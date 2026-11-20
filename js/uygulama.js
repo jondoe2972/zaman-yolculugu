@@ -382,7 +382,7 @@
     if (dragG.moved || Math.hypot(dx, dy) > 4) { dragG.moved = true; DN.drag(dx, dy); dragG.x = ev.clientX; dragG.y = ev.clientY; }
   });
   const endG = ev => {
-    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') showMonument(h.it.id, h.kids, h); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); }
+    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') showMonument(h.it.id, h.kids, h); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); }
     gpts.delete(ev.pointerId); if (!gpts.size) dragG = null;
   };
   gcv.addEventListener('pointerup', endG); gcv.addEventListener('pointercancel', endG);
@@ -445,6 +445,12 @@
       { ad: 'Genel', html: `${rowsHTML(rows)}${e.ozet ? `<p>${e.ozet}</p>` : ''}${e.sonuc ? `<h4>Sonuç</h4><p>${e.sonuc}</p>` : ''}${inRange ? `<div class="gos"><button class="phbtn" data-go="${e.y}">⏩ Zaman çizelgesini ${YIL.fmt(e.y)}'e götür</button></div>` : ''}<p class="note">Antik kaynaklardaki asker sayıları çoğu zaman abartılıdır; rakamlar yaklaşıktır.</p>` },
       ...(e.wiki ? [photoTab(e.wiki, 8)] : [])] });
   }
+  function openKaynak(k) {
+    const t = (window.KAYNAK_TUR || {})[k.tur] || {};
+    const rows = [['Kaynak', `${t.ad} (${t.sem})`], ['İşletildiği yıllar', `${YIL.fmt(k.from)} – ${k.to <= -2026 ? 'bugün' : YIL.fmt(k.to)} (yaklaşık)`]];
+    showModal({ ikon: '⛏️', title: k.ad, sub: t.ad, tabs: [{ ad: 'Genel', html: `${rowsHTML(rows)}<p>${k.not}</p>` }] });
+  }
+  const kaynakAktif = () => (window.KAYNAKLAR || []).filter(k => Y <= k.from && Y >= k.to);
   function olayListesi() {
     const evs = (window.OLAYLAR || []).filter(e => DN.layers[e.tur] && Math.abs(Y - e.y) <= DN.aralik).sort((a, b) => b.y - a.y);
     if (!evs.length) return '<p>Bu yıla ±100 yıl uzaklıkta kayıtlı bir savaş, afet ya da antlaşma yok.</p>';
@@ -458,12 +464,12 @@
   });
   // ---------- sağ üstte dikey olay çubuğu (Dünya görünümünde) ----------
   // Yapılar ve başkentler her zaman görünür; olay türleri yalnızca simgesine tıklanınca (±100 yıl) gösterilir.
-  const OP_CATS = { savas: '⚔️ Savaşlar', antlasma: '📜 Antlaşmalar', afet: '🌋 Doğal afetler', olay: '🏛️ Önemli olaylar' };
+  const OP_CATS = { savas: '⚔️ Savaşlar', antlasma: '📜 Antlaşmalar', afet: '🌋 Doğal afetler', olay: '🏛️ Önemli olaylar', kaynak: '⛏️ Yeraltı kaynakları' };
   let opOpen = null;
   function renderOlayPanel() {
     const el = $('#olaypanel'); if (!el || view !== 'dunya') return;
     el.querySelectorAll('[data-cat]').forEach(b => {
-      const k = b.dataset.cat, n = k === 'sinir' ? 0 : (window.OLAYLAR || []).filter(e => e.tur === k && Math.abs(Y - e.y) <= DN.aralik).length;
+      const k = b.dataset.cat, n = k === 'sinir' ? 0 : k === 'kaynak' ? kaynakAktif().length : (window.OLAYLAR || []).filter(e => e.tur === k && Math.abs(Y - e.y) <= DN.aralik).length;
       b.classList.toggle('on', !!DN.layers[k]);
       const c = b.querySelector('i'); if (c) { c.textContent = n || ''; c.hidden = !n; }
     });
@@ -471,6 +477,12 @@
     if (!opOpen || !DN.layers[opOpen]) { fly.hidden = true; return; }
     const evs = (window.OLAYLAR || []).filter(e => e.tur === opOpen && Math.abs(Y - e.y) <= DN.aralik).sort((a, b) => b.onem - a.onem || b.y - a.y);
     fly.hidden = false;
+    if (opOpen === 'kaynak') {
+      const ks = kaynakAktif(), KT = window.KAYNAK_TUR || {};
+      fly.innerHTML = `<div class="op-fh"><b>${OP_CATS.kaynak}</b><small>${YIL.fmt(Math.round(Y))} yılında işletilenler</small><button class="op-fx">✕</button></div>
+      <ul>${ks.length ? ks.map(k => `<li data-opkaynak="${k.id}"><b>${k.ad}</b><small>${(KT[k.tur] || {}).ad}</small></li>`).join('') : '<li class="empty">Bu yılda kayıtlı kaynak yok.</li>'}</ul>`;
+      return;
+    }
     fly.innerHTML = `<div class="op-fh"><b>${OP_CATS[opOpen]}</b><small>${YIL.fmt(Math.round(Y))} ±${DN.aralik} yıl</small><button class="op-fx">✕</button></div>
       <ul>${evs.length ? evs.map(e => `<li data-opolay="${e.id}" class="${Math.abs(e.y - Y) <= 5 ? 'now' : ''}"><b>${e.ad}</b><small>${YIL.fmt(e.y)} · ${'★'.repeat(e.onem)}</small></li>`).join('') : '<li class="empty">Bu yıllarda kayıt yok.</li>'}</ul>`;
   }
@@ -483,6 +495,7 @@
       if (k !== 'sinir') opOpen = on ? k : (opOpen === k ? null : opOpen);
       renderOlayPanel(); return;
     }
+    const kk = t.closest('[data-opkaynak]'); if (kk) { const k = KAYNAKLAR.find(x => x.id === kk.dataset.opkaynak); DN.goTo(k.ll[0], k.ll[1], 7); openKaynak(k); return; }
     const o = t.closest('[data-opolay]'); if (o) { const e = OLAYLAR.find(x => x.id === o.dataset.opolay); DN.goTo(e.ll[0], e.ll[1], 7); openEvent(e); }
   });
   for (const k of Object.keys(OP_CATS)) DN.setLayer(k, false);
