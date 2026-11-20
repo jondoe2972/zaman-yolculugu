@@ -111,6 +111,37 @@
   const bar = (ad, v) => `<div class="bar"><span>${ad}</span><i><b style="width:${v / 5 * 100}%"></b></i></div>`;
   const card = (ikon, baslik, body, cls = '') => `<section class="card ${cls}"><h3><span>${ikon}</span>${baslik}</h3>${body}</section>`;
 
+  // ---------- coğrafya, ticaret yolları, yolculuklar ----------
+  const COG = window.COGRAFYA || {};
+  // sınır yılı (ör. 1453) yeni döneme sayılır
+  const gecimOf = (b, y) => { const a = (COG[b] || {}).gecim || []; return a.find(q => y <= q.from && y > q.to) || a.find(q => y <= q.from && y >= q.to); };
+  function topraklarHTML(b, y) {
+    const c = COG[b]; if (!c) return '';
+    const gc = gecimOf(b, y), li = a => `<ul>${a.map(x => `<li>${x}</li>`).join('')}</ul>`;
+    return `<div class="topraklar">${gc ? `<h4>🌾 İnsanlar neyle geçinirdi?</h4><p>${gc.t}</p>` : ''}<h4>👍 Bu toprakların artıları</h4>${li(c.arti)}<h4>👎 Eksileri</h4>${li(c.eksi)}<h4>⚔️ Neden bu kadar savaşıldı?</h4><p>${c.savas}</p></div>`;
+  }
+  const ilkCumle = t => (t.match(/^.*?[.:](\s|$)/) || [t])[0].trim();
+  const kmYol = pts => { let t = 0; for (let i = 1; i < pts.length; i++) { const [a, b] = [pts[i - 1], pts[i]], r = Math.PI / 180, h = Math.sin((b[0] - a[0]) * r / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin((b[1] - a[1]) * r / 2) ** 2; t += 12742 * Math.asin(Math.sqrt(h)); } return t; };
+  const ticaretAktif = y => (window.TICARET_YOLLARI || []).filter(t => y <= t.from && y >= t.to);
+  const yakinYolculuk = (y, n) => (window.YOLCULUKLAR || []).slice().sort((a, b) => Math.abs(a.y - y) - Math.abs(b.y - y)).slice(0, n);
+  function yollarHTML(y) {
+    const tr = ticaretAktif(y), yj = yakinYolculuk(y, 3);
+    return `${tr.length ? `<ul class="evs">${tr.map(t => `<li data-yol="${t.id}">${t.tur === 'deniz' ? '⛵' : '🐪'} <b>${t.ad}</b><br><small>${t.cikis} → ${t.varis} · ${t.mal}</small></li>`).join('')}</ul>` : '<p><small>Bu yıl için kayıtlı bir ticaret yolu yok.</small></p>'}
+      <h4 class="alt-baslik">⏱ O zaman yolculuk ne kadar sürerdi?</h4><ul class="evs">${yj.map(j => `<li data-yolculuk="${j.id}"><b>${j.ad}</b><br><small>${YIL.fmt(j.y)} · ${j.sure}</small></li>`).join('')}</ul>`;
+  }
+  const yolOrta = pts => pts[Math.floor(pts.length / 2)];
+  function yolHaritada(pts, uz, y) {
+    if (y != null) setYear(y, true);
+    panelAc(false); closeModal(); setView('dunya'); const m = yolOrta(pts); DN.goTo(m[0], m[1], clamp(4500 / Math.max(uz, 30), 1, 40));
+  }
+  function openYol(t) {
+    const uz = kmYol(t.pts);
+    showModal({ ikon: t.tur === 'deniz' ? '⛵' : '🐪', title: t.ad, sub: `${t.cikis} → ${t.varis}`, tabs: [{ ad: 'Genel', html: `${rowsHTML([['Nereden nereye', `${t.cikis} → ${t.varis}`], ['Kullanıldığı yıllar', `${YIL.fmt(t.from)} – ${t.to <= -2026 ? 'bugün' : YIL.fmt(t.to)} (yaklaşık)`], ['Taşınan mallar', t.mal], ['Yol', `${t.tur === 'deniz' ? 'Deniz' : 'Kara'} · yaklaşık ${fmt(Math.round(uz / 100) * 100)} km`]])}<p>${t.not}</p><div class="gos"><button class="phbtn" data-yolharita="${t.id}">🌍 Haritada göster</button></div>` }] });
+  }
+  function openYolculuk(j) {
+    showModal({ ikon: '🧭', title: j.ad, sub: `${YIL.fmt(j.y)} · ${j.sure}`, tabs: [{ ad: 'Hikâyesi', html: `${rowsHTML([['Ne zaman', YIL.fmt(j.y)], ['Kim', j.kim], ['Nasıl', j.nasil], ['Ne kadar sürdü', `<b>${j.sure}</b>`], ['Mesafe', `yaklaşık ${fmt(j.km)} km`]])}<p>${j.not}</p><div class="gos"><button class="phbtn" data-yolcugoster="${j.id}">🌍 Haritada göster (${YIL.fmt(j.y)})</button></div>` }] });
+  }
+
   function buildStatus(y) {
     const rows = [];
     for (const m of P.monuments) {
@@ -154,6 +185,8 @@
     for (const o of olumYakin(y)) h += `<div class="now death">⚱️ <b>${YIL.fmt(o.y)}:</b> ${o.kim} öldü. <button class="phbtn" data-mumya="${o.id}">Mumyasını ve lahdini gör</button></div>`;
     if (near.length) h += `<div class="now">${near.map(ev => `<div>📌 <b>${YIL.fmt(ev.y)}:</b> ${ev.t}</div>`).join('')}</div>`;
     h += card('📣', 'Ülkenin gündemi', `<p>${e.gundem}</p>`, 'big');
+    if (COG[BG.id]) h += card('🗺️', 'Bu topraklar', topraklarHTML(BG.id, y));
+    h += card('🐪', 'Ticaret yolları ve yolculuklar', yollarHTML(y));
     h += card('🏗️', 'Şantiyeler', buildStatus(y));
     h += card('⚔️', 'Savaş ve ordu', `<p>${e.savas}</p>`);
     h += card('🌾', 'Ekonomi', `<p>${e.ekonomi}</p>`);
@@ -168,7 +201,7 @@
     if (evs.length) h += card('🗓️', `${r.kisa === '?' ? 'Bu dönemde' : r.ad + ' döneminde'} olanlar`, `<ul class="evs">${evs.map(ev => `<li data-y="${ev.y}" class="${Math.abs(ev.y - y) <= 2 ? 'on' : ''}"><b>${YIL.fmt(ev.y)}</b> ${ev.t}</li>`).join('')}</ul>`);
     h += card('⏩', 'Hızlı git', `<div class="chips">${P.hizli.map(q => `<button data-y="${q.y}">${q.ad}</button>`).join('')}</div>`);
     h += `<p class="src">${Q.not} Kaynaklar: KAYNAKLAR.md</p>`;
-    $('#panel').innerHTML = h;
+    $('#pnic').innerHTML = h;
     renderOlayPanel();
   }
   const tam = (arr, y) => (arr || []).find(a => y <= a.from && y > a.to);
@@ -191,16 +224,20 @@
       if (y > a.from || y < a.to) { h += card(Bb.ikon, Bb.ad, `<p><small>Bu yıl için henüz anlatım yok · ${YIL.aralik(a.from, a.to)}</small></p>${btn}`); continue; }
       const ins = (a.p ? a.p.monuments : []).filter(m => !m.minor && !m.eski && S.progress(m, y) >= 0 && ((m.stop && y > m.stop) || (!m.stop && S.progress(m, y) < 1))).map(m => m.ad);
       const kim = a.r && a.r.kisa !== '?' ? `👑 <b>${a.r.ad}</b> <small>${YIL.aralik(a.r.from, a.r.to)}</small>` : '👑 <small>Bilinen bir hükümdar yok</small>';
-      h += card(Bb.ikon, `${Bb.ad} <small>· ${a.p ? a.p.kisa : 'Ara dönem'}</small>`, `<p>${kim}</p>${a.e ? `<p>${a.e.gundem}</p>` : ''}${ins.length ? `<p>🏗️ <b>Süren inşaat:</b> ${ins.slice(0, 4).join(', ')}${ins.length > 4 ? '…' : ''}</p>` : ''}${btn}`);
+      h += card(Bb.ikon, `${Bb.ad} <small>· ${a.p ? a.p.kisa : 'Ara dönem'}</small>`, `<p>${kim}</p>${a.e ? `<p>${a.e.gundem}</p>` : ''}${ins.length ? `<p>🏗️ <b>Süren inşaat:</b> ${ins.slice(0, 4).join(', ')}${ins.length > 4 ? '…' : ''}</p>` : ''}${gecimOf(b, y) ? `<p>🌾 <b>Geçim:</b> ${ilkCumle(gecimOf(b, y).t)}</p>` : ''}${btn.replace('</div>', `${COG[b] ? `<button class="phbtn" data-topraklar="${b}">🗺️ Bu topraklar</button>` : ''}</div>`)}`);
     }
+    h += card('🐪', 'Ticaret yolları ve yolculuklar', yollarHTML(y));
     h += card('⏩', 'Hızlı git', `<div class="chips">${P.hizli.map(q => `<button data-y="${q.y}">${q.ad}</button>`).join('')}</div>`);
     h += '<p class="src">Kaynaklar: KAYNAKLAR.md</p>';
-    $('#panel').innerHTML = h;
+    $('#pnic').innerHTML = h;
     renderOlayPanel();
   }
   $('#panel').addEventListener('click', ev => {
     const gb = ev.target.closest('[data-gitbolge]'); if (gb) return gitBolge(gb.dataset.gitbolge, gb.dataset.yapi ? '&yapi=' + gb.dataset.yapi : '');
-    const kb = ev.target.closest('[data-kurebolge]'); if (kb) { const Bb = BLR[kb.dataset.kurebolge]; setView('dunya'); DN.goEgypt(Bb.merkez, Bb.merkezZ); return; }
+    const kb = ev.target.closest('[data-kurebolge]'); if (kb) { const Bb = BLR[kb.dataset.kurebolge]; panelAc(false); setView('dunya'); DN.goEgypt(Bb.merkez, Bb.merkezZ); return; }
+    const yl = ev.target.closest('[data-yol]'); if (yl) return openYol(TICARET_YOLLARI.find(t => t.id === yl.dataset.yol));
+    const yc = ev.target.closest('[data-yolculuk]'); if (yc) return openYolculuk(YOLCULUKLAR.find(j => j.id === yc.dataset.yolculuk));
+    const tp = ev.target.closest('[data-topraklar]'); if (tp) { const b = tp.dataset.topraklar; return showModal({ ikon: BLR[b].ikon, title: `${BLR[b].ad}: bu topraklar`, sub: YIL.fmt(Math.round(Y)), tabs: [{ ad: 'Coğrafya', html: topraklarHTML(b, Math.round(Y)) }] }); }
     if (ev.target.closest('.aboutbtn')) return openCountry();
     if (ev.target.closest('.lifebtn')) return openLife();
     const mu = ev.target.closest('[data-mumya]'); if (mu) return openMummy(mu.dataset.mumya);
@@ -382,7 +419,7 @@
     if (dragG.moved || Math.hypot(dx, dy) > 4) { dragG.moved = true; DN.drag(dx, dy); dragG.x = ev.clientX; dragG.y = ev.clientY; }
   });
   const endG = ev => {
-    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') showMonument(h.it.id, h.kids, h); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); }
+    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') showMonument(h.it.id, h.kids, h); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
     gpts.delete(ev.pointerId); if (!gpts.size) dragG = null;
   };
   gcv.addEventListener('pointerup', endG); gcv.addEventListener('pointercancel', endG);
@@ -422,7 +459,7 @@
     card.dataset.city = c.ad; card.querySelector('.cc-more').hidden = false;
     if (best) {
       setView('sahne'); follow = false; camX = best.wx; cityFocus = c.ad; shown = null;
-      card.hidden = false;
+      kartGoster();
       toast(`📍 <b>${esc(c.ad)}</b> · ${YIL.fmt(Math.round(Y))}: şehrin o yılki görünümü`);
     } else {
       toast(`<b>${esc(c.ad)}</b> bu çağın sahnesinde yer almıyor; bilgi kartı açıldı.`);
@@ -462,45 +499,37 @@
     if (view !== 'dunya') setView('dunya');
     DN.goTo(e.ll[0], e.ll[1], 7); openEvent(e);
   });
-  // ---------- sağ üstte dikey olay çubuğu (Dünya görünümünde) ----------
-  // Yapılar ve başkentler her zaman görünür; olay türleri yalnızca simgesine tıklanınca (±100 yıl) gösterilir.
-  const OP_CATS = { savas: '⚔️ Savaşlar', antlasma: '📜 Antlaşmalar', afet: '🌋 Doğal afetler', olay: '🏛️ Önemli olaylar', kaynak: '⛏️ Yeraltı kaynakları' };
-  let opOpen = null;
+  // ---------- katman menüsü (sağ üstte 🗂️) ----------
+  const KATLAR = ['savas', 'antlasma', 'afet', 'olay', 'kaynak', 'ticaret', 'yolculuk'];
+  const katSay = k => k === 'kaynak' ? kaynakAktif().length : k === 'ticaret' ? (window.TICARET_YOLLARI || []).filter(t => Y <= t.from && Y >= t.to).length
+    : k === 'yolculuk' ? (window.YOLCULUKLAR || []).filter(j => Math.abs(Y - j.y) <= DN.aralik).length : (window.OLAYLAR || []).filter(e => e.tur === k && Math.abs(Y - e.y) <= DN.aralik).length;
   function renderOlayPanel() {
-    const el = $('#olaypanel'); if (!el || view !== 'dunya') return;
-    el.querySelectorAll('[data-cat]').forEach(b => {
-      const k = b.dataset.cat, n = k === 'sinir' ? 0 : k === 'kaynak' ? kaynakAktif().length : (window.OLAYLAR || []).filter(e => e.tur === k && Math.abs(Y - e.y) <= DN.aralik).length;
-      b.classList.toggle('on', !!DN.layers[k]);
-      const c = b.querySelector('i'); if (c) { c.textContent = n || ''; c.hidden = !n; }
+    const el = $('#katman'); if (!el || el.hidden) return;
+    el.querySelectorAll('[data-kat]').forEach(inp => {
+      const k = inp.dataset.kat; inp.checked = !!DN.layers[k];
+      const c = inp.parentElement.querySelector('i'); if (c) c.textContent = k === 'sinir' ? '' : (katSay(k) || '');
     });
-    const fly = el.querySelector('.op-fly');
-    if (!opOpen || !DN.layers[opOpen]) { fly.hidden = true; return; }
-    const evs = (window.OLAYLAR || []).filter(e => e.tur === opOpen && Math.abs(Y - e.y) <= DN.aralik).sort((a, b) => b.onem - a.onem || b.y - a.y);
-    fly.hidden = false;
-    if (opOpen === 'kaynak') {
-      const ks = kaynakAktif(), KT = window.KAYNAK_TUR || {};
-      fly.innerHTML = `<div class="op-fh"><b>${OP_CATS.kaynak}</b><small>${YIL.fmt(Math.round(Y))} yılında işletilenler</small><button class="op-fx">✕</button></div>
-      <ul>${ks.length ? ks.map(k => `<li data-opkaynak="${k.id}"><b>${k.ad}</b><small>${(KT[k.tur] || {}).ad}</small></li>`).join('') : '<li class="empty">Bu yılda kayıtlı kaynak yok.</li>'}</ul>`;
-      return;
-    }
-    fly.innerHTML = `<div class="op-fh"><b>${OP_CATS[opOpen]}</b><small>${YIL.fmt(Math.round(Y))} ±${DN.aralik} yıl</small><button class="op-fx">✕</button></div>
-      <ul>${evs.length ? evs.map(e => `<li data-opolay="${e.id}" class="${Math.abs(e.y - Y) <= 5 ? 'now' : ''}"><b>${e.ad}</b><small>${YIL.fmt(e.y)} · ${'★'.repeat(e.onem)}</small></li>`).join('') : '<li class="empty">Bu yıllarda kayıt yok.</li>'}</ul>`;
   }
-  $('#olaypanel').addEventListener('click', ev => {
-    const t = ev.target;
-    if (t.closest('.op-fx')) { opOpen = null; renderOlayPanel(); return; }
-    const c = t.closest('[data-cat]');
-    if (c) {
-      const k = c.dataset.cat, on = !DN.layers[k]; DN.setLayer(k, on);
-      if (k !== 'sinir') opOpen = on ? k : (opOpen === k ? null : opOpen);
-      renderOlayPanel(); return;
-    }
-    const kk = t.closest('[data-opkaynak]'); if (kk) { const k = KAYNAKLAR.find(x => x.id === kk.dataset.opkaynak); DN.goTo(k.ll[0], k.ll[1], 7); openKaynak(k); return; }
-    const o = t.closest('[data-opolay]'); if (o) { const e = OLAYLAR.find(x => x.id === o.dataset.opolay); DN.goTo(e.ll[0], e.ll[1], 7); openEvent(e); }
-  });
-  for (const k of Object.keys(OP_CATS)) DN.setLayer(k, false);
+  $('#katman').addEventListener('change', ev => { const k = ev.target.dataset && ev.target.dataset.kat; if (k) { DN.setLayer(k, ev.target.checked); renderOlayPanel(); } });
+  $('#katbtn').addEventListener('click', () => { const el = $('#katman'), ac = el.hidden; if (ac) kartlariKapat('katman'); el.hidden = !ac; $('#katbtn').classList.toggle('on', ac); renderOlayPanel(); });
+  for (const k of KATLAR) DN.setLayer(k, false);
+  DN.setLayer('ticaret', true);
   $('#aralik').addEventListener('change', e => { DN.setAralik(+e.target.value); renderOlayPanel(); shown = null; });
-  $('#aralik').addEventListener('click', e => e.stopPropagation());
+
+  // ---------- aynı anda tek kart ----------
+  function kartlariKapat(haric) {
+    if (haric !== 'kart') $('#citycard').hidden = true;
+    if (haric !== 'katman') { $('#katman').hidden = true; $('#katbtn').classList.remove('on'); }
+    if (haric !== 'panel' && haric !== 'modal') panelAc(false);
+  }
+  function kartGoster() { kartlariKapat('kart'); $('#citycard').hidden = false; }
+  // ---------- 📖 Bu yıl paneli ----------
+  function panelAc(ac) {
+    document.body.classList.toggle('panelacik', ac); $('#buyil').classList.toggle('on', ac); $('#buyil').setAttribute('aria-expanded', ac);
+    if (ac) { shown = null; }
+  }
+  $('#buyil').addEventListener('click', () => { const ac = !document.body.classList.contains('panelacik'); if (ac) kartlariKapat('panel'); panelAc(ac); });
+  $('#panel').addEventListener('click', ev => { if (ev.target.closest('.pn-x')) panelAc(false); });
 
   // ---------- 3D görünüm ----------
   function open3D(id) {
@@ -532,7 +561,7 @@
       card.querySelector('.cc-title').textContent = m.ad;
       card.querySelector('.cc-body').innerHTML = `<p><small>${BLR[p.bolge].ikon} ${BLR[p.bolge].ad} · ${m.yer || ''}</small></p><p><b>${YIL.fmt(Math.round(Y))}:</b> ${durum}</p>${bi && bi.neden ? `<p>${bi.neden}</p>` : ''}
         <div class="gos"><button class="phbtn" data-ccinfo="${id}">ℹ️ Bilgi kartı</button><button class="phbtn icbtn" data-ccgit="${p.bolge}" data-ccyapi="${id}">🎬 Sahnede gör</button></div>`;
-      card.dataset.city = ''; card.querySelector('.cc-more').hidden = true; card.hidden = false;
+      card.dataset.city = ''; card.querySelector('.cc-more').hidden = true; kartGoster();
       return;
     }
     const m = SP.monuments.find(x => x.id === id);
@@ -545,7 +574,7 @@
     card.querySelector('.cc-body').innerHTML = `<p><b>${YIL.fmt(Math.round(Y))}:</b> ${durum}</p>${b ? `<p>${b.neden}</p>` : ''}
       <div class="gos">${has3D(id) ? `<button class="phbtn icbtn" data-cc3d="${id}">🧊 3D'de gör</button>` : ''}<button class="phbtn" data-ccinfo="${id}">ℹ️ Bilgi kartı</button>${K.ic.eslesme[id] ? `<button class="phbtn icbtn" data-ccic="${id}">🔍 İçine gir</button>` : ''}</div>`;
     card.dataset.city = ''; card.querySelector('.cc-more').hidden = true;
-    card.hidden = false;
+    kartGoster();
   }
   $('#citycard').addEventListener('click', e => {
     const d3 = e.target.closest('[data-cc3d]'); if (d3) return open3D(d3.dataset.cc3d);
@@ -562,9 +591,24 @@
     document.body.classList.toggle('maponly', v === 'harita');
     document.body.classList.toggle('globeonly', v === 'dunya');
     if (v !== 'sahne' && !DUNYA) $('#citycard').hidden = true;
-    document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+    modGuncelle();
   }
-  document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+  function modGuncelle() { document.querySelectorAll('[data-mod]').forEach(b => b.classList.toggle('on', (b.dataset.mod === 'kesfet' && view === 'dunya') || (b.dataset.mod === 'sahne' && view === 'sahne'))); }
+  function sahneSec() {
+    showModal({ ikon: '🎬', title: 'Hangi bölgenin sahnesi?', sub: `${YIL.fmt(Math.round(Y))} yılına gidilir`, tabs: [{ ad: 'Bölge seç', html: `<p>Canlı sahnede yapılar yılına göre yükselir, insanlar ve gemiler dönemine göre değişir.</p><div class="secim">${BSIRA.map(b => `<button data-gitbolge2="${b}">${BLR[b].ikon} <b>${BLR[b].ad}</b><small>${BLR[b].ad} sahnesini aç</small></button>`).join('')}</div>` }] });
+  }
+  const yasaVar = () => !DUNYA && BG.kultur && !SP.modern && K.roller && K.roller.length;
+  function yasaAc() {
+    if (yasaVar()) return openLife();
+    const ornek = [{ ad: 'Piramitler yükselirken', y: 2560 }, { ad: 'Orta Krallık', y: 1880 }, { ad: 'Tutankamon dönemi', y: 1330 }, { ad: 'Ramses ve Kadeş', y: 1274 }];
+    showModal({ ikon: '🧑‍🌾', title: 'O dönemde yaşasaydın…', sub: 'Bir meslek seç, bir gününü şafaktan geceye yaşa', tabs: [{ ad: 'Nereye gidelim?', html: `<p>Çiftçi, kâtip, piramit işçisi, rahibe gibi rollerle bir gün yaşamak şimdilik <b>Antik Mısır</b> için hazır. Anadolu ve Avrupa sırada.</p><div class="secim">${ornek.map(o => `<button data-yasagit="${o.y}">🏺 <b>${o.ad}</b><small>${YIL.fmt(o.y)} · Mısır</small></button>`).join('')}</div>` }] });
+  }
+  document.querySelectorAll('[data-mod]').forEach(b => b.addEventListener('click', () => {
+    const m = b.dataset.mod;
+    if (m === 'kesfet') { kartlariKapat(); setView('dunya'); }
+    else if (m === 'sahne') { if (DUNYA) sahneSec(); else { kartlariKapat(); setView('sahne'); } }
+    else if (m === 'yasa') yasaAc();
+  }));
 
   // ---------- bilgi penceresi (sekmeli) ----------
   const modal = $('#modal');
@@ -582,6 +626,7 @@
     };
     nav.onclick = e => { const b = e.target.closest('[data-tab]'); if (b) show(+b.dataset.tab); };
     if (modal.hidden) { playingBeforeModal = playing; playing = false; updPlay(); }
+    kartlariKapat('modal');
     modal.hidden = false;
     show(o.open || 0);
   }
@@ -600,6 +645,10 @@
     const mb = e.target.closest('[data-mumya]'); if (mb) { openMummy(mb.dataset.mumya); return; }
     const rb = e.target.closest('[data-role]'); if (rb) { openRole(rb.dataset.role); return; }
     if (e.target.closest('.lifebtn')) { openLife(); return; }
+    const yh = e.target.closest('[data-yolharita]'); if (yh) { const t = TICARET_YOLLARI.find(x => x.id === yh.dataset.yolharita); DN.setLayer('ticaret', true); playingBeforeModal = false; yolHaritada(t.pts, kmYol(t.pts)); return; }
+    const yg2 = e.target.closest('[data-yolcugoster]'); if (yg2) { const j = YOLCULUKLAR.find(x => x.id === yg2.dataset.yolcugoster); DN.setLayer('yolculuk', true); playingBeforeModal = false; yolHaritada(j.pts, j.km, j.y); return; }
+    const g2 = e.target.closest('[data-gitbolge2]'); if (g2) { gitBolge(g2.dataset.gitbolge2); return; }
+    const yg = e.target.closest('[data-yasagit]'); if (yg) { location.href = location.pathname + '?bolge=misir&yil=' + yg.dataset.yasagit + '&yasa=1'; return; }
     const nx = e.target.closest('[data-next]'); if (nx) { const btn = modal.querySelector(`.tabs [data-tab="${nx.dataset.next}"]`); if (btn) btn.click(); return; }
     const sy = e.target.closest('[data-sym]');
     if (sy) { openSymbol(sy.dataset.sym); return; }
@@ -743,8 +792,6 @@
       photoTab(s.wiki, 8)
     ] });
   }
-  $('#about').addEventListener('click', openCountry);
-  $('#symbols').addEventListener('click', openSymbols);
   $('#follow').addEventListener('click', () => { follow = true; cityFocus = null; $('#citycard').hidden = true; shown = null; });
 
   // ================= KÜLTÜR: tanrılar, içi, mumyalar, yaşam, bilim =================
@@ -957,5 +1004,23 @@
   updPlay();
   if (DUNYA) { setView('dunya'); DN.goEgypt(BG.merkez, BG.merkezZ); }
   else if (QS.get('yapi')) { const id = QS.get('yapi'); syncScenePart(); setTimeout(() => showMonument(id), 50); }
+  modGuncelle();
+  if (QS.get('yasa')) { syncScenePart(); setTimeout(yasaAc, 80); }
+  // ---------- ilk ziyarette bir kez: üç kısa ipucu ----------
+  const IPUCLARI = [
+    '⏳ <b>Alttaki zaman çizelgesini sürükle</b>: yıllar arasında gezersin. ▶ ile zaman akmaya başlar.',
+    '🌍 <b>Keşfet</b> küreyi, 🎬 <b>Sahne</b> bir bölgenin canlı görüntüsünü açar. 🧑‍🌾 <b>Yaşa</b>: o yılda bir meslek seçip bir gününü yaşarsın.',
+    '📖 <b>Bu yıl</b>: o yılın özeti (hükümdar, geçim, savaşlar). 🗂️ <b>Katmanlar</b>: haritada ticaret yollarını, savaşları, madenleri aç ya da kapat.'
+  ];
+  let ipN = 0;
+  function ipucuGoster() {
+    const el = $('#ipucu');
+    if (ipN >= IPUCLARI.length) { el.hidden = true; try { localStorage.setItem('zy-ipucu', '1'); } catch (e) { /* gizli mod */ } return; }
+    el.innerHTML = `<p>${IPUCLARI[ipN]}</p><div class="ip-alt"><small>${ipN + 1} / ${IPUCLARI.length}</small><button class="ip-gec">Geç</button><button class="ip-ok">${ipN + 1 < IPUCLARI.length ? 'Sonraki' : 'Anladım'}</button></div>`;
+    el.hidden = false;
+  }
+  $('#ipucu').addEventListener('click', e => { if (e.target.closest('.ip-gec')) { ipN = IPUCLARI.length; ipucuGoster(); } else if (e.target.closest('.ip-ok')) { ipN++; ipucuGoster(); } });
+  let ilk = false; try { ilk = !localStorage.getItem('zy-ipucu'); } catch (e) { /* gizli mod */ }
+  if (ilk && !QS.get('yasa')) setTimeout(ipucuGoster, 900);
   requestAnimationFrame(frame);
 })();

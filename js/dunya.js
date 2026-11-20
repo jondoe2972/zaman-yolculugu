@@ -12,7 +12,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, afet: false, antlasma: false, olay: false, kaynak: false };
+  const layers = { yapi: true, sehir: true, sinir: true, savas: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false };
 
   // ---------- veri ----------
   const VERI = window.DUNYA_VERI || { kara: [], nehir: [] };
@@ -79,68 +79,27 @@ window.Dunya = (() => {
   }
   const edgeOrPt = (q, cx, cy, r) => q[2] === null ? [q[0], q[1]] : [cx + Math.cos(q[2]) * r, cy + Math.sin(q[2]) * r];
   function linePath(p) { const r = R(); let pen = false; for (let i = 0; i < p.n; i++) { const [x, y, z] = pj(p.cl[i], p.sl[i], p.lo[i]); if (z > 0.02) { const sx = W / 2 + x * r, sy = H / 2 - y * r; pen ? g.lineTo(sx, sy) : g.moveTo(sx, sy); pen = true; } else pen = false; } }
-  // ---------- kabartma (yükselti) ----------
-  // assets/harita/yukselti-*.png: 8 bit yükseklik (kara 128-255, deniz 0-127; karekök ölçek).
-  // Açılışta bir kez gölgeli doku hesaplanır (güneş kuzeybatıda); küreye "overlay" ile bindirilir:
-  // 128 gri nötr, gölgeler koyulaştırır, ışık alan yamaçlar ve yüksek yerler açar, sığ deniz açık, derin deniz koyu görünür.
-  const KABARTMA = [
-    { src: 'assets/harita/yukselti-dunya.png?v=1', box: [-90, 90, -180, 180], step: 0.25, abart: 22 },
-    { src: 'assets/harita/yukselti-bolge.png?v=1', box: [5, 70, -20, 75], step: 0.05, abart: 7 }
-  ];
-  function golgeHesapla(img, k) {
-    const w = img.naturalWidth, h = img.naturalHeight, c = document.createElement('canvas'); c.width = w; c.height = h;
-    const x = c.getContext('2d'); x.drawImage(img, 0, 0); const id = x.getImageData(0, 0, w, h), d = id.data;
-    const E = new Float32Array(w * h);
-    for (let i = 0; i < w * h; i++) { const v = d[i * 4]; E[i] = v >= 128 ? 6000 * ((v - 128) / 127) ** 2 : -8000 * ((127 - v) / 127) ** 2; }
-    const az = 315 * D, alt = 42 * D, sA = Math.sin(alt), cA = Math.cos(alt), my = k.step * 111320;
-    for (let j = 0; j < h; j++) {
-      const lat = k.box[1] - (j + 0.5) * k.step, mx = my * Math.max(0.05, Math.cos(lat * D));
-      const ju = Math.max(0, j - 1) * w, jd = Math.min(h - 1, j + 1) * w;
-      for (let i = 0; i < w; i++) {
-        const e = E[j * w + i], il = Math.max(0, i - 1), ir = Math.min(w - 1, i + 1);
-        const ab = e < 0 ? k.abart * 0.35 : k.abart;
-        const dzx = (E[j * w + ir] - E[j * w + il]) / (2 * mx) * ab, dzy = (E[jd + i] - E[ju + i]) / (2 * my) * ab;
-        const slope = Math.atan(Math.hypot(dzx, dzy)), aspect = Math.atan2(dzy, -dzx);
-        const L = sA * Math.cos(slope) + cA * Math.sin(slope) * Math.cos(az - Math.PI / 2 - aspect);
-        let v;
-        if (e >= 0) v = 122 + (L - sA) * 150 + 34 * Math.sqrt(Math.min(e, 5000) / 5000);
-        else v = 170 - 84 * Math.sqrt(Math.min(-e, 6000) / 6000) + (L - sA) * 60;
-        v = clamp(v, 0, 255); const o = (j * w + i) * 4; d[o] = d[o + 1] = d[o + 2] = v; d[o + 3] = 255;
-      }
-    }
-    x.putImageData(id, 0, 0); return c;
+  // ---------- yollar: sık noktalara bölünmüş çizgi, km cinsinden birikimli uzunluk ----------
+  const km = (a, b) => { const la1 = a[0] * D, la2 = b[0] * D, h = Math.sin((la2 - la1) / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin((b[1] - a[1]) * D / 2) ** 2; return 12742 * Math.asin(Math.min(1, Math.sqrt(h))); };
+  function yolHazirla(r) {
+    if (r._d) return r._d;
+    const pts = [];
+    for (let i = 0; i < r.pts.length - 1; i++) { const a = r.pts[i], b = r.pts[i + 1], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.6)); for (let j = 0; j < n; j++) pts.push([a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n]); }
+    pts.push(r.pts[r.pts.length - 1]);
+    const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + km(pts[i - 1], pts[i]));
+    return (r._d = { pts, cum, L: cum[cum.length - 1] || 1, p: prep(pts) });
   }
-  for (const k of KABARTMA) { const im = new Image(); im.onload = () => { try { k.tex = golgeHesapla(im, k); } catch (e) { console.warn('kabartma', e); } }; im.src = k.src; }
-  // dokuyu küreye hücre hücre (her hücre bir paralelkenar) yerleştirir
-  function dokuCiz(c, k, dpr) {
-    const tex = k.tex, [la0, la1, lo0, lo1] = k.box, ppd = R() * D;
-    const cell = clamp(70 / ppd, k.step * 6, 15), n = Math.max(1, Math.round(cell / k.step)), cd = n * k.step;
-    for (let la = la1; la > la0 + 1e-9; la -= cd) {
-      const lb = Math.max(la0, la - cd);
-      for (let lo = lo0; lo < lo1 - 1e-9; lo += cd) {
-        const lr = Math.min(lo1, lo + cd);
-        const A = P(la, lo), B = P(la, lr), C = P(lb, lo), Dd = P(lb, lr);
-        if (A[2] <= 0.01 && B[2] <= 0.01 && C[2] <= 0.01 && Dd[2] <= 0.01) continue;
-        if (A[2] <= 0 || B[2] <= 0 || C[2] <= 0) continue;
-        const mnx = Math.min(A[0], B[0], C[0], Dd[0]), mxx = Math.max(A[0], B[0], C[0], Dd[0]), mny = Math.min(A[1], B[1], C[1], Dd[1]), mxy = Math.max(A[1], B[1], C[1], Dd[1]);
-        if (mxx < 0 || mnx > W || mxy < 0 || mny > H) continue;
-        const u0 = (lo - lo0) / k.step, v0 = (la1 - la) / k.step, du = (lr - lo) / k.step, dv = (la - lb) / k.step;
-        const a = (B[0] - A[0]) / du, b = (B[1] - A[1]) / du, cc = (C[0] - A[0]) / dv, d = (C[1] - A[1]) / dv;
-        c.setTransform(dpr * a, dpr * b, dpr * cc, dpr * d, dpr * (A[0] - a * u0 - cc * v0), dpr * (A[1] - b * u0 - d * v0));
-        c.drawImage(tex, u0, v0, du, dv, u0 - 0.6, v0 - 0.6, du + 1.2, dv + 1.2);
-      }
-    }
-    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  function yolNokta(d, s) {
+    let lo = 0, hi = d.cum.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (d.cum[m] <= s) lo = m; else hi = m; }
+    const f = clamp((s - d.cum[lo]) / ((d.cum[hi] - d.cum[lo]) || 1), 0, 1), a = d.pts[lo], b = d.pts[hi];
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
   }
-  let kabCv = null;
-  function kabartmaCiz(dpr, guc) {
-    if (!KABARTMA[0].tex) return;
-    const cv = g.canvas; if (!kabCv) kabCv = document.createElement('canvas');
-    if (kabCv.width !== cv.width || kabCv.height !== cv.height) { kabCv.width = cv.width; kabCv.height = cv.height; }
-    const c = kabCv.getContext('2d'); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, kabCv.width, kabCv.height); c.imageSmoothingQuality = 'high';
-    dokuCiz(c, KABARTMA[0], dpr);
-    if (KABARTMA[1].tex && view.z > 1.8) dokuCiz(c, KABARTMA[1], dpr);
-    g.save(); g.globalCompositeOperation = 'overlay'; g.globalAlpha = guc; g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(kabCv, 0, 0); g.restore();
+  // çıkışta küçük halka, varışta ok ucu
+  function yolUclari(d, renk, buyuk) {
+    const n = d.pts.length, [sx, sy, sz] = P(...d.pts[0]), [ex, ey, ez2] = P(...d.pts[n - 1]), [qx, qy] = P(...d.pts[Math.max(0, n - 3)]);
+    g.strokeStyle = renk; g.fillStyle = renk; g.lineWidth = 1.6;
+    if (sz > 0.05) { g.beginPath(); g.arc(sx, sy, buyuk ? 4.5 : 3.2, 0, 7); g.stroke(); }
+    if (ez2 > 0.05) { const a = Math.atan2(ey - qy, ex - qx), L = buyuk ? 10 : 7.5; g.beginPath(); g.moveTo(ex, ey); g.lineTo(ex - Math.cos(a - 0.45) * L, ey - Math.sin(a - 0.45) * L); g.lineTo(ex - Math.cos(a + 0.45) * L, ey - Math.sin(a + 0.45) * L); g.closePath(); g.fill(); }
   }
   let katmanCv = null;
   function katman(w, h) { if (!katmanCv) katmanCv = document.createElement('canvas'); if (katmanCv.width !== w || katmanCv.height !== h) { katmanCv.width = w; katmanCv.height = h; } return katmanCv; }
@@ -412,8 +371,6 @@ window.Dunya = (() => {
       g.restore();
       g.beginPath(); polyPath(HAZAR); g.fillStyle = '#24609e'; g.fill();
     }
-    // kabartma: dağlar, ovalar, deniz derinliği (siyasi renklerin de üstüne biner)
-    if (layers.kabartma !== false) kabartmaCiz(dpr, 0.95);
     // dar boğazlar: 1:50m kıyı verisinde kapalı görünenler, su olarak çizilir
     g.lineCap = 'round'; g.lineJoin = 'round';
     if (view.z > 2.5) for (const b of BOGAZ) { g.beginPath(); linePath(b.p); g.strokeStyle = '#2f6fae'; g.lineWidth = clamp(b.km * r / 6371 * 2.5, 2.5, 40); g.stroke(); }
@@ -515,6 +472,39 @@ window.Dunya = (() => {
         hits.push({ kind: 'kaynak', k, x0: x - s - 2, x1: x + s + 2, y0: y - s - 2, y1: y + s + 2 });
       }
     }
+    // ticaret yolları: yalnızca kullanıldığı yıllarda; ince çizgi, malın aktığı yöne giden noktalar
+    if (layers.ticaret) for (const t of window.TICARET_YOLLARI || []) {
+      if (!(Y <= t.from && Y >= t.to)) continue;
+      const d = yolHazirla(t), deniz = t.tur === 'deniz', col = deniz ? '140,215,255' : '255,206,110';
+      const hov = hover && hover.kind === 'yol' && hover.t === t;
+      g.beginPath(); linePath(d.p); g.strokeStyle = `rgba(${col},${hov ? 0.95 : 0.42})`; g.lineWidth = hov ? 2.6 : 1.5; g.setLineDash(deniz ? [6, 4] : []); g.stroke(); g.setLineDash([]);
+      const sp = clamp(900 / view.z, 40, 600), off = (T * sp / 2.4) % sp;
+      g.fillStyle = `rgba(${col},${hov ? 1 : 0.9})`;
+      for (let s = off; s < d.L; s += sp) { const [x, y, z] = P(...yolNokta(d, s)); if (z <= 0.05) continue; g.beginPath(); g.arc(x, y, hov ? 2.8 : 2, 0, 7); g.fill(); }
+      yolUclari(d, `rgba(${col},${hov ? 1 : 0.75})`, hov);
+      const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
+      if (mz > 0.1 && (view.z > 2.4 || hov)) text(mx, my - 9, (deniz ? '⛵ ' : '🐪 ') + t.ad, { size: 10.5, w: 700, col: `rgb(${col})`, halo: 2.5 });
+      for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.05) hits.unshift({ kind: 'yol', t, x0: x - 6, x1: x + 6, y0: y - 6, y1: y + 6 }); }
+    }
+    // ünlü yolculuklar: seçili yıla yakın olanlar; kesik çizgi, giden yolcu, süre etiketi
+    if (layers.yolculuk) for (const j of window.YOLCULUKLAR || []) {
+      const dd = Math.abs(Y - j.y); if (dd > aralik) continue;
+      const d = yolHazirla(j), hov = hover && hover.kind === 'yolculuk' && hover.j === j;
+      g.globalAlpha = clamp(1 - dd / (aralik * 1.3 + 1), 0.45, 1);
+      g.beginPath(); linePath(d.p); g.strokeStyle = hov ? '#ffb38a' : 'rgba(255,140,90,0.85)'; g.lineWidth = hov ? 3 : 2; g.setLineDash([3, 5]); g.stroke(); g.setLineDash([]);
+      yolUclari(d, '#ff8c5a', hov);
+      const k = (T / 6) % 1, [px, py, pz] = P(...yolNokta(d, d.L * k));
+      if (pz > 0.05) { g.fillStyle = '#fff3e0'; g.strokeStyle = '#d4522a'; g.lineWidth = 2; g.beginPath(); g.arc(px, py, 4, 0, 7); g.fill(); g.stroke(); }
+      const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
+      if (mz > 0.1) {
+        const lb = '⏱ ' + j.sure.split(' (')[0].split(';')[0]; g.font = '700 11px system-ui'; const w = g.measureText(lb).width + 14;
+        g.fillStyle = hov ? '#ffd666' : 'rgba(58,26,12,0.9)'; g.strokeStyle = '#ff8c5a'; g.lineWidth = 1.2; g.beginPath(); g.roundRect(mx - w / 2, my - 10, w, 20, 10); g.fill(); g.stroke();
+        g.fillStyle = hov ? '#2a1d10' : '#ffe7d6'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(lb, mx, my + 0.5);
+        hits.push({ kind: 'yolculuk', j, x0: mx - w / 2, x1: mx + w / 2, y0: my - 10, y1: my + 10 });
+      }
+      for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.05) hits.unshift({ kind: 'yolculuk', j, x0: x - 6, x1: x + 6, y0: y - 6, y1: y + 6 }); }
+      g.globalAlpha = 1;
+    }
     // olaylar: seçili yıla ±100 yıl uzaklıktaki savaşlar, afetler, antlaşmalar (önemine göre büyük)
     const evs = (window.OLAYLAR || []).filter(e => layers[e.tur] && Math.abs(Y - e.y) <= aralik);
     evs.sort((a, b) => a.onem - b.onem);
@@ -541,7 +531,6 @@ window.Dunya = (() => {
         g.strokeStyle = 'rgba(255,214,102,0.7)'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 14 * pr, 0, 7); g.stroke();
         g.fillStyle = on ? '#ffd666' : '#bbb'; g.strokeStyle = OUT; g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); g.stroke();
         text(x + 14, y, (DM ? BGd.ikon + ' ' : '') + (BGd.ad || 'Mısır'), { align: 'left', size: 15, w: 800, col: '#ffe7a3', serif: true });
-        text(x + 14, y + 16, 'tıkla ve yaklaş', { align: 'left', size: 11, w: 600, col: '#dfe9f5' });
         hits.push({ kind: 'med', b: DM ? BGd : null, x0: x - 18, x1: x + 120, y0: y - 18, y1: y + 22 });
         g.globalAlpha = 1;
       }
@@ -565,8 +554,9 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'yapi') tip(hover.x1 + 6, hover.y0, hover.it.ad, ({ ins: `İnşaat sürüyor · %${Math.round((hover.it.p || 0) * 100)}`, bitti: 'Tamamlanmış', harabe: 'Harabe / yarım kalmış' })[hover.it.st] + (hover.kids && hover.kids.length ? ` · tıkla: bilgi kartı · aynı yerde ${hover.kids.length} yapı daha: ${hover.kids.slice(0, 4).map(o => o.it.ad).join(', ')}${hover.kids.length > 4 ? '…' : ''}` : ' · tıkla: bilgi kartı'));
     else if (hover && hover.kind === 'kume') tip(hover.x1 + 6, hover.y0, `${hover.list.length} yapı`, hover.list.slice(0, 6).map(o => o.it.ad).join(', ') + (hover.list.length > 6 ? '…' : '') + ' · tıkla: yaklaş');
     else if (hover && hover.kind === 'kaynak') tip(hover.x1 + 6, hover.y0, hover.k.ad, `${((window.KAYNAK_TUR || {})[hover.k.tur] || {}).ad} · ${YIL.fmt(hover.k.from)} – ${hover.k.to <= -2026 ? 'bugün' : YIL.fmt(hover.k.to)} · tıkla: ayrıntılar`);
+    else if (hover && hover.kind === 'yol') tip(hover.x1 + 6, hover.y0, hover.t.ad, `${hover.t.cikis} → ${hover.t.varis} · ${hover.t.mal} · tıkla: ayrıntılar`);
+    else if (hover && hover.kind === 'yolculuk') tip(hover.x1 + 6, hover.y0, hover.j.ad, `${YIL.fmt(hover.j.y)} · ${hover.j.sure} · ${hover.j.nasil} · tıkla: hikâyesi`);
     else if (hover && hover.kind === 'sehir') tip(hover.x1 + 6, hover.y0, hover.c.ad + (hover.c.cap ? ' (başkent)' : ''), hover.c.not || '');
-    text(12, H - 14, view.z < 2.6 ? 'Sürükle: döndür · tekerlek / iki parmak: yaklaş · ' + ((window.BOLGE || {}).yonelme || 'Mısır\'a') + ' tıkla' : 'Zaman çizelgesini oynat: yapılar yıllarına göre belirir · simgelere tıkla', { align: 'left', size: 11.5, w: 500, col: 'rgba(230,238,255,0.85)', halo: 2 });
   }
   function tip(x, y, t1, t2) {
     g.font = '700 13px system-ui'; const w1 = g.measureText(t1).width; g.font = '12px system-ui';

@@ -523,3 +523,79 @@ body { grid-template-columns: minmax(0, 1fr); }
 .citycard .yakin { margin-top: 8px; border-top: 1px solid #e3d3b2; padding-top: 6px; }
 .citycard .yakin .chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 6px; }
 .citycard .yakin .chips button { font-size: 12px; padding: 3px 8px; border-radius: 10px; border: 1px solid #c9a46a; background: #fff8e8; color: #3a2414; cursor: pointer; }
+
+/* ===== Sade arayüz (2026-11-21): dört mod, kapalı panel, katman menüsü ===== */
+.soon, .hint, .viewsw, .olaybar, #about, #symbols { display: none !important; }
+.top { gap: 12px; padding: 7px 14px; }
+.modlar { display: flex; gap: 3px; margin: 0 auto; background: rgba(255,255,255,.04); padding: 4px; border-radius: 99px; border: 1px solid #3a2c20; }
+.modlar button { display: flex; align-items: center; gap: 6px; border: 0; background: transparent; border-radius: 99px; padding: 6px 15px; font-size: 14px; font-weight: 700; cursor: pointer; color: #e9dcc2; transition: background .15s; }
+.modlar button:hover { background: rgba(255,214,102,.12); }
+.modlar button.on { background: #ffd666; color: #2a1d10; }
+.modlar .arabtn, .modlar #ara { border: 0; background: transparent; padding: 6px 15px; }
+.place { background: transparent; padding: 0; gap: 6px; }
+.place select { background: rgba(255,255,255,.07); color: #f3e7d0; border: 1px solid #4a3828; font-weight: 600; font-size: 13px; }
+.place select option { color: #2a1d10; }
+.place #era { max-width: 200px; }
+.buyil { border: 1px solid #6b5326; background: #3a2c20; color: #ffe3a3; border-radius: 99px; padding: 6px 14px; font-weight: 700; font-size: 13.5px; cursor: pointer; white-space: nowrap; }
+.buyil:hover { background: #4b3a2a; }
+.buyil.on { background: #ffd666; color: #2a1d10; border-color: #ffd666; }
+
+.app { grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: minmax(0, 1fr) !important; position: relative; overflow: clip; }
+.panel { position: absolute; top: 0; right: 0; bottom: 0; width: 400px; max-width: 100%; z-index: 7; padding: 0 14px 20px; transform: translateX(105%); visibility: hidden; transition: transform .28s ease, visibility 0s .28s; box-shadow: -12px 0 32px rgba(0,0,0,.4); border-left: 1px solid #3a2c20; border-top: 0; }
+.panelacik .panel { transform: none; visibility: visible; transition: transform .28s ease; }
+.pn-ust { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; margin: 0 -14px 10px; padding: 10px 14px; background: #211913; border-bottom: 1px solid #3a2c20; }
+.pn-ust b { color: #ffd666; font-size: 15px; }
+.pn-x { border: 0; background: rgba(255,255,255,.08); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+
+.yearcard { padding: 10px 16px 11px; }
+.yearcard b#yc-year { font-size: 40px; }
+.yearcard .site { display: none; }
+.yearcard #yc-ruler { color: #f1e3c6; font-weight: 600; }
+
+.katbtn { position: absolute; right: 12px; top: 12px; z-index: 5; background: rgba(24,18,12,.86); color: #f3e7d0; border: 1px solid rgba(255,255,255,.18); border-radius: 99px; padding: 7px 14px; font-weight: 700; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px); }
+.katbtn:hover, .katbtn.on { background: #ffd666; color: #2a1d10; border-color: #ffd666; }
+.globectl, .mapctl { top: 56px !important; }
+.katpop { position: absolute; right: 12px; top: 54px; z-index: 6; width: 280px; max-height: calc(100% - 70px); overflow-y: auto; background: rgba(24,18,12,.97); border: 1px solid #4a3828; border-radius: 14px; padding: 12px 12px 10px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+.katpop[hidden] { display: none; }
+.katpop > div > b { display: block; color: #ffd666; font-size: 13px; margin: 0 4px 6px; }
+.katpop label { display: flex; align-items: center; gap: 9px; padding: 6px 6px; cursor: pointer; font-size: 13.5px; border-radius: 8px; }
+.katpop label:hover { background: rgba(255,255,255,.06); }
+.katpop label input { accent-color: #ffd666; width: 16px; height: 16px; margin: 0; }
+.katpop label i { margin-left: auto; font-style: normal; font-size: 11px; font-weight: 700; background: #d9473a; color: #fff; border-radius: 9px; padding: 1px 6px; }
+.katpop label i:empty { display: none; }
+.kp-aralik { font-size: 12px; color: #b6a481; margin: 8px 6px 2px; }
+.kp-aralik select { background: #3a2c20; border: 1px solid #5a4632; border-radius: 6px; padding: 1px 3px; }
+.kp-sahne { display: none; }
+body:not(.globeonly) .kp-sahne { display: block; }
+body:not(.globeonly) .kp-kure { display: none; }
+.katpop .seasons { position: static; display: flex; gap: 6px; flex-wrap: wrap; }
+.globeonly .seasons { display: flex; }
+
+.ipucu { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 8; width: min(420px, calc(100% - 24px)); background: #fbf4e4; color: #3a2414; border-radius: 14px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.35); font-size: 14px; line-height: 1.45; }
+.ipucu[hidden] { display: none; }
+.ipucu p { margin: 0 0 8px; }
+.ipucu .ip-alt { display: flex; align-items: center; gap: 8px; }
+.ipucu .ip-alt small { color: #8a6a4a; margin-right: auto; }
+.ipucu button { border: 0; border-radius: 99px; padding: 5px 12px; font-weight: 700; cursor: pointer; background: #ffd666; color: #2a1d10; }
+.ipucu button.ip-gec { background: transparent; color: #8a6a4a; }
+.secim { display: grid; gap: 8px; }
+.secim button { text-align: left; border: 1px solid #c9a46a; background: #fff8e8; color: #3a2414; border-radius: 12px; padding: 10px 12px; cursor: pointer; font-size: 14px; }
+.secim button:hover { background: #ffefc4; }
+.secim button small { display: block; color: #8a6a4a; font-size: 12px; margin-top: 2px; }
+.topraklar ul { margin: 4px 0 8px; padding-left: 18px; } .topraklar li { margin: 2px 0; }
+.topraklar h4 { margin: 10px 0 2px; font-size: 13.5px; }
+.panel .topraklar h4, .panel .alt-baslik { color: #ffd666; font-size: 13px; margin: 10px 0 4px; }
+.panel [data-yol], .panel [data-yolculuk] { cursor: pointer; }
+
+@media (max-width: 860px) {
+  .logo, .place #era, .buyil span, .katbtn span { display: none; }
+  .top { gap: 6px; padding: 6px 8px; }
+  .modlar { margin: 0; }
+  .modlar button { padding: 6px 9px; font-size: 13px; gap: 4px; }
+  .modlar button span { display: none; }
+  .modlar button.on span { display: inline; }
+  .panel { width: 100%; }
+  .yearcard b#yc-year { font-size: 28px; }
+  .katbtn { top: 8px; right: 8px; }
+  .ipucu { bottom: 10px; font-size: 13px; }
+}

@@ -70,10 +70,13 @@ kayık, palmiye, kızak, rampa ve köy kodla modellendi.
 - Nüfus: CAPMAS resmî sayımları (1882-2017); 2026 rakamı tahmindir.
 - Yıl sayıları: uygulamada MÖ yıllar pozitif, MS yıllar negatif tutulur (js/yil.js); ekranda "MÖ" ve "MS" olarak gösterilir.
 
-## Kabartma ve deniz derinliği (2026-11-21)
-- **Veri:** Terrain Tiles (Mapzen), AWS Open Data: `s3.amazonaws.com/elevation-tiles-prod/terrarium/` (dünya için z3, 64 karo; Avrupa, Anadolu, Orta Doğu ve Kuzey Afrika için z5, 90 karo; toplam ~12 MB indirildi, projeye konmadı).
-- **Lisans ve atıf:** açık veri. Bu ölçeklerdeki kaynaklar ETOPO1 (NOAA) ve GMTED2010 (USGS), ikisi de kamu malı. Atıf: "Terrain Tiles: Mapzen, AWS Open Data; ETOPO1, GMTED2010, SRTM".
-- **Projedeki dosyalar:** `assets/harita/yukselti-dunya.png` (0,25°, 1440×720) ve `assets/harita/yukselti-bolge.png` (0,05°; enlem 5-70, boylam -20 ile 75 arası, 1900×1300). Karolardan eş-dikdörtgen ızgaraya çevrildi, 8 bit (karekök ölçek). Gölgeleme tarayıcıda hesaplanıyor (js/dunya.js, `golgeHesapla`).
-
 ## Yeraltı kaynakları (data/kaynaklar.js)
 - İşletme yılları yaklaşıktır. Genel kaynaklar: Paul T. Craddock, *Early Metal Mining and Production*, Edinburgh University Press, 1995; madenlerin ve şirketlerin kendi tarihçeleri; Türkiye için MTA ve Eti Maden yayınları.
+
+## Ticaret yolları ve yolculuklar (data/yollar.js) ve coğrafya (data/cografya.js)
+- Güzergâhlar ana duraklarıyla basitleştirilmiştir; yıllar ve süreler yaklaşıktır.
+- Kral Yolu ve ulaklar: Herodot, *Tarih* V.52-54 ve VIII.98. Gedrosya: Arrianos, *Anabasis* VI. Hannibal: Polybios, *Tarih* III. Roma-İskenderiye yolculuğu: Plinius, *Naturalis Historia* XIX.3.
+- Asur ticaret kolonileri: Mogens Trolle Larsen, *Ancient Kanesh*, Cambridge University Press, 2015. Uluburun batığı: Cemal Pulak'ın kazı yayınları (INA).
+- Merer'in günlüğü: Pierre Tallet, *The Red Sea Scrolls*, 2021. İbn Battuta: *Rihle* (Tuhfetü'n-Nüzzâr).
+- Atlantik köle ticareti rakamları: Trans-Atlantic Slave Trade Database (slavevoyages.org).
+- Geçim kaynakları ve coğrafya özetleri genel tarih kaynaklarından derlenmiştir (ör. Fernand Braudel, *Akdeniz ve Akdeniz Dünyası*; Halil İnalcık, *Osmanlı İmparatorluğu'nun Ekonomik ve Sosyal Tarihi*).
