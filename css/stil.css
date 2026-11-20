@@ -520,3 +520,6 @@ body { grid-template-columns: minmax(0, 1fr); }
 /* Tüm Dünya: sahne yok, yalnızca küre */
 .dunyamod .viewsw, .dunyamod .seasons, .dunyamod .hint, .dunyamod #follow, .dunyamod #about, .dunyamod .mapctl { display: none !important; }
 .dunyamod #yc-ruler { max-width: 340px; white-space: normal; font-size: 12px; }
+.citycard .yakin { margin-top: 8px; border-top: 1px solid #e3d3b2; padding-top: 6px; }
+.citycard .yakin .chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 6px; }
+.citycard .yakin .chips button { font-size: 12px; padding: 3px 8px; border-radius: 10px; border: 1px solid #c9a46a; background: #fff8e8; color: #3a2414; cursor: pointer; }

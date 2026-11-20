@@ -382,7 +382,7 @@
     if (dragG.moved || Math.hypot(dx, dy) > 4) { dragG.moved = true; DN.drag(dx, dy); dragG.x = ev.clientX; dragG.y = ev.clientY; }
   });
   const endG = ev => {
-    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi' && h.kids && h.kids.length && DN.view.z < 3500) DN.zoomTo(h.cx, h.cy, 3); else if (h && h.kind === 'yapi') showMonument(h.it.id); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); }
+    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') showMonument(h.it.id, h.kids, h); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); }
     gpts.delete(ev.pointerId); if (!gpts.size) dragG = null;
   };
   gcv.addEventListener('pointerup', endG); gcv.addEventListener('pointercancel', endG);
@@ -501,7 +501,15 @@
   const has3D = id => !!(BG.uc3 && window.UcBoyut && (MIS.coords || {})[id]);
 
   // ---------- küredeki yapıya tıklayınca: sahneye geç ----------
-  function showMonument(id) {
+  // küredeki simgeye tıklanınca: o yapının kartı hemen açılır; aynı simgede toplanan yakın yapılar kartta düğme olur
+  function showMonument(id, kids, hit) {
+    showMonument0(id);
+    const card = $('#citycard'), m = monOf(id) || PARTS.flatMap(p => p.monuments).find(x => x.id === id);
+    if (!kids || !kids.length || card.hidden || !m || card.querySelector('.cc-title').textContent !== m.ad) return;
+    const ks = kids.map(o => o.it).filter(it => it.id !== id);
+    card.querySelector('.cc-body').insertAdjacentHTML('beforeend', `<div class="yakin"><small>📍 Aynı yerde ${ks.length} yapı daha:</small><div class="chips">${ks.slice(0, 8).map(it => `<button data-ccyakin="${it.id}">${esc(it.ad)}</button>`).join('')}</div>${view === 'dunya' && hit ? `<button class="phbtn" data-ccyaklas="${hit.cx},${hit.cy}">🔍 Küreden yaklaş</button>` : ''}</div>`);
+  }
+  function showMonument0(id) {
     if (DUNYA) {
       const p = PARTS.find(q => q.monuments.some(m => m.id === id && !m.eski)) || PARTS.find(q => q.monuments.some(m => m.id === id)); if (!p) { openInfo(id); return; }
       const m = p.monuments.find(x => x.id === id), pr = S.progress(m, Y), co = (MIS.coords || {})[id];
@@ -528,6 +536,8 @@
   }
   $('#citycard').addEventListener('click', e => {
     const d3 = e.target.closest('[data-cc3d]'); if (d3) return open3D(d3.dataset.cc3d);
+    const yk = e.target.closest('[data-ccyakin]'); if (yk) return showMonument(yk.dataset.ccyakin);
+    const ya = e.target.closest('[data-ccyaklas]'); if (ya) { const [x, y] = ya.dataset.ccyaklas.split(',').map(Number); $('#citycard').hidden = true; DN.zoomTo(x, y, 3); return; }
     const cg = e.target.closest('[data-ccgit]'); if (cg) return gitBolge(cg.dataset.ccgit, '&yapi=' + cg.dataset.ccyapi);
     const a = e.target.closest('[data-ccinfo]'); if (a) return openInfo(a.dataset.ccinfo);
     const b = e.target.closest('[data-ccic]'); if (b) return zoomInto(b.dataset.ccic);

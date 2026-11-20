@@ -188,9 +188,9 @@ window.Dunya = (() => {
   }
   // olayların canlı efektleri: savaşta yükselen duman ve alevler, yangında alev, yanardağda kül bulutu,
   // depremde yayılan halkalar, dalgada su halkaları, kuraklıkta sıcak titreşimi, salgında soluk ışıma
-  function puff(x, y, r, col, a) { g.fillStyle = col.replace('A', a.toFixed(3)); g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+  function puff(x, y, r, col, a) { if (!(r > 0) || !(a > 0)) return; g.fillStyle = col.replace('A', a.toFixed(3)); g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
   function evFx(e, x, y, s, now) {
-    const k = now ? 1 : 0.6, seed = e.y * 0.37;
+    const k = now ? 1 : 0.6, seed = Math.abs(e.y * 0.37); // MS yılları eksi: kalan da eksi çıkıp yarıçapı bozmasın
     if (e.tur === 'savas') {
       for (let i = 0; i < 7; i++) { const ph = (T * 0.35 + i / 7 + seed) % 1; puff(x + Math.sin(i * 2.1 + T * 0.6) * s * 0.5 + ph * s * 0.9, y - s * 0.4 - ph * s * 3.2, s * (0.35 + ph * 0.9), 'rgba(60,55,50,A)', 0.55 * (1 - ph) * k); }
       for (let i = 0; i < 5; i++) { const ph = (T * 1.6 + i / 5 + seed) % 1; puff(x + (rnd(i) - 0.5) * s * 1.6, y + s * 0.55 - ph * s * 1.1, s * 0.22 * (1 - ph) + 0.6, i % 2 ? 'rgba(255,170,40,A)' : 'rgba(230,70,30,A)', 0.9 * (1 - ph) * k); }
@@ -464,7 +464,7 @@ window.Dunya = (() => {
     }
     // ipucu
     if (hover && hover.kind === 'olay') tip(hover.x1 + 6, hover.y0, hover.e.ad, `${YIL.fmt(hover.e.y)} · ${({ savas: 'Savaş', afet: 'Doğal afet', antlasma: 'Antlaşma', olay: 'Önemli olay' })[hover.e.tur]} · tıkla: ayrıntılar`);
-    else if (hover && hover.kind === 'yapi') tip(hover.x1 + 6, hover.y0, hover.it.ad, ({ ins: `İnşaat sürüyor · %${Math.round((hover.it.p || 0) * 100)}`, bitti: 'Tamamlanmış', harabe: 'Harabe / yarım kalmış' })[hover.it.st] + (hover.kids && hover.kids.length ? ` · yakınında ${hover.kids.length} yapı daha: ${hover.kids.slice(0, 4).map(o => o.it.ad).join(', ')}${hover.kids.length > 4 ? '…' : ''} · tıkla: yaklaş` : ' · tıkla: bilgi kartı'));
+    else if (hover && hover.kind === 'yapi') tip(hover.x1 + 6, hover.y0, hover.it.ad, ({ ins: `İnşaat sürüyor · %${Math.round((hover.it.p || 0) * 100)}`, bitti: 'Tamamlanmış', harabe: 'Harabe / yarım kalmış' })[hover.it.st] + (hover.kids && hover.kids.length ? ` · tıkla: bilgi kartı · aynı yerde ${hover.kids.length} yapı daha: ${hover.kids.slice(0, 4).map(o => o.it.ad).join(', ')}${hover.kids.length > 4 ? '…' : ''}` : ' · tıkla: bilgi kartı'));
     else if (hover && hover.kind === 'kume') tip(hover.x1 + 6, hover.y0, `${hover.list.length} yapı`, hover.list.slice(0, 6).map(o => o.it.ad).join(', ') + (hover.list.length > 6 ? '…' : '') + ' · tıkla: yaklaş');
     else if (hover && hover.kind === 'sehir') tip(hover.x1 + 6, hover.y0, hover.c.ad + (hover.c.cap ? ' (başkent)' : ''), hover.c.not || '');
     text(12, H - 14, view.z < 2.6 ? 'Sürükle: döndür · tekerlek / iki parmak: yaklaş · ' + ((window.BOLGE || {}).yonelme || 'Mısır\'a') + ' tıkla' : 'Zaman çizelgesini oynat: yapılar yıllarına göre belirir · simgelere tıkla', { align: 'left', size: 11.5, w: 500, col: 'rgba(230,238,255,0.85)', halo: 2 });
