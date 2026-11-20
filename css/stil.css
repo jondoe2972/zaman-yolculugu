@@ -655,3 +655,9 @@ body:not(.globeonly) .kp-kure { display: none; }
 .hy-puan { font-size: 15px; } .hy-puan b { color: #b5452f; font-size: 20px; }
 .hy-yukle { color: #8a6a4a; }
 @media (max-width: 860px) { .hayat { left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 62%; font-size: 13.5px; } }
+.hy-bas b em { font-style: normal; color: #b5452f; }
+.hy-alt { color: #8a6a4a; font-size: 12px; margin: -2px 0 6px; }
+.hy-nadir { background: linear-gradient(90deg, #fff1c2, #ffe08a); border-radius: 8px; padding: 6px 9px; font-weight: 600; }
+.hy-cozum { background: #eef6ff; border-left: 3px solid #4a8acb; border-radius: 6px; padding: 7px 10px; font-size: 13px; color: #24405e; }
+.hy-ipucu { font-size: 12px; color: #8a6a4a; font-style: italic; }
+.hayat p b { color: #4a2a12; }
