@@ -601,3 +601,30 @@ body:not(.globeonly) .kp-kure { display: none; }
 }
 .rolbas { margin: 12px 0 2px; font-size: 14px; color: #8a4f12; }
 .rolecard.guc { border-color: #d9b45a; background: linear-gradient(#fffaf0, #fff3d8); }
+/* 3D şehir */
+.s3 { position: fixed; inset: 0; z-index: 70; background: #cfe3ee; display: flex; flex-direction: column; }
+.s3[hidden] { display: none; }
+.s3-ust { display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: #241b14; border-bottom: 1px solid #3a2c20; flex-wrap: wrap; }
+.s3-baslik { color: #f3e7d0; font-size: 15px; }
+.s3-yil { color: #ffd666; font-size: 24px; min-width: 110px; }
+.s3-geri { background: #ffd666; color: #2a1d10; border: 0; border-radius: 99px; padding: 7px 14px; font-weight: 700; cursor: pointer; }
+.s3-kam { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+.s3-kam button, .s3-hizli button { background: #3a2c20; border: 1px solid #5a4632; border-radius: 99px; padding: 5px 11px; cursor: pointer; font-size: 12.5px; color: #f3e7d0; }
+.s3-kam button:hover, .s3-hizli button:hover { background: #ffd666; color: #2a1d10; }
+.s3-govde { position: relative; flex: 1; min-height: 0; }
+#s3cv { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+.s3-etiket { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.s3-etiket button { position: absolute; transform: translate(-50%, -100%); pointer-events: auto; background: rgba(32,22,14,.8); color: #fff6dc; border: 1px solid rgba(255,214,102,.45); border-radius: 8px; padding: 3px 8px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.s3-etiket button small { display: none; }
+.s3-donem { position: absolute; left: 12px; top: 12px; width: min(380px, calc(100% - 24px)); background: rgba(251,244,228,.94); color: #3a2414; border-radius: 12px; padding: 10px 12px; font-size: 13.5px; line-height: 1.45; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.s3-donem small { display: block; margin-top: 4px; color: #8a6a4a; font-weight: 600; }
+.s3-bilgi { position: absolute; right: 12px; top: 12px; width: min(330px, calc(100% - 24px)); background: #fbf4e4; color: #3a2414; border-radius: 12px; padding: 12px; font-size: 13.5px; line-height: 1.45; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
+.s3-bilgi[hidden] { display: none; }
+.s3-bilgi b { display: block; font-size: 15px; } .s3-bilgi small { color: #8a6a4a; }
+.s3-bx { float: right; border: 0; background: transparent; cursor: pointer; font-size: 15px; }
+.s3-ipucu { position: absolute; left: 12px; bottom: 8px; margin: 0; color: #3a4a5a; font-size: 12px; }
+.s3-alt { display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: #241b14; border-top: 1px solid #3a2c20; flex-wrap: wrap; }
+.s3-oynat { width: 42px; height: 42px; border-radius: 50%; border: 0; background: #ffd666; color: #2a1d10; font-size: 18px; cursor: pointer; }
+.s3-kaydir { flex: 1; min-width: 160px; accent-color: #ffd666; }
+.s3-hizli { display: flex; gap: 4px; flex-wrap: wrap; }
+@media (max-width: 860px) { .s3-kam { margin-left: 0; } .s3-donem { font-size: 12px; top: auto; bottom: 30px; } .s3-ipucu { display: none; } .s3-yil { font-size: 19px; } }

@@ -80,3 +80,14 @@ kayık, palmiye, kızak, rampa ve köy kodla modellendi.
 - Merer'in günlüğü: Pierre Tallet, *The Red Sea Scrolls*, 2021. İbn Battuta: *Rihle* (Tuhfetü'n-Nüzzâr).
 - Atlantik köle ticareti rakamları: Trans-Atlantic Slave Trade Database (slavevoyages.org).
 - Geçim kaynakları ve coğrafya özetleri genel tarih kaynaklarından derlenmiştir (ör. Fernand Braudel, *Akdeniz ve Akdeniz Dünyası*; Halil İnalcık, *Osmanlı İmparatorluğu'nun Ekonomik ve Sosyal Tarihi*).
+
+## Tarihi sınırlar (data/sinir/, 2026-11-21)
+- **Cliopatria**, Seshat Global History Databank: MÖ 3400 – MS 2024 arası dünya devletlerinin sınırları. Kaynak: github.com/Seshat-Global-History-Databank/cliopatria (v0.21), makale: doi.org/10.1038/s41597-025-04516-9.
+- **Lisans:** Creative Commons Attribution 4.0 (creativecommons.org/licenses/by/4.0/).
+- **Yapılan değişiklikler:** Bileşik (birlik) kayıtları çıkarıldı, şekiller sadeleştirildi (Douglas-Peucker, 0,12°) ve 0,05°'ye yuvarlandı; kıyılar Natural Earth kara haritasına kırpılarak çizilir. Yıllar sitenin kuralına çevrildi, veri 10 zaman dilimine bölündü (`araclar/sinir-donustur.js`).
+- **Türkçe devlet adları:** Wikidata etiketleri (CC0), `araclar/turkce-adlar.json`. Türkçe adı olmayanlarda özgün ad kullanılır.
+- Kayıtlar arasındaki sınır değişimi, kaydın son yıllarında yayılarak canlandırılır (görsel bir ara geçiş; ara yıllardaki gerçek sınırı göstermez).
+
+## 3D İstanbul (data/sehir3d-istanbul.js)
+- Konumlar ve yapım yılları: Cyril Mango, *Le développement urbain de Constantinople*, 1985; Wolfgang Müller-Wiener, *Bildlexikon zur Topographie Istanbuls*, 1977; Doğan Kuban, *İstanbul: Bir Kent Tarihi*, 1996.
+- Nüfus tahminleri yaklaşıktır (Mango; Halil İnalcık, "Istanbul", *Encyclopaedia of Islam*). Mahallelerin dolup boşalması bu tahminlerden türetilmiş temsili bir canlandırmadır; tek tek evler gerçek konumlarında değildir.

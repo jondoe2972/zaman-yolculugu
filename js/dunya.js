@@ -115,28 +115,91 @@ window.Dunya = (() => {
   function katman(w, h) { if (!katmanCv) katmanCv = document.createElement('canvas'); if (katmanCv.width !== w || katmanCv.height !== h) { katmanCv.width = w; katmanCv.height = h; } return katmanCv; }
   const llPath = pts => { const p = prep(pts); return () => polyPath(p); };
 
-  // ---------- Mısır katmanı: sınırlar ----------
-  let sinirCache = null;
-  function nilIdx(ll) { const N = NIL_GERCEK || (window.Harita && window.Harita.NIL) || []; let bi = 0, bd = 1e9; N.forEach((p, i) => { const d = Math.hypot(p[0] - ll[0], p[1] - ll[1]); if (d < bd) { bd = d; bi = i; } }); return bi; }
-  function band(aName, bName, w = 0.42) {
-    const N = NIL_GERCEK || window.Harita.NIL, NN = window.NIL_NOKTA;
-    let ia = nilIdx(NN[aName]), ib = nilIdx(NN[bName]); if (ia > ib) [ia, ib] = [ib, ia];
-    const s = N.slice(ia, ib + 1); if (s.length < 2) return null;
-    const L = [], Rr = [];
-    for (let i = 0; i < s.length; i++) {
-      const a = s[Math.max(0, i - 1)], b = s[Math.min(s.length - 1, i + 1)];
-      let dy = b[0] - a[0], dx = (b[1] - a[1]) * Math.cos(s[i][0] * D); const n = Math.hypot(dx, dy) || 1; dx /= n; dy /= n;
-      const k = w / Math.cos(s[i][0] * D);
-      L.push([s[i][0] + dx * w, s[i][1] - dy * k]); Rr.push([s[i][0] - dx * w, s[i][1] + dy * k]);
+  // ---------- tarihi sınırlar: Cliopatria (Seshat, CC BY 4.0) ----------
+  // data/sinir/sinir-<n>.js zaman dilimleri, gerektikçe yüklenir. Kayıt: {n, tr, y0, y1, a, r, e, g, w}
+  // y1 başlangıç (erken) yılı, y0 bitiş yılı (site kuralı: MÖ pozitif). Aynı adlı ardışık kayıtlar arasında
+  // sınır, kaydın son yıllarında yayılarak değişir: kazanılan yer eski merkezden halka halka dolar,
+  // kaybedilen yer uzaktan başlayarak çekilir, ortak kısım hep görünür kalır.
+  const DILIM = {}, yukleniyor = {};
+  window.__sinirDilim = (i, v) => {
+    const H = v.h.map(d => { const la = [], lo = []; let a = 0, o = 0; for (let k = 0; k < d.length; k += 2) { a += d[k]; o += d[k + 1]; la.push(a / 20); lo.push(o / 20); } return { la, lo, p: null }; });
+    const K = v.k;
+    for (const k of K) {
+      k.H = k.g.map(id => H[id]);
+      let a0 = 90, a1 = -90, o0 = 180, o1 = -180; for (const h of k.H) for (let j = 0; j < h.la.length; j++) { a0 = Math.min(a0, h.la[j]); a1 = Math.max(a1, h.la[j]); o0 = Math.min(o0, h.lo[j]); o1 = Math.max(o1, h.lo[j]); }
+      k.bb = [a0, a1, o0, o1]; if (!k.e) k.e = [(a0 + a1) / 2, (o0 + o1) / 2];
     }
-    return prep([...L, ...Rr.reverse()]);
+    const ada = {}; for (const k of K) (ada[k.n] = ada[k.n] || []).push(k);
+    for (const L of Object.values(ada)) { L.sort((x, y) => y.y1 - x.y1); for (let j = 0; j < L.length; j++) { const n = L[j + 1]; if (n && n.y1 >= L[j].y0 - 2) { L[j].sonra = n; n.once = L[j]; } } }
+    K.sort((x, y) => y.a - x.a);
+    DILIM[i] = K;
+  };
+  function dilimNo(y) { const Z = window.SINIR_DIZIN || []; const d = Z.find(z => y <= z.y[0] && y >= z.y[1]); return d ? d.d : y > (Z[0] || { y: [0] }).y[0] ? 0 : Z.length - 1; }
+  function dilimIste(i) { if (DILIM[i] || yukleniyor[i] || i < 0) return; yukleniyor[i] = 1; const sc = document.createElement('script'); sc.src = `data/sinir/sinir-${i}.js?v=1`; sc.onerror = () => { yukleniyor[i] = 0; }; document.head.appendChild(sc); }
+  // ayrıntı düzeyleri: uzaktan bakarken halkanın sadeleştirilmiş sürümü çizilir
+  function dpLL(la, lo, tol) {
+    const n = la.length; if (n < 5) return la.map((a, j) => [a, lo[j]]);
+    const keep = new Uint8Array(n); keep[0] = keep[n - 1] = 1; const st = [[0, n - 1]];
+    while (st.length) { const [a, b] = st.pop(); let md = 0, mi = -1; const dx = lo[b] - lo[a], dy = la[b] - la[a], L = Math.hypot(dx, dy) || 1e-9; for (let i = a + 1; i < b; i++) { const d = Math.abs(dy * (lo[i] - lo[a]) - dx * (la[i] - la[a])) / L; if (d > md) { md = d; mi = i; } } if (md > tol && mi > 0) { keep[mi] = 1; st.push([a, mi], [mi, b]); } }
+    const out = []; for (let i = 0; i < n; i++) if (keep[i]) out.push([la[i], lo[i]]); return out.length >= 3 ? out : null;
   }
-  function sinirlar() {
-    if (sinirCache) return sinirCache;
-    const DELTA = prep((window.Harita && window.Harita.DELTA) || []);
-    sinirCache = (window.SINIRLAR || []).map(s => ({ ...s, parts: [s.vadi && band(...s.vadi), s.delta && DELTA, ...(s.poly || []).map(prep)].filter(Boolean) }));
-    return sinirCache;
+  const LOD = [0, 0.25, 0.7];
+  function halkaYol(h, sv) {
+    if (!h.L) {
+      h.L = []; let a0 = 90, a1 = -90, o0 = 180, o1 = -180; for (let j = 0; j < h.la.length; j++) { a0 = Math.min(a0, h.la[j]); a1 = Math.max(a1, h.la[j]); o0 = Math.min(o0, h.lo[j]); o1 = Math.max(o1, h.lo[j]); }
+      h.c = [(a0 + a1) / 2, (o0 + o1) / 2]; h.rad = Math.hypot((a1 - a0) / 2, (o1 - o0) / 2 * Math.cos(h.c[0] * D)) * D;
+    }
+    if (h.L[sv] === undefined) { const pts = sv ? dpLL(h.la, h.lo, LOD[sv]) : h.la.map((a, j) => [a, h.lo[j]]); h.L[sv] = pts ? prep(pts) : null; }
+    return h.L[sv];
   }
+  let svNow = 0;
+  function sekilYol(k) {
+    g.beginPath(); let v = false; const r = R();
+    for (const h of k.H) {
+      const p = halkaYol(h, svNow); if (!p) continue;
+      const [x, y, z] = P(h.c[0], h.c[1]); if (z < -Math.sin(Math.min(1.5, h.rad))) continue;
+      const rr = h.rad * r + 4; if (x + rr < 0 || x - rr > W || y + rr < 0 || y - rr > H) continue;
+      if (polyPath(p)) v = true;
+    }
+    return v;
+  }
+  // ekranda (px) bir merkezden kaydın sınır kutusunun en uzak köşesine uzaklık
+  function uzak(c, bb) { let m = 0; for (const la of [bb[0], bb[1]]) for (const lo of [bb[2], bb[3]]) { const a = Math.acos(clamp(Math.sin(c[0] * D) * Math.sin(la * D) + Math.cos(c[0] * D) * Math.cos(la * D) * Math.cos((lo - c[1]) * D), -1, 1)); if (a > m) m = a; } return m * R() * 1.05 + 4; }
+  function daireKirp(c, r) { const [x, y, z] = P(...c); g.beginPath(); g.arc(x, y, Math.max(0, r), 0, 7); g.clip(); void z; }
+  // seçili yılda görünen kayıtlar ve geçiş durumları
+  let aktifOnbellek = { y: null, o: [] };
+  function aktifSinirlar(Y) {
+    if (aktifOnbellek.y === Y) return aktifOnbellek.o;
+    const o = aktifSinirlar0(Y); if (o.length || !Object.keys(DILIM).length) aktifOnbellek = { y: Y, o }; return o;
+  }
+  function aktifSinirlar0(Y) {
+    const i = dilimNo(Y); dilimIste(i);
+    const Z = window.SINIR_DIZIN || [], dz = Z[i]; if (dz) { if (Y - dz.y[1] < 60) dilimIste(i + 1); if (dz.y[0] - Y < 60) dilimIste(i - 1); }
+    const K = DILIM[i]; if (!K) return [];
+    const out = [];
+    for (const k of K) {
+      if (!(Y > k.y0 - 1 && Y <= k.y1 + 0.0001)) continue;
+      const boy = k.y1 - k.y0 + 1, w = clamp(boy * 0.6, 0.8, 15);
+      const bitisT = clamp((k.y0 - 1 + w - Y) / w, 0, 1), baslaT = clamp((k.y1 + 1 - Y) / w, 0, 1);
+      if (k.sonra && bitisT > 0) out.push({ k, mod: 'gecis', A: k, B: k.sonra, t: bitisT });
+      else if (!k.sonra && bitisT > 0 && k.y0 > -2024) out.push({ k, mod: 'son', t: bitisT });
+      else if (!k.once && baslaT < 1) out.push({ k, mod: 'dogus', t: baslaT });
+      else out.push({ k, mod: 'sabit' });
+    }
+    return out;
+  }
+  function sinirCiz(o) {
+    const k = o.k, renk = siyasiRenk(k.r);
+    g.fillStyle = renk;
+    if (o.mod === 'sabit') { if (!sekilYol(k)) return; g.fill('evenodd'); g.globalCompositeOperation = 'source-atop'; g.strokeStyle = 'rgba(255,250,235,0.45)'; g.lineWidth = 3; g.stroke(); g.globalCompositeOperation = 'source-over'; g.strokeStyle = 'rgba(90,50,25,0.55)'; g.lineWidth = 0.9; g.stroke(); return; }
+    if (o.mod === 'dogus') { g.save(); daireKirp(k.e, o.t * uzak(k.e, k.bb)); if (sekilYol(k)) g.fill('evenodd'); g.restore(); return; }
+    if (o.mod === 'son') { g.save(); daireKirp(k.e, (1 - o.t) * uzak(k.e, k.bb)); if (sekilYol(k)) g.fill('evenodd'); g.restore(); return; }
+    const { A, B, t } = o;
+    g.save(); if (sekilYol(A)) { g.clip('evenodd'); if (sekilYol(B)) g.fill('evenodd'); } g.restore();       // ortak kısım
+    g.save(); daireKirp(A.e, t * uzak(A.e, B.bb)); if (sekilYol(B)) g.fill('evenodd'); g.restore();          // kazanılan yer yayılır
+    g.save(); daireKirp(B.e, (1 - t) * uzak(B.e, A.bb)); if (sekilYol(A)) g.fill('evenodd'); g.restore();    // kaybedilen yer çekilir
+  }
+  const sinirAd = k => k.tr || k.n;
 
   // ---------- simgeler (yapıların küçük resimleri) ----------
   function sh(x, y, s) { g.fillStyle = 'rgba(0,0,0,0.28)'; g.beginPath(); g.ellipse(x, y + s * 0.75, s * 1.1, s * 0.25, 0, 0, 7); g.fill(); }
@@ -367,22 +430,17 @@ window.Dunya = (() => {
     }
     // dönemin siyasi sınırları: opak renk, keskin sınır çizgisi (nehirler üstte kalır)
     // Yalnızca karaya boyanır ve yarı saydamdır: denizler, boğazlar ve arazi görünür kalır.
-    if (ez > 0 && layers.sinir && anyLand) {
+    if (layers.sinir && anyLand) {
       // dönemin devletleri: hepsi ayrı bir katmana boyanır, katman karaya kırpılır,
       // sonra yumuşak gölgeyle bindirilir (kabarık, resimli harita görünümü)
       const cv = g.canvas, L = katman(cv.width, cv.height), lc = L.getContext('2d'), gg = g;
       lc.setTransform(1, 0, 0, 1, 0, 0); lc.clearRect(0, 0, L.width, L.height); lc.setTransform(dpr, 0, 0, dpr, 0, 0);
       g = lc; g.lineJoin = 'round'; let var_ = false;
-      for (const s of sinirlar()) {
-        if (!(Y <= s.from && Y >= s.to)) continue;
-        g.beginPath(); for (const p of s.parts) polyPath(p);
-        g.fillStyle = siyasiRenk(s.renk); g.fill(); var_ = true;
-        g.globalCompositeOperation = 'source-atop'; g.strokeStyle = 'rgba(255,250,235,0.45)'; g.lineWidth = 3; g.stroke();
-        g.globalCompositeOperation = 'source-over'; g.strokeStyle = 'rgba(90,50,25,0.55)'; g.lineWidth = 0.9; g.stroke();
-      }
+      const tolPx = 1.3 / (R() * D); svNow = tolPx >= LOD[2] ? 2 : tolPx >= LOD[1] ? 1 : 0;
+      for (const o of aktifSinirlar(Y)) { sinirCiz(o); var_ = true; }
       g.globalCompositeOperation = 'destination-in'; g.beginPath(); for (const p of KARA) polyPath(p); g.fill('evenodd'); g.globalCompositeOperation = 'source-over';
       g = gg;
-      if (var_) { g.save(); g.globalAlpha = ez * 0.9; g.shadowColor = 'rgba(70,40,15,0.42)'; g.shadowBlur = 7 * dpr; g.shadowOffsetY = 3 * dpr; g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(L, 0, 0); g.restore(); }
+      if (var_) { g.save(); g.globalAlpha = 0.9; g.shadowColor = 'rgba(70,40,15,0.42)'; g.shadowBlur = 7 * dpr; g.shadowOffsetY = 3 * dpr; g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(L, 0, 0); g.restore(); }
       g.beginPath(); polyPath(HAZAR); g.fillStyle = '#93c2dc'; g.fill();
     }
     // dar boğazlar: 1:50m kıyı verisinde kapalı görünenler, su olarak çizilir
@@ -405,11 +463,6 @@ window.Dunya = (() => {
     hits.length = 0;
     if (ez > 0) {
       g.globalAlpha = ez;
-      // dönemin sınırları
-      for (const s of sinirlar()) {
-        if (!(Y <= s.from && Y >= s.to)) continue;
-        void s; // sınırlar artık nehirlerden önce, opak olarak çiziliyor
-      }
       // coğrafi adlar
       const EGEO = [[32.4, 28.4, 'AKDENİZ', 'deniz', 2.2], [24.8, 36.0, 'KIZILDENİZ', 'deniz', 2.2], [29.4, 33.75, 'SİNA', 'bolge', 3], [25.4, 28.2, 'BATI ÇÖLÜ', 'bolge', 3], [27.3, 33.55, 'DOĞU ÇÖLÜ', 'bolge', 3.5], [21.6, 32.9, 'NUBYA', 'bolge', 3],
         [30.8, 30.35, 'AŞAĞI MISIR', 'misir', 2.6], [26.6, 31.55, 'YUKARI MISIR', 'misir', 2.6], [28.2, 31.15, 'Nil Nehri', 'nehir', 3.2], [29.42, 30.45, 'Faiyum', 'kucuk', 7], [31.1, 31.2, 'Delta', 'kucuk', 6]];
@@ -424,12 +477,14 @@ window.Dunya = (() => {
         else lab(pr, x, y, ad, { col: '#5e5434', it: tur === 'bolge', serif: true, size: tur === 'kucuk' ? 11 : 12, w: 600, ls: tur === 'bolge' ? 2 : 0, halo: 2.5, haloCol: 'rgba(245,245,230,0.7)' });
       }
       if (view.z > 8 && misirVar) for (const [la, lo, ad] of [[24.08, 32.89, '1. Çağlayan'], [21.8, 31.25, '2. Çağlayan'], [19.75, 30.4, '3. Çağlayan'], [18.68, 32.15, '4. Çağlayan']]) { const [x, y, z] = P(la, lo); if (z <= 0) continue; g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - 5, y - 3); g.lineTo(x, y + 2); g.lineTo(x + 5, y - 3); g.stroke(); lab(30, x + 8, y, ad, { align: 'left', size: 10.5, col: '#dfe9f5' }); }
-      // sınır adları
-      for (const s of sinirlar()) {
-        if (!layers.sinir || !(Y <= s.from && Y >= s.to)) continue;
-        if (DM && view.z < 2.6) continue;
-        const [x, y, z] = P(...s.etiket); if (z > 0.05) lab(90, x, y, s.ad.toLocaleUpperCase('tr'), { col: '#fffaf0', size: 12, w: 600, serif: true, ls: 2, haloCol: 'rgba(80,40,15,0.55)' });
-        if (s.etiket2) { const [x2, y2, z2] = P(...s.etiket2); if (z2 > 0.05) lab(60, x2, y2, s.ad2, { col: '#fff3dc', size: 11, w: 600, it: true, serif: true, haloCol: 'rgba(80,40,15,0.55)' }); }
+      // devlet adları: ekranda yeterince büyük olanlar, büyükten küçüğe öncelikli
+      if (layers.sinir) for (const o of aktifSinirlar(Y)) {
+        const k = o.k; if (o.mod === 'son' || o.mod === 'dogus') continue;
+        const px = Math.sqrt(k.a) / 111 * R() * D; if (px < 55) continue;
+        const [x, y, z] = P(...k.e); if (z <= 0.08) continue;
+        const ad = sinirAd(k).toLocaleUpperCase('tr'), sz = clamp(9 + Math.log10(k.a) * 0.9, 10, 14);
+        lab(60 + Math.log10(k.a) * 6, x, y, ad, { col: '#fffaf0', size: sz, w: 600, serif: true, ls: 1.5, haloCol: 'rgba(80,40,15,0.55)' });
+        hits.push({ kind: 'devlet', k, x0: x - ad.length * sz * 0.36, x1: x + ad.length * sz * 0.36, y0: y - sz * 0.7, y1: y + sz * 0.7 });
       }
       // şehirler ve başkent
       const cityHits = [];
@@ -570,6 +625,7 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'kaynak') tip(hover.x1 + 6, hover.y0, hover.k.ad, `${((window.KAYNAK_TUR || {})[hover.k.tur] || {}).ad} · ${YIL.fmt(hover.k.from)} – ${hover.k.to <= -2026 ? 'bugün' : YIL.fmt(hover.k.to)} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'yol') tip(hover.x1 + 6, hover.y0, hover.t.ad, `${hover.t.cikis} → ${hover.t.varis} · ${hover.t.mal} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'yolculuk') tip(hover.x1 + 6, hover.y0, hover.j.ad, `${YIL.fmt(hover.j.y)} · ${hover.j.sure} · ${hover.j.nasil} · tıkla: hikâyesi`);
+    else if (hover && hover.kind === 'devlet') tip(hover.x1 + 6, hover.y0, sinirAd(hover.k), `${YIL.fmt(hover.k.y1)} – ${hover.k.y0 <= -2024 ? 'bugün' : YIL.fmt(hover.k.y0)} arasındaki sınırları · ~${Math.round(hover.k.a).toLocaleString('tr-TR')} km² · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'sehir') tip(hover.x1 + 6, hover.y0, hover.c.ad + (hover.c.cap ? ' (başkent)' : ''), hover.c.not || '');
   }
   function tip(x, y, t1, t2) {
@@ -608,5 +664,5 @@ window.Dunya = (() => {
   function pin(lat, lon, ad) { pinAt = { lat, lon, ad, t0: T }; }
   function goTo(lat, lon, z) { idle = 0; vel = [0, 0]; target = { lat, lon, z }; }
   function reset() { idle = 0; vel = [0, 0]; target = { lat: 24, lon: 22, z: 1 }; }
-  return { pin, layers, setLayer: (k, v) => { layers[k] = v; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
+  return { sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
 })();

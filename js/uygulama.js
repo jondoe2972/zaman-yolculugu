@@ -111,6 +111,14 @@
   const bar = (ad, v) => `<div class="bar"><span>${ad}</span><i><b style="width:${v / 5 * 100}%"></b></i></div>`;
   const card = (ikon, baslik, body, cls = '') => `<section class="card ${cls}"><h3><span>${ikon}</span>${baslik}</h3>${body}</section>`;
 
+  // ---------- 3D şehir ----------
+  const s3Var = () => !!(window.Sehir3D && window.Sehir3D.var('istanbul')) && (DUNYA || BG.id === 'anadolu');
+  function sehir3dAc(ad = 'istanbul') {
+    if (!window.Sehir3D) return; closeModal(); playingBeforeModal = false; playing = false; updPlay(); kartlariKapat();
+    window.Sehir3D.open(ad, { Y: () => Y, setYear: y => setYear(y, true), onClose: () => { shown = null; } });
+  }
+  const s3Dugme = () => s3Var() ? '<button class="symbtn s3btn">🧊 İstanbul\'u 3D gez</button>' : '';
+
   // ---------- coğrafya, ticaret yolları, yolculuklar ----------
   const COG = window.COGRAFYA || {};
   // sınır yılı (ör. 1453) yeni döneme sayılır
@@ -137,6 +145,11 @@
   function openYol(t) {
     const uz = kmYol(t.pts);
     showModal({ ikon: t.tur === 'deniz' ? '⛵' : '🐪', title: t.ad, sub: `${t.cikis} → ${t.varis}`, tabs: [{ ad: 'Genel', html: `${rowsHTML([['Nereden nereye', `${t.cikis} → ${t.varis}`], ['Kullanıldığı yıllar', `${YIL.fmt(t.from)} – ${t.to <= -2026 ? 'bugün' : YIL.fmt(t.to)} (yaklaşık)`], ['Taşınan mallar', t.mal], ['Yol', `${t.tur === 'deniz' ? 'Deniz' : 'Kara'} · yaklaşık ${fmt(Math.round(uz / 100) * 100)} km`]])}<p>${t.not}</p><div class="gos"><button class="phbtn" data-yolharita="${t.id}">🌍 Haritada göster</button></div>` }] });
+  }
+  function openDevlet(k) {
+    const bit = k.y0 <= -2024 ? 'bugün' : YIL.fmt(k.y0);
+    const rows = [['Ad', k.tr && k.tr !== k.n ? `${k.tr} <small>(${esc(k.n)})</small>` : esc(k.n)], ['Bu sınırların geçerli olduğu yıllar', `${YIL.fmt(k.y1)} – ${bit}`], ['Yüzölçümü', `yaklaşık ${fmt(k.a)} km²`]];
+    showModal({ ikon: '🗺️', title: k.tr || k.n, sub: `${YIL.fmt(k.y1)} – ${bit}`, tabs: [{ ad: 'Genel', html: `${rowsHTML(rows)}${k.w ? `<p><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(k.w.replace(/ /g, '_'))}" target="_blank" rel="noopener">Vikipedi'de oku ↗</a></p>` : ''}<p class="note">Sınırlar: Cliopatria (Seshat Global History Databank, CC BY 4.0). Sadeleştirilmiştir; kıyılar kara haritasına kırpılır. Tarihî sınırlar çoğu zaman kesin değildir.</p>` }] });
   }
   function openYolculuk(j) {
     showModal({ ikon: '🧭', title: j.ad, sub: `${YIL.fmt(j.y)} · ${j.sure}`, tabs: [{ ad: 'Hikâyesi', html: `${rowsHTML([['Ne zaman', YIL.fmt(j.y)], ['Kim', j.kim], ['Nasıl', j.nasil], ['Ne kadar sürdü', `<b>${j.sure}</b>`], ['Mesafe', `yaklaşık ${fmt(j.km)} km`]])}<p>${j.not}</p><div class="gos"><button class="phbtn" data-yolcugoster="${j.id}">🌍 Haritada göster (${YIL.fmt(j.y)})</button></div>` }] });
@@ -181,7 +194,7 @@
     h += `<div class="head"><div class="dyn" style="--c:${d.renk}">${d.ad} · ${Q.kisa}</div>
       <div class="ruler"><span class="crown">👑</span><div><b>${r.ad}</b><small>${YIL.aralik(r.from, r.to)} · saltanatının ${ry}. yılı</small></div></div>
       <p class="kim">${r.kim}</p>
-      <div class="headbtns"><button class="aboutbtn">${BG.ikon} ${BG.hakkinda} <small>(${BG.kultur ? 'din, tanrılar, bilim…' : 'halklar, din, yaşam…'})</small></button><button class="symbtn">⭐ ${BG.simgeAd}</button>${yasaVar() ? '<button class="symbtn lifebtn">🎭 Bu dönemde yaşasaydım…</button>' : ''}</div></div>`;
+      <div class="headbtns"><button class="aboutbtn">${BG.ikon} ${BG.hakkinda} <small>(${BG.kultur ? 'din, tanrılar, bilim…' : 'halklar, din, yaşam…'})</small></button><button class="symbtn">⭐ ${BG.simgeAd}</button>${s3Dugme()}${yasaVar() ? '<button class="symbtn lifebtn">🎭 Bu dönemde yaşasaydım…</button>' : ''}</div></div>`;
     for (const o of olumYakin(y)) h += `<div class="now death">⚱️ <b>${YIL.fmt(o.y)}:</b> ${o.kim} öldü. <button class="phbtn" data-mumya="${o.id}">Mumyasını ve lahdini gör</button></div>`;
     if (near.length) h += `<div class="now">${near.map(ev => `<div>📌 <b>${YIL.fmt(ev.y)}:</b> ${ev.t}</div>`).join('')}</div>`;
     h += card('📣', 'Ülkenin gündemi', `<p>${e.gundem}</p>`, 'big');
@@ -216,7 +229,7 @@
     const tek = new Set(), near = P.events.filter(ev => Math.abs(ev.y - y) <= 4).sort((a, b) => b.y - a.y).filter(ev => { const k = ev.y + '|' + ev.t.replace(/^Dünya:s*/, '').split(/[s:(,]/)[0].toLocaleLowerCase('tr'); return !tek.has(k) && tek.add(k); });
     let h = `<div class="head"><div class="dyn" style="--c:#2f6fa8">🌍 Tüm Dünya · ${YIL.fmt(y)}</div>
       <p class="kim">Bütün bölgeler aynı zaman çizelgesinde. Bir bölgenin canlı sahnesine girmek için kartındaki düğmeye bas, ya da yukarıdan bölge seç.</p>
-      <div class="headbtns"><button class="symbtn">⭐ ${BG.simgeAd}</button></div></div>`;
+      <div class="headbtns"><button class="symbtn">⭐ ${BG.simgeAd}</button>${s3Dugme()}</div></div>`;
     if (near.length) h += `<div class="now">${near.slice(0, 5).map(ev => `<div>📌 <b>${YIL.fmt(ev.y)}:</b> ${ev.t}</div>`).join('')}</div>`;
     for (const b of BSIRA) {
       const Bb = BLR[b], a = bolgeAn(b, y); if (!a) continue;
@@ -239,6 +252,7 @@
     const yc = ev.target.closest('[data-yolculuk]'); if (yc) return openYolculuk(YOLCULUKLAR.find(j => j.id === yc.dataset.yolculuk));
     const tp = ev.target.closest('[data-topraklar]'); if (tp) { const b = tp.dataset.topraklar; return showModal({ ikon: BLR[b].ikon, title: `${BLR[b].ad}: bu topraklar`, sub: YIL.fmt(Math.round(Y)), tabs: [{ ad: 'Coğrafya', html: topraklarHTML(b, Math.round(Y)) }] }); }
     if (ev.target.closest('.aboutbtn')) return openCountry();
+    if (ev.target.closest('.s3btn')) return sehir3dAc();
     if (ev.target.closest('.lifebtn')) return openLife();
     const mu = ev.target.closest('[data-mumya]'); if (mu) return openMummy(mu.dataset.mumya);
     if (ev.target.closest('.symbtn')) return openSymbols();
@@ -419,7 +433,7 @@
     if (dragG.moved || Math.hypot(dx, dy) > 4) { dragG.moved = true; DN.drag(dx, dy); dragG.x = ev.clientX; dragG.y = ev.clientY; }
   });
   const endG = ev => {
-    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') showMonument(h.it.id, h.kids, h); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
+    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') showMonument(h.it.id, h.kids, h); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
     gpts.delete(ev.pointerId); if (!gpts.size) dragG = null;
   };
   gcv.addEventListener('pointerup', endG); gcv.addEventListener('pointercancel', endG);
@@ -439,7 +453,7 @@
       ['Başkent mi?', capNow ? `<b>Evet, ${YIL.fmt(Math.round(Y))}'de başkent</b>` : (c.b && c.b.length ? 'Bu yılda değil' : 'Hiç başkent olmadı')],
       ...(c.b && c.b.length ? [['Başkent olduğu dönemler', capText(c)]] : []),
       ...(yakin.length ? [['Bu yıl çevresindeki yapılar', yakin.join(', ')]] : [])])}
-      <h4>Mısır için önemi</h4><p>${sb.onem || c.not || ''}</p>${!kisa && sb.ilginc ? `<div class="did"><b>💡 Biliyor muydun?</b><p>${sb.ilginc}</p></div>` : ''}`;
+      ${/^İstanbul/.test(c.ad) && window.Sehir3D ? '<div class="gos"><button class="phbtn" data-s3="istanbul">🧊 Şehri 3D gez</button></div>' : ''}<h4>Önemi</h4><p>${sb.onem || c.not || ''}</p>${!kisa && sb.ilginc ? `<div class="did"><b>💡 Biliyor muydun?</b><p>${sb.ilginc}</p></div>` : ''}`;
   }
   function openCityModal(c) {
     const sb = (window.SEHIR_BILGI || {})[c.ad] || {};
@@ -577,6 +591,7 @@
     kartGoster();
   }
   $('#citycard').addEventListener('click', e => {
+    const s3b = e.target.closest('[data-s3]'); if (s3b) return sehir3dAc(s3b.dataset.s3);
     const d3 = e.target.closest('[data-cc3d]'); if (d3) return open3D(d3.dataset.cc3d);
     const yk = e.target.closest('[data-ccyakin]'); if (yk) return showMonument(yk.dataset.ccyakin);
     const ya = e.target.closest('[data-ccyaklas]'); if (ya) { const [x, y] = ya.dataset.ccyaklas.split(',').map(Number); $('#citycard').hidden = true; DN.zoomTo(x, y, 3); return; }
@@ -654,6 +669,7 @@
     const mb = e.target.closest('[data-mumya]'); if (mb) { openMummy(mb.dataset.mumya); return; }
     const rb = e.target.closest('[data-role]'); if (rb) { openRole(rb.dataset.role); return; }
     if (e.target.closest('.lifebtn')) { openLife(); return; }
+    const s3m = e.target.closest('[data-s3]'); if (s3m) { sehir3dAc(s3m.dataset.s3); return; }
     const yh = e.target.closest('[data-yolharita]'); if (yh) { const t = TICARET_YOLLARI.find(x => x.id === yh.dataset.yolharita); DN.setLayer('ticaret', true); playingBeforeModal = false; yolHaritada(t.pts, kmYol(t.pts)); return; }
     const yg2 = e.target.closest('[data-yolcugoster]'); if (yg2) { const j = YOLCULUKLAR.find(x => x.id === yg2.dataset.yolcugoster); DN.setLayer('yolculuk', true); playingBeforeModal = false; yolHaritada(j.pts, j.km, j.y); return; }
     const g2 = e.target.closest('[data-gitbolge2]'); if (g2) { gitBolge(g2.dataset.gitbolge2); return; }
