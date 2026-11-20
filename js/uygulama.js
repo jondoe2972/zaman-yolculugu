@@ -181,7 +181,7 @@
     h += `<div class="head"><div class="dyn" style="--c:${d.renk}">${d.ad} · ${Q.kisa}</div>
       <div class="ruler"><span class="crown">👑</span><div><b>${r.ad}</b><small>${YIL.aralik(r.from, r.to)} · saltanatının ${ry}. yılı</small></div></div>
       <p class="kim">${r.kim}</p>
-      <div class="headbtns"><button class="aboutbtn">${BG.ikon} ${BG.hakkinda} <small>(${BG.kultur ? 'din, tanrılar, bilim…' : 'halklar, din, yaşam…'})</small></button><button class="symbtn">⭐ ${BG.simgeAd}</button>${Q.modern || !BG.kultur ? '' : '<button class="symbtn lifebtn">🎭 Bu dönemde yaşasaydım…</button>'}</div></div>`;
+      <div class="headbtns"><button class="aboutbtn">${BG.ikon} ${BG.hakkinda} <small>(${BG.kultur ? 'din, tanrılar, bilim…' : 'halklar, din, yaşam…'})</small></button><button class="symbtn">⭐ ${BG.simgeAd}</button>${yasaVar() ? '<button class="symbtn lifebtn">🎭 Bu dönemde yaşasaydım…</button>' : ''}</div></div>`;
     for (const o of olumYakin(y)) h += `<div class="now death">⚱️ <b>${YIL.fmt(o.y)}:</b> ${o.kim} öldü. <button class="phbtn" data-mumya="${o.id}">Mumyasını ve lahdini gör</button></div>`;
     if (near.length) h += `<div class="now">${near.map(ev => `<div>📌 <b>${YIL.fmt(ev.y)}:</b> ${ev.t}</div>`).join('')}</div>`;
     h += card('📣', 'Ülkenin gündemi', `<p>${e.gundem}</p>`, 'big');
@@ -597,12 +597,21 @@
   function sahneSec() {
     showModal({ ikon: '🎬', title: 'Hangi bölgenin sahnesi?', sub: `${YIL.fmt(Math.round(Y))} yılına gidilir`, tabs: [{ ad: 'Bölge seç', html: `<p>Canlı sahnede yapılar yılına göre yükselir, insanlar ve gemiler dönemine göre değişir.</p><div class="secim">${BSIRA.map(b => `<button data-gitbolge2="${b}">${BLR[b].ikon} <b>${BLR[b].ad}</b><small>${BLR[b].ad} sahnesini aç</small></button>`).join('')}</div>` }] });
   }
-  const yasaVar = () => !DUNYA && BG.kultur && !SP.modern && K.roller && K.roller.length;
-  function yasaAc() {
-    if (yasaVar()) return openLife();
-    const ornek = [{ ad: 'Piramitler yükselirken', y: 2560 }, { ad: 'Orta Krallık', y: 1880 }, { ad: 'Tutankamon dönemi', y: 1330 }, { ad: 'Ramses ve Kadeş', y: 1274 }];
-    showModal({ ikon: '🧑‍🌾', title: 'O dönemde yaşasaydın…', sub: 'Bir meslek seç, bir gününü şafaktan geceye yaşa', tabs: [{ ad: 'Nereye gidelim?', html: `<p>Çiftçi, kâtip, piramit işçisi, rahibe gibi rollerle bir gün yaşamak şimdilik <b>Antik Mısır</b> için hazır. Anadolu ve Avrupa sırada.</p><div class="secim">${ornek.map(o => `<button data-yasagit="${o.y}">🏺 <b>${o.ad}</b><small>${YIL.fmt(o.y)} · Mısır</small></button>`).join('')}</div>` }] });
+  // ---------- Yaşa: bu yılda ve bölgede seçilebilecek roller ----------
+  const misirAntik = () => DUNYA ? (Y <= 3150 && Y >= 30) : (BG.id === 'misir' && BG.kultur && !SP.modern);
+  function rolListesi() {
+    const y = Math.round(Y), bolgeler = DUNYA ? BSIRA : [BG.id];
+    const guc = (window.ROLLER || []).filter(r => bolgeler.includes(r.bolge) && y <= r.from && y >= r.to);
+    const halk = misirAntik() && K.roller ? K.roller.map(r => ({ ...r, bolge: 'misir', tema: 'misir', giyim: 'antik', halk: true })) : [];
+    return { guc, halk };
   }
+  const rolBul = id => { const { guc, halk } = rolListesi(); return [...guc, ...halk].find(r => r.id === id); };
+  const yasaVar = () => { const { guc, halk } = rolListesi(); return guc.length + halk.length > 0; };
+  function yasaYok() {
+    const oneri = (window.ROLLER || []).map(r => ({ r, y: r.to <= -2026 ? -2000 : Math.round((r.from + r.to) / 2) }));
+    showModal({ ikon: '🧑‍🌾', title: 'O dönemde yaşasaydın…', sub: `${YIL.fmt(Math.round(Y))} için henüz rol yok`, tabs: [{ ad: 'Nereye gidelim?', html: `<p>Bu yıl ve bölge için hazır bir rol yok. Bir hayat seç, seni o yıla götüreyim:</p><div class="secim">${oneri.map(({ r, y }) => `<button data-yasagit="${r.bolge}|${y}">${r.ikon} <b>${r.ad}</b><small>${BLR[r.bolge] ? BLR[r.bolge].ad : r.bolge} · ${YIL.fmt(y)}</small></button>`).join('')}<button data-yasagit="misir|2560">🌾 <b>Çiftçi, kâtip, piramit işçisi…</b><small>Mısır · ${YIL.fmt(2560)}</small></button></div>` }] });
+  }
+  function yasaAc() { if (yasaVar()) openLife(); else yasaYok(); }
   document.querySelectorAll('[data-mod]').forEach(b => b.addEventListener('click', () => {
     const m = b.dataset.mod;
     if (m === 'kesfet') { kartlariKapat(); setView('dunya'); }
@@ -648,7 +657,7 @@
     const yh = e.target.closest('[data-yolharita]'); if (yh) { const t = TICARET_YOLLARI.find(x => x.id === yh.dataset.yolharita); DN.setLayer('ticaret', true); playingBeforeModal = false; yolHaritada(t.pts, kmYol(t.pts)); return; }
     const yg2 = e.target.closest('[data-yolcugoster]'); if (yg2) { const j = YOLCULUKLAR.find(x => x.id === yg2.dataset.yolcugoster); DN.setLayer('yolculuk', true); playingBeforeModal = false; yolHaritada(j.pts, j.km, j.y); return; }
     const g2 = e.target.closest('[data-gitbolge2]'); if (g2) { gitBolge(g2.dataset.gitbolge2); return; }
-    const yg = e.target.closest('[data-yasagit]'); if (yg) { location.href = location.pathname + '?bolge=misir&yil=' + yg.dataset.yasagit + '&yasa=1'; return; }
+    const yg = e.target.closest('[data-yasagit]'); if (yg) { const [b, y] = yg.dataset.yasagit.split('|'); location.href = location.pathname + '?bolge=' + b + '&yil=' + y + '&yasa=1'; return; }
     const nx = e.target.closest('[data-next]'); if (nx) { const btn = modal.querySelector(`.tabs [data-tab="${nx.dataset.next}"]`); if (btn) btn.click(); return; }
     const sy = e.target.closest('[data-sym]');
     if (sy) { openSymbol(sy.dataset.sym); return; }
@@ -926,22 +935,33 @@
     const tanri = amarna() ? 'Aton' : ({ 'misir-erken': 'Horus', 'misir-eski-krallik': 'Ra ve Ptah', 'misir-orta-krallik': 'Amon ve Osiris', 'misir-yeni-krallik': 'Amon-Ra', 'misir-gec-donem': 'İsis ve Serapis' })[SP.id] || 'Ra';
     return { yil: Math.round(Y), firavun: r.ad, baskent: (e.baskent || SP.baskent || '').split(' (')[0], tanri, santiye: act ? f.ad : 'tapınak, kanal ve set yapımı' };
   }
+  // rol metinlerindeki {tarih}, {hukumdar}, {baskent} ve Mısır'a özgü değişkenler
+  function rolDegisken(rol) {
+    const y = Math.round(Y);
+    let v;
+    if (!DUNYA) { v = BG.id === 'misir' && BG.kultur ? lifeVars() : {}; const r = pick(P.rulers, Y), e = pick(P.eras, Y); v.hukumdar = r && r.kisa !== '?' ? r.ad : ''; v.baskent = v.baskent || ((e && e.baskent) || SP.baskent || '').split(' (')[0]; }
+    else { const a = bolgeAn(rol.bolge, Y) || {}; const hk = a.r && a.r.kisa !== '?' ? a.r.ad : ''; v = { yil: y, hukumdar: hk, firavun: hk || 'firavun', baskent: ((a.e && a.e.baskent) || (a.p && a.p.baskent) || '').split(' (')[0], tanri: 'Amon-Ra', santiye: 'tapınak, kanal ve set yapımı' }; }
+    v.tarih = YIL.fmt(y); return v;
+  }
   const fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? '');
+  const rolCizimOpt = r => ({ tapinak: DUNYA || !['misir-erken', 'misir-eski-krallik', 'misir-orta-krallik'].includes(SP.id), tema: r.tema || 'misir', giyim: r.giyim || 'antik', tac: r.tac });
   function openLife() {
-    const v = lifeVars();
-    showModal({ ikon: '🎭', title: `${YIL.fmt(v.yil)}'de doğsaydın…`, sub: `${v.firavun} döneminde Mısır · bir rol seç`, tabs: [{ ad: '🎭 Rolünü seç', html: `<p>Bu yılda Mısır'da yaşasaydın günün nasıl geçerdi? Bir hayat seç, şafaktan geceye kadar yaşa.</p>
-      <div class="rolegrid">${K.roller.map(r => `<button class="rolecard" data-role="${r.id}"><canvas data-rolecv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small>${fill(r.kim, v)}</small></button>`).join('')}</div>`,
-      onShow: b => b.querySelectorAll('[data-rolecv]').forEach(cvEl => { const r = K.roller.find(x => x.id === cvEl.dataset.rolecv); liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, r.adimlar[1], t, A)), false); }) }] });
+    const { guc, halk } = rolListesi(), y = Math.round(Y);
+    const kart = r => `<button class="rolecard${r.guc ? ' guc' : ''}" data-role="${r.id}"><canvas data-rolecv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small>${fill(r.kim, rolDegisken(r))}</small></button>`;
+    const tum = [...guc, ...halk];
+    showModal({ ikon: '🎭', title: `${YIL.fmt(y)}'de yaşasaydın…`, sub: 'Bir hayat seç, şafaktan geceye bir gününü yaşa', tabs: [{ ad: '🎭 Rolünü seç',
+      html: `${guc.length ? `<h4 class="rolbas">👑 Güç sahibi hayatlar</h4><div class="rolegrid">${guc.map(kart).join('')}</div>` : ''}${halk.length ? `<h4 class="rolbas">🌾 Sıradan hayatlar</h4><div class="rolegrid">${halk.map(kart).join('')}</div>` : ''}`,
+      onShow: b => b.querySelectorAll('[data-rolecv]').forEach(cvEl => { const r = tum.find(x => x.id === cvEl.dataset.rolecv); liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, r.adimlar[1], t, A, rolCizimOpt(r))), false); }) }] });
   }
   function openRole(id) {
-    const r = K.roller.find(x => x.id === id); if (!r) return; const v = lifeVars();
+    const r = rolBul(id); if (!r) return; const v = rolDegisken(r);
     const n = r.adimlar.length;
     const tabs = r.adimlar.map((st, i) => ({ ad: `${i + 1}. ${st.saat}`, html: `<canvas class="lifecv"></canvas><p class="lifetext">${fill(st.metin, v)}</p>
       <div class="gos"><button class="phbtn" data-next="${i + 1}">${i + 1 < n ? 'Sonraki ▶' : 'Günün sonu: ne hissederdin? ▶'}</button></div>`,
-      onShow: b => liveCanvas(b.querySelector('.lifecv'), (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, st, t, A, { tapinak: !['misir-erken', 'misir-eski-krallik', 'misir-orta-krallik'].includes(SP.id) })), true) }));
+      onShow: b => liveCanvas(b.querySelector('.lifecv'), (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, st, t, A, rolCizimOpt(r))), true) }));
     tabs.push({ ad: '💭 Ne hissederdin?', html: `<h4>Ne hissederdin?</h4><p>${fill(r.his, v)}</p><h4>Gerçekler</h4><ul class="hap">${r.gercekler.map(x => `<li>${x}</li>`).join('')}</ul>
       <div class="gos"><button class="phbtn lifebtn">🎭 Başka bir hayat seç</button></div>` });
-    showModal({ ikon: r.ikon, title: `${r.ad} olarak bir gün`, sub: `${YIL.fmt(v.yil)} · ${v.firavun}`, tabs });
+    showModal({ ikon: r.ikon, title: `${r.ad} olarak bir gün`, sub: `${v.tarih}${v.hukumdar && !r.guc ? ' · ' + v.hukumdar : ''}`, tabs });
   }
   // ---------- bilim sekmesi ----------
   const bilimTab = () => ({ ad: '🔬 Bilim ve teknoloji', html: `<div class="did"><b>${SP.kisa}</b><p>${K.bilim.cag[SP.id] || ''}</p></div>${K.bilim.genel}` });

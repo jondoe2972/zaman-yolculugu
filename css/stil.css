@@ -599,3 +599,5 @@ body:not(.globeonly) .kp-kure { display: none; }
   .katbtn { top: 8px; right: 8px; }
   .ipucu { bottom: 10px; font-size: 13px; }
 }
+.rolbas { margin: 12px 0 2px; font-size: 14px; color: #8a4f12; }
+.rolecard.guc { border-color: #d9b45a; background: linear-gradient(#fffaf0, #fff3d8); }

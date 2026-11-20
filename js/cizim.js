@@ -547,23 +547,77 @@ window.Cizim = (() => {
     if (night) { c.fillStyle = 'rgba(255,255,255,0.8)'; for (let i = 0; i < 30; i++) circ(hash(i) * W, hash(i + 5) * H * 0.4, 1 + hash(i + 2), 'rgba(255,255,255,0.8)', 0); }
     const sunY = { 'Şafak': 0.55, 'Sabah': 0.3, 'Öğle': 0.12, 'İkindi': 0.3, 'Akşam': 0.62 }[step.saat];
     if (sunY != null) circ(W * (step.saat === 'İkindi' || step.saat === 'Akşam' ? 0.8 : 0.2), H * sunY, H * 0.07, '#fff1b0', 0);
-    const gy = H * 0.78;
-    c.fillStyle = '#e2bf84'; c.fillRect(0, gy, W, H - gy);
+    const gy = H * 0.78, tema = opt.tema || 'misir', giyim = opt.giyim;
+    const ic = ['saray', 'divan', 'ofis'].includes(step.sahne);
+    const DUVAR = { misir: ['#d9b98a', '#c49a64'], anadolu: giyim === 'modern' ? ['#e9e4da', '#cfc6b6'] : giyim === 'cubbe' ? ['#e8dcc4', '#2f6f8f'] : ['#cdb28c', '#a07a52'], avrupa: giyim === 'modern' ? ['#e4ddd0', '#b9ab94'] : ['#e8d8b0', '#b58a3a'] }[tema];
+    if (ic) { c.fillStyle = DUVAR[0]; c.fillRect(0, 0, W, gy); }
+    c.fillStyle = ic ? '#a98a64' : tema === 'misir' ? '#e2bf84' : '#b7c08a'; c.fillRect(0, gy, W, H - gy);
     const k = H / 160;
-    const P = (x, o) => A.person(x, gy + 6, k, o);
+    const P = (x, o) => A.person(x, gy + 6, k, { giyim, ...o });
+    const agac = (x, h, s) => { if (tema === 'misir') return A.palm(x, gy, h, s); limb(x, gy, x, gy - h * 0.45, 5 * k, '#7a5532'); circ(x, gy - h * 0.62, h * 0.2, '#6f9a4a', 1.4); circ(x - h * 0.1, gy - h * 0.52, h * 0.13, '#7fa957', 1.2); };
+    // başlık: lider rolünün kişisinin başına
+    const tac = (x, tur) => {
+      const hy = gy + 6 - 57 * k, s = k;
+      if (tur === 'pskent') { poly([x - 5 * s, hy + 3 * s, x + 5 * s, hy + 3 * s, x + 4 * s, hy - 9 * s, x - 4 * s, hy - 9 * s], '#f4efe2', 1.2); poly([x - 7 * s, hy + 4 * s, x + 7 * s, hy + 4 * s, x + 7 * s, hy - 3 * s, x + 2 * s, hy - 3 * s, x + 2 * s, hy - 10 * s, x - 7 * s, hy - 10 * s], '#c0392b', 1.2); }
+      else if (tur === 'kavuk') { c.beginPath(); c.ellipse(x, hy - 3 * s, 9 * s, 8 * s, 0, 0, 7); c.fillStyle = '#fbf8f0'; c.fill(); c.strokeStyle = OUT; c.lineWidth = 1.2; c.stroke(); circ(x + 4 * s, hy - 9 * s, 2 * s, '#e8b923', 1); limb(x + 4 * s, hy - 10 * s, x + 7 * s, hy - 16 * s, 1.5 * s, '#f4efe2'); }
+      else if (tur === 'tac') { poly([x - 7 * s, hy + 2 * s, x + 7 * s, hy + 2 * s, x + 8 * s, hy - 7 * s, x + 4 * s, hy - 3 * s, x, hy - 9 * s, x - 4 * s, hy - 3 * s, x - 8 * s, hy - 7 * s], GOLD, 1.2); circ(x, hy - 1 * s, 1.5 * s, '#c0392b', 0); }
+      else if (tur === 'migfer') { c.beginPath(); c.arc(x, hy + 2 * s, 7.5 * s, Math.PI, 0); c.closePath(); c.fillStyle = '#9aa3ab'; c.fill(); c.strokeStyle = OUT; c.lineWidth = 1.2; c.stroke(); poly([x - 6 * s, hy - 4 * s, x + 6 * s, hy - 4 * s, x + 4 * s, hy - 10 * s, x - 4 * s, hy - 10 * s], '#b5383a', 1); }
+    };
+    const lider = (x, o = {}) => { P(x, { kind: 'man', act: 'staff', collar: true, longKilt: true, dir: -1, ...o }); if (opt.tac && opt.tac !== 'yok') tac(x, opt.tac); };
+    const kemerler = (n, col) => { for (let i = 0; i < n; i++) { const x = W * (0.08 + i * (0.84 / (n - 1))); poly([x - W * 0.025, gy, x + W * 0.025, gy, x + W * 0.025, gy - H * 0.55, x - W * 0.025, gy - H * 0.55], col, 1.4); } };
     switch (step.sahne) {
+      case 'saray': {
+        if (tema === 'misir') kemerler(5, '#e6c995');
+        else if (tema === 'anadolu' && giyim !== 'antik') { for (let i = 0; i < 4; i++) { const x = W * (0.12 + i * 0.25); c.beginPath(); c.moveTo(x - W * 0.09, gy - H * 0.05); c.lineTo(x - W * 0.09, gy - H * 0.38); c.quadraticCurveTo(x, gy - H * 0.62, x + W * 0.09, gy - H * 0.38); c.lineTo(x + W * 0.09, gy - H * 0.05); c.fillStyle = '#f3ecdc'; c.fill(); c.strokeStyle = OUT; c.lineWidth = 1.4; c.stroke(); } c.fillStyle = DUVAR[1]; c.fillRect(0, gy - H * 0.05, W, H * 0.05); }
+        else { kemerler(4, DUVAR[1]); c.fillStyle = 'rgba(255,240,200,0.25)'; c.fillRect(W * 0.3, gy - H * 0.5, W * 0.4, H * 0.42); }
+        poly([W * 0.62, gy, W * 0.78, gy, W * 0.78, gy - H * 0.3, W * 0.74, gy - H * 0.36, W * 0.66, gy - H * 0.36, W * 0.62, gy - H * 0.3], tema === 'misir' ? GOLD : '#a8322e', 1.6);
+        lider(W * 0.55);
+        P(W * 0.28, { kind: 'man', act: 'walk', dir: 1, lean: 0.35 }); P(W * 0.38, { kind: 'woman', act: 'walk', dir: 1, lean: 0.25 }); P(W * 0.88, { kind: 'man', act: 'staff', dir: -1 });
+        if (step.saat === 'Akşam') for (let i = 0; i < 3; i++) circ(W * (0.2 + i * 0.3), gy - H * 0.5, 5 + Math.sin(t * 8 + i) * 1.5, '#ffb347', 0);
+        break;
+      }
+      case 'divan': {
+        if (giyim === 'cubbe' && tema === 'anadolu') { c.fillStyle = '#2f6f8f'; c.fillRect(0, gy - H * 0.55, W, H * 0.06); for (let i = 0; i < 12; i++) { c.strokeStyle = '#7a5a2a'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(W * 0.42 + i * 4, gy - H * 0.5); c.lineTo(W * 0.42 + i * 4, gy - H * 0.32); c.stroke(); } poly([W * 0.4, gy - H * 0.5, W * 0.6, gy - H * 0.5, W * 0.6, gy - H * 0.32, W * 0.4, gy - H * 0.32], null, 1.6); }
+        poly([W * 0.08, gy, W * 0.92, gy, W * 0.92, gy - H * 0.08, W * 0.08, gy - H * 0.08], giyim === 'modern' ? '#7a5a3a' : '#b5383a', 1.4);
+        for (let i = 0; i < 5; i++) P(W * (0.18 + i * 0.16), { kind: i === 4 && giyim === 'modern' ? 'woman' : 'man', act: i === 2 ? 'staff' : 'walk', dir: i < 2 ? 1 : -1, collar: i === 2 });
+        if (opt.tac && opt.tac !== 'yok' && tema !== 'anadolu') tac(W * 0.5, opt.tac);
+        break;
+      }
+      case 'karargah': {
+        poly([W * 0.1, gy, W * 0.9, gy, W * 0.75, gy - H * 0.5, W * 0.25, gy - H * 0.5], giyim === 'modern' ? '#d9d2bf' : '#efe2c4', 1.6);
+        limb(W * 0.5, gy - H * 0.5, W * 0.5, gy - H * 0.68, 2, '#6b4a2a'); poly([W * 0.5, gy - H * 0.68, W * 0.6, gy - H * 0.64, W * 0.5, gy - H * 0.6], tema === 'anadolu' && giyim !== 'antik' ? '#c0392b' : '#2f5fa8', 1);
+        poly([W * 0.36, gy - H * 0.1, W * 0.64, gy - H * 0.1, W * 0.64, gy - H * 0.13, W * 0.36, gy - H * 0.13], '#e9dcb8', 1.2);
+        c.strokeStyle = '#8a6a3a'; c.lineWidth = 1; for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(W * (0.38 + i * 0.06), gy - H * 0.115); c.lineTo(W * (0.41 + i * 0.06), gy - H * 0.125); c.stroke(); }
+        lider(W * 0.3, { dir: 1 }); P(W * 0.7, { kind: 'man', act: 'staff', dir: -1 }); P(W * 0.8, { kind: 'man', act: 'walk', dir: -1 });
+        break;
+      }
+      case 'toren': {
+        for (let i = 0; i < 4; i++) { const x = W * (0.1 + i * 0.27); limb(x, gy, x, gy - H * 0.55, 2, '#6b4a2a'); const dal = Math.sin(t * 3 + i) * 4; poly([x, gy - H * 0.55, x + W * 0.09, gy - H * 0.52 + dal, x, gy - H * 0.45], tema === 'anadolu' && giyim !== 'antik' ? '#c0392b' : tema === 'misir' ? '#e8b923' : '#2f5fa8', 1); }
+        for (let i = 0; i < 6; i++) P(W * (0.42 + i * 0.09), { kind: 'man', act: 'staff', dir: -1, ph: t * 4 + i });
+        lider(W * 0.25, { dir: 1, act: 'walk', move: true, ph: t * 3 });
+        break;
+      }
+      case 'ofis': {
+        c.fillStyle = '#9fc6e0'; c.fillRect(W * 0.62, gy - H * 0.55, W * 0.26, H * 0.32); poly([W * 0.62, gy - H * 0.55, W * 0.88, gy - H * 0.55, W * 0.88, gy - H * 0.23, W * 0.62, gy - H * 0.23], null, 2);
+        limb(W * 0.15, gy, W * 0.15, gy - H * 0.55, 2, '#c9b16a'); poly([W * 0.15, gy - H * 0.55, W * 0.27, gy - H * 0.52 + Math.sin(t * 2) * 2, W * 0.15, gy - H * 0.42], '#d1322e', 1); circ(W * 0.195, gy - H * 0.485, H * 0.022, '#fff', 0);
+        poly([W * 0.35, gy, W * 0.37, gy, W * 0.37, gy - H * 0.14, W * 0.35, gy - H * 0.14], '#5a3a22', 1); poly([W * 0.66, gy, W * 0.68, gy, W * 0.68, gy - H * 0.14, W * 0.66, gy - H * 0.14], '#5a3a22', 1);
+        poly([W * 0.32, gy - H * 0.14, W * 0.72, gy - H * 0.14, W * 0.72, gy - H * 0.18, W * 0.32, gy - H * 0.18], '#6b4428', 1.4);
+        poly([W * 0.42, gy - H * 0.18, W * 0.5, gy - H * 0.18, W * 0.5, gy - H * 0.19, W * 0.42, gy - H * 0.19], '#f4f1ea', 0.8);
+        lider(W * 0.55, { act: 'staff', dir: -1 }); P(W * 0.25, { kind: 'woman', act: 'walk', dir: 1 });
+        break;
+      }
       case 'ev': case 'aksam':
-        A.house(W * 0.3, gy, k * 2.2, 0.7); A.palm(W * 0.85, gy, H * 0.55, 3);
+        A.house(W * 0.3, gy, k * 2.2, 0.7); agac(W * 0.85, H * 0.55, 3);
         if (step.sahne === 'aksam') { circ(W * 0.42, gy - 8, 6 + Math.sin(t * 9) * 1.5, '#ffb347', 0); }
         P(W * 0.55, { kind: 'woman', act: 'jar', dir: -1, ph: t * 3, move: false }); P(W * 0.65, { kind: 'man', act: 'walk', dir: -1 }); P(W * 0.72, { kind: 'child', act: 'walk', dir: -1, ph: t * 6, move: true });
         break;
       case 'tarla':
         c.fillStyle = '#86b04c'; c.fillRect(0, gy - H * 0.04, W, H * 0.06);
         A.plough(W * 0.55, gy + 4, k * 1.1, t);
-        P(W * 0.2, { kind: 'man', act: 'sow', dir: 1, ph: t * 4, move: true }); A.palm(W * 0.9, gy, H * 0.5, 7);
+        P(W * 0.2, { kind: 'man', act: 'sow', dir: 1, ph: t * 4, move: true }); agac(W * 0.9, H * 0.5, 7);
         break;
       case 'golge':
-        A.palm(W * 0.45, gy, H * 0.65, 11); A.palm(W * 0.6, gy, H * 0.55, 4);
+        agac(W * 0.45, H * 0.65, 11); agac(W * 0.6, H * 0.55, 4);
         A.scribe(W * 0.45, gy + 6, k); P(W * 0.58, { kind: 'man', act: 'walk', dir: -1 });
         break;
       case 'katip': case 'yazi': case 'ders':
@@ -596,9 +650,14 @@ window.Cizim = (() => {
         for (let i = 0; i < 3; i++) { const x = W * (0.2 + i * 0.3); poly([x - 30, gy, x + 30, gy, x, gy - 40], '#e9dcc0', 1.4); }
         if (step.sahne === 'kamp') { circ(W * 0.5, gy - 6, 8 + Math.sin(t * 10) * 2, '#ff9a3a', 0); }
         for (let i = 0; i < 3; i++) P(W * (0.35 + i * 0.12), { kind: 'man', act: 'staff', dir: 1, ph: t * 5 + i, move: step.sahne !== 'kamp' });
+        if (opt.tac && opt.tac !== 'yok') lider(W * 0.2, { dir: 1, act: 'staff' });
         break;
       case 'savas':
-        A.chariot(W * 0.5, gy + 4, k * 1.2, -1, t * 6);
+        if (tema === 'misir' || (tema === 'anadolu' && giyim === 'antik')) { A.chariot(W * 0.5, gy + 4, k * 1.2, -1, t * 6); if (opt.tac && opt.tac !== 'yok') tac(W * 0.5 + 6 * k, opt.tac); break; }
+        for (let i = 0; i < 4; i++) P(W * (0.12 + i * 0.08), { kind: 'man', act: 'staff', dir: 1, ph: t * 5 + i, move: true });
+        for (let i = 0; i < 4; i++) P(W * (0.62 + i * 0.08), { kind: 'man', act: 'staff', dir: -1, ph: t * 5 + i + 2, move: true, giyim: giyim === 'modern' ? 'modern' : 'antik' });
+        if (giyim === 'modern') for (let i = 0; i < 4; i++) { const r = 10 + ((t * 20 + i * 13) % 30); c.fillStyle = `rgba(235,235,230,${0.6 - r / 70})`; c.beginPath(); c.arc(W * (0.42 + i * 0.05), gy - H * 0.3 - r * 0.6, r, 0, 7); c.fill(); }
+        if (opt.tac && opt.tac !== 'yok') lider(W * 0.06, { dir: 1, act: 'staff' });
         break;
       case 'oyun':
         for (let i = 0; i < 3; i++) P(W * (0.3 + i * 0.18), { kind: 'child', act: 'walk', dir: i % 2 ? -1 : 1, ph: t * 7 + i, move: true });

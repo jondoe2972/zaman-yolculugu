@@ -101,6 +101,16 @@ window.Dunya = (() => {
     if (sz > 0.05) { g.beginPath(); g.arc(sx, sy, buyuk ? 4.5 : 3.2, 0, 7); g.stroke(); }
     if (ez2 > 0.05) { const a = Math.atan2(ey - qy, ex - qx), L = buyuk ? 10 : 7.5; g.beginPath(); g.moveTo(ex, ey); g.lineTo(ex - Math.cos(a - 0.45) * L, ey - Math.sin(a - 0.45) * L); g.lineTo(ex - Math.cos(a + 0.45) * L, ey - Math.sin(a + 0.45) * L); g.closePath(); g.fill(); }
   }
+  // kara için hafif boya dokusu (ekran uzayında tekrar eden desen)
+  let desen = null;
+  function dokuDesen() {
+    if (desen) return desen;
+    const c = document.createElement('canvas'); c.width = c.height = 160; const x = c.getContext('2d');
+    for (let i = 0; i < 900; i++) { const a = rnd(i), b = rnd(i + 999), k = rnd(i + 77); x.fillStyle = k < 0.5 ? `rgba(70,100,45,${0.05 + k * 0.12})` : `rgba(255,255,235,${0.04 + (k - 0.5) * 0.16})`; x.beginPath(); x.ellipse(a * 160, b * 160, 1 + rnd(i + 5) * 3, 0.6 + rnd(i + 6) * 1.6, rnd(i + 7) * 3, 0, 7); x.fill(); }
+    return (desen = g.createPattern(c, 'repeat'));
+  }
+  // devlet rengi: aynı ton, resimli haritaya uygun toprak/pastel karışımı
+  function siyasiRenk(hex) { const n = parseInt(hex.slice(1), 16), m = [214, 150, 104], f = (v, i) => Math.round(v * 0.6 + m[i] * 0.4); return `rgb(${f(n >> 16, 0)},${f((n >> 8) & 255, 1)},${f(n & 255, 2)})`; }
   let katmanCv = null;
   function katman(w, h) { if (!katmanCv) katmanCv = document.createElement('canvas'); if (katmanCv.width !== w || katmanCv.height !== h) { katmanCv.width = w; katmanCv.height = h; } return katmanCv; }
   const llPath = pts => { const p = prep(pts); return () => polyPath(p); };
@@ -330,10 +340,10 @@ window.Dunya = (() => {
     g.fillStyle = sp; g.fillRect(0, 0, W, H);
     for (let i = 0; i < 220; i++) { const x = ((Math.sin(i * 91.7) * 0.5 + 0.5) * W + view.lon * 0.4) % W, y = (Math.sin(i * 47.3 + 1) * 0.5 + 0.5) * H, tw = 0.25 + 0.6 * (Math.sin(i * 13 + T * (1 + i % 3)) * 0.5 + 0.5); g.fillStyle = `rgba(255,255,255,${tw})`; g.fillRect((x + W) % W, y, i % 9 ? 1.2 : 2, i % 9 ? 1.2 : 2); }
     // atmosfer
-    const atm = g.createRadialGradient(cx, cy, r * 0.96, cx, cy, r * 1.16); atm.addColorStop(0, 'rgba(110,180,255,0.6)'); atm.addColorStop(0.5, 'rgba(90,160,255,0.18)'); atm.addColorStop(1, 'rgba(90,160,255,0)');
+    const atm = g.createRadialGradient(cx, cy, r * 0.96, cx, cy, r * 1.16); atm.addColorStop(0, 'rgba(200,228,245,0.65)'); atm.addColorStop(0.5, 'rgba(170,210,240,0.2)'); atm.addColorStop(1, 'rgba(150,200,240,0)');
     g.fillStyle = atm; g.beginPath(); g.arc(cx, cy, r * 1.16, 0, 7); g.fill();
     // okyanus
-    const oc = g.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.05, cx, cy, r); oc.addColorStop(0, '#4b9ad6'); oc.addColorStop(0.55, '#24609e'); oc.addColorStop(1, '#0f3462');
+    const oc = g.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.05, cx, cy, r); oc.addColorStop(0, '#b4d6e8'); oc.addColorStop(0.55, '#8fbedb'); oc.addColorStop(1, '#5e93bd');
     g.fillStyle = oc; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill();
     g.save(); g.beginPath(); g.arc(cx, cy, r, 0, 7); g.clip();
     // ızgara
@@ -342,40 +352,44 @@ window.Dunya = (() => {
     // karalar (tek yol: çöller ve buzlar bunun içine kırpılır)
     g.beginPath(); let anyLand = false; for (const p of KARA) if (polyPath(p)) anyLand = true;
     if (anyLand) {
-      const lg = g.createLinearGradient(cx - r, cy - r, cx + r, cy + r); lg.addColorStop(0, '#8fb766'); lg.addColorStop(1, '#5f8a45');
+      // resimli harita: kıyı boyunca açık sığ su parlaması, soluk yeşil ve hafif dokulu kara
+      g.beginPath(); for (const p of KARA) polyPath(p);
+      g.lineJoin = 'round'; for (const [w, a] of [[22, 0.12], [12, 0.18], [5, 0.28]]) { g.strokeStyle = `rgba(232,246,252,${a})`; g.lineWidth = w; g.stroke(); }
+      const lg = g.createLinearGradient(cx - r, cy - r, cx + r, cy + r); lg.addColorStop(0, '#d3e0b2'); lg.addColorStop(1, '#a9c287');
       g.fillStyle = lg; g.fill('evenodd');
       g.save(); g.clip('evenodd');
-      g.beginPath(); for (const p of COLP) polyPath(p); g.fillStyle = 'rgba(222,196,140,0.92)'; g.fill();
-      g.beginPath(); for (const p of BUZ) polyPath(p); g.fillStyle = 'rgba(245,248,252,0.95)'; g.fill();
+      g.fillStyle = dokuDesen(); g.globalAlpha = 0.55; g.fillRect(cx - r, cy - r, r * 2, r * 2); g.globalAlpha = 1;
+      g.beginPath(); for (const p of COLP) polyPath(p); g.fillStyle = 'rgba(236,222,182,0.88)'; g.fill();
+      g.beginPath(); for (const p of BUZ) polyPath(p); g.fillStyle = 'rgba(248,250,252,0.95)'; g.fill();
       g.restore();
-      g.beginPath(); polyPath(HAZAR); g.fillStyle = '#24609e'; g.fill(); g.strokeStyle = 'rgba(30,40,25,0.4)'; g.lineWidth = 0.8; g.stroke();
-      g.beginPath(); for (const p of KARA) polyPath(p); g.strokeStyle = `rgba(30,40,25,${0.35 + ez * 0.3})`; g.lineWidth = 0.8 + ez * 0.6; g.stroke();
+      g.beginPath(); polyPath(HAZAR); g.fillStyle = '#93c2dc'; g.fill(); g.strokeStyle = 'rgba(100,125,90,0.5)'; g.lineWidth = 0.7; g.stroke();
+      g.beginPath(); for (const p of KARA) polyPath(p); g.strokeStyle = `rgba(105,125,90,${0.45 + ez * 0.2})`; g.lineWidth = 0.7 + ez * 0.3; g.stroke();
     }
     // dönemin siyasi sınırları: opak renk, keskin sınır çizgisi (nehirler üstte kalır)
     // Yalnızca karaya boyanır ve yarı saydamdır: denizler, boğazlar ve arazi görünür kalır.
     if (ez > 0 && layers.sinir && anyLand) {
-      const cv = g.canvas, L = katman(cv.width, cv.height), lg2 = L.getContext('2d');
-      g.save(); g.beginPath(); for (const p of KARA) polyPath(p); g.clip('evenodd');
+      // dönemin devletleri: hepsi ayrı bir katmana boyanır, katman karaya kırpılır,
+      // sonra yumuşak gölgeyle bindirilir (kabarık, resimli harita görünümü)
+      const cv = g.canvas, L = katman(cv.width, cv.height), lc = L.getContext('2d'), gg = g;
+      lc.setTransform(1, 0, 0, 1, 0, 0); lc.clearRect(0, 0, L.width, L.height); lc.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g = lc; g.lineJoin = 'round'; let var_ = false;
       for (const s of sinirlar()) {
         if (!(Y <= s.from && Y >= s.to)) continue;
-        // dolgu: tek yol, nonzero kuralı → üst üste binen parçalar bir kez boyanır
-        g.globalAlpha = ez * 0.34; g.beginPath(); for (const p of s.parts) polyPath(p);
-        g.fillStyle = s.renk; g.fill();
-        // dış çizgi: ayrı katmanda kalın çizgi, içi silinir → yalnızca birleşik alanın kenarı kalır
-        const gg = g; lg2.setTransform(1, 0, 0, 1, 0, 0); lg2.clearRect(0, 0, L.width, L.height); lg2.setTransform(dpr, 0, 0, dpr, 0, 0);
-        g = lg2; g.beginPath(); for (const p of s.parts) polyPath(p);
-        g.lineJoin = 'round'; g.strokeStyle = darkHex(s.renk); g.lineWidth = 3.6; g.stroke();
-        g.globalCompositeOperation = 'destination-out'; g.fill(); g.globalCompositeOperation = 'source-over';
-        g = gg; g.globalAlpha = ez * 0.9; g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(L, 0, 0); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        g.beginPath(); for (const p of s.parts) polyPath(p);
+        g.fillStyle = siyasiRenk(s.renk); g.fill(); var_ = true;
+        g.globalCompositeOperation = 'source-atop'; g.strokeStyle = 'rgba(255,250,235,0.45)'; g.lineWidth = 3; g.stroke();
+        g.globalCompositeOperation = 'source-over'; g.strokeStyle = 'rgba(90,50,25,0.55)'; g.lineWidth = 0.9; g.stroke();
       }
-      g.restore();
-      g.beginPath(); polyPath(HAZAR); g.fillStyle = '#24609e'; g.fill();
+      g.globalCompositeOperation = 'destination-in'; g.beginPath(); for (const p of KARA) polyPath(p); g.fill('evenodd'); g.globalCompositeOperation = 'source-over';
+      g = gg;
+      if (var_) { g.save(); g.globalAlpha = ez * 0.9; g.shadowColor = 'rgba(70,40,15,0.42)'; g.shadowBlur = 7 * dpr; g.shadowOffsetY = 3 * dpr; g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(L, 0, 0); g.restore(); }
+      g.beginPath(); polyPath(HAZAR); g.fillStyle = '#93c2dc'; g.fill();
     }
     // dar boğazlar: 1:50m kıyı verisinde kapalı görünenler, su olarak çizilir
     g.lineCap = 'round'; g.lineJoin = 'round';
-    if (view.z > 2.5) for (const b of BOGAZ) { g.beginPath(); linePath(b.p); g.strokeStyle = '#2f6fae'; g.lineWidth = clamp(b.km * r / 6371 * 2.5, 2.5, 40); g.stroke(); }
+    if (view.z > 2.5) for (const b of BOGAZ) { g.beginPath(); linePath(b.p); g.strokeStyle = '#8fbedb'; g.lineWidth = clamp(b.km * r / 6371 * 2.5, 2.5, 40); g.stroke(); }
     // nehirler
-    if (view.z > 1.6) for (const n of NEHIR) { if (n.nil) continue; g.beginPath(); linePath(n); g.strokeStyle = `rgba(70,140,200,${clamp((view.z - 1.6) / 2, 0, 0.7)})`; g.lineWidth = 0.8 + ez; g.stroke(); }
+    if (view.z > 1.6) for (const n of NEHIR) { if (n.nil) continue; g.beginPath(); linePath(n); g.strokeStyle = `rgba(80,145,195,${clamp((view.z - 1.6) / 2, 0, 0.75)})`; g.lineWidth = 0.8 + ez; g.stroke(); }
     // Nil: yeşil vadi + mavi nehir
     const nilW = clamp(view.z * 0.6, 1.4, 9);
     for (const n of NEHIR) if (n.nil) { g.beginPath(); linePath(n); g.strokeStyle = `rgba(90,150,60,${0.55 * (1 - ez * 0.85)})`; g.lineWidth = nilW * 1.8; g.stroke(); }
@@ -404,18 +418,18 @@ window.Dunya = (() => {
       for (const [la, lo, ad, tur, zmin] of geo) {
         if (view.z < zmin) continue; const [x, y, z] = P(la, lo); if (z <= 0.05) continue;
         const pr = { deniz: 80, misir: 70, nehir: 55, bolge: 50, kucuk: 32 }[tur];
-        if (tur === 'deniz') lab(pr, x, y, ad, { col: '#cfe6ff', it: true, serif: true, size: 13, w: 600, ls: 3, haloCol: 'rgba(10,30,60,0.6)' });
-        else if (tur === 'misir') lab(pr, x, y, ad, { col: '#ffe2a8', serif: true, size: 13, w: 800, ls: 2 });
-        else if (tur === 'nehir') lab(pr, x, y, ad, { col: '#bfe3ff', it: true, size: 12, w: 700 });
-        else lab(pr, x, y, ad, { col: '#f4e7cf', it: tur === 'bolge', size: tur === 'kucuk' ? 11 : 12, w: 600, ls: tur === 'bolge' ? 2 : 0 });
+        if (tur === 'deniz') lab(pr, x, y, ad, { col: '#4d7392', it: true, serif: true, size: 13, w: 600, ls: 3, halo: 2.5, haloCol: 'rgba(225,240,248,0.75)' });
+        else if (tur === 'misir') lab(pr, x, y, ad, { col: '#fffaf0', serif: true, size: 12.5, w: 600, ls: 2.5, haloCol: 'rgba(90,45,15,0.6)' });
+        else if (tur === 'nehir') lab(pr, x, y, ad, { col: '#2f6f9e', it: true, serif: true, size: 12, w: 600, halo: 2.5, haloCol: 'rgba(240,248,252,0.75)' });
+        else lab(pr, x, y, ad, { col: '#5e5434', it: tur === 'bolge', serif: true, size: tur === 'kucuk' ? 11 : 12, w: 600, ls: tur === 'bolge' ? 2 : 0, halo: 2.5, haloCol: 'rgba(245,245,230,0.7)' });
       }
       if (view.z > 8 && misirVar) for (const [la, lo, ad] of [[24.08, 32.89, '1. Çağlayan'], [21.8, 31.25, '2. Çağlayan'], [19.75, 30.4, '3. Çağlayan'], [18.68, 32.15, '4. Çağlayan']]) { const [x, y, z] = P(la, lo); if (z <= 0) continue; g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - 5, y - 3); g.lineTo(x, y + 2); g.lineTo(x + 5, y - 3); g.stroke(); lab(30, x + 8, y, ad, { align: 'left', size: 10.5, col: '#dfe9f5' }); }
       // sınır adları
       for (const s of sinirlar()) {
         if (!layers.sinir || !(Y <= s.from && Y >= s.to)) continue;
         if (DM && view.z < 2.6) continue;
-        const [x, y, z] = P(...s.etiket); if (z > 0.05) lab(90, x, y, s.ad, { col: lightHex(s.renk), size: 12.5, w: 800, serif: true });
-        if (s.etiket2) { const [x2, y2, z2] = P(...s.etiket2); if (z2 > 0.05) lab(60, x2, y2, s.ad2, { col: lightHex(s.renk), size: 11, w: 700, it: true }); }
+        const [x, y, z] = P(...s.etiket); if (z > 0.05) lab(90, x, y, s.ad.toLocaleUpperCase('tr'), { col: '#fffaf0', size: 12, w: 600, serif: true, ls: 2, haloCol: 'rgba(80,40,15,0.55)' });
+        if (s.etiket2) { const [x2, y2, z2] = P(...s.etiket2); if (z2 > 0.05) lab(60, x2, y2, s.ad2, { col: '#fff3dc', size: 11, w: 600, it: true, serif: true, haloCol: 'rgba(80,40,15,0.55)' }); }
       }
       // şehirler ve başkent
       const cityHits = [];
@@ -475,15 +489,15 @@ window.Dunya = (() => {
     // ticaret yolları: yalnızca kullanıldığı yıllarda; ince çizgi, malın aktığı yöne giden noktalar
     if (layers.ticaret) for (const t of window.TICARET_YOLLARI || []) {
       if (!(Y <= t.from && Y >= t.to)) continue;
-      const d = yolHazirla(t), deniz = t.tur === 'deniz', col = deniz ? '140,215,255' : '255,206,110';
+      const d = yolHazirla(t), deniz = t.tur === 'deniz', col = deniz ? '40,110,165' : '160,85,25';
       const hov = hover && hover.kind === 'yol' && hover.t === t;
-      g.beginPath(); linePath(d.p); g.strokeStyle = `rgba(${col},${hov ? 0.95 : 0.42})`; g.lineWidth = hov ? 2.6 : 1.5; g.setLineDash(deniz ? [6, 4] : []); g.stroke(); g.setLineDash([]);
+      g.beginPath(); linePath(d.p); g.strokeStyle = `rgba(${col},${hov ? 0.95 : 0.5})`; g.lineWidth = hov ? 2.6 : 1.5; g.setLineDash(deniz ? [6, 4] : []); g.stroke(); g.setLineDash([]);
       const sp = clamp(900 / view.z, 40, 600), off = (T * sp / 2.4) % sp;
       g.fillStyle = `rgba(${col},${hov ? 1 : 0.9})`;
       for (let s = off; s < d.L; s += sp) { const [x, y, z] = P(...yolNokta(d, s)); if (z <= 0.05) continue; g.beginPath(); g.arc(x, y, hov ? 2.8 : 2, 0, 7); g.fill(); }
       yolUclari(d, `rgba(${col},${hov ? 1 : 0.75})`, hov);
       const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
-      if (mz > 0.1 && (view.z > 2.4 || hov)) text(mx, my - 9, (deniz ? '⛵ ' : '🐪 ') + t.ad, { size: 10.5, w: 700, col: `rgb(${col})`, halo: 2.5 });
+      if (mz > 0.1 && (view.z > 2.4 || hov)) text(mx, my - 9, (deniz ? '⛵ ' : '🐪 ') + t.ad, { size: 10.5, w: 700, col: `rgb(${col})`, halo: 3, haloCol: 'rgba(250,248,236,0.85)', serif: true, it: true });
       for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.05) hits.unshift({ kind: 'yol', t, x0: x - 6, x1: x + 6, y0: y - 6, y1: y + 6 }); }
     }
     // ünlü yolculuklar: seçili yıla yakın olanlar; kesik çizgi, giden yolcu, süre etiketi
