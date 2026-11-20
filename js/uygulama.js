@@ -633,6 +633,7 @@
     if (m === 'kesfet') { kartlariKapat(); setView('dunya'); }
     else if (m === 'sahne') { if (DUNYA) sahneSec(); else { kartlariKapat(); setView('sahne'); } }
     else if (m === 'yasa') yasaAc();
+    else if (m === 'dog') { if (!DUNYA) { location.href = location.pathname + '?dog=1'; return; } kartlariKapat(); closeModal(); if (window.Hayat) window.Hayat.basla(); }
   }));
 
   // ---------- bilgi penceresi (sekmeli) ----------
@@ -1058,6 +1059,7 @@
   }
   $('#ipucu').addEventListener('click', e => { if (e.target.closest('.ip-gec')) { ipN = IPUCLARI.length; ipucuGoster(); } else if (e.target.closest('.ip-ok')) { ipN++; ipucuGoster(); } });
   let ilk = false; try { ilk = !localStorage.getItem('zy-ipucu'); } catch (e) { /* gizli mod */ }
-  if (ilk && !QS.get('yasa')) setTimeout(ipucuGoster, 900);
+  if (ilk && !QS.get('yasa') && !QS.get('dog')) setTimeout(ipucuGoster, 900);
+  if (QS.get('dog') && DUNYA) setTimeout(() => { if (window.Hayat) window.Hayat.basla(); }, 700);
   requestAnimationFrame(frame);
 })();
