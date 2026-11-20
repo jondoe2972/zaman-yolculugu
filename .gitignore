@@ -1,0 +1,12 @@
+# Ham indirmeler ve gereksiz dosyalar
+assets/natural-earth-indirme/
+*.zip
+*.tmp
+Thumbs.db
+desktop.ini
+.DS_Store
+.claude/settings.local.json
+
+# yerel notlar ve ayarlar (yayınlanmaz)
+YENI-SOHBET-OZETI.md
+.claude/

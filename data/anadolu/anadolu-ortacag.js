@@ -1,0 +1,251 @@
+// Anadolu: Roma ve Bizans (MÖ 133 – MS 1071) ve Selçuklular (MS 1071 – 1299)
+// Yıl: MS yıllar negatif (MS 1071 = -1071).
+// Kaynaklar: Mitchell, "Anatolia: Land, Men and Gods in Asia Minor" (1993); Ostrogorsky, "Bizans Devleti Tarihi";
+// Cahen, "Osmanlılardan Önce Anadolu" (1968); Turan, "Selçuklular Zamanında Türkiye" (1971).
+(() => {
+  const ESKI = window.ANADOLU_ESKI;
+
+  // ================= 5. ROMA VE BİZANS =================
+  window.PLACES.push({
+    id: 'anadolu-roma', sira: 5, kisa: 'Roma ve Bizans', aralikAd: 'MÖ 133 – MS 1071',
+    baslik: 'Asya eyaleti · Konstantinopolis · Ayasofya',
+    ulkeAlt: 'Roma ve Doğu Roma (Bizans) dönemi Anadolu (MÖ 133 – MS 1071)',
+    from: 133, to: -1071, start: -530,
+    not: 'Tarihler büyük ölçüde kesindir. Nüfus tahminleri yaklaşıktır.',
+    baskent: 'Efes (Asya eyaleti), MS 330\'dan sonra Konstantinopolis',
+    sahne: { kizak: false, araba: false, deve: true, katipYok: -400, giyim: [[133, 'antik'], [-400, 'cubbe']] },
+    dynasties: [
+      { from: 133, to: -27, ad: 'Roma Cumhuriyeti', renk: '#9a3a3a' },
+      { from: -27, to: -330, ad: 'Roma İmparatorluğu', renk: '#a8443a' },
+      { from: -330, to: -867, ad: 'Doğu Roma (Bizans): erken dönem', renk: '#6a3a8a' },
+      { from: -867, to: -1071, ad: 'Bizans: Makedon hanedanı', renk: '#7a4a9a' }
+    ],
+    rulers: [
+      { from: 133, to: 63, ad: 'Roma Senatosu ve Pontus kralı VI. Mithridates', kisa: 'Mithridates', kim: 'Pontuslu Mithridates Roma\'ya karşı üç savaş açtı; MÖ 88\'de bir günde Anadolu\'daki 80.000 Romalıyı öldürttü ("Asya Vesperleri"). Sonunda Pompeius\'a yenildi.' },
+      { from: 63, to: 27, ad: 'Pompeius, Sezar ve Antonius', kisa: 'Sezar', kim: 'Sezar MÖ 47\'de Zile\'de Pontus kralı Farnakes\'i yendi ve "Veni, vidi, vici" (Geldim, gördüm, yendim) dedi.' },
+      { from: 27, to: -14, ad: 'Augustus', kisa: 'Augustus', kim: 'Ankara\'daki Augustus Tapınağı\'nın duvarına yaptıklarını anlatan "Res Gestae" yazıtı kazındı; en sağlam kopyası budur.' },
+      { from: -14, to: -117, ad: 'Julius-Claudius ve Flavius hanedanları, Traianus', kisa: 'Erken imparatorlar', kim: 'Pax Romana: Anadolu kentleri en zengin dönemlerini yaşıyor. Aziz Pavlus Anadolu\'da Hristiyanlığı yayıyor.' },
+      { from: -117, to: -193, ad: 'Hadrianus ve Antoninuslar', kisa: 'Hadrianus', kim: 'Hadrianus Anadolu\'yu iki kez gezdi; Efes, İzmir, Kyzikos\'a tapınaklar yaptırdı.' },
+      { from: -193, to: -284, ad: 'Severuslar ve 3. yüzyıl bunalımı', kisa: 'Bunalım', kim: 'Gotlar Karadeniz\'den gelip Efes Artemis Tapınağı\'nı yaktı (MS 262). İmparator Valerianus Sasanilere esir düştü.' },
+      { from: -284, to: -305, ad: 'Diocletianus', kisa: 'Diocletianus', kim: 'Başkenti İzmit\'e (Nikomedia) taşıdı; imparatorluğu dörtlü yönetime böldü; Hristiyanlara "Büyük Zulüm"ü başlattı.' },
+      { from: -305, to: -337, ad: 'I. Konstantin', kisa: 'Konstantin', kim: 'Hristiyanlığı serbest bıraktı, İznik\'te ilk Ekümenik Konsil\'i topladı (325) ve MS 330\'da Byzantion\'u "Yeni Roma" Konstantinopolis olarak başkent yaptı.' },
+      { from: -337, to: -408, ad: 'Konstantin\'in ardılları ve I. Theodosius', kisa: 'Theodosius', kim: 'Theodosius Hristiyanlığı devlet dini yaptı (380). MS 395\'te imparatorluk ikiye ayrıldı.' },
+      { from: -408, to: -527, ad: 'II. Theodosius ve ardılları', kisa: 'II. Theodosius', kim: 'II. Theodosius İstanbul\'un 6,5 km\'lik kara surlarını yaptırdı; bu surlar 1.000 yıl aşılamadı.' },
+      { from: -527, to: -565, ad: 'I. Justinianus', kisa: 'Justinianus', kim: 'Roma hukukunu derletti, İtalya\'yı geri aldı ve Nika İsyanı\'nda (532) yanan Ayasofya\'yı 5 yılda yeniden yaptırdı.' },
+      { from: -565, to: -717, ad: 'Herakleios ve Arap kuşatmaları dönemi', kisa: 'Herakleios', kim: 'Sasanilere karşı zafer, sonra Arap orduları Anadolu\'ya akınlar yaptı ve İstanbul\'u iki kez kuşattı (674-678, 717-718); "Rum ateşi" şehri kurtardı.' },
+      { from: -717, to: -867, ad: 'İsaurya ve Amorion hanedanları', kisa: 'İkonoklastlar', kim: 'III. Leon\'dan itibaren "İkonoklazma": dinî resimlerin (ikonaların) yasaklanıp kırıldığı dönem (726-843).' },
+      { from: -867, to: -1025, ad: 'Makedon hanedanı (I. Basileios, II. Basileios)', kisa: 'Makedonlar', kim: 'Bizans\'ın ikinci altın çağı. II. Basileios "Bulgar Kasabı" Balkanları aldı.' },
+      { from: -1025, to: -1071, ad: 'Geç Makedonlar ve IV. Romanos Diogenes', kisa: 'Romanos Diogenes', kim: 'Ordu zayıfladı, Selçuklu akınları başladı. IV. Romanos Diogenes 1071\'de Malazgirt\'te Alparslan\'a yenilip esir düştü.' }
+    ],
+    eras: [
+      { from: 133, to: -27, puan: { eko: 3, ordu: 3, istikrar: 2 }, baskent: 'Bergama, sonra Efes (Asya eyaleti)',
+        gundem: 'Bergama Krallığı Roma\'nın "Asya" eyaleti oldu; vergi toplayıcılar (publicani) kentleri soyuyor. Pontus kralı VI. Mithridates bu öfkeyi kullanıp Roma\'ya karşı ayaklandı. Roma iç savaşları da Anadolu\'da yaşandı.',
+        savas: 'Mithridates Savaşları (MÖ 89-63), Sezar\'ın Zile zaferi (MÖ 47), Filipi ve Aktium savaşları.',
+        ekonomi: 'Ağır vergiler ve savaş tazminatları; korsanlar Kilikya kıyılarını üs yapmış.',
+        din: 'Kommagene Kralı I. Antiokhos, Nemrut Dağı\'nın tepesine Yunan ve Pers tanrılarını karıştıran dev heykelli bir mezar yaptırdı (MÖ ~62-38).',
+        yasam: 'Amasyalı Strabon Anadolu\'yu ayrıntılı anlatan "Coğrafya"sını yazıyor.',
+        bilgi: 'Mithridates zehirlenmekten korktuğu için her gün az miktarda zehir içip bağışıklık kazanmaya çalıştı; "mitridatizm" kelimesi buradan gelir.' },
+      { from: -27, to: -284, puan: { eko: 5, ordu: 4, istikrar: 5 }, baskent: 'Efes (Asya), Ankara (Galatya), Kayseri (Kapadokya)',
+        gundem: 'Pax Romana: Anadolu imparatorluğun en kalabalık ve zengin bölgelerinden. Efes 200.000 kişilik bir metropol; Celsus Kütüphanesi, Aspendos ve Side tiyatroları, su kemerleri yapılıyor. Aziz Pavlus Tarsus\'ta doğdu ve Anadolu\'da kiliseler kurdu.',
+        savas: 'Doğu sınırında Partlarla, sonra Sasanilerle savaşlar. MS 262\'de Gotlar Efes\'i yağmaladı.',
+        ekonomi: 'Mermer ocakları (Marmara Adası: Prokonnesos, Afyon İscehisar: Dokimeion), şarap, zeytinyağı, dokuma ihracatı.',
+        din: 'İmparator kültü ve eski tanrılar; Hristiyanlık önce Yahudi topluluklarında yayıldı. Vahiy Kitabı\'ndaki "Yedi Kilise" (Efes, İzmir, Bergama, Tiyatira, Sardes, Filadelfiya, Laodikya) Anadolu\'da.',
+        yasam: 'Hamamlar, tiyatrolar, gladyatör dövüşleri. Bergamalı Galenos (MS 129) gladyatör hekimliğinden Roma imparatorunun hekimliğine yükseldi.',
+        bilgi: '"Hristiyan" adı ilk kez Antakya\'da kullanıldı (İncil, Elçilerin İşleri 11:26).' },
+      { from: -284, to: -527, puan: { eko: 4, ordu: 4, istikrar: 4 }, baskent: 'İzmit (Nikomedia), sonra Konstantinopolis',
+        gundem: 'Konstantin MS 330\'da Konstantinopolis\'i başkent yaptı. Hristiyanlık önce serbest (313), sonra devlet dini (380) oldu. İznik (325), İstanbul (381), Efes (431) ve Kadıköy (451) konsilleri Hristiyan inancının temel kurallarını Anadolu\'da belirledi.',
+        savas: 'MS 395\'te imparatorluk ikiye ayrıldı; Batı Roma 476\'da yıkıldı, Doğu Roma ayakta kaldı. Hunlar Balkanları yağmaladı; İstanbul\'un kara surları (413) şehri korudu.',
+        ekonomi: 'Altın sikke "solidus" yüzyıllarca dünyanın en güvenilir parası. İstanbul Mısır tahılıyla besleniyor.',
+        din: 'Kapadokyalı Babalar (Büyük Basileios, Nazianzoslu Gregorios, Nyssalı Gregorios) Hristiyan teolojisini şekillendirdi. Aziz Nikolaos (Noel Baba) Myra (Demre) piskoposuydu.',
+        yasam: 'Hipodromdaki araba yarışlarında "Maviler" ve "Yeşiller" takımları adeta siyasi partiler.',
+        bilgi: 'Noel Baba\'nın kökeni Antalya Demre\'de yaşamış Aziz Nikolaos: yoksul kızların çeyizi için gece gizlice altın bırakmasıyla ünlü.' },
+      { from: -527, to: -717, puan: { eko: 4, ordu: 3, istikrar: 2 }, baskent: 'Konstantinopolis',
+        gundem: 'Justinianus 532\'deki Nika İsyanı\'nda yanan Ayasofya\'yı 537\'de bugünkü hâliyle bitirdi: 1.000 yıl dünyanın en büyük kilisesi. Ama 541\'deki veba salgını nüfusun belki üçte birini öldürdü. 7. yüzyılda Sasani, sonra Arap orduları Anadolu\'ya girdi.',
+        savas: 'Arapların İstanbul kuşatmaları (674-678 ve 717-718); denize dökülen "Rum ateşi" Arap donanmasını yaktı. Anadolu\'da yüzyıllar süren sınır akınları.',
+        ekonomi: 'Kentler küçüldü, birçok antik kent terk edildi; insanlar tepelerdeki kalelere (kastron) çekildi.',
+        din: 'Kapadokya\'da keşişler tüf kayalara kiliseler ve manastırlar oyuyor.',
+        yasam: 'Akınlara karşı yer altı şehirleri (Derinkuyu, Kaymaklı) genişletildi: 20.000 kişi aylarca saklanabiliyordu.',
+        bilgi: 'Ayasofya\'nın mimarları Trallesli (Aydın) Anthemios bir matematikçi, Miletli İsidoros bir geometriciydi.' },
+      { from: -717, to: -1071, puan: { eko: 4, ordu: 4, istikrar: 3 }, baskent: 'Konstantinopolis',
+        gundem: 'Anadolu "thema" denen askeri eyaletlere bölündü: köylü-askerler toprak karşılığında savaşıyor. İkonoklazma (726-843) tartışması bitince Makedon hanedanıyla Bizans yeniden güçlendi. 11. yüzyılın ortasından itibaren Oğuz Türkleri (Selçuklular) Doğu Anadolu\'ya akınlar yapıyor.',
+        savas: '1071 Malazgirt Savaşı: Selçuklu Sultanı Alparslan, Bizans imparatoru IV. Romanos Diogenes\'i yenip esir aldı; Anadolu\'nun kapıları Türklere açıldı.',
+        ekonomi: 'İstanbul Avrupa\'nın en büyük şehri (~400.000 kişi); İpek üretimi devlet tekelinde.',
+        din: 'Kiril ve Methodios kardeşler Slavlara Hristiyanlığı götürdü (863); 1054\'te Ortodoks ve Katolik kiliseleri ayrıldı.',
+        yasam: 'Kapadokya\'nın boyalı kaya kiliseleri (Göreme Karanlık Kilise, Tokalı Kilise) yapılıyor.',
+        bilgi: 'Alparslan esir aldığı imparatora "Ben senin yerinde olsaydım ne yapardın?" diye sordu; Romanos "Seni öldürtürdüm" deyince Alparslan onu hediyelerle serbest bıraktı (rivayet).' }
+    ],
+    nufus: [[133, 7], [-150, 9], [-300, 8], [-540, 9], [-600, 6], [-800, 6], [-1071, 7]],
+    nufusNot: 'Roma ve Bizans Anadolu\'su için tahminler 6-10 milyon arasında; veba salgınları nüfusu birkaç kez azalttı.',
+    dunyaOzet: { eko: 'Roma ve sonra Bizans, Akdeniz\'in ticaretini yönetiyor; İpek Yolu Çin\'e uzanıyor. 7. yüzyıldan sonra İslam halifelikleri yükseldi.', askeri: 'Roma lejyonları, sonra Bizans atlı zırhlı askerleri (katafrakt) ve Rum ateşi. Doğuda Sasaniler, sonra Araplar, 11. yüzyılda Selçuklular.' },
+    events: [
+      { y: 133, t: 'Bergama Krallığı Roma\'nın Asya eyaleti oldu', k: 'm' },
+      { y: 88, t: 'Mithridates\'in "Asya Vesperleri" katliamı', k: 'm' },
+      { y: 62, t: 'Kommagene kralı Antiokhos, Nemrut Dağı anıtını yaptırmaya başladı', k: 'm' },
+      { y: 47, t: 'Sezar Zile\'de: "Veni, vidi, vici"', k: 'm' },
+      { y: -47, t: 'Aziz Pavlus\'un Anadolu yolculukları (yaklaşık)', k: 'm' },
+      { y: -117, t: 'Efes\'te Celsus Kütüphanesi yapıldı (yaklaşık)', k: 'm' },
+      { y: -262, t: 'Gotlar Efes Artemis Tapınağı\'nı yaktı', k: 'm' },
+      { y: -325, t: 'İznik Konsili', k: 'm' },
+      { y: -330, t: 'Konstantinopolis başkent oldu', k: 'm' },
+      { y: -395, t: 'Roma İmparatorluğu ikiye ayrıldı', k: 'm' },
+      { y: -413, t: 'Theodosius kara surları tamamlandı', k: 'm' },
+      { y: -532, t: 'Nika İsyanı; eski Ayasofya yandı', k: 'm' },
+      { y: -537, t: 'Ayasofya açıldı', k: 'm' },
+      { y: -541, t: 'Justinianus vebası', k: 'm' },
+      { y: -678, t: 'Arap kuşatması Rum ateşiyle püskürtüldü', k: 'm' },
+      { y: -726, t: 'İkonoklazma başladı', k: 'm' },
+      { y: -1054, t: 'Doğu ve Batı kiliseleri ayrıldı', k: 'm' },
+      { y: -1071, t: 'Malazgirt Savaşı: Alparslan kazandı', k: 'm' },
+      { y: -476, t: 'Batı Roma İmparatorluğu yıkıldı', k: 'w' },
+      { y: -622, t: 'Hicret; İslam takviminin başlangıcı', k: 'w' },
+      { y: -800, t: 'Şarlman imparator ilan edildi', k: 'w' }
+    ],
+    world: [
+      { from: 133, to: -476, yer: 'Roma', t: 'Roma Akdeniz\'in tamamına hâkim.' },
+      { from: 206, to: -220, yer: 'Çin', t: 'Han Hanedanı; kâğıt icat edildi (MS ~105).' },
+      { from: -224, to: -651, yer: 'İran', t: 'Sasani İmparatorluğu: Bizans\'ın büyük rakibi.' },
+      { from: -552, to: -744, yer: 'Orta Asya', t: 'Göktürk Kağanlığı: "Türk" adını taşıyan ilk devlet; Orhun yazıtları (732-735).' },
+      { from: -632, to: -1071, yer: 'Arabistan ve Orta Doğu', t: 'İslam halifelikleri: Emeviler, Abbasiler; Bağdat bilim merkezi.' },
+      { from: -800, to: -1071, yer: 'Avrupa', t: 'Feodal krallıklar; Kutsal Roma Germen İmparatorluğu.' },
+      { from: -1040, to: -1071, yer: 'İran', t: 'Büyük Selçuklu Devleti: Tuğrul Bey, Alparslan.' }
+    ],
+    sites: [{ ad: 'ANTAKYA', wx: 1250 }, { ad: 'NEMRUT DAĞI', wx: 1700 }, { ad: 'MALAZGİRT', wx: 2550 }, { ad: 'KAPADOKYA', wx: 3000 }, { ad: 'KAYSERİ', wx: 3300 }, { ad: 'ANKARA', wx: 4500 }, { ad: 'ASPENDOS', wx: 5900 }, { ad: 'EFES', wx: 7000 }, { ad: 'BERGAMA', wx: 7500 }, { ad: 'İZNİK', wx: 8400 }, { ad: 'KONSTANTİNOPOLİS', wx: 8800 }],
+    cliffs: [{ wx: 1700, w: 900, h: 140, peak: 0.5 }, { wx: 3000, w: 700, h: 60, peak: 0.4 }],
+    monuments: [
+      { id: 'nemrut', ad: 'Nemrut Dağı anıtı', yer: 'Adıyaman', wx: 1700, type: 'nemrut', lift: 0, b: 150, h: 50, start: 62, end: 38, vol: 1.6e5, ruin: -600 },
+      { id: 'augustustapinagi', ad: 'Augustus Tapınağı (Res Gestae)', yer: 'Ankara', wx: 4500, type: 'greek', b: 36, h: 16, sutun: 8, start: 25, end: -14, vol: 4e4 },
+      { id: 'celsus', ad: 'Celsus Kütüphanesi', yer: 'Efes', wx: 6960, bank: 'near', type: 'greek', duz: true, renk: '#ead9bd', boya: 'rgba(140,80,40,0.35)', b: 21, h: 17, sutun: 8, start: -110, end: -117, vol: 3e4 },
+      { id: 'aspendos', ad: 'Aspendos Tiyatrosu', yer: 'Serik (Antalya)', wx: 5900, bank: 'near', type: 'theater', b: 96, h: 26, start: -155, end: -165, vol: 6e4 },
+      { id: 'surlar', ad: 'Theodosius kara surları', yer: 'Konstantinopolis', wx: 8700, type: 'citadel', b: 260, h: 22, start: -408, end: -413, vol: 1.6e5 },
+      { id: 'ayasofya', ad: 'Ayasofya', yer: 'Konstantinopolis', wx: 8850, bank: 'near', type: 'church', buyukKubbe: true, kubbe: '#9aa0a6', renk: '#d9b98a', b: 82, h: 55, start: -532, end: -537, vol: 2.2e5 },
+      { id: 'goreme', ad: 'Göreme kaya kiliseleri', yer: 'Kapadokya (Nevşehir)', wx: 3000, type: 'valley', b: 180, h: 50, n: 30, start: -600, end: -1100, vol: 5e4 },
+      { id: 'derinkuyu', ad: 'Derinkuyu yer altı şehri', yer: 'Nevşehir', wx: 3150, bank: 'near', type: 'mound', renk: '#d6c3a0', b: 70, h: 8, start: -500, end: -900, vol: 4e4 },
+      ...ESKI(['bergama', 'efestiyatro', 'artemis2', 'vankalesi', 'midastumulus'], { artemis2: { ruin: -262 } })
+    ],
+    hizli: [{ ad: 'Asya eyaleti', y: 130 }, { ad: 'Nemrut', y: 50 }, { ad: 'Sezar', y: 47 }, { ad: 'Pavlus', y: -50 }, { ad: 'Celsus', y: -117 }, { ad: 'İznik Konsili', y: -325 }, { ad: 'Konstantinopolis', y: -330 }, { ad: 'Kara surları', y: -413 }, { ad: 'Ayasofya', y: -535 }, { ad: 'Rum ateşi', y: -678 }, { ad: 'Malazgirt', y: -1071 }],
+    bilgi: {
+      nemrut: { ikon: '🗿', yaptiran: 'Kommagene Kralı I. Antiokhos', donem: 'MÖ ~62-38', mimar: 'Kommagene saray ustaları', sure: '~25 yıl',
+        neden: 'Kralın mezarı ve kendisini tanrılarla bir arada gösteren kutsal alan (hierothesion).', onem: 'Dağın 2.134 m\'deki tepesinde dev heykeller; Pers ve Yunan kültürlerinin birleşmesinin simgesi. UNESCO Dünya Mirası (1987).',
+        teknik: [['Tümülüs', '~50 m yüksek, 150 m çap, kırma taştan'], ['Heykeller', '8-10 m oturan heykeller: Zeus-Oromasdes, Apollon-Mithras, Herakles, Kommagene tanrıçası, Antiokhos; kartal ve aslanlar'], ['Teraslar', 'Doğu, batı ve kuzey']], nasil: 'Kireçtaşı bloklar üst üste konularak oturan heykeller yapıldı; tümülüs yumruk büyüklüğünde taşlarla örtüldü. Mezar odası hâlâ bulunamadı.',
+        bugun: 'Gün doğumu ve batımında ziyaret edilir. Heykellerin başları depremlerle düşmüş; önlerine sıralanmış durumda.', ilginc: 'Batı terasındaki "Aslan Horoskobu" kabartmasında, bir aslanın üstündeki yıldızlar ve gezegenler MÖ 62 Temmuz\'undaki bir gök durumunu gösteriyor olabilir: bilinen en eski burç haritası sayılır.' },
+      augustustapinagi: { ikon: '🏛️', yaptiran: 'Galatya eyaleti halkı', donem: 'MÖ ~25 – MS 14', mimar: '—', sure: '—', neden: 'Roma ve Augustus kültü için.', onem: 'Duvarındaki Res Gestae, Augustus\'un vasiyetinin en eksiksiz kopyası: "yazıtların kraliçesi".', teknik: [['Yazıt', 'Latince ve Yunanca']], nasil: 'Mermer İyon tapınağı.', bugun: 'Ankara Ulus\'ta, Hacı Bayram Camii\'nin yanında.', ilginc: '15. yüzyılda tapınak bir medrese olarak kullanıldı; bu sayede yazıt korunmuş.' },
+      celsus: { ikon: '📚', yaptiran: 'Gaius Julius Aquila (babası Celsus için)', donem: 'MS ~110-117', mimar: 'Vitruvius Tiberius Julius Aquila', sure: '~7 yıl', neden: 'Asya valisi Celsus\'un mezarı ve kütüphanesi.', onem: 'Roma dünyasının en büyük üçüncü kütüphanesi (~12.000 tomar). Cephesi Efes\'in simgesi.', teknik: [['Cephe', '2 katlı, 16 m'], ['Kitap', '~12.000 tomar']], nasil: 'Kitapları nemden korumak için çift duvar; cephe ortada daha yüksek, kenarlarda daha kısa sütunlarla büyük görünür (görsel yanılsama).', bugun: '1970\'lerde Avusturyalı arkeologlar cepheyi yeniden dikti.', ilginc: 'Celsus\'un lahdi kütüphanenin altındaki mezar odasında hâlâ duruyor.' },
+      aspendos: { ikon: '🎭', yaptiran: 'Aspendoslu Curtius Crispinus ve Auspicatus', donem: 'MS ~155', mimar: 'Zenon', sure: '—', neden: 'Kent tiyatrosu.', onem: 'Dünyanın en iyi korunmuş antik tiyatrosu.', teknik: [['Kapasite', '~15.000'], ['Sahne binası', '~25 m']], nasil: 'Yamaca yaslandı; sahne binası tam yüksekliğiyle ayakta.', bugun: 'Opera ve bale festivali yapılıyor.', ilginc: 'Selçuklular burayı kervansaray olarak kullandı; bu yüzden sağlam kaldı. Atatürk tiyatroyu gezdikten sonra onarılmasını istedi.' },
+      surlar: { ikon: '🏰', yaptiran: 'II. Theodosius', donem: 'MS 408-413 (deniz hendekleriyle 447\'de tamamlandı)', mimar: 'Anthemios (vali)', sure: '~5 yıl', neden: 'Konstantinopolis\'i karadan korumak.', onem: 'Ortaçağ\'ın en güçlü savunma sistemi; 1453\'e kadar yalnızca 1204\'te Haçlılar (deniz tarafından) aşabildi.', teknik: [['Uzunluk', '~6,5 km'], ['Katlar', 'Hendek + ön sur + ana sur (12 m), 96 kule']], nasil: 'Taş ve tuğla sıraları; 447 depreminden sonra 2 ayda onarıldı.', bugun: 'Büyük bölümü ayakta; UNESCO Dünya Mirası (İstanbul Tarihi Alanları).', ilginc: '447\'de deprem surları yıkınca Hipodrom takımları Maviler ve Yeşiller yarışarak 60 günde onardı; Attila\'nın Hunları geri döndü.' },
+      ayasofya: { ikon: '⛪', yaptiran: 'I. Justinianus', donem: 'MS 532-537', mimar: 'Trallesli Anthemios ve Miletli İsidoros', sure: '5 yıl 10 ay',
+        neden: 'Nika İsyanı\'nda yanan kilisenin yerine imparatorluğun en büyük kilisesi.', onem: '~1.000 yıl dünyanın en büyük kilisesi; kubbeli mimarinin şaheseri. 1453\'te camiye, 1934\'te müzeye, 2020\'de yeniden camiye dönüştürüldü.',
+        teknik: [['Kubbe', 'Çap ~31 m, yükseklik 55,6 m'], ['İşçi', '~10.000'], ['Malzeme', 'Tuğla, Prokonnesos mermeri, farklı ülkelerden renkli mermer sütunlar']], nasil: 'Kubbe dört büyük kemer ve pandantifler üzerine oturtuldu; hafif olsun diye Rodos\'tan getirilen hafif tuğlalar kullanıldı. 558\'de çöken kubbe daha yüksek yeniden yapıldı.',
+        bugun: 'İstanbul Sultanahmet\'te cami olarak ziyaret edilebilir. Mozaikleri ve Osmanlı hat levhaları birlikte duruyor.', ilginc: 'Justinianus açılışta "Ey Süleyman, seni geçtim!" dedi (rivayet). Galerideki bir mermer korkulukta 9. yüzyıldan bir Viking\'in kazıdığı run harfleri var: "Halvdan buradaydı".' },
+      goreme: { ikon: '⛪', yaptiran: 'Kapadokyalı keşişler', donem: 'MS ~6-12. yy', mimar: '—', sure: '—', neden: 'Manastır yaşamı ve ibadet.', onem: 'Yüzlerce kaya kilisesi ve fresk; peribacaları. UNESCO Dünya Mirası (1985).', teknik: [['Kiliseler', 'Göreme\'de 30\'dan fazla']], nasil: 'Yumuşak tüf kaya içten oyuldu, duvarlar boyandı.', bugun: 'Göreme Açık Hava Müzesi; balon turları.', ilginc: 'Karanlık Kilise\'nin freskleri, içeri az ışık girdiği için 1.000 yıl sonra bile parlak renklerini koruyor.' },
+      derinkuyu: { ikon: '🕳️', yaptiran: 'Kapadokya halkı', donem: 'MÖ ~8. yy\'dan (Frig?) Bizans\'a', mimar: '—', sure: 'Yüzyıllar', neden: 'Akınlardan saklanmak.', onem: '85 m derinliğe inen, 18 kata kadar yer altı şehri; havalandırma bacaları, ahırlar, kiliseler, şarap mahzenleri.', teknik: [['Derinlik', '~85 m'], ['Kapasite', '~20.000 kişi']], nasil: 'Tüf kaya oyuldu; girişler dev yuvarlak taş kapılarla kapatılırdı.', bugun: 'Ziyarete açık (8 katı).', ilginc: '1963\'te bir köylü evinin duvarını yıkınca arkasında bir tünel buldu: şehir böyle keşfedildi.' }
+    },
+    ulke: [
+      { ad: 'Genel bakış', ikon: '🧭', html: `<p>MÖ 133\'ten itibaren Anadolu <b>Roma</b>\'nın en zengin bölgelerinden biri oldu. MS 330\'da Konstantin, Byzantion\'u <b>Konstantinopolis</b> adıyla başkent yaptı. Batı Roma 476\'da yıkıldı, ama Doğu Roma (bugün <b>Bizans</b> deniyor; kendileri "Romalılar" yani "Rum" diyordu) 1.000 yıl daha yaşadı.</p><p>Bu dönemde Anadolu Hristiyanlığın beşiklerinden biri oldu: ilk konsiller, Yedi Kilise, Kapadokya manastırları.</p>` },
+      { ad: 'Din: Hristiyanlık', ikon: '✝️', html: `<p>Aziz Pavlus Tarsuslu idi; Efes, Antakya, Galatya\'da vaaz verdi. Rivayete göre Meryem Ana Efes\'te yaşadı. İznik\'te (325) ve Kadıköy\'de (451) toplanan konsiller Hristiyan inancının temel kurallarını belirledi.</p>` },
+      { ad: 'Halklar', ikon: '👥', html: `<ul><li><b>Rumlar:</b> Yunanca konuşan Ortodoks Hristiyanlar.</li><li><b>Ermeniler:</b> Doğu Anadolu\'da; 301\'de Hristiyanlığı devlet dini yapan ilk krallık.</li><li><b>Süryaniler:</b> Güneydoğuda; Mardin Deyrulzafaran Manastırı.</li><li><b>Gürcüler, Lazlar:</b> Kuzeydoğu.</li><li><b>Yahudiler:</b> Sardes, Efes, İstanbul.</li></ul>` },
+      { ad: 'Bilim ve hukuk', ikon: '⚖️', html: `<ul><li><b>Galenos</b> (Bergama): 1.500 yıl kullanılan tıp kitapları.</li><li><b>Justinianus Kodu</b>: Avrupa hukukunun temeli.</li><li><b>Rum ateşi</b>: suda bile yanan gizli silah.</li></ul>` }
+    ]
+  });
+
+  // ================= 6. SELÇUKLULAR =================
+  window.PLACES.push({
+    id: 'anadolu-selcuklu', sira: 6, kisa: 'Anadolu Selçukluları', aralikAd: 'MS 1071 – 1299',
+    baslik: 'Malazgirt · Konya · Kervansaraylar · Mevlana',
+    ulkeAlt: 'Türkiye Selçukluları ve beylikler (MS 1071 – 1299)',
+    from: -1071, to: -1299, start: -1229,
+    not: 'Tarihler büyük ölçüde kesindir. Nüfus tahminleri yaklaşıktır.',
+    baskent: 'İznik (1075-1097), sonra Konya',
+    sahne: { kizak: false, deve: true, saduf: false, giyim: 'cubbe' },
+    dynasties: [
+      { from: -1071, to: -1243, ad: 'Türkiye Selçuklu Devleti', renk: '#2a7a6a' },
+      { from: -1243, to: -1299, ad: 'İlhanlı (Moğol) egemenliğinde Selçuklular ve beylikler', renk: '#7a6a2a' }
+    ],
+    rulers: [
+      { from: -1071, to: -1086, ad: 'Kutalmışoğlu Süleyman Şah', kisa: 'Süleyman Şah', kim: 'Malazgirt\'ten sonra Anadolu\'ya giren Türkmenlerin önderi; İznik\'i başkent yaparak Türkiye Selçuklu Devleti\'ni kurdu (1075).' },
+      { from: -1086, to: -1107, ad: 'I. Kılıç Arslan', kisa: 'I. Kılıç Arslan', kim: 'Birinci Haçlı Seferi\'nde İznik\'i kaybetti (1097); başkent Konya\'ya taşındı.' },
+      { from: -1107, to: -1156, ad: 'I. Mesud', kisa: 'I. Mesud', kim: 'İkinci Haçlı Seferi\'ni durdurdu; Konya\'yı başkent olarak güçlendirdi.' },
+      { from: -1156, to: -1192, ad: 'II. Kılıç Arslan', kisa: 'II. Kılıç Arslan', kim: '1176 Miryokefalon\'da Bizans imparatoru Manuel\'i yendi; Bizans Anadolu\'yu geri alma umudunu yitirdi.' },
+      { from: -1192, to: -1220, ad: 'I. Gıyaseddin Keyhüsrev ve I. İzzeddin Keykavus', kisa: 'Keyhüsrev · Keykavus', kim: 'Antalya (1207) ve Sinop (1214) alındı: Selçuklular hem Akdeniz\'e hem Karadeniz\'e açıldı. Sivas Darüşşifası yapıldı.' },
+      { from: -1220, to: -1237, ad: 'I. Alaaddin Keykubad', kisa: 'Alaaddin Keykubad', kim: 'Selçuklunun en parlak sultanı. Alanya\'yı aldı, Kızıl Kule\'yi ve tersaneyi yaptırdı; kervansaraylar, Kubadabad Sarayı. 1230 Yassıçemen\'de Harezmşahları yendi.' },
+      { from: -1237, to: -1246, ad: 'II. Gıyaseddin Keyhüsrev', kisa: 'II. Keyhüsrev', kim: 'Babai İsyanı (1240) ve 1243 Kösedağ yenilgisiyle Selçuklular Moğollara bağlandı.' },
+      { from: -1246, to: -1299, ad: 'Moğol egemenliğinde son Selçuklu sultanları', kisa: 'Son sultanlar', kim: 'Asıl güç İlhanlı valilerinde ve vezirlerde (Muineddin Pervane). Uç bölgelerde Türkmen beylikleri bağımsızlaşıyor: Karamanoğulları, Germiyanoğulları, Osmanoğulları…' }
+    ],
+    eras: [
+      { from: -1071, to: -1176, puan: { eko: 2, ordu: 4, istikrar: 2 }, baskent: 'İznik, sonra Konya',
+        gundem: 'Malazgirt zaferinden sonra Oğuz Türkmenleri sürüleriyle Anadolu\'ya akıyor. Süleyman Şah İznik\'te devlet kurdu; Danişmendliler (Sivas, Tokat), Saltuklular (Erzurum), Mengücekliler (Erzincan, Divriği) ve Artuklular (Diyarbakır, Mardin) gibi ilk Türk beylikleri doğdu. Avrupa\'dan Haçlı orduları geçiyor.',
+        savas: 'Birinci Haçlı Seferi (1096-99): İznik kaybedildi, Dorylaion (Eskişehir) yenilgisi. Miryokefalon (1176) zaferiyle Bizans\'ın geri dönüş umudu bitti.',
+        ekonomi: 'Göçebe hayvancılık ve yerleşik tarım bir arada. Haçlı ve savaş ortamında kentler zor durumda.',
+        din: 'Türkmenler Müslüman; ama halkın çoğu hâlâ Hristiyan Rum ve Ermeni. Türkmen babaları ve dervişler İslam\'ı kırsalda yayıyor.',
+        yasam: 'Avrupalılar 12. yüzyıldan itibaren Anadolu\'ya "Turchia" (Türkiye) demeye başladı.',
+        bilgi: 'Dorylaion\'da Haçlıları gören Selçuklu atlı okçuları, Avrupalıları en çok "geri çekilir gibi yapıp birden dönerek ok atma" taktiğiyle şaşırttı.' },
+      { from: -1176, to: -1243, puan: { eko: 5, ordu: 4, istikrar: 4 }, baskent: 'Konya',
+        gundem: 'Selçuklu altın çağı. Antalya, Alanya ve Sinop limanları alındı; Akdeniz ile Karadeniz arasındaki ticaret Selçuklu yollarından geçiyor. Yollara her 30-40 km\'de bir (bir günlük deve yolu) kervansaray yapıldı: Sultanhanı, Karatay Han. Konya\'da Alaeddin Camii, Karatay ve İnce Minareli medreseler.',
+        savas: '1230 Yassıçemen\'de Harezmşahlar yenildi. Ama 1243\'te Kösedağ\'da Baycu Noyan\'ın Moğol ordusu Selçukluları yendi.',
+        ekonomi: 'Devlet, kervansaraylarda soyulan tüccarın zararını ödeyen bir tür "sigorta" sistemi uyguladı. Venedik ve Cenevizlilerle ticaret antlaşmaları yapıldı.',
+        din: 'Ahmet Yesevi geleneğinden gelen dervişler, Ahi esnaf birlikleri. Mevlana Celaleddin Rumi 1228\'de babasıyla Konya\'ya yerleşti.',
+        yasam: 'Ahilik: esnaf ve zanaatkârların dayanışma ve meslek ahlakı birliği (Ahi Evran, Kırşehir).',
+        bilgi: 'Sivas\'taki I. Keykavus Darüşşifası (1217) bir hastane ve tıp okuluydu; Divriği Darüşşifası\'nda akıl hastaları su sesi ve müzikle tedavi ediliyordu.' },
+      { from: -1243, to: -1299, puan: { eko: 3, ordu: 2, istikrar: 1 }, baskent: 'Konya (asıl güç İlhanlı valilerinde)',
+        gundem: 'Kösedağ\'dan sonra Selçuklular İlhanlı Moğollarına vergi veren bir devlet oldu. Merkez zayıfladıkça Batı ve Güney Anadolu\'nun uçlarında Türkmen beylikleri güçleniyor. Söğüt\'te Ertuğrul Gazi\'nin oğlu Osman Bey bir beylik kuruyor.',
+        savas: 'Karamanoğlu Mehmet Bey 1277\'de Konya\'yı aldı ve divanda Türkçenin kullanılmasını emretti (fermanı). Memlük Sultanı Baybars 1277 Elbistan\'da Moğolları yendi.',
+        ekonomi: 'Moğol vergileri ağır; ama İpek Yolu ticareti Tebriz-Sivas-Ayas yolu üzerinden sürüyor.',
+        din: 'Mevlana (ö. 1273) Mesnevi\'yi yazdı; Hacı Bektaş Veli, Yunus Emre: Türkçe tasavvuf şiiri doğdu.',
+        yasam: 'Nasreddin Hoca (Akşehir, ö. ~1284) fıkralarıyla bu yüzyılın insanıdır.',
+        bilgi: 'Mevlana\'nın cenazesine Müslümanlar, Hristiyanlar ve Yahudiler birlikte katıldı. Ölüm gününe "Şeb-i Arus" (düğün gecesi) denir.' }
+    ],
+    nufus: [[-1071, 7], [-1150, 6], [-1240, 7], [-1299, 6]],
+    nufusNot: 'Türkmen göçleri ve savaşlar nedeniyle tahminler çok belirsiz (5-8 milyon).',
+    dunyaOzet: { eko: 'Venedik ve Ceneviz Akdeniz ticaretine hâkim; Moğol İmparatorluğu İpek Yolu\'nu tek elde topladı (Pax Mongolica).', askeri: 'Haçlı Seferleri (1096-1291) ve Moğol istilaları (1220\'lerden itibaren): Bağdat 1258\'de yıkıldı.' },
+    events: [
+      { y: -1071, t: 'Malazgirt Savaşı', k: 'm' },
+      { y: -1075, t: 'Süleyman Şah İznik\'i başkent yaptı', k: 'm' },
+      { y: -1097, t: 'Birinci Haçlı Seferi: İznik kaybedildi, Dorylaion Savaşı', k: 'm' },
+      { y: -1176, t: 'Miryokefalon Zaferi', k: 'm' },
+      { y: -1207, t: 'Antalya alındı', k: 'm' },
+      { y: -1214, t: 'Sinop alındı', k: 'm' },
+      { y: -1221, t: 'Alanya alındı; Kızıl Kule (1226)', k: 'm' },
+      { y: -1229, t: 'Sultanhanı kervansarayı tamamlandı', k: 'm' },
+      { y: -1228, t: 'Divriği Ulu Camii ve Darüşşifası', k: 'm' },
+      { y: -1230, t: 'Yassıçemen Savaşı', k: 'm' },
+      { y: -1243, t: 'Kösedağ: Moğollara yenilgi', k: 'm' },
+      { y: -1273, t: 'Mevlana Celaleddin Rumi vefat etti', k: 'm' },
+      { y: -1277, t: 'Karamanoğlu Mehmet Bey\'in Türkçe fermanı', k: 'm' },
+      { y: -1204, t: 'Dördüncü Haçlı Seferi İstanbul\'u yağmaladı', k: 'm' },
+      { y: -1261, t: 'Bizans İstanbul\'u geri aldı', k: 'm' },
+      { y: -1206, t: 'Cengiz Han Moğolları birleştirdi', k: 'w' },
+      { y: -1215, t: 'İngiltere\'de Magna Carta', k: 'w' },
+      { y: -1258, t: 'Moğollar Bağdat\'ı yıktı', k: 'w' }
+    ],
+    world: [
+      { from: -1071, to: -1194, yer: 'İran', t: 'Büyük Selçuklu Devleti; Melikşah, Nizamülmülk, Ömer Hayyam.' },
+      { from: -1096, to: -1291, yer: 'Kudüs ve Levant', t: 'Haçlı devletleri.' },
+      { from: -1171, to: -1250, yer: 'Mısır ve Suriye', t: 'Eyyubiler: Selahaddin Kudüs\'ü aldı (1187).' },
+      { from: -1206, to: -1299, yer: 'Asya', t: 'Moğol İmparatorluğu: tarihin en büyük kara imparatorluğu.' },
+      { from: -1250, to: -1299, yer: 'Mısır', t: 'Memlükler: Ayn Calut\'ta Moğolları durdurdu (1260).' },
+      { from: -1071, to: -1299, yer: 'Avrupa', t: 'Katedraller çağı (Notre Dame), ilk üniversiteler (Bologna, Paris, Oxford).' }
+    ],
+    sites: [{ ad: 'MARDİN', wx: 1300 }, { ad: 'DİVRİĞİ', wx: 2300 }, { ad: 'SİVAS', wx: 2800 }, { ad: 'KAYSERİ', wx: 3300 }, { ad: 'AKSARAY · SULTANHANI', wx: 4900 }, { ad: 'KONYA', wx: 5200 }, { ad: 'ALANYA', wx: 5800 }, { ad: 'ANTALYA', wx: 6100 }, { ad: 'İZNİK', wx: 8400 }, { ad: 'İSTANBUL (BİZANS)', wx: 8800 }],
+    monuments: [
+      { id: 'alaeddin', ad: 'Alaeddin Camii', yer: 'Konya', wx: 5200, bank: 'near', type: 'mosque', stil: 'memluk', minare: 1, renk: '#d8c3a0', kubbe: '#5aa0a0', b: 70, h: 28, start: -1155, end: -1220, vol: 6e4 },
+      { id: 'sultanhani', ad: 'Sultanhanı kervansarayı', yer: 'Aksaray', wx: 4900, type: 'citadel', renk: '#d9c39a', b: 116, h: 14, start: -1229, end: -1229.9, vol: 7e4 },
+      { id: 'divrigi', ad: 'Divriği Ulu Camii ve Darüşşifası', yer: 'Sivas', wx: 2300, type: 'mosque', stil: 'memluk', minare: 1, renk: '#cdb08a', kubbe: '#8a7a6a', b: 64, h: 24, start: -1228, end: -1229, vol: 5e4 },
+      { id: 'kizilkule', ad: 'Kızıl Kule ve Alanya Kalesi', yer: 'Alanya', wx: 5800, bank: 'near', type: 'citadel', tepe: true, renk: '#c26a4a', b: 120, h: 36, start: -1221, end: -1226, vol: 8e4 },
+      { id: 'mevlana', ad: 'Mevlana Türbesi (Yeşil Kubbe)', yer: 'Konya', wx: 5300, type: 'mosque', stil: 'memluk', minare: 0, renk: '#e4d6b8', kubbe: '#3aa07a', b: 40, h: 25, start: -1274, end: -1275, vol: 3e4 },
+      ...ESKI(['ayasofya', 'surlar', 'aspendos', 'celsus', 'goreme', 'nemrut', 'vankalesi'], { celsus: { ruin: -1100 } })
+    ],
+    hizli: [{ ad: 'Malazgirt', y: -1071 }, { ad: 'İznik', y: -1078 }, { ad: 'Haçlılar', y: -1097 }, { ad: 'Miryokefalon', y: -1176 }, { ad: 'Antalya', y: -1207 }, { ad: 'Keykubad', y: -1225 }, { ad: 'Sultanhanı', y: -1229 }, { ad: 'Kösedağ', y: -1243 }, { ad: 'Mevlana', y: -1273 }, { ad: 'Osman Bey', y: -1299 }],
+    bilgi: {
+      alaeddin: { ikon: '🕌', yaptiran: 'I. Mesud\'dan I. Alaaddin Keykubad\'a kadar sultanlar', donem: 'MS ~1155-1220', mimar: 'Şamlı Muhammed bin Havlan (son bölüm)', sure: '~65 yıl', neden: 'Konya\'nın sultan camii ve sultanların türbesi.', onem: 'Selçuklu başkentinin en önemli camisi; sekiz Selçuklu sultanı buradaki türbede yatıyor.', teknik: [['Sütun', '42 antik mermer sütun'], ['Minber', '1155, ahşap kündekari']], nasil: 'Alaeddin Tepesi\'ne, Roma ve Bizans sütunları kullanılarak.', bugun: 'İbadete açık.', ilginc: 'Abanoz minberi Anadolu\'nun tarihli en eski ahşap eseri; çivi ve tutkal kullanılmadan geçme tekniğiyle yapıldı.' },
+      sultanhani: { ikon: '🐪', yaptiran: 'I. Alaaddin Keykubad', donem: '1229 (1278\'de yangından sonra genişletildi)', mimar: 'Halepli Muhammed bin Havlan', sure: '~1 yıl', neden: 'Konya-Aksaray kervan yolunda konaklama.', onem: 'Anadolu\'nun en büyük Selçuklu kervansarayı.', teknik: [['Alan', '~4.900 m²'], ['Bölümler', 'Avlu, mescit, hamam, ahırlar, kapalı kış salonu']], nasil: 'Kesme taş, mukarnaslı taç kapı.', bugun: 'Aksaray Sultanhanı ilçesinde ziyarete açık.', ilginc: 'Kervansaraylarda yolcular 3 gün boyunca ücretsiz kalıp yemek yiyebiliyordu; hayvanları beslenir, ayakkabıları onarılırdı.' },
+      divrigi: { ikon: '🕌', yaptiran: 'Mengücekli Ahmed Şah ve eşi Turan Melek', donem: '1228-1229', mimar: 'Ahlatlı Hürremşah', sure: '—', neden: 'Cami ve hastane (darüşşifa) birlikte.', onem: 'Taş işçiliğinin doruğu; UNESCO Dünya Mirası (1985).', teknik: [['Kapılar', '4 taç kapı'], ['Darüşşifa', 'Su sesiyle tedavi havuzu']], nasil: 'Taş oymacılığı "barok" denecek kadar derin ve ayrıntılı.', bugun: 'Onarımdan sonra ziyarete açık.', ilginc: 'Batı taç kapısında yılın belli saatlerinde gölgeler namaz kılan bir insan silüeti oluşturur.' },
+      kizilkule: { ikon: '🏰', yaptiran: 'I. Alaaddin Keykubad', donem: '1221-1226', mimar: 'Halepli Ebu Ali', sure: '~5 yıl', neden: 'Alanya limanını ve tersaneyi korumak.', onem: 'Selçuklu donanmasının üssü; Alanya\'nın simgesi.', teknik: [['Kule', '8 köşeli, 33 m'], ['Tersane', '5 gözlü, kayaya oyulmuş']], nasil: 'Alt kısım taş, üst kısım kırmızı tuğla: adı buradan gelir.', bugun: 'Müze olarak ziyarete açık.', ilginc: 'Alanya\'nın eski adı Kalonoros; Keykubad aldıktan sonra kendi adıyla "Alaiye" oldu.' },
+      mevlana: { ikon: '🌀', yaptiran: 'Sultan Veled ve Alemüddin Kayser', donem: '1274; sonra Osmanlı eklemeleri', mimar: 'Tebrizli Bedreddin', sure: '—', neden: 'Mevlana Celaleddin Rumi\'nin türbesi.', onem: 'Mevlevilik\'in merkezi; dünyanın her yerinden ziyaretçi.', teknik: [['Kubbe', 'Yeşil çinili, 25 m']], nasil: 'Konik külah çatı, çini kaplama.', bugun: 'Mevlana Müzesi; Türkiye\'nin en çok ziyaret edilen müzelerinden.', ilginc: 'Mevlana\'nın sözü: "Gel, ne olursan ol yine gel" aslında Ebu Said-i Ebu\'l Hayr\'a ait olabilir.' }
+    },
+    ulke: [
+      { ad: 'Genel bakış', ikon: '🧭', html: `<p>1071\'de <b>Malazgirt</b>\'te Selçuklu Sultanı Alparslan\'ın zaferiyle Oğuz Türkleri Anadolu\'ya yerleşmeye başladı. <b>Türkiye Selçuklu Devleti</b> önce İznik\'te, sonra Konya\'da kuruldu.</p><p>13. yüzyılda kervansaraylar, medreseler ve camilerle Anadolu yeniden zenginleşti. 1243\'teki Moğol yenilgisinden sonra devlet zayıfladı ve yerini <b>beyliklere</b> bıraktı; bunlardan biri Osmanoğulları\'ydı.</p>` },
+      { ad: 'Halklar', ikon: '👥', html: `<ul><li><b>Türkmenler (Oğuzlar):</b> göçebe ve yerleşik.</li><li><b>Rumlar, Ermeniler, Süryaniler:</b> kentlerde ve köylerde birlikte yaşıyor.</li><li><b>Kürtler:</b> Güneydoğu ve Doğu.</li><li><b>Farslar:</b> saray dili Farsça.</li></ul>` },
+      { ad: 'Din ve tasavvuf', ikon: '🌀', html: `<p>Mevlana, Yunus Emre, Hacı Bektaş Veli ve Ahi Evran bu dönemin büyük isimleri. Yunus Emre Türkçe şiirle "Yaratılanı severiz Yaratandan ötürü" diyerek halka seslendi.</p>` },
+      { ad: 'Mimari', ikon: '🏗️', html: `<p>Taç kapılar, mukarnaslar, çini kaplamalar, kümbetler (kubbeli mezarlar). Ahlat\'taki Selçuklu mezarlığı, dünyanın en büyük Türk-İslam mezarlıklarından biri (8.000\'den fazla mezar taşı).</p>` }
+    ]
+  });
+})();
