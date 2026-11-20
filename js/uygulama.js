@@ -117,6 +117,7 @@
     if (!window.Sehir3D) return; closeModal(); playingBeforeModal = false; playing = false; updPlay(); kartlariKapat();
     window.Sehir3D.open(ad, { Y: () => Y, setYear: y => setYear(y, true), onClose: () => { shown = null; } });
   }
+  { const b = document.querySelector('#s3hizli'); if (b) { b.hidden = !s3Var(); b.addEventListener('click', () => sehir3dAc()); } }
   const s3Dugme = () => s3Var() ? '<button class="symbtn s3btn">🧊 İstanbul\'u 3D gez</button>' : '';
 
   // ---------- coğrafya, ticaret yolları, yolculuklar ----------
@@ -610,7 +611,7 @@
   }
   function modGuncelle() { document.querySelectorAll('[data-mod]').forEach(b => b.classList.toggle('on', (b.dataset.mod === 'kesfet' && view === 'dunya') || (b.dataset.mod === 'sahne' && view === 'sahne'))); }
   function sahneSec() {
-    showModal({ ikon: '🎬', title: 'Hangi bölgenin sahnesi?', sub: `${YIL.fmt(Math.round(Y))} yılına gidilir`, tabs: [{ ad: 'Bölge seç', html: `<p>Canlı sahnede yapılar yılına göre yükselir, insanlar ve gemiler dönemine göre değişir.</p><div class="secim">${BSIRA.map(b => `<button data-gitbolge2="${b}">${BLR[b].ikon} <b>${BLR[b].ad}</b><small>${BLR[b].ad} sahnesini aç</small></button>`).join('')}</div>` }] });
+    showModal({ ikon: '🎬', title: 'Hangi bölgenin sahnesi?', sub: `${YIL.fmt(Math.round(Y))} yılına gidilir`, tabs: [{ ad: 'Bölge seç', html: `<p>Canlı sahnede yapılar yılına göre yükselir, insanlar ve gemiler dönemine göre değişir.</p><div class="secim">${window.Sehir3D ? '<button data-s3="istanbul">🧊 <b>İstanbul · 3D</b><small>Surlar, Ayasofya, camiler ve mahalleler yıl yıl değişir</small></button>' : ''}${BSIRA.map(b => `<button data-gitbolge2="${b}">${BLR[b].ikon} <b>${BLR[b].ad}</b><small>${BLR[b].ad} sahnesini aç</small></button>`).join('')}</div>` }] });
   }
   // ---------- Yaşa: bu yılda ve bölgede seçilebilecek roller ----------
   const misirAntik = () => DUNYA ? (Y <= 3150 && Y >= 30) : (BG.id === 'misir' && BG.kultur && !SP.modern);

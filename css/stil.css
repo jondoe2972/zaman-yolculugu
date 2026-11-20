@@ -628,3 +628,7 @@ body:not(.globeonly) .kp-kure { display: none; }
 .s3-kaydir { flex: 1; min-width: 160px; accent-color: #ffd666; }
 .s3-hizli { display: flex; gap: 4px; flex-wrap: wrap; }
 @media (max-width: 860px) { .s3-kam { margin-left: 0; } .s3-donem { font-size: 12px; top: auto; bottom: 30px; } .s3-ipucu { display: none; } .s3-yil { font-size: 19px; } }
+
+.s3hizli { right: 138px; }
+.s3hizli[hidden] { display: none; }
+@media (max-width: 860px) { .s3hizli { right: 56px; } }
