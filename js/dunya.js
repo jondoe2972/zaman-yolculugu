@@ -12,7 +12,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false };
+  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true };
 
   // ---------- veri ----------
   const VERI = window.DUNYA_VERI || { kara: [], nehir: [] };
@@ -700,6 +700,47 @@ window.Dunya = (() => {
       for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.05) hits.unshift({ kind: 'yolculuk', j, x0: x - 6, x1: x + 6, y0: y - 6, y1: y + 6 }); }
       g.globalAlpha = 1;
     }
+    // insanlığın yayılışı (data/goc.js): MÖ 3000'den önce Homo sapiens'in Afrika'dan yayılış yolları, beşik ve tarımın doğduğu yerler;
+    // Pasifik yolları kendi yıllarında. Yollar kesik kırmızı çizgi, üstünde akan noktalar, varışta ok.
+    const GOC = window.GOC;
+    if (layers.goc && GOC) {
+      const ea = clamp((Y - 3000) / 400, 0, 1);
+      for (const r of GOC.yollar) {
+        const a = r.son != null ? (Y <= r.bas && Y >= r.son ? 1 : 0) : ea; if (a <= 0) continue;
+        const d = yolHazirla(r), hov = hover && hover.kind === 'goc' && hover.r === r;
+        g.globalAlpha = a; g.lineCap = 'round'; g.lineJoin = 'round';
+        g.beginPath(); linePath(d.p); g.strokeStyle = `rgba(200,80,50,${hov ? 0.5 : 0.26})`; g.lineWidth = hov ? 10 : 7; g.stroke();
+        g.strokeStyle = 'rgba(150,45,30,0.9)'; g.lineWidth = 1.7; g.setLineDash([6, 4]); g.stroke(); g.setLineDash([]);
+        const sp = clamp(1500 / view.z, 70, 900), off = (T * sp / 3) % sp; g.fillStyle = 'rgba(255,240,220,0.95)';
+        for (let s = off; s < d.L; s += sp) { const [x, y, z] = P(...yolNokta(d, s)); if (z <= 0.05) continue; g.beginPath(); g.arc(x, y, 2.3, 0, 7); g.fill(); }
+        yolUclari(d, 'rgba(150,45,30,0.95)', true);
+        const [mx, my, mz] = P(...yolNokta(d, d.L * (r.lf ?? 0.5)));
+        if (mz > 0.15 && (view.z >= 1.4 || hov)) text(mx, my - 11, r.etiket, { size: 11.5, w: 700, col: '#7a2414', halo: 3, haloCol: 'rgba(255,246,230,0.9)', serif: true, it: true });
+        for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.05) hits.unshift({ kind: 'goc', r, x0: x - 8, x1: x + 8, y0: y - 8, y1: y + 8 }); }
+        g.globalAlpha = 1;
+      }
+      if (ea > 0) { // beşik: Doğu Afrika'da atan halka
+        const [x, y, z] = P(...GOC.besik.ll);
+        if (z > 0.1) {
+          g.globalAlpha = ea; const ph = (T * 0.6) % 1;
+          for (const k of [0, 0.5]) { const p = (ph + k) % 1; g.strokeStyle = `rgba(200,80,50,${0.8 * (1 - p)})`; g.lineWidth = 2.5; g.beginPath(); g.arc(x, y, 8 + p * 30, 0, 7); g.stroke(); }
+          g.fillStyle = '#c8502f'; g.strokeStyle = '#fff6e6'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 7, 0, 7); g.fill(); g.stroke();
+          // yazı noktanın sağında (Hint Okyanusu tarafı boş; solda kıta adı ve bölge işareti var)
+          text(x + 14, y + 16, '🧬 İnsanlığın beşiği', { size: 13, w: 800, col: '#7a2414', halo: 3.5, haloCol: 'rgba(255,246,230,0.92)', serif: true, align: 'left' });
+          hits.unshift({ kind: 'besik', x0: x - 10, x1: x + 150, y0: y - 10, y1: y + 26 }); g.globalAlpha = 1;
+        }
+      }
+      for (const m of GOC.tarim) { // tarımın doğduğu yerler: başladığı yıldan MÖ 2000'e kadar
+        const a = Y <= m.y ? clamp((Y - 2000) / 300, 0, 1) : 0; if (!a) continue;
+        const [x, y, z] = P(...m.ll); if (z <= 0.1) continue;
+        const hov = hover && hover.kind === 'tarim' && hover.m === m;
+        g.globalAlpha = a; g.fillStyle = 'rgba(250,236,170,0.95)'; g.strokeStyle = '#7a5a14'; g.lineWidth = 1.5;
+        g.beginPath(); g.arc(x, y, hov ? 11 : 9, 0, 7); g.fill(); g.stroke();
+        g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('🌾', x, y + 0.5); g.textBaseline = 'alphabetic';
+        if (view.z >= 1.9 || hov) text(x, y + 20, m.ad, { size: 11, w: 700, col: '#5a4010', halo: 3, haloCol: 'rgba(255,248,225,0.9)', serif: true });
+        hits.unshift({ kind: 'tarim', m, x0: x - 12, x1: x + 12, y0: y - 12, y1: y + 12 }); g.globalAlpha = 1;
+      }
+    }
     // olaylar: seçili yıla ±100 yıl uzaklıktaki savaşlar, afetler, antlaşmalar (önemine göre büyük)
     const evs = (window.OLAYLAR || []).filter(e => layers[e.tur] && Math.abs(Y - e.y) <= aralik);
     evs.sort((a, b) => a.onem - b.onem);
@@ -779,6 +820,9 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'yol') tip(hover.x1 + 6, hover.y0, hover.t.ad, `${hover.t.cikis} → ${hover.t.varis} · ${hover.t.mal} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'yolculuk') tip(hover.x1 + 6, hover.y0, hover.j.ad, `${YIL.fmt(hover.j.y)} · ${hover.j.sure} · ${hover.j.nasil} · tıkla: hikâyesi`);
     else if (hover && hover.kind === 'devlet') tip(hover.x1 + 6, hover.y0, sinirAd(hover.k), `${YIL.fmt(hover.k.y1)} – ${hover.k.y0 <= -2024 ? 'bugün' : YIL.fmt(hover.k.y0)} arasındaki sınırları · ~${Math.round(hover.k.a).toLocaleString('tr-TR')} km² · tıkla: ayrıntılar`);
+    else if (hover && hover.kind === 'goc') tip(hover.x1 + 6, hover.y0, hover.r.ad + ' · ' + hover.r.etiket, 'tıkla: insanlığın yolculuğu');
+    else if (hover && hover.kind === 'besik') tip(hover.x1 + 6, hover.y0, window.GOC.besik.ad, window.GOC.besik.not + ' · tıkla: insanlığın yolculuğu');
+    else if (hover && hover.kind === 'tarim') tip(hover.x1 + 6, hover.y0, `🌾 ${hover.m.ad} · MÖ ~${hover.m.y.toLocaleString('tr-TR')}`, `${hover.m.urun} · ${hover.m.not}`);
     else if (hover && hover.kind === 'med' && hover.b) tip(hover.x1 + 6, hover.y0 + 30, hover.b.ikon + ' ' + hover.b.ad, 'tıkla: bu bölgeye git');
     else if (hover && hover.kind === 'sehir') tip(hover.x1 + 6, hover.y0, hover.c.ad + (hover.c.cap ? ' (başkent)' : ''), hover.c.not || '');
   }

@@ -839,3 +839,62 @@ button.dv-kisi { grid-template-columns: 1fr; }
 .mbody .yakin .chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 6px; }
 .mbody .yakin .chips button { font-size: 12px; padding: 3px 8px; border-radius: 10px; border: 1px solid #c9a46a; background: #fff8e8; color: #3a2414; cursor: pointer; }
 @media (max-width: 600px) { .kapak img, .kapak-bos { height: 200px; } }
+
+/* ---- kartları gizleme: yıl kartı (▴) ve zaman çizelgesi (⌄) ayrı ayrı; ⛶ ikisini birden ---- */
+.yearcard { padding-right: 38px; }
+.yc-gizle { position: absolute; right: 6px; top: 6px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); color: #f3e7d0; font-size: 13px; line-height: 1; cursor: pointer; pointer-events: auto; padding: 0; }
+.yc-gizle:hover { background: #ffd666; color: #2a1d10; }
+body.ust-gizli .yearcard > :not(#yc-year):not(#yc-gizle) { display: none !important; }
+body.ust-gizli .yearcard { pointer-events: auto; cursor: pointer; padding: 5px 38px 5px 12px; }
+body.ust-gizli .yearcard b#yc-year { font-size: 20px; }
+body.ust-gizli .yearcard .yc-gizle { top: 50%; transform: translateY(-50%); width: 24px; height: 24px; }
+.yc-goc { pointer-events: auto; align-self: flex-start; margin-top: 4px; background: #c8502f; color: #fff6e6; border: 0; border-radius: 99px; padding: 5px 12px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.yc-goc:hover { background: #e06a45; }
+.yc-goc[hidden] { display: none; }
+body.alt-gizli footer.tl { display: none; }
+.tl-ac { position: absolute; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 8px; background: rgba(24,18,12,.9); color: #ffe7a3; border: 1px solid rgba(255,255,255,.2); border-radius: 99px; padding: 4px 14px 4px 4px; font-size: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+.tl-ac[hidden] { display: none; }
+.tl-ac-oyna { width: 30px; height: 30px; border-radius: 50%; background: #ffd666; color: #2a1d10; display: grid; place-items: center; font-size: 14px; }
+.tl-ac b { font-size: 15px; }
+.globectl .tamekran { font-size: 16px; text-align: center; }
+.globectl .tamekran.on { background: #ffd666; color: #2a1d10; }
+/* zaman çizelgesi: tarihe git, gizle, yakınlaştırma */
+.tl { position: relative; }
+.ctrl .tarihgit, .ctrl .tl-gizle { width: 34px; height: 34px; font-size: 15px; }
+.ctrl .tl-gizle { font-size: 17px; line-height: 1; }
+.ctrl .tarihgit.on { background: #ffd666; border-color: #ffd666; }
+.tarihpop { position: absolute; left: 12px; bottom: calc(100% + 8px); z-index: 9; width: min(300px, calc(100% - 24px)); background: #fbf4e4; color: #3a2414; border-radius: 14px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+.tarihpop[hidden] { display: none; }
+.tarihpop b { display: block; margin-bottom: 8px; }
+.tp-sat { display: flex; gap: 6px; }
+.tp-sat input { flex: 1; min-width: 0; font-size: 16px; padding: 7px 9px; border: 1px solid #c9a46a; border-radius: 9px; background: #fff; color: #2a1d10; }
+.tp-sat select { font-size: 15px; padding: 6px; border: 1px solid #c9a46a; border-radius: 9px; background: #fff8e8; color: #2a1d10; }
+.tp-git { font-size: 15px; font-weight: 700; padding: 7px 14px; border: 0; border-radius: 9px; background: #3a2414; color: #ffd666; cursor: pointer; }
+.tarihpop small { display: block; margin-top: 7px; color: #7a6548; font-size: 12px; line-height: 1.35; }
+.tlzoom { position: absolute; right: 2px; top: 0; display: flex; gap: 3px; z-index: 2; }
+.tlzoom button { width: 26px; height: 22px; border-radius: 7px; border: 1px solid rgba(255,255,255,.18); background: rgba(24,18,12,.85); color: #f3e7d0; font-size: 13px; font-weight: 800; cursor: pointer; padding: 0; line-height: 1; }
+.tlzoom button:hover { background: #ffd666; color: #2a1d10; }
+.tlzoom button[hidden] { display: none; }
+/* insanlığın yolculuğu kartı */
+.goc-yol { border-top: 1px solid #e3d3b2; padding: 8px 0 10px; }
+.goc-yol:first-child { border-top: 0; }
+.goc-yol h4 { margin: 0 0 4px; }
+.goc-yol h4 small { color: #8b6a3a; font-weight: 600; }
+.goc-yol p { margin: 0 0 6px; }
+.goc-yol.on { background: #fff1d0; border-radius: 10px; padding: 8px 10px 10px; }
+@media (max-width: 860px) {
+  .ctrl { flex-wrap: wrap; }
+  .ctrl .tarihgit, .ctrl .tl-gizle { width: 32px; height: 32px; }
+  .yearcard { max-width: calc(100% - 64px); }
+}
+/* telefon: sağdaki düğmeler tek dikey sütunda; yıl kartı onlara değmez */
+@media (max-width: 860px) {
+  .yearcard { max-width: calc(100% - 70px); }
+  .katbtn { top: 8px; right: 8px; }
+  .s3hizli { top: 50px; right: 8px; }
+  .globectl, .mapctl { top: 92px !important; right: 8px; flex-direction: column !important; }
+}
+/* açık zeminli pencerelerde olay listeleri okunaklı olsun (koyu panel rengi burada soluk görünüyordu) */
+.modal .evs { color: #3a2414; }
+.modal .evs li.on { color: #a0521c; font-weight: 700; }
+.modal .evs a { color: #6a3a14; }

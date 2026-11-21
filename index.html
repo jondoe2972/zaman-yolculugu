@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Zaman Yolculuğu · Mısır</title>
 <meta name="description" content="Zaman çizelgesini kaydır, Antik Mısır'da piramitlerin yükselişini canlı bir sahnede izle.">
-<link rel="stylesheet" href="css/stil.css?v=50">
+<link rel="stylesheet" href="css/stil.css?v=53">
 </head>
 <body>
 <header class="top">
@@ -25,7 +25,7 @@
     <canvas id="scene" aria-label="Canlı sahne: Nil vadisi ve piramitler"></canvas>
     <canvas id="map" aria-label="Mısır haritası"></canvas>
     <canvas id="globe" aria-label="Dünya küresi"></canvas>
-    <div class="globectl"><button id="gzin" title="Yakınlaştır">＋</button><button id="gzout" title="Uzaklaştır">－</button></div>
+    <div class="globectl"><button id="gzin" title="Yakınlaştır">＋</button><button id="gzout" title="Uzaklaştır">－</button><button id="tamekran" class="tamekran" title="Tam ekran: yıl kartını ve zaman çizelgesini gizle">⛶</button></div>
     <div class="mapctl">
       <button id="mzin" title="Yakınlaştır">＋</button><button id="mzout" title="Uzaklaştır">－</button>
       <button data-mapgo="tum">Tüm Mısır</button><button data-mapgo="delta">Delta</button><button data-mapgo="memfis">Memfis · Gize</button><button data-mapgo="teb">Teb</button><button data-mapgo="nubya">Nubya</button>
@@ -36,7 +36,10 @@
       <span id="yc-ago"></span>
       <span id="yc-ruler"></span>
       <span id="yc-site" class="site"></span>
+      <button id="yc-goc" class="yc-goc" hidden>🧬 İnsanlık Afrika'dan nasıl yayıldı? ›</button>
+      <button id="yc-gizle" class="yc-gizle" title="Yıl kartını küçült" aria-label="Yıl kartını küçült">▴</button>
     </div>
+    <button id="tl-ac" class="tl-ac" hidden title="Zaman çizelgesini göster"><span id="tl-ac-oyna" class="tl-ac-oyna">▶</span><b id="tl-ac-yil"></b><span>▴</span></button>
     <button id="follow" class="follow">🎯 Şantiyeye dön</button>
     <div id="toast" class="toast"></div>
     <button id="s3hizli" class="katbtn s3hizli" hidden title="İstanbul'u 3D gez: surlar, Ayasofya, mahalleler yıl yıl">🧊<span> İstanbul 3D</span></button>
@@ -45,6 +48,7 @@
       <div class="kp-kure">
         <b>Haritada göster</b>
         <label><input type="checkbox" data-kat="sinir" checked><span>🗺️ Dönemin sınırları</span></label>
+        <label><input type="checkbox" data-kat="goc" checked><span>🧬 İnsanlığın yayılışı (MÖ 3000 öncesi)</span></label>
         <label><input type="checkbox" data-kat="ticaret" checked><span>🐪 Ticaret yolları</span><i></i></label>
         <label><input type="checkbox" data-kat="yolculuk"><span>🧭 Ünlü yolculuklar ve seferler</span><i></i></label>
         <label><input type="checkbox" data-kat="savas"><span>⚔️ Savaşlar</span><i></i></label>
@@ -82,10 +86,14 @@
       <option value="25">25 yıl/sn</option>
       <option value="50">50 yıl/sn</option>
     </select>
+    <button id="tarihgit" class="tarihgit" title="Belirli bir tarihe git">📅</button>
+    <button id="tl-gizle" class="tl-gizle" title="Zaman çizelgesini gizle">⌄</button>
   </div>
+  <div id="tarihpop" class="tarihpop" hidden><b>📅 Tarihe git</b><form id="tp-form" class="tp-sat"><input id="tp-yil" type="number" min="0" step="1" inputmode="numeric" placeholder="ör. 1453" aria-label="Yıl"><select id="tp-cag" aria-label="Çağ"><option value="ms">MS</option><option value="mo">MÖ</option></select><button class="tp-git" type="submit">Git</button></form><small id="tp-not"></small></div>
   <div class="tlwrap">
     <canvas id="timeline" aria-label="Zaman çizelgesi"></canvas>
     <div id="tip" class="tip"></div>
+    <div class="tlzoom"><button id="tlztum" title="Bütün tarihi göster" hidden>⤢</button><button id="tlzin" title="Çizelgeyi yakınlaştır (ya da fare tekerleği / iki parmak)">＋</button><button id="tlzout" title="Çizelgeyi uzaklaştır">－</button></div>
   </div>
 </footer>
 <div id="ic" class="ic" hidden>
@@ -138,15 +146,16 @@
 <script src="data/cografya.js?v=1"></script>
 <script src="data/roller.js?v=2"></script>
 <script src="data/sinir/sinir-dizin.js?v=1"></script>
-<script src="js/dunya.js?v=61"></script>
+<script src="js/dunya.js?v=63"></script>
 <script src="data/sehir3d-istanbul.js?v=3"></script>
 <script src="js/sehir3d.js?v=4"></script>
 <script src="js/uc-boyut.js?v=42"></script>
+<script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
 <script src="data/yapilar/avrupa.js?v=1"></script>
 <script src="data/yapilar/amerika.js?v=1"></script>
-<script src="js/uygulama.js?v=55"></script>
+<script src="js/uygulama.js?v=56"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=3"></script>

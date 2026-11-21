@@ -101,8 +101,17 @@
 
   // ---------- zaman ----------
   function setYear(y, fromUser) { Y = clamp(y, P.to, P.from); if (fromUser) follow = true; }
-  const yearX = y => 14 + (P.from - y) / (P.from - P.to) * (TW - 28);
-  const xYear = x => P.from - (x - 14) / (TW - 28) * (P.from - P.to);
+  // zaman çizelgesinin görünen aralığı: tlA (eski uç, MÖ +) – tlB (yeni uç); null = bütün tarih (yakınlaştırma için)
+  let tlA = null, tlB = null;
+  const vA = () => tlA ?? P.from, vB = () => tlB ?? P.to;
+  const yearX = y => 14 + (vA() - y) / (vA() - vB()) * (TW - 28);
+  const xYear = x => vA() - (x - 14) / (TW - 28) * (vA() - vB());
+  function tlAralik(a, b) {
+    const tam = P.from - P.to, s = Math.max(10, a - b);
+    if (s >= tam) { tlA = tlB = null; } else { a = Math.min(P.from, Math.max(P.to + s, a)); tlA = a; tlB = a - s; }
+    $('#tlztum').hidden = tlA == null;
+  }
+  function tlZoom(f, x) { const m = x != null ? xYear(x) : clamp(Y, vB(), vA()); tlAralik(m + (vA() - m) * f, m - (m - vB()) * f); }
 
   // ---------- panel ----------
   const popAt = y => {
@@ -174,6 +183,10 @@
     out.trwiki = ((ent.sitelinks || {}).trwiki || {}).title; out.enwiki = ((ent.sitelinks || {}).enwiki || {}).title;
     return out;
   }
+  // Aynı devletin ardışık sınır kayıtları (her biri yalnızca kendi yıllarında geçerli)
+  function kayitZinciri(k) { let a = k; for (let i = 0; a.once && i < 500; i++) a = a.once; const L = []; for (let i = 0; a && i < 500; i++, a = a.sonra) L.push(a); return L; }
+  // y yılında (ll) noktası bu devletin topraklarında mıydı? O yılın sınır kaydının çokgenine bakılır.
+  const oZamanBurada = (k, y, ll) => y != null && kayitZinciri(k).some(r => y <= r.y1 + 0.5 && y >= r.y0 - 0.5 && DN.icerir(r, ll[0], ll[1]));
   function openDevlet(k) {
     const N = (window.DEVLET_NOT || {})[k.n] || {}, ad = DN.sinirAd(k, Math.round(Y)), bit = k.y0 <= -2024 ? 'bugün' : YIL.fmt(k.y0);
     const veri = devletVeri(k);
@@ -181,7 +194,30 @@
     const genel = `<div class="kisi-ust"><div class="kisi-foto dv-foto"></div><div>${rowsHTML([['Ad', ad !== k.n ? `${esc(ad)} <small>(${esc(k.n)})</small>` : esc(ad)], [k.y1 === k.y0 ? 'Bu harita' : 'Bu sınırların yılları', k.y1 === k.y0 ? `${YIL.fmt(k.y1)} yılının sınırları` : `${YIL.fmt(k.y1)} – ${bit}`], ['Yüzölçümü', `yaklaşık ${fmt(k.a)} km²`]])}</div></div>
       ${N.koken ? `<h4>🧭 Kökeni</h4><p>${N.koken}</p>` : ''}${N.halk ? `<h4>👥 Halklar</h4><p>${N.halk}</p>` : ''}
       <div class="dv-wd"><p class="note">Ayrıntılar yükleniyor…</p></div>
-      <h4>📖 Kısaca</h4><div class="dv-ozet"><p class="note">Vikipedi\'den özet yükleniyor…</p></div>`;
+      <div class="dv-ozetk"><h4>📖 Kısaca</h4><div class="dv-ozet"><p class="note">Vikipedi\'den özet yükleniyor…</p></div></div>`;
+    // Kişiler ve olaylar pencere açılırken birlikte aranır; hiçbir şey çıkmayan sekme gizlenir ("bulunamadı" yazısı yok).
+    // Yalnızca o anda bu devletin toprağı olan yerdekiler sayılır: her kişi/olay kendi yılındaki sınır kaydına göre denetlenir.
+    const kisiP = (async () => {
+      const yerel = (window.KIM || []).filter(p => p.ll && oZamanBurada(k, p.dogum, p.ll));
+      let wd = [];
+      if (k.q) try {
+        const r = await sparql(`SELECT ?p ?pLabel ?img ?b ?d ?sl ?trw WHERE { ?p wdt:P27 wd:${k.q}; wdt:P31 wd:Q5; wikibase:sitelinks ?sl. OPTIONAL{?p wdt:P18 ?img} OPTIONAL{?p wdt:P569 ?b} OPTIONAL{?p wdt:P570 ?d} OPTIONAL{?trw schema:about ?p; schema:isPartOf <https://tr.wikipedia.org/>} SERVICE wikibase:label { bd:serviceParam wikibase:language "tr,en". } } ORDER BY DESC(?sl) LIMIT 40`);
+        const gor = new Set(); wd = r.filter(x => !gor.has(x.p.value) && gor.add(x.p.value)).slice(0, 16);
+      } catch (e) { /* çevrimdışı: yalnızca yerel liste */ }
+      return { yerel, wd };
+    })();
+    const olayP = (async () => {
+      const yerel = (window.OLAYLAR || []).filter(e => e.ll && oZamanBurada(k, e.y, e.ll)).sort((a, b2) => b2.y - a.y);
+      let wd = [];
+      if (k.q) try {
+        const r = await sparql(`SELECT ?e ?eLabel ?t ?t2 ?sl ?trw WHERE { ?e wdt:P710 wd:${k.q}; wikibase:sitelinks ?sl. OPTIONAL{?e wdt:P585 ?t} OPTIONAL{?e wdt:P580 ?t2} OPTIONAL{?trw schema:about ?e; schema:isPartOf <https://tr.wikipedia.org/>} SERVICE wikibase:label { bd:serviceParam wikibase:language "tr,en". } } ORDER BY DESC(?sl) LIMIT 40`);
+        const gor = new Set(); wd = r.filter(x => !gor.has(x.e.value) && gor.add(x.e.value)).slice(0, 15).map(x => ({ ...x, yil: wdYil((x.t || x.t2 || {}).value) })).sort((a, b2) => (b2.yil ?? -9999) - (a.yil ?? -9999));
+      } catch (e) { /* */ }
+      return { yerel, wd };
+    })();
+    const sekmeGizle = (i, bos) => { if (!bos || modal.hidden || modal.querySelector('h2').textContent !== ad) return; const bt = modal.querySelector(`.tabs [data-tab="${i}"]`); if (bt && !bt.classList.contains('on')) bt.hidden = true; };
+    kisiP.then(r => sekmeGizle(1, !r.yerel.length && !r.wd.length && !(N.kisi || []).length));
+    olayP.then(r => sekmeGizle(2, !r.yerel.length && !r.wd.length));
     const tabs = [
       { ad: '🏛️ Genel', html: genel, onShow: async b => {
         const v = await veri, kutu = b.querySelector('.dv-wd'); if (!b.contains(kutu)) return;
@@ -192,49 +228,73 @@
         if (dil) sat.push(['Dil', esc(dil)]); if (din) sat.push(['Din', esc(din)]);
         if (v && v.yonetim.length) sat.push(['Yönetim', esc(v.yonetim.join(', '))]); if (v && v.para.length) sat.push(['Para', esc(v.para.join(', '))]);
         const onc = N.onceki || (v && v.onceki), son = N.sonraki || (v && v.sonraki);
-        kutu.innerHTML = (sat.length ? rowsHTML(sat) : '') + (onc && onc.length ? `<h4>⬅️ Hangi devletin devamı?</h4>${cipler(onc)}` : '') + (son && son.length ? `<h4>➡️ Yerini kim aldı?</h4>${cipler(son)}` : '') + (!sat.length && !(onc || []).length && !N.koken ? '<p class="note">Bu devlet için ayrıntılı kayıt bulunamadı.</p>' : '');
-        const oz = b.querySelector('.dv-ozet'), fk = b.querySelector('.dv-foto');
+        kutu.innerHTML = (sat.length ? rowsHTML(sat) : '') + (onc && onc.length ? `<h4>⬅️ Hangi devletin devamı?</h4>${cipler(onc)}` : '') + (son && son.length ? `<h4>➡️ Yerini kim aldı?</h4>${cipler(son)}` : '');
+        const oz = b.querySelector('.dv-ozet'), ozk = b.querySelector('.dv-ozetk'), fk = b.querySelector('.dv-foto');
         try {
           const u = v && v.trwiki ? 'https://tr.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(v.trwiki.replace(/ /g, '_')) : k.w ? 'https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(k.w.replace(/ /g, '_')) : null;
-          if (!u) { oz.innerHTML = ''; return; }
+          if (!u) { ozk.remove(); return; }
           const o = await fetch(u).then(r => r.json()); if (!b.contains(oz)) return;
           if (o.thumbnail) fk.innerHTML = `<img src="${esc(o.thumbnail.source)}" alt="${esc(ad)}">`;
-          oz.innerHTML = `<p>${esc(o.extract || '')}</p>${v && v.trwiki ? '' : '<p class="note">Türkçe Vikipedi\'de madde bulunamadı; İngilizce özet gösteriliyor.</p>'}${o.content_urls ? `<p><a href="${esc(o.content_urls.desktop.page)}" target="_blank" rel="noopener">Vikipedi\'de devamını oku ↗</a></p>` : ''}`;
-        } catch (e) { oz.innerHTML = '<p class="note">Özet yüklenemedi.</p>'; }
+          if (!o.extract) { ozk.remove(); return; }
+          oz.innerHTML = `<p>${esc(o.extract)}</p>${o.content_urls ? `<p><a href="${esc(o.content_urls.desktop.page)}" target="_blank" rel="noopener">Vikipedi\'de devamını oku ↗</a></p>` : ''}`;
+        } catch (e) { if (ozk.isConnected) ozk.remove(); }
       } },
       { ad: '👥 Kişiler', html: '<div class="dv-kisiler"><p class="note">Kişiler yükleniyor…</p></div>', onShow: async b => {
-        const kutu = b.querySelector('.dv-kisiler'), v = await veri;
-        // 1) Ben kimim? oyunundaki ünlülerden devlet ayaktayken yaşamış ve bu sınırların içinde doğmuş olanlar (yerel, Türkçe)
-        const bas = v && v.kurulus != null ? v.kurulus : k.y1, son = v && v.yikilis != null ? v.yikilis : k.y0;
-        const yerel = (window.KIM || []).filter(p => p.ll && p.dogum >= son && p.olum <= bas && DN.icerir(k, p.ll[0], p.ll[1]));
+        const kutu = b.querySelector('.dv-kisiler'), r = await kisiP; if (!kutu.isConnected) return;
         let h = '';
         if (N.kisi && N.kisi.length) h += `<h4>⭐ Önemli kişiler</h4>${cipler(N.kisi)}`;
-        if (yerel.length) h += `<h4>🎭 Bu sınırların içinde doğmuş ünlüler <small>(doğdukları yıl orası başka bir devlete ait olabilir)</small></h4><div class="dv-grid">${yerel.map(p => `<button class="dv-kisi" data-tani="${p.id}"><b>${esc(p.ad)}</b><small>${YIL.aralik(p.dogum, p.olum)} · ${esc(p.alan || '')}</small></button>`).join('')}</div>`;
-        kutu.innerHTML = h + '<h4>🌐 Bu devletin vatandaşı olarak kayıtlı en tanınmış kişiler</h4><div class="dv-wdk"><p class="note">Wikidata\'dan yükleniyor…</p></div>';
+        if (r.yerel.length) h += `<h4>🎭 Bu devletin topraklarında doğmuş ünlüler</h4><div class="dv-grid">${r.yerel.map(p => `<button class="dv-kisi" data-tani="${p.id}"><b>${esc(p.ad)}</b><small>${YIL.aralik(p.dogum, p.olum)} · ${esc(p.alan || '')}</small></button>`).join('')}</div>`;
+        if (r.wd.length) h += `<h4>🌐 Bu devletin vatandaşı olarak kayıtlı en tanınmış kişiler</h4><div class="dv-grid">${r.wd.map(x => { const by = wdYil(x.b && x.b.value), dy = wdYil(x.d && x.d.value), url = x.trw ? x.trw.value : 'https://www.wikidata.org/wiki/' + qId(x.p.value);
+          return `<a class="dv-kisi" href="${esc(url)}" target="_blank" rel="noopener">${x.img ? `<img src="${esc(resim(x.img.value, 96))}" alt="" loading="lazy">` : '<i>👤</i>'}<b>${esc(x.pLabel.value)}</b><small>${by != null ? YIL.fmt(by) : '?'}${dy != null ? ' – ' + YIL.fmt(dy) : ''}</small></a>`; }).join('')}</div><p class="note">Kaynak: Wikidata (vatandaşlık kaydı olan kişiler, tanınırlığa göre).</p>`;
+        kutu.innerHTML = h;
         kutu.querySelectorAll('[data-tani]').forEach(x => x.addEventListener('click', () => window.BenKimim && window.BenKimim.tani(x.dataset.tani)));
-        const wk = kutu.querySelector('.dv-wdk'); if (!k.q) { wk.innerHTML = '<p class="note">Kayıt yok.</p>'; return; }
-        const r = await sparql(`SELECT ?p ?pLabel ?img ?b ?d ?sl ?trw WHERE { ?p wdt:P27 wd:${k.q}; wdt:P31 wd:Q5; wikibase:sitelinks ?sl. OPTIONAL{?p wdt:P18 ?img} OPTIONAL{?p wdt:P569 ?b} OPTIONAL{?p wdt:P570 ?d} OPTIONAL{?trw schema:about ?p; schema:isPartOf <https://tr.wikipedia.org/>} SERVICE wikibase:label { bd:serviceParam wikibase:language "tr,en". } } ORDER BY DESC(?sl) LIMIT 40`);
-        if (!b.contains(wk)) return;
-        const gor = new Set(), L = r.filter(x => !gor.has(x.p.value) && gor.add(x.p.value)).slice(0, 16);
-        wk.innerHTML = L.length ? `<div class="dv-grid">${L.map(x => { const by = wdYil(x.b && x.b.value), dy = wdYil(x.d && x.d.value), url = x.trw ? x.trw.value : 'https://www.wikidata.org/wiki/' + qId(x.p.value);
-          return `<a class="dv-kisi" href="${esc(url)}" target="_blank" rel="noopener">${x.img ? `<img src="${esc(resim(x.img.value, 96))}" alt="" loading="lazy">` : '<i>👤</i>'}<b>${esc(x.pLabel.value)}</b><small>${by != null ? YIL.fmt(by) : '?'}${dy != null ? ' – ' + YIL.fmt(dy) : ''}</small></a>`; }).join('')}</div><p class="note">Kaynak: Wikidata (vatandaşlık kaydı olan kişiler, tanınırlığa göre).</p>` : '<p class="note">Wikidata\'da bu devlete bağlı kişi kaydı bulunamadı.</p>';
       } },
       { ad: '⚔️ Olaylar', html: '<div class="dv-olaylar"><p class="note">Olaylar yükleniyor…</p></div>', onShow: async b => {
-        const kutu = b.querySelector('.dv-olaylar'), v = await veri;
-        const y0 = v && v.kurulus != null ? v.kurulus : k.y1, y1 = v && v.yikilis != null ? v.yikilis : k.y0;
-        const yerel = (window.OLAYLAR || []).filter(e => e.ll && e.y <= y0 && e.y >= y1 && DN.icerir(k, e.ll[0], e.ll[1])).sort((a, b2) => b2.y - a.y);
-        let h = yerel.length ? `<h4>📍 Bu sınırların içinde yaşanan olaylar <small>(olay anında orası başka bir devlete ait olabilir)</small></h4><ul class="evs olaylist">${yerel.map(e => `<li data-dvolay="${e.id}">${{ savas: '⚔️', deniz: '⚓', afet: '🌋', antlasma: '📜', olay: '🏛️' }[e.tur] || '📌'} <b>${YIL.fmt(e.y)}</b> ${esc(e.ad)}</li>`).join('')}</ul>` : '';
-        kutu.innerHTML = h + '<h4>🌐 Bu devletin katıldığı savaş ve olaylar</h4><div class="dv-wde"><p class="note">Wikidata\'dan yükleniyor…</p></div>';
+        const kutu = b.querySelector('.dv-olaylar'), r = await olayP; if (!kutu.isConnected) return;
+        let h = '';
+        if (r.yerel.length) h += `<h4>📍 Bu devletin topraklarında yaşanan olaylar</h4><ul class="evs olaylist">${r.yerel.map(e => `<li data-dvolay="${e.id}">${{ savas: '⚔️', deniz: '⚓', afet: '🌋', antlasma: '📜', olay: '🏛️' }[e.tur] || '📌'} <b>${YIL.fmt(e.y)}</b> ${esc(e.ad)}</li>`).join('')}</ul>`;
+        if (r.wd.length) h += `<h4>🌐 Bu devletin katıldığı savaş ve olaylar</h4><ul class="evs">${r.wd.map(x => `<li><a href="${esc(x.trw ? x.trw.value : 'https://www.wikidata.org/wiki/' + qId(x.e.value))}" target="_blank" rel="noopener"><b>${x.yil != null ? YIL.fmt(x.yil) : ''}</b> ${esc(x.eLabel.value)}</a></li>`).join('')}</ul>`;
+        kutu.innerHTML = h;
         kutu.querySelectorAll('[data-dvolay]').forEach(x => x.addEventListener('click', () => { const e = (window.OLAYLAR || []).find(o => o.id === x.dataset.dvolay); if (e) openEvent(e); }));
-        const we = kutu.querySelector('.dv-wde'); if (!k.q) { we.innerHTML = ''; return; }
-        const r = await sparql(`SELECT ?e ?eLabel ?t ?t2 ?sl ?trw WHERE { ?e wdt:P710 wd:${k.q}; wikibase:sitelinks ?sl. OPTIONAL{?e wdt:P585 ?t} OPTIONAL{?e wdt:P580 ?t2} OPTIONAL{?trw schema:about ?e; schema:isPartOf <https://tr.wikipedia.org/>} SERVICE wikibase:label { bd:serviceParam wikibase:language "tr,en". } } ORDER BY DESC(?sl) LIMIT 40`);
-        if (!b.contains(we)) return;
-        const gor = new Set(), L = r.filter(x => !gor.has(x.e.value) && gor.add(x.e.value)).slice(0, 15).map(x => ({ ...x, yil: wdYil((x.t || x.t2 || {}).value) })).sort((a, b2) => (b2.yil ?? -9999) - (a.yil ?? -9999));
-        we.innerHTML = L.length ? `<ul class="evs">${L.map(x => `<li><a href="${esc(x.trw ? x.trw.value : 'https://www.wikidata.org/wiki/' + qId(x.e.value))}" target="_blank" rel="noopener"><b>${x.yil != null ? YIL.fmt(x.yil) : ''}</b> ${esc(x.eLabel.value)}</a></li>`).join('')}</ul>` : '<p class="note">Wikidata\'da kayıt bulunamadı.</p>';
       } }
     ];
     if (k.w) tabs.push(photoTab(k.w, 12, true));
     showModal({ ikon: '🗺️', title: ad, sub: k.y1 === k.y0 ? `${YIL.fmt(k.y1)} yılının sınırları` : `${YIL.fmt(k.y1)} – ${bit} sınırları`, tabs });
+  }
+  // ---------- 🧬 insanlığın yolculuğu (data/goc.js) ----------
+  function openGoc(bolum) {
+    const G = window.GOC; if (!G) return;
+    const baslangic = `<p>Bugün yaşayan bütün insanlar tek bir türe aittir: <b>Homo sapiens</b> («akıllı insan»). Fosiller ve DNA çalışmaları, türümüzün <b>Afrika</b>'da ortaya çıktığını gösteriyor.</p>
+      <ul class="hap"><li><b>~7-6 milyon yıl önce:</b> İnsanlara giden soy, şempanzelerle ortak atasından Afrika'da ayrıldı.</li>
+      <li><b>~3,2 milyon yıl önce:</b> «Lucy» adı verilen Australopithecus iskeleti (Etiyopya): iki ayak üstünde yürüyordu.</li>
+      <li><b>~1,8 milyon yıl önce:</b> Homo erectus Afrika'dan çıkan ilk insan türü oldu; Gürcistan'daki Dmanisi'de bu yaşta kafatasları bulundu.</li>
+      <li><b>~300.000 yıl önce:</b> Bilinen en eski Homo sapiens fosilleri (Cebel İrhud, Fas).</li>
+      <li><b>~70-60 bin yıl önce:</b> Bugün Afrika dışında yaşayan insanların atalarının büyük göçü başladı.</li>
+      <li><b>~12.000 yıl önce:</b> Buzul çağı bitti; insanlar tarıma başladı.</li></ul>
+      <div class="gos"><button class="phbtn" data-gocgit="cikis">🌍 Kürede göster</button></div>
+      <p class="note">Tarihler fosil, arkeoloji ve DNA çalışmalarına dayanır; yaklaşıktır ve yeni bulgularla değişebilir. Küredeki yollar, haritada MÖ 3000'den önceki bir yıl seçilince görünür.</p>`;
+    const yollar = G.yollar.map(r => `<div class="goc-yol"><h4>${esc(r.ad)} <small>· ${esc(r.etiket)}</small></h4><p>${esc(r.not)}</p><button class="phbtn" data-gocgit="${r.id}">🌍 Kürede göster</button></div>`).join('');
+    const tarim = `<p>Buzul çağı yaklaşık 12 bin yıl önce bitince iklim ısındı. İnsanlar birbirinden habersiz, dünyanın en az 7-8 farklı yerinde bitkileri ve hayvanları evcilleştirdi. Avcı-toplayıcılıktan köy hayatına geçiş böyle başladı.</p>
+      ${G.tarim.map(m => `<div class="goc-yol"><h4>🌾 ${esc(m.ad)} <small>· MÖ ~${m.y.toLocaleString('tr-TR')}</small></h4><p><b>${esc(m.urun)}.</b> ${esc(m.not)}</p></div>`).join('')}
+      <div class="gos"><button class="phbtn" data-gocgit="tarim">🌍 Kürede göster</button></div>`;
+    const kuzen = `<p>Homo sapiens Afrika'dan çıktığında dünya boş değildi: Avrupa ve Batı Asya'da <b>Neandertaller</b>, Asya'da <b>Denisovalılar</b> yaşıyordu.</p>
+      <ul class="hap"><li>Afrika dışındaki insanların DNA'sının yaklaşık <b>%1-2'si</b> Neandertallerden gelir: iki tür karşılaştı ve çocuk sahibi oldu.</li>
+      <li>Yeni Gine ve Avustralya yerlilerinin DNA'sında Denisovalı izleri de bulunur.</li>
+      <li>Neandertaller yaklaşık <b>40 bin yıl önce</b> yok oldu; nedenleri (iklim, rekabet, küçük nüfus) hâlâ tartışılıyor.</li>
+      <li>Endonezya'nın Flores adasında «Hobbit» denen küçük boylu bir insan türü (Homo floresiensis) ~50 bin yıl öncesine kadar yaşadı.</li></ul>`;
+    const ac = bolum === 'tarim' ? 2 : bolum ? 1 : 0;
+    showModal({ ikon: '🧬', title: 'İnsanlığın yolculuğu', sub: 'Afrika\'dan bütün dünyaya', open: ac, tabs: [
+      { ad: '🧬 Başlangıç', html: baslangic }, { ad: '🗺️ Yollar', html: yollar, onShow: b => { if (bolum && bolum !== 'tarim') { const el = b.querySelector(`[data-gocgit="${bolum}"]`); if (el) el.closest('.goc-yol').classList.add('on'); } } },
+      { ad: '🌾 Tarımın doğuşu', html: tarim }, { ad: '👥 Kuzenlerimiz', html: kuzen }, photoTab('Early human migrations', 8, true)] });
+  }
+  function gocGit(id) {
+    const G = window.GOC; if (!G) return;
+    closeModal(); playingBeforeModal = false; playing = false; updPlay();
+    DN.setLayer('goc', true); if (view !== 'dunya') setView('dunya');
+    if (id === 'tarim') { setYear(Math.min(5000, P.from), true); DN.goTo(25, 40, 1.15); return; }
+    const r = G.yollar.find(x => x.id === id); if (!r) return;
+    if (r.son != null) setYear(r.id === 'lapita' ? 1000 : -1300, true); else if (Y < 3400) setYear(P.from, true);
+    const m = r.pts[Math.floor(r.pts.length / 2)]; DN.goTo(m[0], ((m[1] + 540) % 360) - 180, r.id === 'amerika' ? 1.1 : 1.6);
   }
   function openYolculuk(j) {
     showModal({ ikon: '🧭', title: j.ad, sub: `${YIL.fmt(j.y)} · ${j.sure}`, tabs: [{ ad: 'Hikâyesi', html: `${rowsHTML([['Ne zaman', YIL.fmt(j.y)], ['Kim', j.kim], ['Nasıl', j.nasil], ['Ne kadar sürdü', `<b>${j.sure}</b>`], ['Mesafe', `yaklaşık ${fmt(j.km)} km`]])}<p>${j.not}</p><div class="gos"><button class="phbtn" data-yolcugoster="${j.id}">🌍 Haritada göster (${YIL.fmt(j.y)})</button></div>` }] });
@@ -354,15 +414,19 @@
   });
 
   function yearCard(y) {
+    $('#tl-ac-yil').textContent = YIL.fmt(y); // çizelge gizliyken görünen küçük düğme
     if (DUNYA) {
       $('#yc-year').textContent = YIL.fmt(y); $('#yc-ago').textContent = YIL.once(y);
       // küre hangi bölgeye bakıyorsa önce o bölgeler (en yakın 3)
       const v = window.Dunya && window.Dunya.view, uz = b => { const m = BLR[b].isaret || BLR[b].merkez; if (!v || !m) return 0; const dl = ((m[1] - v.lon + 540) % 360) - 180; return (m[0] - v.lat) ** 2 + (dl * Math.cos(v.lat * Math.PI / 180)) ** 2; };
       const L = BSIRA.map(b => { const a = bolgeAn(b, y); return a && a.p ? [uz(b), BLR[b].ikon + ' ' + a.p.kisa] : null; }).filter(Boolean).sort((a, b) => a[0] - b[0]);
       $('#yc-ruler').textContent = L.slice(0, 3).map(x => x[1]).join(' · ') + (L.length > 3 ? ` · +${L.length - 3} bölge` : '');
+      // MÖ 3000 öncesinde haritada devlet azdır: insanlığın yolculuğuna bağlantı
+      $('#yc-goc').hidden = !(y >= 3000 && window.GOC);
       $('#yc-site').textContent = '🌍 Tüm Dünya'; $('#yc-city').hidden = true; return;
     }
     const r = pick(P.rulers, y);
+    $('#yc-goc').hidden = !(y >= 3000 && window.GOC && view === 'dunya');
     $('#yc-year').textContent = `${YIL.fmt(y)}`;
     $('#yc-ago').textContent = YIL.once(y);
     $('#yc-ruler').textContent = r.kisa === '?' ? 'Belirsiz dönem' : `${r.ad} · ${Math.max(1, r.from - y + 1)}. yıl`;
@@ -383,6 +447,8 @@
   function drawTL() {
     tg.setTransform(DPR, 0, 0, DPR, 0, 0); tg.clearRect(0, 0, TW, TH);
     tg.textBaseline = 'middle'; tg.textAlign = 'center';
+    // yakınlaştırılmışken seçili yıl görünen aralıktan çıkarsa çizelge onu ortaya alacak biçimde kayar (oynatırken de)
+    if (tlA != null && (Y > vA() || Y < vB())) { const s = vA() - vB(); tlAralik(Y + s / 2, Y - s / 2); }
     const x0 = yearX(P.from);
     if (DUNYA) {
       // her kıta bir sıra; içinde her bölge ince bir şerit (bölgenin çağları iki tonla)
@@ -423,10 +489,11 @@
       tg.beginPath(); if (w) tg.arc(x, 60, 3.6, 0, 7); else { tg.moveTo(x, 55); tg.lineTo(x + 4.5, 63); tg.lineTo(x - 4.5, 63); tg.closePath(); } tg.fill();
     }
     tg.fillStyle = '#b9a88c'; tg.strokeStyle = '#7d6b52'; tg.font = '10px system-ui';
-    const pxYr = (TW - 28) / (P.from - P.to);
-    const step = [10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000].find(v => v * pxYr >= 64) || 2000;
-    const tick = [5, 10, 20, 25, 50, 100, 250, 500].find(v => v * pxYr >= 7) || 500;
-    for (let y = Math.ceil(P.to / tick) * tick; y <= P.from; y += tick) {
+    const pxYr = (TW - 28) / (vA() - vB());
+    const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000].find(v => v * pxYr >= 64) || 5000;
+    const tick = [1, 2, 5, 10, 20, 25, 50, 100, 250, 500, 1000].find(v => v * pxYr >= 7) || 1000;
+    for (let y = Math.ceil(vB() / tick) * tick; y <= vA(); y += tick) {
+      if (y === 0) continue; // 0 yılı yok: MÖ 1'den MS 1'e geçilir
       const x = yearX(y), big = y % step === 0; tg.beginPath(); tg.moveTo(x, 68); tg.lineTo(x, big ? 76 : 72); tg.stroke();
       if (big) tg.fillText(`${YIL.fmt(y)}`, x, 84);
     }
@@ -444,21 +511,38 @@
     for (const ev of P.events) { const d = Math.abs(yearX(ev.y) - x); if (d < bd) { bd = d; best = ev; } }
     return best;
   };
+  // iki parmakla sıkıştırma: çizelgeyi yakınlaştırır; parmakların ortasındaki yıl yerinde kalır
+  const tlPar = new Map(); let tlSik = null;
+  const tlSikBilgi = () => { const [a, b] = [...tlPar.values()]; return { d: Math.max(20, Math.abs(a - b)), m: (a + b) / 2 }; };
   tcv.addEventListener('pointerdown', ev => {
-    const [x, y] = tlPos(ev); const e = evAt(x, y);
+    const [x, y] = tlPos(ev); tlPar.set(ev.pointerId, x);
+    if (tlPar.size === 2) { dragTL = false; const s = tlSikBilgi(); tlSik = { d0: s.d, span: vA() - vB(), m0: xYear(s.m) }; tcv.setPointerCapture(ev.pointerId); return; }
+    const e = evAt(x, y);
     playing = false; updPlay();
     if (e) { setYear(e.y, true); toast(`<b>${YIL.fmt(e.y)}</b> ${e.t}`); return; }
     dragTL = true; tcv.setPointerCapture(ev.pointerId); setYear(Math.round(xYear(x)), true);
   });
   tcv.addEventListener('pointermove', ev => {
     const [x, y] = tlPos(ev);
+    if (tlPar.has(ev.pointerId)) tlPar.set(ev.pointerId, x);
+    if (tlSik && tlPar.size === 2) { const s = tlSikBilgi(), span = tlSik.span * tlSik.d0 / s.d, A = tlSik.m0 + (s.m - 14) / (TW - 28) * span; tlAralik(A, A - span); return; }
     if (dragTL) { setYear(Math.round(xYear(x)), true); return; }
     hoverEv = evAt(x, y);
     const tip = $('#tip');
     if (hoverEv) { tip.style.display = 'block'; tip.innerHTML = `<b>${YIL.fmt(hoverEv.y)}</b> ${hoverEv.t}`; tip.style.left = clamp(x - 120, 4, TW - 244) + 'px'; }
     else tip.style.display = 'none';
   });
-  tcv.addEventListener('pointerup', () => { dragTL = false; });
+  const tlBirak = ev => { tlPar.delete(ev.pointerId); if (tlPar.size < 2) tlSik = null; dragTL = false; };
+  tcv.addEventListener('pointerup', tlBirak); tcv.addEventListener('pointercancel', tlBirak);
+  // fare tekerleği: yakınlaştır/uzaklaştır (imlecin altındaki yıl sabit); Shift ya da yatay kaydırma: sağa-sola kaydır
+  tcv.addEventListener('wheel', ev => {
+    ev.preventDefault(); const [x] = tlPos(ev);
+    if (ev.shiftKey || Math.abs(ev.deltaX) > Math.abs(ev.deltaY)) { if (tlA == null) return; const dy = -(ev.deltaX || ev.deltaY) / (TW - 28) * (vA() - vB()); tlAralik(vA() + dy, vB() + dy); }
+    else tlZoom(Math.exp(clamp(ev.deltaY, -200, 200) * 0.0025), x);
+  }, { passive: false });
+  $('#tlzin').addEventListener('click', () => tlZoom(0.4));
+  $('#tlzout').addEventListener('click', () => tlZoom(2.5));
+  $('#tlztum').addEventListener('click', () => tlAralik(P.from, P.to));
   tcv.addEventListener('pointerleave', () => { hoverEv = null; $('#tip').style.display = 'none'; });
 
   // ---------- sahnede sürükleme ve tıklama ----------
@@ -540,7 +624,7 @@
     if (dragG.moved || Math.hypot(dx, dy) > 4) { dragG.moved = true; DN.drag(dx, dy); dragG.x = ev.clientX; dragG.y = ev.clientY; }
   });
   const endG = ev => {
-    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (!h && DN.sinirAcik) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
+    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (!h && DN.sinirAcik) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
     gpts.delete(ev.pointerId); if (!gpts.size) dragG = null;
   };
   gcv.addEventListener('pointerup', endG); gcv.addEventListener('pointercancel', endG);
@@ -806,6 +890,7 @@
     if (go) { setYear(+go.dataset.go, true); playingBeforeModal = false; closeModal(); return; }
     const sh = e.target.closest('[data-show]');
     if (sh) { playingBeforeModal = false; closeModal(); showInScene(JSON.parse(sh.dataset.show)); return; }
+    const gg0 = e.target.closest('[data-gocgit]'); if (gg0) { gocGit(gg0.dataset.gocgit); return; }
     const yg0 = e.target.closest('[data-yapigit]'); if (yg0) { playingBeforeModal = false; yapiKurede(yg0.dataset.yapigit); return; }
     const yy0 = e.target.closest('[data-yakinyapi]'); if (yy0) { const i = yy0.dataset.yakinyapi; if (/^yp:/.test(i)) openYapi(i); else showMonument(i); return; }
     const ph = e.target.closest('[data-photos]');
@@ -1214,7 +1299,41 @@
   const bilimTab = () => ({ ad: '🔬 Bilim ve teknoloji', html: `<div class="did"><b>${SP.kisa}</b><p>${K.bilim.cag[SP.id] || ''}</p></div>${K.bilim.genel}` });
 
   // ---------- kontroller ----------
-  function updPlay() { $('#play').textContent = playing ? '⏸' : '▶'; $('#play').title = playing ? 'Durdur' : 'Oynat'; }
+  function updPlay() { $('#play').textContent = playing ? '⏸' : '▶'; $('#play').title = playing ? 'Durdur' : 'Oynat'; $('#tl-ac-oyna').textContent = playing ? '⏸' : '▶'; }
+
+  // ---------- kartları gizleme: yıl kartı (üst) ve zaman çizelgesi (alt) ayrı ayrı ya da birlikte (⛶ tam ekran) ----------
+  const GIZ = (() => { try { return JSON.parse(localStorage.getItem('zy-gizli') || '{}'); } catch (e) { return {}; } })();
+  function gizliUygula() {
+    document.body.classList.toggle('ust-gizli', !!GIZ.ust); document.body.classList.toggle('alt-gizli', !!GIZ.alt);
+    $('#tl-ac').hidden = !GIZ.alt; $('#yc-gizle').textContent = GIZ.ust ? '▾' : '▴';
+    $('#yc-gizle').title = GIZ.ust ? 'Yıl kartını aç' : 'Yıl kartını küçült'; $('#tamekran').classList.toggle('on', !!(GIZ.ust && GIZ.alt));
+    if (GIZ.alt) $('#tarihpop').hidden = true;
+    try { localStorage.setItem('zy-gizli', JSON.stringify(GIZ)); } catch (e) { /* */ }
+    requestAnimationFrame(resize);
+  }
+  $('#yc-gizle').addEventListener('click', ev => { ev.stopPropagation(); GIZ.ust = !GIZ.ust; gizliUygula(); });
+  $('.yearcard').addEventListener('click', ev => { if (GIZ.ust && !ev.target.closest('button, a')) { GIZ.ust = false; gizliUygula(); } });
+  $('#yc-goc').addEventListener('click', ev => { ev.stopPropagation(); openGoc(); });
+  $('#tl-gizle').addEventListener('click', () => { GIZ.alt = true; gizliUygula(); });
+  $('#tl-ac').addEventListener('click', ev => { if (ev.target.closest('#tl-ac-oyna')) { $('#play').click(); return; } GIZ.alt = false; gizliUygula(); });
+  $('#tamekran').addEventListener('click', () => { const hepsi = !!(GIZ.ust && GIZ.alt); GIZ.ust = GIZ.alt = !hepsi; gizliUygula(); });
+  gizliUygula();
+
+  // ---------- 📅 tarihe git ----------
+  $('#tarihgit').addEventListener('click', () => {
+    const p = $('#tarihpop'), ac = p.hidden; p.hidden = !ac; $('#tarihgit').classList.toggle('on', ac);
+    if (ac) { const y = Math.round(Y); $('#tp-yil').value = Math.abs(y) || 1; $('#tp-cag').value = y > 0 ? 'mo' : 'ms'; $('#tp-not').textContent = `Bu çizelge ${YIL.fmt(P.from)} – ${P.to <= -2026 ? 'bugün' : YIL.fmt(P.to)} arasını kapsıyor.`; setTimeout(() => { $('#tp-yil').focus(); $('#tp-yil').select(); }, 30); }
+  });
+  $('#tp-form').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const n = Math.abs(parseInt($('#tp-yil').value, 10)); if (!n) { $('#tp-not').textContent = 'Bir yıl yaz (ör. 1453).'; return; }
+    const y = $('#tp-cag').value === 'mo' ? n : -n;
+    if (y > P.from || y < P.to) { $('#tp-not').textContent = `${YIL.fmt(y)} bu çizelgenin dışında: ${YIL.fmt(P.from)} – ${P.to <= -2026 ? 'bugün' : YIL.fmt(P.to)} arasında bir yıl seç.`; return; }
+    playing = false; updPlay(); setYear(y, true);
+    if (tlA != null) { const s = vA() - vB(); tlAralik(y + s / 2, y - s / 2); }
+    $('#tarihpop').hidden = true; $('#tarihgit').classList.remove('on');
+    toast(`📅 <b>${YIL.fmt(y)}</b>`);
+  });
   $('#play').addEventListener('click', () => { if (Y <= P.to) Y = P.from; playing = !playing; follow = true; updPlay(); });
   $('#back').addEventListener('click', () => { setYear(Math.round(Y) + 1, true); });
   $('#fwd').addEventListener('click', () => { setYear(Math.round(Y) - 1, true); });
