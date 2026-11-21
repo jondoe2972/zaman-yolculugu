@@ -24,7 +24,7 @@
       'js/oyun/topraklar.js?v=3'
     ],
     hayvan: [
-      'js/oyun/hayvan-oyun.js?v=2'
+      'js/oyun/hayvan-oyun.js?v=3'
     ]
   };
   const dosyaSoz = new Map();
@@ -114,7 +114,7 @@
     },
     {
       id: 'hayvan', kutu: 'hayvan-oyun', ikon: '🐾', ad: 'Hayvanlar Alemi', yeni: true,
-      alt: () => { const r = hayvanRekor(); return r ? `Bu hayvan nerede yaşar? + Doğa Bilgini · 🏆 Seri: ${r}` : 'Fotoğraftan yaşam bölgesini bil + 8 soruluk doğa testi'; },
+      alt: () => { const r = hayvanRekor(); return r ? `Bu hayvan nerede yaşar? + Doğa Bilgini · 🏆 Seri: ${r}` : 'Fotoğraftan yaşam bölgesini bil + Doğa Bilgini yarışması'; },
       ac: async () => {
         await paketYukle('hayvan');
         if (window.HayvanOyunu) window.HayvanOyunu.ac();

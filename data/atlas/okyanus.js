@@ -134,6 +134,7 @@ window.ATLAS_OKYANUS = {
       pts: [[24, -82], [28, -79], [35, -74], [39, -64], [43, -46], [49, -28], [56, -12], [63, 2]],
       neden: 'Meksika Körfezi\'nden çıkan sıcak sular, rüzgârlar ve Dünya\'nın dönüşü (Coriolis etkisi) ile kuzeydoğuya, Avrupa\'ya doğru taşınır.',
       etki: 'Batı ve Kuzey Avrupa\'yı aynı enlemdeki Kanada\'ya göre kışın 5–10 °C daha ılık tutar; Norveç limanlarının kışın donmamasını sağlar.',
+      dogaOnemi: 'Avrupa yılan balığı yavrularını Sargasso Denizi\'nden Avrupa nehirlerine taşır; deniz kaplumbağaları ve göçmen orkinoslar için sıcak bir okyanus otoyolu görevi görür ve mevsimsel göç takvimini tetikler.',
       ilginc: 'Taşıdığı su miktarı, dünyadaki tüm nehirlerin toplam debisinin yaklaşık 30 katıdır.',
       w: 'Gulf Stream'
     },
@@ -143,6 +144,7 @@ window.ATLAS_OKYANUS = {
       pts: [[66, -61], [59, -59], [52, -53], [46, -50], [41, -54]],
       neden: 'Arktik Okyanusu ve Baffin Körfezi\'nin buz gibi suları Kanada\'nın doğu kıyısı boyunca güneye iner.',
       etki: 'Sıcak Gulf Stream ile Newfoundland açıklarında çarpışır; yoğun sisler ve dünyanın en bereketli balıkçılık alanlarından biri oluşur.',
+      dogaOnemi: 'Oksijen ve mineralce zengin kutup sularını güneye taşıyarak plankton patlaması yaratır; yaz aylarında kambur ve mavi balinaları, fokları ve milyonlarca deniz kuşunu Newfoundland kıyılarına çeker.',
       ilginc: 'Grönland buzullarından kopan dev buzdağlarını güneye taşır; 1912\'de Titanik\'in çarptığı buzdağı da bu akıntıyla inmişti.',
       w: 'Labrador Current'
     },
@@ -152,6 +154,7 @@ window.ATLAS_OKYANUS = {
       pts: [[41, -11], [34, -13], [27, -16], [19, -18], [13, -21]],
       neden: 'Kuzey Atlantik Döngüsü\'nün doğu kolu olarak serin kuzey sularını İberya ve Kuzeybatı Afrika boyunca güneye taşır.',
       etki: 'Sahra kıyılarında buharlaşmayı azaltarak kıyı çölleşmesini güçlendirir; dipten besin yüklü soğuk su çıkardığı için balıkçılığı zenginleştirir.',
+      dogaOnemi: 'Derinden yüzeye çıkardığı besinlerle Batı Afrika kıyılarında dev sardalya sürüleri oluşturur; Akdeniz foku, yunuslar ve Atlantik\'i aşan deniz kaplumbağaları bu akıntıyla yol alır.',
       ilginc: '15. yüzyıldan itibaren Portekizli ve İspanyol gemileri Amerika\'ya giderken bu akıntı ve alize rüzgârlarından yararlandı.',
       w: 'Canary Current'
     },
@@ -161,6 +164,7 @@ window.ATLAS_OKYANUS = {
       pts: [[-8, -33], [-16, -37], [-24, -42], [-33, -50], [-40, -54]],
       neden: 'Güney Ekvator Akıntısı Brezilya kıyılarına çarpınca güneye yönelerek sıcak bir kıyı akıntısı oluşturur.',
       etki: 'Brezilya\'nın güney kıyılarına ılık ve nemli hava taşır; güneyde soğuk Falkland Akıntısı ile karşılaşır.',
+      dogaOnemi: 'Güneyde soğuk Falkland Akıntısı ile buluştuğu bölge (Arjantin açıkları) Güney Atlantik\'in en büyük beslenme alanına dönüşür; Macellan penguenleri ve güney gerçek balinaları göç zamanını bu su sıcaklığı değişimine göre ayarlar.',
       ilginc: 'Gulf Stream\'in güney yarımküredeki karşılığıdır ancak daha sığ ve daha zayıftır.',
       w: 'Brazil Current'
     },
@@ -170,6 +174,7 @@ window.ATLAS_OKYANUS = {
       pts: [[-35, 16], [-27, 13], [-19, 11], [-11, 10]],
       neden: 'Güney Okyanusu\'nun soğuk suları Güney Afrika ve Namibya kıyıları boyunca kuzeye doğru akar.',
       etki: 'Kıyıda aşırı soğuk su ve yoğun sis oluşturur; Namib Çölü\'nün kurak kalmasının başlıca nedenlerinden biridir.',
+      dogaOnemi: 'Kıyıdaki soğuk sis, Namib Çölü\'ndeki böcek ve bitkilerin tek su kaynağıdır; denizde ise dev sardalya göçünü besleyerek Afrika penguenleri, kürklü foklar ve balinalar için hayati bir besin zinciri kurar.',
       ilginc: 'Dipten yükselen soğuk sular bol plankton taşır; bu sayede Güney Afrika kıyılarında penguenler, foklar ve büyük beyaz köpekbalıkları yaşar.',
       w: 'Benguela Current'
     },
@@ -179,6 +184,7 @@ window.ATLAS_OKYANUS = {
       pts: [[-14, 42], [-22, 37], [-30, 32], [-36, 23], [-38, 17]],
       neden: 'Hint Okyanusu\'nun sıcak suları Mozambik Kanalı\'ndan geçip Güney Afrika\'nın doğu kıyısını izleyerek güneybatıya hızlanır.',
       etki: 'Güney Afrika\'nın doğu kıyılarını ılık ve yağışlı yapar; Güney Okyanusu\'na çarpınca dev "Agulhas halkaları" hâlinde sıcak suyu Atlas Okyanusu\'na sızdırır.',
+      dogaOnemi: 'Her kış kıyıya sokulan soğuk su koridoruyla etkileşerek milyonlarca balığın katıldığı ünlü "Güney Afrika Sardalya Göçü"nü başlatır; yunuslar, köpekbalıkları ve sümsük kuşları bu akıntı takvimini izler.',
       ilginc: 'Ters yönden esen güney fırtınalarıyla çarpıştığında 25–30 metrelik "dev haydut dalgalar" (rogue waves) üretebilir.',
       w: 'Agulhas Current'
     },
@@ -188,6 +194,7 @@ window.ATLAS_OKYANUS = {
       pts: [[16, 124], [24, 124], [30, 130], [35, 141], [39, 155], [41, 172]],
       neden: 'Pasifik\'in sıcak Ekvator suları Filipinler ve Tayvan\'dan kuzeye yönelip Japonya kıyısı boyunca hızla akar.',
       etki: 'Japonya\'nın güney kıyılarını ılıtır ve mercan resiflerinin dünyanın en kuzey noktalarından birinde yaşamasını sağlar.',
+      dogaOnemi: 'Kuzeyde soğuk Oyashio Akıntısı ile buluştuğunda Pasifik\'in en zengin balık ve kalamar sofrası kurulur; mavi yüzgeçli orkinoslar ve genç deniz kaplumbağaları bu akıntıyı göç koridoru olarak kullanır.',
       ilginc: 'Adı Japoncada "Kara Akıntı" demektir; planktonca fakir ama çok berrak olduğu için uzaktan koyu lacivert görünür.',
       w: 'Kuroshio Current'
     },
@@ -197,6 +204,7 @@ window.ATLAS_OKYANUS = {
       pts: [[-44, -76], [-34, -74], [-22, -72], [-12, -79], [-2, -84]],
       neden: 'Antarktika\'dan gelen soğuk sular Şili ve Peru kıyıları boyunca Ekvator\'a doğru yükselir.',
       etki: 'Dünyanın en kurak çölü olan Atakama Çölü\'nün oluşmasında büyük rol oynar; aynı zamanda dünyanın en zengin balıkçılık sularını yaratır.',
+      dogaOnemi: 'Dünyadaki deniz balıkçılığının ~%18\'ini tek başına besleyen dev hamsi sürülerini yaratır; Galápagos penguenleri, deniz iguanaları ve pelikan kolonileri hayatta kalmak için bu akıntının getirdiği besine bağımlıdır.',
       ilginc: 'Ekvator\'a bu kadar yakın olan Galápagos Adaları\'nda penguenlerin yaşayabilmesinin sırrı bu soğuk akıntıdır!',
       w: 'Humboldt Current'
     },
@@ -206,6 +214,7 @@ window.ATLAS_OKYANUS = {
       pts: [[-14, 148], [-22, 154], [-30, 155], [-38, 151]],
       neden: 'Mercan Denizi\'nin sıcak tropikal suları Avustralya\'nın doğu kıyısı boyunca güneye doğru akar.',
       etki: 'Büyük Set Resifi\'nden Sidney\'e kadar tropikal deniz canlılarını güneye taşır ve doğu kıyılarını ılıtır.',
+      dogaOnemi: 'Mercan larvalarını ve yavru tropikal balıkları güneye taşıyarak kıyı resiflerini yeniler; kambur balinalar güneye Antarktika\'ya dönerken akıntının hızından yararlanır.',
       ilginc: 'Animasyon filmi "Kayıp Balık Nemo"da deniz kaplumbağalarının yolculuk ettiği ünlü "EAC" otoyolu tam olarak bu akıntıdır.',
       w: 'East Australian Current'
     },
@@ -215,6 +224,7 @@ window.ATLAS_OKYANUS = {
       pts: [[-56, -70], [-54, -30], [-52, 15], [-54, 70], [-56, 130], [-57, 175]],
       neden: 'Güney Okyanusu\'nda karaların engellemediği batı rüzgârları suyu kesintisiz doğuya sürükler.',
       etki: 'Sıcak suların Antarktika kıyılarına ulaşmasını engelleyerek kıtanın dev buz tabakasını korur ve üç büyük okyanusu birbirine bağlar.',
+      dogaOnemi: 'Derin okyanusun besin ve oksijenini tüm gezegene pompalayan "küresel taşıyıcı bant"ın motorudur; milyarlarca ton Antarktika krilini besleyerek mavi balinaların, penguenlerin ve albatrosların göç döngüsünü ayakta tutar.',
       ilginc: 'Saniyede ~130 milyon metreküp su taşır — dünyadaki tüm nehirlerin toplamının yaklaşık 100 katıdır.',
       w: 'Antarctic Circumpolar Current'
     }

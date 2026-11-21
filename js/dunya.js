@@ -12,7 +12,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, akinti: false, hayvan: false, cografya: false, donum: false };
+  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, akinti: false, hayvan: false, cografya: false, nehir: false, hayvangoc: false, liman: false, donum: false };
 
   // ---------- veri ----------
   const VERI = window.DUNYA_VERI || { kara: [], nehir: [] };
@@ -857,6 +857,65 @@ window.Dunya = (() => {
         hits.push({ kind: 'cografya', cg, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
       }
     }
+    // 🏞️ Dünya Nehir İsimleri (büyüklüğüne oranla yaklaştıkça/uzaklaştıkça belirir — data/atlas/nehirler.js)
+    if ((layers.nehir || layers.cografya) && window.ATLAS_NEHIRLER) {
+      for (const nr of window.ATLAS_NEHIRLER) {
+        const minZ = nr.boy === 3 ? 1.55 : nr.boy === 2 ? 2.75 : 4.4;
+        if (view.z < minZ) continue;
+        const [x, y, z] = P(...nr.ll); if (z <= 0.1 || x < -24 || x > W + 24 || y < -24 || y > H + 24) continue;
+        const hov = hover && hover.kind === 'nehir' && hover.nr === nr;
+        const fa = clamp((view.z - minZ) / 0.65, 0.25, 1);
+        const sz = nr.boy === 3 ? 11.2 : nr.boy === 2 ? 10.4 : 9.6;
+        lab(hov ? 96 : 42 + nr.boy * 5, x, y, `~ ${nr.ad}`, { size: sz, w: 700, it: true, serif: true, col: hov ? '#ffe89c' : '#cdeeff', halo: 2.8, haloCol: 'rgba(14,42,68,0.9)', a: hov ? 1 : fa, kay: true });
+        const hw = Math.max(28, nr.ad.length * 3.4);
+        hits.push({ kind: 'nehir', nr, x0: x - hw, x1: x + hw, y0: y - 9, y1: y + 9 });
+      }
+    }
+    // 🐋🦅 Hayvanların Yıllık Göç Döngüleri (data/atlas/hayvan-goc.js)
+    if (layers.hayvangoc && window.ATLAS_HAYVAN_GOC) {
+      for (const hg of window.ATLAS_HAYVAN_GOC) {
+        const d = yolHazirla(hg), hov = hover && hover.kind === 'hayvangoc' && hover.hg === hg;
+        g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+        g.beginPath(); linePath(d.p);
+        g.strokeStyle = hov ? 'rgba(255,214,102,0.5)' : 'rgba(20,30,45,0.45)'; g.lineWidth = hov ? 8.5 : 5.5; g.stroke();
+        g.strokeStyle = hov ? '#ffd666' : (hg.renk || '#34d399'); g.lineWidth = hov ? 3 : 2.1; g.setLineDash([7, 5]); g.stroke(); g.setLineDash([]);
+        yolUclari(d, hov ? '#ffd666' : (hg.renk || '#34d399'), true);
+        // Hat boyunca hareket eden göçmen hayvan simgesi
+        const k = (T / 7 + (hg.pts[0][0] * 0.013)) % 1;
+        const [px, py, pz] = P(...yolNokta(d, d.L * (k < 0 ? k + 1 : k)));
+        if (pz > 0.08) {
+          g.fillStyle = 'rgba(20,26,38,0.88)'; g.strokeStyle = hov ? '#ffd666' : (hg.renk || '#34d399'); g.lineWidth = 1.6;
+          g.beginPath(); g.arc(px, py, hov ? 11.5 : 9.5, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 13.5 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(hg.ik, px, py + 0.5);
+        }
+        g.restore();
+        const [mx, my, mz] = P(...yolNokta(d, d.L * 0.5));
+        if (mz > 0.12 && (view.z >= 1.35 || hov)) lab(hov ? 97 : 58, mx, my - 12, `${hg.ik} ${hg.ad.split(' (')[0]}`, { size: 10.5, w: 700, col: '#fff7dc', halo: 3, haloCol: 'rgba(14,24,34,0.9)', kay: true });
+        for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.06) hits.unshift({ kind: 'hayvangoc', hg, x0: x - 8, x1: x + 8, y0: y - 8, y1: y + 8 }); }
+        if (pz > 0.08) hits.push({ kind: 'hayvangoc', hg, x0: px - 12, x1: px + 12, y0: py - 12, y1: py + 12 });
+      }
+    }
+    // ⚓ Dünya Çapındaki Önemli Limanlar (data/atlas/limanlar.js)
+    if (layers.liman && window.ATLAS_LIMANLAR) {
+      const shownL = [];
+      for (const lm of window.ATLAS_LIMANLAR) {
+        const [x, y, z] = P(...lm.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+        if (shownL.some(q => Math.abs(q[0] - x) < 24 && Math.abs(q[1] - y) < 24)) continue;
+        shownL.push([x, y]);
+        const hov = hover && hover.kind === 'liman' && hover.lm === lm;
+        const s0 = hov ? 12 : 9.5;
+        g.save();
+        g.fillStyle = hov ? '#1d4ed8' : '#163457'; g.strokeStyle = hov ? '#ffd666' : '#f3d58d'; g.lineWidth = hov ? 2.2 : 1.5;
+        g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
+        g.font = `${hov ? 13 : 10.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText('⚓', x, y + 0.5);
+        g.restore();
+        obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
+        if (view.z >= 1.65 || hov) lab(hov ? 97 : 60, x, y + s0 + 10, lm.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e8f4ff', halo: 2.8, haloCol: 'rgba(12,24,44,0.9)', kay: true });
+        hits.push({ kind: 'liman', lm, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
+      }
+    }
     // 🐾 Bölge hayvanları ve okyanus canlıları (nesli tükenenler yıla göre görünür — data/atlas/hayvanlar.js)
     if (layers.hayvan && window.ATLAS_HAYVANLAR && view.z >= 1.35) {
       const minD = clamp(40 - view.z * 2.5, 24, 38);
@@ -1093,6 +1152,9 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'denizolay') tip(hover.x1 + 6, hover.y0, hover.o.ad, `${hover.o.tip === 'girdap' ? '🌀 Girdap / Döngü' : '🌪️ Fırtına alanı'} · ${hover.o.yer} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'hayvan') tip(hover.x1 + 6, hover.y0, `${hover.h.ik} ${hover.h.ad}`, `${hover.h.bolge} · ${hover.h.durum} · tıkla: bilgi ve fotoğraf`);
     else if (hover && hover.kind === 'cografya') tip(hover.x1 + 6, hover.y0, hover.cg.ad, `${hover.cg.konum} · tıkla: tarihî önemi ve fotoğraf`);
+    else if (hover && hover.kind === 'nehir') tip(hover.x1 + 6, hover.y0, `🏞️ ${hover.nr.ad}`, `${hover.nr.uzunluk} · ${hover.nr.havza} · tıkla: doğa ve tarih`);
+    else if (hover && hover.kind === 'hayvangoc') tip(hover.x1 + 6, hover.y0, `${hover.hg.ik} ${hover.hg.ad}`, `${hover.hg.mesafe} · tıkla: yıllık göç döngüsü`);
+    else if (hover && hover.kind === 'liman') tip(hover.x1 + 6, hover.y0, `⚓ ${hover.lm.ad}`, `${hover.lm.ulke} · ${hover.lm.rol} · tıkla: liman bilgisi`);
     else if (hover && hover.kind === 'hatyapi') tip(hover.x1 + 6, hover.y0, hover.hy.ad, `${hover.hy.yer} · ${hover.hy.uzunluk} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'donum') tip(hover.x1 + 6, hover.y0, `⚡ ${hover.d.ad}`, `${hover.d.yilYazi} · ${hover.d.yer} · tıkla: dünyayı nasıl değiştirdi?`);
     else if (hover && hover.kind === 'magara') tip(hover.x1 + 6, hover.y0, `🪨 ${hover.m.ad}`, `${hover.m.donem} · ${hover.m.yer} · tıkla: kazı buluntuları ve nüfus`);

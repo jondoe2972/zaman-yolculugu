@@ -30,6 +30,9 @@
     for (const cg of window.ATLAS_COGRAFYA || []) add({ tur: ({ dag: 'Dağ', col: 'Çöl / Bozkır', havza: 'Tarihî Havza', nehir: 'Nehir' })[cg.tur] || 'Coğrafya', ikon: ({ dag: '🏔️', col: '🏜️', havza: '🌿', nehir: '🌊' })[cg.tur] || '🗺️', ad: cg.ad, alt: cg.konum, kw: [cg.konum, cg.w], oncelik: 5, act: () => ZY().openCografya(cg.id) });
     for (const d of window.DONUM_NOKTALARI || []) add({ tur: 'Büyük Olay', ikon: '⚡', ad: d.ad, alt: `${d.yilYazi} · ${d.yer}`, kw: [d.yer, d.w], oncelik: 6, act: () => ZY().openDonum(d.id) });
     for (const m of window.ATLAS_MAGARALAR || []) add({ tur: 'Tarihöncesi Kazı', ikon: '🪨', ad: m.ad, alt: `${m.donem} · ${m.yer}`, kw: [m.yer, m.w], oncelik: 5, act: () => ZY().openMagara(m.id) });
+    for (const lm of window.ATLAS_LIMANLAR || []) add({ tur: 'Liman', ikon: '⚓', ad: lm.ad, alt: `${lm.ulke} · ${lm.rol}`, kw: [lm.ulke, lm.w], oncelik: 5, act: () => ZY().openLiman(lm.id) });
+    for (const nr of window.ATLAS_NEHIRLER || []) add({ tur: 'Nehir', ikon: '🏞️', ad: nr.ad, alt: `${nr.uzunluk} · ${nr.havza}`, kw: [nr.havza, nr.w], oncelik: 5, act: () => ZY().openNehir(nr.id) });
+    for (const hg of window.ATLAS_HAYVAN_GOC || []) add({ tur: 'Göç Döngüsü', ikon: hg.ik || '🐋', ad: hg.ad, alt: hg.mesafe, kw: [hg.w], oncelik: 5, act: () => ZY().openHayvanGoc(hg.id) });
     return out;
   }
   function search(q) {
