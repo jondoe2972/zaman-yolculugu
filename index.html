@@ -3,9 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Zaman Yolculuğu · Mısır</title>
-<meta name="description" content="Zaman çizelgesini kaydır, Antik Mısır'da piramitlerin yükselişini canlı bir sahnede izle.">
-<link rel="stylesheet" href="css/stil.css?v=56">
+<title>⏳ Zaman Yolculuğu: Tarihin Derinliklerinde Kaybolmaya Hazır Mısın?</title>
+<meta name="description" content="Dünya tarihini interaktif küre ve canlı sahnelerle keşfet, tarihte yolculuğa çık, o dönemde bir gününü yaşa ve eğlenceli tarih oyunları oyna.">
+<meta property="og:title" content="⏳ Zaman Yolculuğu: Tarihin Derinliklerinde Kaybolmaya Hazır Mısın?">
+<meta property="og:description" content="17 bölge, binlerce yıllık interaktif dünya küresi, canlı tarih sahneleri, o dönemde yaşa deneyimi ve tarih oyunlarıyla geçmişe yolculuk yap.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jondoe2972.github.io/zaman-yolculugu/">
+<meta property="og:site_name" content="Zaman Yolculuğu">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="⏳ Zaman Yolculuğu: Tarihin Derinliklerinde Kaybolmaya Hazır Mısın?">
+<meta name="twitter:description" content="Dünya tarihini interaktif kürede keşfet, o dönemde bir gününü yaşa ve tarih oyunlarını oyna.">
+<meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23241b14'/%3E%3Cpath d='M18 12h28v6c0 7-6 11-11 14 5 3 11 7 11 14v6H18v-6c0-7 6-11 11-14-5-3-11-7-11-14v-6z' fill='none' stroke='%23ffd666' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 18h18c0 4-4 7-9 10-5-3-9-6-9-10zm9 18c5 3 9 6 9 10H23c0-4 4-7 9-10z' fill='%23ffd666'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/stil.css?v=57">
 </head>
 <body>
 <header class="top">
@@ -22,8 +34,8 @@
 </header>
 <main class="app">
   <section class="stage">
-    <canvas id="scene" aria-label="Canlı sahne: Nil vadisi ve piramitler"></canvas>
-    <canvas id="map" aria-label="Mısır haritası"></canvas>
+    <canvas id="scene" aria-label="Canlı tarih sahnesi"></canvas>
+    <canvas id="map" aria-label="Bölge haritası"></canvas>
     <canvas id="globe" aria-label="Dünya küresi"></canvas>
     <div class="globectl"><button id="gzin" title="Yakınlaştır">＋</button><button id="gzout" title="Uzaklaştır">－</button><button id="tamekran" class="tamekran" title="Tam ekran: yıl kartını ve zaman çizelgesini gizle">⛶</button></div>
     <div class="mapctl">
@@ -51,7 +63,6 @@
       <div class="ys-liste" hidden></div>
     </div>
     <div id="toast" class="toast"></div>
-    <button id="s3hizli" class="katbtn s3hizli" hidden title="İstanbul'u 3D gez: surlar, Ayasofya, mahalleler yıl yıl">🧊<span> İstanbul 3D</span></button>
     <button id="katbtn" class="katbtn" aria-expanded="false" title="Haritada neler gösterilsin?">🗂️<span> Katmanlar</span></button>
     <div id="katman" class="katpop" hidden>
       <div class="kp-kure">
@@ -110,7 +121,7 @@
     <button id="tarihgit" class="tarihgit" title="Belirli bir tarihe git">📅</button>
     <button id="tl-gizle" class="tl-gizle" title="Zaman çizelgesini gizle">⌄</button>
   </div>
-  <div id="tarihpop" class="tarihpop" hidden><b>📅 Tarihe git</b><form id="tp-form" class="tp-sat"><input id="tp-yil" type="number" min="0" step="1" inputmode="numeric" placeholder="ör. 1453" aria-label="Yıl"><select id="tp-cag" aria-label="Çağ"><option value="ms">MS</option><option value="mo">MÖ</option></select><button class="tp-git" type="submit">Git</button></form><small id="tp-not"></small></div>
+  <div id="tarihpop" class="tarihpop" hidden><b>📅 Tarihe git</b><form id="tp-form" class="tp-sat"><input id="tp-yil" type="number" min="1" step="1" inputmode="numeric" placeholder="ör. 1453" aria-label="Yıl"><select id="tp-cag" aria-label="Çağ"><option value="ms">MS</option><option value="mo">MÖ</option></select><button class="tp-git" type="submit">Git</button></form><small id="tp-not"></small></div>
   <div class="tlwrap">
     <canvas id="timeline" aria-label="Zaman çizelgesi"></canvas>
     <div id="tip" class="tip"></div>
@@ -122,19 +133,30 @@
   <div class="icbody"><canvas id="iccv"></canvas>
     <aside class="icside"><div class="ictext"></div><div class="iclist"></div><p class="icnote note"></p></aside></div>
 </div>
-<div id="u3" class="u3" hidden>
-  <div class="u3-head"><button class="u3-back">← Geri</button><div><b class="u3-title"></b><small class="u3-durum"></small></div>
-    <div class="u3-yil"><button data-dy="50">« 50</button><button data-dy="10">‹ 10</button><button data-dy="-10">10 ›</button><button data-dy="-50">50 »</button></div>
-    <div class="u3-cam"><button data-cam="genel">🔭 Genel</button><button data-cam="rampa">🧱 Rampaya yaklaş</button><button data-cam="ocak">⛏️ Taş ocağı</button><button data-cam="kanal">⛵ Liman ve kayıklar</button></div>
-    <button class="u3-info">ℹ️ Bilgi kartı</button></div>
-  <div class="u3-body"><canvas id="u3cv"></canvas><div class="u3-labels"></div>
-    <p class="u3-ipucu">Sürükle: etrafında dön · tekerlek / iki parmak: yaklaş · yapı adlarına tıkla: oraya git · yıl düğmeleriyle inşaatı izle</p></div>
-</div>
-<div id="s3" class="s3" hidden>
-  <div class="s3-ust"><button class="s3-geri">← Geri</button><b class="s3-baslik">Şehir · 3D</b><b class="s3-yil"></b><div class="s3-kam"></div></div>
-  <div class="s3-govde"><canvas id="s3cv"></canvas><div class="s3-etiket"></div><div class="s3-donem"></div><div class="s3-bilgi" hidden></div>
-    <p class="s3-ipucu">Sürükle: döndür · sağ tık ya da Shift + sürükle: kaydır · tekerlek / iki parmak: yaklaş · yapı adlarına tıkla</p></div>
-  <div class="s3-alt"><button class="s3-oynat" title="Zamanı akıt">▶</button><input type="range" class="s3-kaydir" aria-label="Yıl"><div class="s3-hizli"></div></div>
+<div id="hosgeldin" class="hosgeldin" hidden>
+  <div class="hg-kart" role="dialog" aria-modal="true" aria-labelledby="hg-baslik">
+    <button class="hg-x" title="Kapat" aria-label="Kapat">✕</button>
+    <div class="hg-ust">
+      <span class="hg-logo">⏳</span>
+      <h1 id="hg-baslik">Zaman Yolculuğu'na Hoş Geldin</h1>
+      <p>Binlerce yıllık dünya tarihini nasıl keşfetmek istersin?</p>
+    </div>
+    <div class="hg-sec">
+      <button class="hg-btn" data-hg="kesfet">
+        <span class="hg-ik">🌍</span>
+        <span><b>Tarihi Keşfet</b><small>Dünya küresini döndür, sınırların ve uygarlıkların değişimini izle</small></span>
+      </button>
+      <button class="hg-btn" data-hg="oyun">
+        <span class="hg-ik">🎮</span>
+        <span><b>Eğlenceli Oyunlar Oyna</b><small>Ben Kimim?, Sınırdan Bil ve şaşırtıcı tarih bilgileriyle kendini dene</small></span>
+      </button>
+      <button class="hg-btn" data-hg="yasa">
+        <span class="hg-ik">🧑‍🌾</span>
+        <span><b>O Dönemde Yaşa</b><small>Başka bir çağdan bir hayat seç, şafaktan geceye bir gününü yaşa</small></span>
+      </button>
+    </div>
+    <button class="hg-gec" data-hg="kapat">Pencereyi kapatıp serbestçe gez</button>
+  </div>
 </div>
 <div id="arama" class="arama" hidden>
   <div class="ara-kutu" role="dialog" aria-label="Arama">
@@ -154,11 +176,8 @@
     <div class="mbody"></div>
   </div>
 </div>
-<script src="js/yil.js?v=2"></script>
-<script src="js/bolge.js?v=7"></script>
-<script src="vendor/three/three.min.js"></script>
-<script type="importmap">{ "imports": { "three": "./vendor/three/jsm/three-shim.js" } }</script>
-<script type="module" src="js/uc-yukleyici.js?v=1"></script>
+<script src="js/yil.js?v=3"></script>
+<script src="js/bolge.js?v=8"></script>
 <script src="js/sahne.js?v=32"></script>
 <script src="js/harita.js?v=28"></script>
 <script src="js/cizim.js?v=29"></script>
@@ -168,29 +187,17 @@
 <script src="data/roller.js?v=2"></script>
 <script src="data/sinir/sinir-dizin.js?v=1"></script>
 <script src="js/dunya.js?v=63"></script>
-<script src="data/sehir3d-istanbul.js?v=3"></script>
-<script src="js/sehir3d.js?v=4"></script>
-<script src="js/uc-boyut.js?v=42"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
 <script src="data/yapilar/avrupa.js?v=1"></script>
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="js/sahne-harita.js?v=6"></script>
-<script src="js/uygulama.js?v=62"></script>
+<script src="js/uygulama.js?v=63"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=3"></script>
-<script src="data/oyun/kim.js?v=2"></script>
-<script src="data/oyun/kim-kolay.js?v=1"></script>
-<script src="data/oyun/kim-orta.js?v=1"></script>
-<script src="data/oyun/kim-zor.js?v=1"></script>
-<script src="data/oyun/kim-dunya.js?v=1"></script>
-<script src="js/oyun/cizimler.js?v=3"></script>
-<script src="js/oyun/kim.js?v=4"></script>
-<script src="data/oyun/sinir-bil.js?v=1"></script>
-<script src="js/oyun/sinir-bil.js?v=2"></script>
-<script src="js/oyun/oyunlar.js?v=2"></script>
+<script src="js/oyun/oyunlar.js?v=3"></script>
 <script src="js/ara.js?v=7"></script>
 </body>
 </html>

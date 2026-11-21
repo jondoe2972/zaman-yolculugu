@@ -8,7 +8,7 @@
     misir: {
       id: 'misir', ad: 'Mısır', ikon: '🏺', merkez: [27.2, 31.0], merkezZ: 6, isaret: [27, 31],
       hakkinda: 'Bu çağda Mısır', simgeAd: "Mısır'ın simgeleri", bugunAd: 'Bugünkü Mısır', antikAd: 'Antik Mısır',
-      uc3: true, kultur: true,
+      kultur: true,
       dosyalar: ['data/misir-erken.js?v=28', 'data/misir-eski-krallik.js?v=28', 'data/misir-bilgi.js?v=28', 'data/misir-orta-krallik.js?v=28',
         'data/misir-yeni-krallik.js?v=28', 'data/misir-gec-donem.js?v=28', 'data/misir-genel.js?v=28', 'data/misir-kultur.js?v=28',
         'data/misir-sinirlar.js?v=28', 'data/olaylar.js?v=28', 'data/misir-sehir-bilgi.js?v=28', ...ORTAK,
@@ -17,7 +17,7 @@
     anadolu: {
       id: 'anadolu', ad: 'Anadolu', ikon: '🏛️', merkez: [39.0, 34.5], merkezZ: 5.5, isaret: [39, 35],
       hakkinda: 'Bu çağda Anadolu', yonelme: "Anadolu'ya", hukumdar: 'hükümdar', simgeGiris: "Anadolu'yu Anadolu yapan yerler, halklar ve eserler.", simgeAlt: '12.000 yıllık Anadolu mirası · bugünkü Türkiye', simgeAd: "Anadolu'nun simgeleri", bugunAd: 'Bugünkü Türkiye', antikAd: 'Anadolu',
-      uc3: false, kultur: false,
+      kultur: false,
       tum: { kisa: 'Tüm Anadolu tarihi', baslik: 'Anadolu · Bütün çağlar (MÖ 9600 – bugün)', start: 1300,
         hizli: [{ ad: 'Göbekli Tepe', y: 9500 }, { ad: 'Çatalhöyük', y: 7000 }, { ad: 'Kaniş', y: 1900 }, { ad: 'Hititler', y: 1600 }, { ad: 'Kadeş', y: 1274 }, { ad: 'Truva', y: 1180 },
           { ad: 'Midas', y: 720 }, { ad: 'İlk sikke', y: 620 }, { ad: 'Kroisos', y: 550 }, { ad: 'İskender', y: 334 }, { ad: 'Bergama', y: 180 }, { ad: 'Konstantinopolis', y: -330 }, { ad: 'Ayasofya', y: -537 },
@@ -32,7 +32,7 @@
   B.avrupa = {
     id: 'avrupa', ad: 'Avrupa', ikon: '🏰', merkez: [49.5, 12.0], merkezZ: 3.2, isaret: [49, 10],
     hakkinda: 'Bu çağda Avrupa', yonelme: "Avrupa'ya", hukumdar: 'önder', simgeGiris: "Avrupa'yı Avrupa yapan yerler, olaylar ve fikirler.", simgeAlt: '5.000 yıllık Avrupa mirası · bugünkü Avrupa',
-    simgeAd: "Avrupa'nın simgeleri", bugunAd: 'Bugünkü Avrupa', antikAd: 'Avrupa', uc3: false, kultur: false,
+    simgeAd: "Avrupa'nın simgeleri", bugunAd: 'Bugünkü Avrupa', antikAd: 'Avrupa', kultur: false,
     tum: { kisa: 'Tüm Avrupa tarihi', baslik: 'Avrupa · Bütün çağlar (MÖ 3000 – bugün)', start: 432,
       hizli: [{ ad: 'Stonehenge', y: 2500 }, { ad: 'Knossos', y: 1700 }, { ad: 'Parthenon', y: 440 }, { ad: 'Sezar', y: 44 }, { ad: 'Kolezyum', y: -80 }, { ad: 'Roma\'nın düşüşü', y: -476 }, { ad: 'Şarlman', y: -800 },
         { ad: 'Notre-Dame', y: -1250 }, { ad: 'Kara Ölüm', y: -1348 }, { ad: 'Matbaa', y: -1450 }, { ad: 'Rönesans', y: -1504 }, { ad: 'Reform', y: -1517 }, { ad: 'Versay', y: -1690 }, { ad: 'Fransız İhtilali', y: -1789 },
@@ -47,7 +47,7 @@
   const MEV_MUSON = { ahet: ['🌧️ Muson', 'Muson yağmurları: tarlalar su dolar'], peret: ['🌱 Ekim', 'Pirinç fideleri dikilir'], semu: ['🌾 Hasat', 'Kuru mevsimde hasat'] };
   const MEV_SAHEL = { ahet: ['🌧️ Yağmurlar', 'Yağmur mevsimi: darı ve sorgum ekilir'], peret: ['🌱 Büyüme', 'Ekinler büyür, nehir taşar'], semu: ['🌾 Hasat', 'Kuru mevsim: hasat ve kervanlar'] };
   const yeni = (id, ad, ikon, kita, o) => ({
-    id, ad, ikon, kita, uc3: false, kultur: false, hakkinda: 'Bu çağda ' + ad, antikAd: ad, hukumdar: 'hükümdar',
+    id, ad, ikon, kita, kultur: false, hakkinda: 'Bu çağda ' + ad, antikAd: ad, hukumdar: 'hükümdar',
     simgeGiris: `${o.ilgi} simgeleri: yerler, olaylar ve eserler.`, simgeAlt: o.simgeAlt, simgeAd: `${o.ilgi} simgeleri`, mevsimler: MEV_KUZEY,
     dosyalar: [`data/bolgeler/${id}.js?v=3`, ...ORTAK], ...o
   });
@@ -189,7 +189,7 @@
   B.dunya = {
     id: 'dunya', ad: 'Tüm Dünya', ikon: '🌍', dunya: true, merkez: [36, 22], merkezZ: 1.9, isaret: null,
     hakkinda: 'Bu yıl dünyada', yonelme: 'bir bölgeye', simgeAd: 'Dünyanın simgeleri', simgeGiris: 'Bütün kıtaların bölgelerinden simgeler.', simgeAlt: 'Bütün bölgelerin mirası',
-    bugunAd: 'Bugünkü dünya', antikAd: 'Dünya', hukumdar: 'hükümdar', uc3: false, kultur: false,
+    bugunAd: 'Bugünkü dünya', antikAd: 'Dünya', hukumdar: 'hükümdar', kultur: false,
     tum: { kisa: 'Tüm dünya tarihi', baslik: 'Dünya · Bütün kıtalar (MÖ 9600 – bugün)', start: 1274,
       hizli: [{ ad: 'Göbekli Tepe', y: 9500 }, { ad: 'Çatalhöyük', y: 7000 }, { ad: 'Mısır birleşiyor', y: 3100 }, { ad: 'Büyük Piramit', y: 2577 }, { ad: 'Stonehenge', y: 2500 }, { ad: 'Hititler', y: 1600 },
         { ad: 'Kadeş', y: 1274 }, { ad: 'Truva', y: 1180 }, { ad: 'Parthenon', y: 440 }, { ad: 'İskender', y: 334 }, { ad: 'Sezar', y: 44 }, { ad: 'Kolezyum', y: -80 }, { ad: 'Ayasofya', y: -537 },

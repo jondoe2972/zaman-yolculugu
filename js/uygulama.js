@@ -2,12 +2,11 @@
 'use strict';
 (() => {
   const S = window.Sahne, M = window.Harita, MIS = window.MISIR || {};
-  const BG = window.BOLGE || { id: 'misir', ad: 'Mısır', ikon: '🏺', hakkinda: 'Bu çağda Mısır', simgeAd: "Mısır'ın simgeleri", bugunAd: 'Bugünkü Mısır', antikAd: 'Antik Mısır', uc3: true, kultur: true };
+  const BG = window.BOLGE || { id: 'misir', ad: 'Mısır', ikon: '🏺', hakkinda: 'Bu çağda Mısır', simgeAd: "Mısır'ın simgeleri", bugunAd: 'Bugünkü Mısır', antikAd: 'Antik Mısır', kultur: true };
   // bölge seçici (Mısır / Anadolu): sayfa o bölgenin verileriyle yeniden açılır
   { const bs = document.querySelector('#bolge'); if (bs) { const BL = window.BOLGELER || {}; if (window.KITALAR) bs.innerHTML = '<option value="dunya">🌍 Tüm Dünya</option>' + window.KITALAR.map(k => `<optgroup label="${k.ikon} ${k.ad}">${k.b.filter(b => BL[b]).map(b => `<option value="${b}">${BL[b].ikon} ${BL[b].ad}</option>`).join('')}</optgroup>`).join(''); bs.value = BG.id; bs.addEventListener('change', () => { location.href = location.pathname + (bs.value === 'dunya' ? '' : '?bolge=' + bs.value); }); } }
   { const ai = document.querySelector('#about-ikon'), at = document.querySelector('#about-tx'); if (ai) ai.textContent = BG.ikon; if (at) at.textContent = ' ' + BG.ad + ' hakkında'; }
   if (BG.mevsimler) document.querySelectorAll('[data-season]').forEach(b => { const v = BG.mevsimler[b.dataset.season]; if (v) { b.textContent = v[0]; b.title = v[1]; } });
-  if (!BG.uc3) document.body.classList.add('uc3yok');
   // Tüm Dünya: bütün bölgeler birlikte; sahne yerine küre, panelde bölgelerin o yılki özeti
   const DUNYA = !!BG.dunya, BSIRA = window.BOLGE_SIRA || [], BLR = window.BOLGELER || {};
   if (DUNYA) document.body.classList.add('dunyamod');
@@ -87,11 +86,11 @@
     camX = S.focus(Y).wx;
     speed = P.composite ? 10 : 2; $('#speed').value = String(speed);
     history.replaceState(null, '', '#' + P.id);
-    document.title = `Zaman Yolculuğu · ${BG.ad} · ${P.kisa}`;
+    document.title = DUNYA && P.composite ? '⏳ Zaman Yolculuğu: Tarihin Derinliklerinde Kaybolmaya Hazır Mısın?' : `Zaman Yolculuğu · ${BG.ad} · ${P.kisa}`;
     if (eraSel.value !== id) eraSel.value = id;
     $('#panel').scrollTop = 0;
   }
-  document.title = `Zaman Yolculuğu · ${BG.ad} · ${P.kisa}`;
+  if (!DUNYA || !P.composite) document.title = `Zaman Yolculuğu · ${BG.ad} · ${P.kisa}`;
 
   // ---------- boyut ----------
   function resize() {
@@ -108,7 +107,7 @@
   // ---------- zaman ----------
   // Yıl değişince kamera yerinde kalır: kullanıcı sahnede bir yer seçtiyse (follow = false) orada durur;
   // şantiyeye yalnızca "🎯 Şantiyeye dön" ile döner. (Eskiden her yıl değişiminde şantiyeye atlıyordu.)
-  function setYear(y) { Y = clamp(y, P.to, P.from); }
+  function setYear(y) { Y = clamp(y === 0 ? -1 : y, P.to, P.from); }
   // zaman çizelgesinin görünen aralığı: tlA (eski uç, MÖ +) – tlB (yeni uç); null = bütün tarih (yakınlaştırma için)
   let tlA = null, tlB = null;
   const vA = () => tlA ?? P.from, vB = () => tlB ?? P.to;
@@ -128,15 +127,6 @@
   };
   const bar = (ad, v) => `<div class="bar"><span>${ad}</span><i><b style="width:${v / 5 * 100}%"></b></i></div>`;
   const card = (ikon, baslik, body, cls = '') => `<section class="card ${cls}"><h3><span>${ikon}</span>${baslik}</h3>${body}</section>`;
-
-  // ---------- 3D şehir ----------
-  const s3Var = () => !!(window.Sehir3D && window.Sehir3D.var('istanbul')) && (DUNYA || BG.id === 'anadolu');
-  function sehir3dAc(ad = 'istanbul') {
-    if (!window.Sehir3D) return; closeModal(); playingBeforeModal = false; playing = false; updPlay(); kartlariKapat();
-    window.Sehir3D.open(ad, { Y: () => Y, setYear: y => setYear(y, true), onClose: () => { shown = null; } });
-  }
-  { const b = document.querySelector('#s3hizli'); if (b) { b.hidden = !s3Var(); b.addEventListener('click', () => sehir3dAc()); } }
-  const s3Dugme = () => s3Var() ? '<button class="symbtn s3btn">🧊 İstanbul\'u 3D gez</button>' : '';
 
   // ---------- coğrafya, ticaret yolları, yolculuklar ----------
   const COG = window.COGRAFYA || {};
@@ -206,6 +196,7 @@
     // Kişiler ve olaylar pencere açılırken birlikte aranır; hiçbir şey çıkmayan sekme gizlenir ("bulunamadı" yazısı yok).
     // Yalnızca o anda bu devletin toprağı olan yerdekiler sayılır: her kişi/olay kendi yılındaki sınır kaydına göre denetlenir.
     const kisiP = (async () => {
+      if (!window.KIM && window.OyunYukle) try { await window.OyunYukle('kim'); } catch (e) { /* */ }
       const yerel = (window.KIM || []).filter(p => p.ll && oZamanBurada(k, p.dogum, p.ll));
       let wd = [];
       if (k.q) try {
@@ -347,7 +338,7 @@
     h += `<div class="head"><div class="dyn" style="--c:${d.renk}">${d.ad} · ${Q.kisa}</div>
       <div class="ruler"><span class="crown">👑</span><div><b>${r.ad}</b><small>${YIL.aralik(r.from, r.to)} · saltanatının ${ry}. yılı</small></div></div>
       <p class="kim">${r.kim}</p>
-      <div class="headbtns"><button class="aboutbtn">${BG.ikon} ${BG.hakkinda} <small>(${BG.kultur ? 'din, tanrılar, bilim…' : 'halklar, din, yaşam…'})</small></button><button class="symbtn">⭐ ${BG.simgeAd}</button>${s3Dugme()}${true ? '<button class="symbtn lifebtn">🎭 Bu dönemde yaşasaydım…</button>' : ''}</div></div>`;
+      <div class="headbtns"><button class="aboutbtn">${BG.ikon} ${BG.hakkinda} <small>(${BG.kultur ? 'din, tanrılar, bilim…' : 'halklar, din, yaşam…'})</small></button><button class="symbtn">⭐ ${BG.simgeAd}</button><button class="symbtn lifebtn">🎭 Bu dönemde yaşasaydım…</button></div></div>`;
     for (const o of olumYakin(y)) h += `<div class="now death">⚱️ <b>${YIL.fmt(o.y)}:</b> ${o.kim} öldü. <button class="phbtn" data-mumya="${o.id}">Mumyasını ve lahdini gör</button></div>`;
     if (near.length) h += `<div class="now">${near.map(ev => `<div>📌 <b>${YIL.fmt(ev.y)}:</b> ${ev.t}</div>`).join('')}</div>`;
     h += card('📣', 'Ülkenin gündemi', `<p>${e.gundem}</p>`, 'big');
@@ -382,7 +373,7 @@
     const tek = new Set(), near = P.events.filter(ev => Math.abs(ev.y - y) <= 4).sort((a, b) => b.y - a.y).filter(ev => { const k = ev.y + '|' + ev.t.replace(/^Dünya:s*/, '').split(/[s:(,]/)[0].toLocaleLowerCase('tr'); return !tek.has(k) && tek.add(k); });
     let h = `<div class="head"><div class="dyn" style="--c:#2f6fa8">🌍 Tüm Dünya · ${YIL.fmt(y)}</div>
       <p class="kim">Bütün bölgeler aynı zaman çizelgesinde. Bir bölgenin canlı sahnesine girmek için kartındaki düğmeye bas, ya da yukarıdan bölge seç.</p>
-      <div class="headbtns"><button class="symbtn">⭐ ${BG.simgeAd}</button>${s3Dugme()}</div></div>`;
+      <div class="headbtns"><button class="symbtn">⭐ ${BG.simgeAd}</button></div></div>`;
     if (near.length) h += `<div class="now">${near.slice(0, 5).map(ev => `<div>📌 <b>${YIL.fmt(ev.y)}:</b> ${ev.t}</div>`).join('')}</div>`;
     const KT = window.KITALAR || [{ id: 'hepsi', ad: 'Bölgeler', ikon: '🌍', b: BSIRA }];
     for (const kt of KT) {
@@ -412,7 +403,6 @@
     const yc = ev.target.closest('[data-yolculuk]'); if (yc) return openYolculuk(YOLCULUKLAR.find(j => j.id === yc.dataset.yolculuk));
     const tp = ev.target.closest('[data-topraklar]'); if (tp) { const b = tp.dataset.topraklar; return showModal({ ikon: BLR[b].ikon, title: `${BLR[b].ad}: bu topraklar`, sub: YIL.fmt(Math.round(Y)), tabs: [{ ad: 'Coğrafya', html: topraklarHTML(b, Math.round(Y)) }] }); }
     if (ev.target.closest('.aboutbtn')) return openCountry();
-    if (ev.target.closest('.s3btn')) return sehir3dAc();
     if (ev.target.closest('.lifebtn')) return openYasam();
     const mu = ev.target.closest('[data-mumya]'); if (mu) return openMummy(mu.dataset.mumya);
     if (ev.target.closest('.symbtn')) return openSymbols();
@@ -851,7 +841,7 @@
       ['Başkent mi?', capNow ? `<b>Evet, ${YIL.fmt(Math.round(Y))}'de başkent</b>` : (c.b && c.b.length ? 'Bu yılda değil' : 'Hiç başkent olmadı')],
       ...(c.b && c.b.length ? [['Başkent olduğu dönemler', capText(c)]] : []),
       ...(yakin.length ? [['Bu yıl çevresindeki yapılar', yakin.join(', ')]] : [])])}
-      ${/^İstanbul/.test(c.ad) && window.Sehir3D ? '<div class="gos"><button class="phbtn" data-s3="istanbul">🧊 Şehri 3D gez</button></div>' : ''}<h4>Önemi</h4><p>${sb.onem || c.not || ''}</p>${!kisa && sb.ilginc ? `<div class="did"><b>💡 Biliyor muydun?</b><p>${sb.ilginc}</p></div>` : ''}`;
+      <h4>Önemi</h4><p>${sb.onem || c.not || ''}</p>${!kisa && sb.ilginc ? `<div class="did"><b>💡 Biliyor muydun?</b><p>${sb.ilginc}</p></div>` : ''}`;
   }
   function openCityModal(c) {
     const sb = (window.SEHIR_BILGI || {})[c.ad] || {};
@@ -943,17 +933,6 @@
   $('#buyil').addEventListener('click', () => { const ac = !document.body.classList.contains('panelacik'); if (ac) kartlariKapat('panel'); panelAc(ac); });
   $('#panel').addEventListener('click', ev => { if (ev.target.closest('.pn-x')) panelAc(false); });
 
-  // ---------- 3D görünüm ----------
-  function open3D(id) {
-    if (!window.UcBoyut) return;
-    closeModal(); playingBeforeModal = false;
-    window.UcBoyut.open(id, {
-      Y: () => Y, setYear: y => setYear(y, true), coords: MIS.coords || {}, progress: S.progress, openInfo,
-      monuments: () => { const out = [...SP.monuments], seen = new Set(out.map(m => m.id)); for (const p of PARTS) for (const m of p.monuments) if (!seen.has(m.id)) { seen.add(m.id); out.push(m); } return out; }
-    });
-  }
-  const has3D = id => !!(BG.uc3 && window.UcBoyut && (MIS.coords || {})[id]);
-
   // ---------- küredeki yapıya tıklayınca: sahneye geç ----------
   // küredeki simgeye tıklanınca: o yapının kartı hemen açılır; aynı simgede toplanan yakın yapılar kartta düğme olur
   function showMonument(id, kids, hit) {
@@ -988,13 +967,11 @@
     card.querySelector('.cc-title').textContent = m.ad;
     const wt = (MIS.wiki || {})[id];
     card.querySelector('.cc-body').innerHTML = `${wt ? `<div class="kapak kucuk" data-kapak="${esc(wt)}"></div>` : ''}<p><b>${YIL.fmt(Math.round(Y))}:</b> ${durum}</p>${b ? `<p>${b.neden}</p>` : ''}
-      <div class="gos">${has3D(id) ? `<button class="phbtn icbtn" data-cc3d="${id}">🧊 3D'de gör</button>` : ''}<button class="phbtn" data-ccinfo="${id}">ℹ️ Bilgi kartı</button>${K.ic.eslesme[id] ? `<button class="phbtn icbtn" data-ccic="${id}">🔍 İçine gir</button>` : ''}</div>`;
+      <div class="gos"><button class="phbtn" data-ccinfo="${id}">ℹ️ Bilgi kartı</button>${K.ic.eslesme[id] ? `<button class="phbtn icbtn" data-ccic="${id}">🔍 İçine gir</button>` : ''}</div>`;
     card.dataset.city = ''; card.querySelector('.cc-more').hidden = true;
     kartGoster(); kapakYukle(card.querySelector('.kapak'));
   }
   $('#citycard').addEventListener('click', e => {
-    const s3b = e.target.closest('[data-s3]'); if (s3b) return sehir3dAc(s3b.dataset.s3);
-    const d3 = e.target.closest('[data-cc3d]'); if (d3) return open3D(d3.dataset.cc3d);
     const yk = e.target.closest('[data-ccyakin]'); if (yk) return showMonument(yk.dataset.ccyakin);
     const ya = e.target.closest('[data-ccyaklas]'); if (ya) { const [x, y] = ya.dataset.ccyaklas.split(',').map(Number); $('#citycard').hidden = true; DN.zoomTo(x, y, 3); return; }
     const cg = e.target.closest('[data-ccgit]'); if (cg) return gitBolge(cg.dataset.ccgit, '&yapi=' + cg.dataset.ccyapi);
@@ -1015,7 +992,7 @@
   }
   function modGuncelle() { document.querySelectorAll('[data-mod]').forEach(b => b.classList.toggle('on', (b.dataset.mod === 'kesfet' && view === 'dunya') || (b.dataset.mod === 'sahne' && view === 'sahne'))); }
   function sahneSec() {
-    showModal({ ikon: '🎬', title: 'Hangi bölgenin sahnesi?', sub: `${YIL.fmt(Math.round(Y))} yılına gidilir`, tabs: [{ ad: 'Bölge seç', html: `<p>Canlı sahnede yapılar yılına göre yükselir, insanlar ve gemiler dönemine göre değişir.</p><div class="secim">${window.Sehir3D ? '<button data-s3="istanbul">🧊 <b>İstanbul · 3D</b><small>Surlar, Ayasofya, camiler ve mahalleler yıl yıl değişir</small></button>' : ''}${BSIRA.map(b => `<button data-gitbolge2="${b}">${BLR[b].ikon} <b>${BLR[b].ad}</b><small>${BLR[b].ad} sahnesini aç</small></button>`).join('')}</div>` }] });
+    showModal({ ikon: '🎬', title: 'Hangi bölgenin sahnesi?', sub: `${YIL.fmt(Math.round(Y))} yılına gidilir`, tabs: [{ ad: 'Bölge seç', html: `<p>Canlı sahnede yapılar yılına göre yükselir, insanlar ve gemiler dönemine göre değişir.</p><div class="secim">${BSIRA.map(b => `<button data-gitbolge2="${b}">${BLR[b].ikon} <b>${BLR[b].ad}</b><small>${BLR[b].ad} sahnesini aç</small></button>`).join('')}</div>` }] });
   }
   // ---------- Yaşa: bu yılda ve bölgede seçilebilecek roller ----------
   const misirAntik = () => DUNYA ? (Y <= 3150 && Y >= 30) : (BG.id === 'misir' && BG.kultur && !SP.modern);
@@ -1101,7 +1078,7 @@
     if (m === 'kesfet') { kartlariKapat(); setView('dunya'); }
     else if (m === 'sahne') { if (DUNYA) sahneSec(); else { kartlariKapat(); setView('sahne'); } }
     else if (m === 'yasa') yasaAc();
-    else if (m === 'dog') { if (!DUNYA) { location.href = location.pathname + '?dog=1'; return; } kartlariKapat(); closeModal(); if (window.Hayat) window.Hayat.basla(); }
+    else if (m === 'dog') { if (!DUNYA) { location.href = location.pathname + '?dog=1'; return; } kartlariKapat(); closeModal(); (window.OyunYukle ? window.OyunYukle('kim') : Promise.resolve()).then(() => { if (window.Hayat) window.Hayat.basla(); }).catch(() => {}); }
   }));
 
   // ---------- bilgi penceresi (sekmeli) ----------
@@ -1142,7 +1119,6 @@
     const yy0 = e.target.closest('[data-yakinyapi]'); if (yy0) { const i = yy0.dataset.yakinyapi; if (/^yp:/.test(i)) openYapi(i); else showMonument(i); return; }
     const ph = e.target.closest('[data-photos]');
     if (ph) { const box = ph.parentElement.querySelector('.ph-box'); ph.remove(); loadPhotos(ph.dataset.photos, box, 6); return; }
-    const u3 = e.target.closest('[data-u3]'); if (u3) { open3D(u3.dataset.u3); return; }
     const icb = e.target.closest('[data-ic]'); if (icb) { zoomInto(icb.dataset.ic); return; }
     const gb = e.target.closest('[data-god]'); if (gb) { openGod(gb.dataset.god); return; }
     const mb = e.target.closest('[data-mumya]'); if (mb) { openMummy(mb.dataset.mumya); return; }
@@ -1152,7 +1128,6 @@
     const yyb = e.target.closest('[data-yyil]'); if (yyb) { const v = yyb.dataset.yyil; openYasam(v === 'rastgele' ? Math.round(YASA_EN_ESKI - Math.random() * (YASA_EN_ESKI + YIL.BUGUN)) : +v); return; }
     const yr = e.target.closest('[data-yrol]'); if (yr) { openYasamRol(yr.dataset.yrol); return; }
     const yy = e.target.closest('[data-ygit]'); if (yy) { setYear(+yy.dataset.ygit, true); playingBeforeModal = false; closeModal(); return; }
-    const s3m = e.target.closest('[data-s3]'); if (s3m) { sehir3dAc(s3m.dataset.s3); return; }
     const yh = e.target.closest('[data-yolharita]'); if (yh) { const t = TICARET_YOLLARI.find(x => x.id === yh.dataset.yolharita); DN.setLayer('ticaret', true); playingBeforeModal = false; yolHaritada(t.pts, kmYol(t.pts)); return; }
     const yg2 = e.target.closest('[data-yolcugoster]'); if (yg2) { const j = YOLCULUKLAR.find(x => x.id === yg2.dataset.yolcugoster); DN.setLayer('yolculuk', true); playingBeforeModal = false; yolHaritada(j.pts, j.km, j.y); return; }
     const g2 = e.target.closest('[data-gitbolge2]'); if (g2) { gitBolge(g2.dataset.gitbolge2); return; }
@@ -1323,8 +1298,7 @@
         ${inRange(m.start) ? `<button data-go="${m.start}">⏮ Başlangıca git (${YIL.fmt(m.start)})</button>` : ''}
         ${inRange(fin) ? `<button data-go="${fin}">⏭ ${m.stop ? 'Durduğu' : 'Bittiği'} yıla git (${YIL.fmt(fin)})</button>` : ''}
         ${view === 'dunya' ? `<button data-show='${JSON.stringify({ id: m.id })}'>🎬 Sahnede göster</button>` : ''}
-        ${icOf(id) ? `<button class="icbtn" data-ic="${id}">🔍 Yakınlaş: içine gir</button>` : ''}
-        ${has3D(id) ? `<button class="icbtn" data-u3="${id}">🧊 3D'de gör</button>` : ''}</span>`;
+        ${icOf(id) ? `<button class="icbtn" data-ic="${id}">🔍 Yakınlaş: içine gir</button>` : ''}</span>`;
     }
     const isMon = !!m || /mastaba/.test(id);
     const tabs = [
@@ -1575,26 +1549,32 @@
   });
   $('#tp-form').addEventListener('submit', ev => {
     ev.preventDefault();
-    const n = Math.abs(parseInt($('#tp-yil').value, 10)); if (!n) { $('#tp-not').textContent = 'Bir yıl yaz (ör. 1453).'; return; }
+    const raw = $('#tp-yil').value.trim();
+    if (raw === '' || isNaN(Number(raw))) { $('#tp-not').textContent = 'Bir yıl yaz (ör. 1453).'; return; }
+    let n = Math.abs(parseInt(raw, 10));
+    let sifirNot = false;
+    if (n === 0) { n = 1; sifirNot = true; }
     const y = $('#tp-cag').value === 'mo' ? n : -n;
     if (y > P.from || y < P.to) { $('#tp-not').textContent = `${YIL.fmt(y)} bu çizelgenin dışında: ${YIL.fmt(P.from)} – ${P.to <= -2026 ? 'bugün' : YIL.fmt(P.to)} arasında bir yıl seç.`; return; }
     playing = false; updPlay(); setYear(y, true);
     if (tlA != null) { const s = vA() - vB(); tlAralik(y + s / 2, y - s / 2); }
     $('#tarihpop').hidden = true; $('#tarihgit').classList.remove('on');
-    toast(`📅 <b>${YIL.fmt(y)}</b>`);
+    toast(sifirNot ? `📅 <b>${YIL.fmt(y)}</b> · Tarihte 0 yılı olmadığı için ${YIL.ek(y, 'e')} yönlendirildi.` : `📅 <b>${YIL.fmt(y)}</b>`);
   });
+  const yilAdim = (y, d) => { let r = Math.round(y) + d; if (r === 0) r = d < 0 ? -1 : 1; return r; };
   $('#play').addEventListener('click', () => { if (Y <= P.to) Y = P.from; playing = !playing; updPlay(); });
-  $('#back').addEventListener('click', () => { setYear(Math.round(Y) + 1, true); });
-  $('#fwd').addEventListener('click', () => { setYear(Math.round(Y) - 1, true); });
+  $('#back').addEventListener('click', () => { setYear(yilAdim(Y, 1), true); });
+  $('#fwd').addEventListener('click', () => { setYear(yilAdim(Y, -1), true); });
   $('#speed').value = String(speed);
   $('#speed').addEventListener('change', e => { speed = +e.target.value; });
   document.querySelectorAll('[data-season]').forEach(b => b.addEventListener('click', () => {
     S.setSeason(b.dataset.season); document.querySelectorAll('[data-season]').forEach(x => x.classList.toggle('on', x === b));
   }));
   window.addEventListener('keydown', e => {
-    if (e.target.tagName === 'SELECT' || !modal.hidden) return;
-    if (e.key === 'ArrowLeft') setYear(Math.round(Y) + (e.shiftKey ? 10 : 1), true);
-    else if (e.key === 'ArrowRight') setYear(Math.round(Y) - (e.shiftKey ? 10 : 1), true);
+    const hg = $('#hosgeldin');
+    if (e.target.tagName === 'SELECT' || !modal.hidden || (hg && !hg.hidden)) return;
+    if (e.key === 'ArrowLeft') setYear(yilAdim(Y, e.shiftKey ? 10 : 1), true);
+    else if (e.key === 'ArrowRight') setYear(yilAdim(Y, e.shiftKey ? -10 : -1), true);
     else if (e.key === ' ') { e.preventDefault(); $('#play').click(); }
   });
 
@@ -1638,28 +1618,35 @@
     monuments: () => P.monuments || SP.monuments, cities: () => MIS.sehirler || [], coords: id => MIS.coords[id], hasInfo: id => !!bilgiOf(id),
     openYapi: id => openYapi(id), yapiKurede: id => yapiKurede(id)
   };
-  window.__zy = { get Y() { return Y; }, get camX() { return camX; }, get follow() { return follow; }, setYear: y => setYear(y, true), snap: wx => { follow = false; camHedef = null; camX = wx ?? S.focus(Y).wx; }, setView, switchPlace, openInfo, openCity: ad => openCity((MIS.sehirler || []).find(c => c.ad === ad)), showMonument: id => showMonument(id), open3D: id => open3D(id) };
+  window.__zy = { get Y() { return Y; }, get camX() { return camX; }, get follow() { return follow; }, setYear: y => setYear(y, true), snap: wx => { follow = false; camHedef = null; camX = wx ?? S.focus(Y).wx; }, setView, switchPlace, openInfo, openCity: ad => openCity((MIS.sehirler || []).find(c => c.ad === ad)), showMonument: id => showMonument(id) };
   updPlay();
   if (DUNYA) { setView('dunya'); DN.goEgypt(BG.merkez, BG.merkezZ); }
   else if (QS.get('yapi')) { const id = QS.get('yapi'); syncScenePart(); setTimeout(() => showMonument(id), 50); }
   modGuncelle();
   if (QS.get('yasa')) { syncScenePart(); setTimeout(yasaAc, 80); }
-  // ---------- ilk ziyarette bir kez: üç kısa ipucu ----------
-  const IPUCLARI = [
-    '⏳ <b>Alttaki zaman çizelgesini sürükle</b>: yıllar arasında gezersin. ▶ ile zaman akmaya başlar.',
-    '🌍 <b>Keşfet</b> küreyi, 🎬 <b>Sahne</b> bir bölgenin canlı görüntüsünü açar. 🧑‍🌾 <b>Yaşa</b>: o yılda bir meslek seçip bir gününü yaşarsın.',
-    '📖 <b>Bu yıl</b>: o yılın özeti (hükümdar, geçim, savaşlar). 🗂️ <b>Katmanlar</b>: haritada ticaret yollarını, savaşları, madenleri aç ya da kapat.'
-  ];
-  let ipN = 0;
-  function ipucuGoster() {
-    const el = $('#ipucu');
-    if (ipN >= IPUCLARI.length) { el.hidden = true; try { localStorage.setItem('zy-ipucu', '1'); } catch (e) { /* gizli mod */ } return; }
-    el.innerHTML = `<p>${IPUCLARI[ipN]}</p><div class="ip-alt"><small>${ipN + 1} / ${IPUCLARI.length}</small><button class="ip-gec">Geç</button><button class="ip-ok">${ipN + 1 < IPUCLARI.length ? 'Sonraki' : 'Anladım'}</button></div>`;
-    el.hidden = false;
+  // ---------- ilk ziyaret: sade karşılama (onboarding) penceresi ----------
+  const hg = $('#hosgeldin');
+  function hgKapat() {
+    if (!hg) return;
+    hg.hidden = true;
+    try { localStorage.setItem('zy-hosgeldin', '1'); } catch (e) { /* gizli mod */ }
   }
-  $('#ipucu').addEventListener('click', e => { if (e.target.closest('.ip-gec')) { ipN = IPUCLARI.length; ipucuGoster(); } else if (e.target.closest('.ip-ok')) { ipN++; ipucuGoster(); } });
-  let ilk = false; try { ilk = !localStorage.getItem('zy-ipucu'); } catch (e) { /* gizli mod */ }
-  if (ilk && !QS.get('yasa') && !QS.get('dog')) setTimeout(ipucuGoster, 900);
-  if (QS.get('dog') && DUNYA) setTimeout(() => { if (window.Hayat) window.Hayat.basla(); }, 700);
+  if (hg) {
+    hg.addEventListener('click', ev => {
+      if (ev.target === hg || ev.target.closest('.hg-x')) return hgKapat();
+      const b = ev.target.closest('[data-hg]'); if (!b) return;
+      const sec = b.dataset.hg;
+      ev.stopPropagation();
+      hgKapat();
+      if (sec === 'kesfet') { kartlariKapat(); setView('dunya'); }
+      else if (sec === 'oyun') { kartlariKapat(); if (window.OyunYukle) window.OyunYukle.menuAc(); }
+      else if (sec === 'yasa') { yasaAc(); }
+    });
+    window.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !hg.hidden) hgKapat(); });
+    let ilk = false; try { ilk = !localStorage.getItem('zy-hosgeldin'); } catch (e) { /* gizli mod */ }
+    if (ilk && !QS.get('yasa') && !QS.get('dog') && !QS.get('oyun') && !QS.get('yapi')) {
+      hg.hidden = false;
+    }
+  }
   requestAnimationFrame(frame);
 })();

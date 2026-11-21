@@ -3,10 +3,11 @@
 'use strict';
 window.YIL = (() => {
   const BUGUN = 2026;
-  const fmt = y => { y = Math.round(y); return y > 0 ? `MÖ ${y}` : `MS ${Math.max(1, -y)}`; };
-  const aralik = (a, b) => { a = Math.round(a); b = Math.round(b); if (a > 0 && b > 0) return `MÖ ${a}-${b}`; if (a <= 0 && b <= 0) return `MS ${Math.max(1, -a)}-${Math.max(1, -b)}`; return `${fmt(a)} – ${fmt(b)}`; };
-  const once = y => { y = Math.round(y); const n = y > 0 ? y + BUGUN - 1 : BUGUN + y; return n <= 0 ? 'bu yıl' : `≈ ${n.toLocaleString('tr-TR')} yıl önce`; };
-  const msYil = ms => -ms; // MS yılını iç sayıya çevirir
+  const guvenli = y => { const r = Math.round(y); return r === 0 ? -1 : r; };
+  const fmt = y => { y = guvenli(y); return y > 0 ? `MÖ ${y}` : `MS ${-y}`; };
+  const aralik = (a, b) => { a = guvenli(a); b = guvenli(b); if (a > 0 && b > 0) return `MÖ ${a}-${b}`; if (a < 0 && b < 0) return `MS ${-a}-${-b}`; return `${fmt(a)} – ${fmt(b)}`; };
+  const once = y => { y = guvenli(y); const n = y > 0 ? y + BUGUN - 1 : BUGUN + y; return n <= 0 ? 'bu yıl' : `≈ ${n.toLocaleString('tr-TR')} yıl önce`; };
+  const msYil = ms => ms === 0 ? -1 : -ms; // MS yılını iç sayıya çevirir
   // Türkçe ek: sayının okunuşundaki son kelimeye göre. ek(y, 'e') → "MS 476'ya", ek(y, 'den') → "MS 476'dan"
   const SON = { 1: 'bir', 2: 'iki', 3: 'üç', 4: 'dört', 5: 'beş', 6: 'altı', 7: 'yedi', 8: 'sekiz', 9: 'dokuz' };
   const ONLAR = { 1: 'on', 2: 'yirmi', 3: 'otuz', 4: 'kırk', 5: 'elli', 6: 'altmış', 7: 'yetmiş', 8: 'seksen', 9: 'doksan' };
@@ -18,5 +19,5 @@ window.YIL = (() => {
     const sert = 'fstkçşhp'.includes(k.slice(-1));
     return `${s}'${sert ? 't' : 'd'}${kalin ? 'a' : 'e'}n`;
   };
-  return { fmt, aralik, once, msYil, ek, BUGUN };
+  return { fmt, aralik, once, msYil, ek, guvenli, BUGUN };
 })();

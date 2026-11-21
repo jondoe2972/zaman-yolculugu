@@ -2,9 +2,9 @@
 // Her nesne 120×120'lik bir tuvale düz renklerle bir kez çizilir; seçilen tarz bu çizimi dönüştürür:
 //   MÖ → siyah figür vazo · MS 1–1450 → mozaik (İslam dünyasında minyatür/çini) · 1450–1900 → gravür · 1900 sonrası → kesik kâğıt.
 // kaba (1–4): ilk ipuçlarında resim iri taneli çıkar, ilerledikçe netleşir.
-// Kullanım: Cizim.ciz(canvas, 'lir', yil, [enlem, boylam], kaba)
+// Kullanım: OyunCizim.ciz(canvas, 'lir', yil, [enlem, boylam], kaba)
 'use strict';
-window.Cizim = (() => {
+window.OyunCizim = (() => {
   const S = 120;
   // ---------- küçük yardımcılar ----------
   let g;

@@ -58,15 +58,15 @@ window.Hayat = window.BenKimim = (() => {
     return L.length ? `<div class="bk-ekip">${L.map(x => `<span>${x}</span>`).join('')}</div>` : '';
   }
   function kartHTML() {
-    const k = kart(), [y, r, t, h] = k, ll = k[4] || s.p.ll, tz = window.Cizim ? window.Cizim.tarz(y, ll) : '';
-    return `<figure class="bk-resim"><canvas aria-label="İpucu resmi"></canvas><figcaption>${window.Cizim ? window.Cizim.TARZ_AD[tz] : ''}</figcaption></figure>
+    const k = kart(), [y, r, t, h] = k, ll = k[4] || s.p.ll, OC = window.OyunCizim, tz = OC ? OC.tarz(y, ll) : '';
+    return `<figure class="bk-resim"><canvas aria-label="İpucu resmi"></canvas><figcaption>${OC ? OC.TARZ_AD[tz] : ''}</figcaption></figure>
       <div class="bk-metin"><p>${esc(t)}</p>${h ? `<div class="bk-hayat"><b>🏠 O zaman hayat</b>${esc(h)}</div>` : ''}
       <div class="bk-git"><button data-bk="git" class="ikincil">🌍 Bu yıla ve yere git</button><span class="bk-devlet"></span></div></div>`;
   }
   function kartCiz(anim) {
     const ka = el.querySelector('.bk-kart'), yap = () => {
       ka.innerHTML = kartHTML(); ka.classList.remove('cik'); if (anim) { ka.classList.remove('gir'); void ka.offsetWidth; ka.classList.add('gir'); }
-      const k = kart(); if (window.Cizim) window.Cizim.ciz(ka.querySelector('canvas'), k[1], k[0], k[4] || s.p.ll, s.bitti ? 1 : KABA[s.i] || 1, true);
+      const k = kart(); if (window.OyunCizim) window.OyunCizim.ciz(ka.querySelector('canvas'), k[1], k[0], k[4] || s.p.ll, s.bitti ? 1 : KABA[s.i] || 1, true);
       ustCiz(); el.scrollTop = 0;
     };
     if (anim && !matchMedia('(prefers-reduced-motion: reduce)').matches) { ka.classList.add('cik'); setTimeout(yap, 260); } else yap();
@@ -120,7 +120,7 @@ window.Hayat = window.BenKimim = (() => {
   function bitir() {
     s.bitti = true; for (let i = s.i + 1; i < s.izler.length; i++) s.izler[i] = '⬜';
     const I = oku('zy-kim-ist', { puan: 0, oyun: 0, bilinen: 0 }); I.oyun++; if (s.bildi) I.bilinen++; I.puan += s.puan; yaz('zy-kim-ist', I);
-    const k = kart(), cv = el.querySelector('.bk-kart canvas'); if (cv && window.Cizim) window.Cizim.ciz(cv, k[1], k[0], k[4] || s.p.ll, 1, false);
+    const k = kart(), cv = el.querySelector('.bk-kart canvas'); if (cv && window.OyunCizim) window.OyunCizim.ciz(cv, k[1], k[0], k[4] || s.p.ll, 1, false);
     ustCiz(); altCiz(); el.querySelector('.bk-alt').classList.add('gir');
   }
   function sonucHTML() {
