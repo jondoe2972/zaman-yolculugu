@@ -269,6 +269,29 @@ window.Dunya = (() => {
         poly([x - s * 0.36, y - s * 0.9, x + s * 0.36, y - s * 0.9, x + s * 0.26, y - s * 1.15, x - s * 0.26, y - s * 1.15], dark); break;
       case 'modcity':
         for (let i = 0; i < 5; i++) { const hx = x - s * 1.05 + i * s * 0.44, hh = s * (0.5 + (i * 37 % 5) * 0.2); poly([hx, b, hx + s * 0.36, b, hx + s * 0.36, b - hh, hx, b - hh], i % 2 ? light : dark); } break;
+      case 'pagoda': // kat kat kıvrık çatı
+        for (let i = 0; i < 3; i++) { const w = s * (0.95 - i * 0.24), yy = b - i * s * 0.55; poly([x - w * 0.5, yy, x + w * 0.5, yy, x + w * 0.5, yy - s * 0.3, x - w * 0.5, yy - s * 0.3], '#c0533e'); poly([x - w, yy - s * 0.26, x + w, yy - s * 0.26, x + w * 0.5, yy - s * 0.55, x - w * 0.5, yy - s * 0.55], dark); } break;
+      case 'stupa':
+        poly([x - s, b, x + s, b, x + s * 0.9, b - s * 0.3, x - s * 0.9, b - s * 0.3], dark);
+        g.beginPath(); g.moveTo(x - s * 0.75, b - s * 0.3); g.arc(x, b - s * 0.3, s * 0.75, Math.PI, 0); g.closePath(); g.fillStyle = light; g.fill(); g.strokeStyle = OUT; g.lineWidth = 1.2; g.stroke();
+        poly([x - s * 0.1, b - s * 1.05, x + s * 0.1, b - s * 1.05, x, b - s * 1.55], dark, 1); break;
+      case 'ziggurat':
+        for (let i = 0; i < 3; i++) { const w = s * (1 - i * 0.28), yy = b - i * s * 0.45; poly([x - w, yy, x + w, yy, x + w * 0.92, yy - s * 0.45, x - w * 0.92, yy - s * 0.45], i % 2 ? dark : light); } break;
+      case 'sahel':
+        poly([x - s, b, x + s, b, x + s, b - s * 0.7, x - s, b - s * 0.7], '#c89460');
+        for (const cx of [x - s * 0.6, x, x + s * 0.6]) poly([cx - s * 0.18, b - s * 0.7, cx + s * 0.18, b - s * 0.7, cx + s * 0.12, b - s * 1.3, cx - s * 0.12, b - s * 1.3], '#b07a48', 1); break;
+      case 'prang':
+        poly([x - s, b, x + s, b, x + s * 0.9, b - s * 0.35, x - s * 0.9, b - s * 0.35], dark);
+        for (const [cx, h] of [[x - s * 0.55, 0.8], [x + s * 0.55, 0.8], [x, 1.25]]) poly([cx - s * 0.2, b - s * 0.35, cx + s * 0.2, b - s * 0.35, cx, b - s * (0.35 + h)], light, 1); break;
+      case 'sur':
+        poly([x - s * 1.2, b, x - s * 1.2, b - s * 0.5, x - s * 0.3, b - s * 0.9, x + s * 0.5, b - s * 0.6, x + s * 1.2, b - s * 0.8, x + s * 1.2, b], light);
+        poly([x - s * 0.5, b - s * 0.75, x - s * 0.1, b - s * 0.75, x - s * 0.1, b - s * 1.25, x - s * 0.5, b - s * 1.25], dark, 1); break;
+      case 'heykel':
+        poly([x - s * 0.5, b, x + s * 0.5, b, x + s * 0.3, b - s * 0.35, x - s * 0.3, b - s * 0.35], dark);
+        poly([x - s * 0.25, b - s * 0.35, x + s * 0.25, b - s * 0.35, x + s * 0.15, y - s * 0.9, x - s * 0.15, y - s * 0.9], light, 1); break;
+      case 'opera':
+        poly([x - s, b, x + s, b, x + s, b - s * 0.2, x - s, b - s * 0.2], dark);
+        for (const [cx, h] of [[x - s * 0.5, 0.8], [x, 1.2], [x + s * 0.5, 0.7]]) poly([cx - s * 0.3, b - s * 0.2, cx + s * 0.25, b - s * (0.2 + h), cx + s * 0.2, b - s * 0.2], '#f6f4ee', 1); break;
       default: g.beginPath(); g.arc(x, y, s * 0.6, 0, 7); g.fillStyle = light; g.fill(); g.strokeStyle = OUT; g.stroke();
     }
   }
@@ -593,16 +616,26 @@ window.Dunya = (() => {
     // uzaktan medeniyet işareti
     const isaretler = DM ? (window.BOLGE_SIRA || []).map(id => window.BOLGELER[id]) : [window.BOLGE || { isaret: [27, 31], ad: 'Mısır' }];
     const ia = DM ? clamp(1 - (view.z - 2.6) / 1.2, 0, 1) : 1 - ez;
-    if (ia > 0) for (const BGd of isaretler) {
-      const [x, y, z] = P(...(BGd.isaret || [27, 31])); const on = BGd.id !== 'misir' || (Y <= 3150 && Y >= 30);
-      if (z > 0.1) {
+    if (ia > 0) {
+      // önce bütün işaretlerin yerleri; sonra adlar çakışmayacak biçimde yerleşir (sağ, sol, üst, alt; sığmazsa yalnızca simge)
+      const pts = isaretler.map(BGd => { const [x, y, z] = P(...(BGd.isaret || [27, 31])); return { BGd, x, y, z }; }).filter(o => o.z > 0.1);
+      const kutular = pts.map(o => [o.x - 9, o.y - 9, o.x + 9, o.y + 9]);
+      const cakisir = r => kutular.some(k => r[0] < k[2] && r[2] > k[0] && r[1] < k[3] && r[3] > k[1]);
+      g.save(); g.font = '800 15px Georgia, serif';
+      for (const o of pts) {
+        const { BGd, x, y } = o, on = BGd.id !== 'misir' || (Y <= 3150 && Y >= 30), ad = (DM ? BGd.ikon + ' ' : '') + (BGd.ad || 'Mısır');
+        const tw = g.measureText(ad).width + 4;
         g.globalAlpha = ia; const pr = 1 + Math.sin(T * 2.5) * 0.25;
         g.strokeStyle = 'rgba(255,214,102,0.7)'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 14 * pr, 0, 7); g.stroke();
         g.fillStyle = on ? '#ffd666' : '#bbb'; g.strokeStyle = OUT; g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); g.stroke();
-        text(x + 14, y, (DM ? BGd.ikon + ' ' : '') + (BGd.ad || 'Mısır'), { align: 'left', size: 15, w: 800, col: '#ffe7a3', serif: true });
-        hits.push({ kind: 'med', b: DM ? BGd : null, x0: x - 18, x1: x + 120, y0: y - 18, y1: y + 22 });
+        const yer = [[x + 14, y, 'left', [x + 12, y - 10, x + 14 + tw, y + 10]], [x - 14, y, 'right', [x - 14 - tw, y - 10, x - 12, y + 10]],
+          [x, y - 22, 'center', [x - tw / 2, y - 32, x + tw / 2, y - 12]], [x, y + 22, 'center', [x - tw / 2, y + 12, x + tw / 2, y + 32]]].find(c => !cakisir(c[3]));
+        if (yer) { kutular.push(yer[3]); text(yer[0], yer[1], ad, { align: yer[2], size: 15, w: 800, col: '#ffe7a3', serif: true }); }
+        const r = yer ? yer[3] : [x - 18, y - 18, x + 18, y + 18];
+        hits.push({ kind: 'med', b: DM ? BGd : null, x0: Math.min(x - 18, r[0]), x1: Math.max(x + 18, r[2]), y0: Math.min(y - 18, r[1]), y1: Math.max(y + 18, r[3]) });
         g.globalAlpha = 1;
       }
+      g.restore();
     }
     // aramadan gelen konum işareti: birkaç saniye nabız gibi atan iğne
     if (pinAt && T - pinAt.t0 < 9) {

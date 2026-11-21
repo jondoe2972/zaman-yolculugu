@@ -91,3 +91,23 @@ kayık, palmiye, kızak, rampa ve köy kodla modellendi.
 ## 3D İstanbul (data/sehir3d-istanbul.js)
 - Konumlar ve yapım yılları: Cyril Mango, *Le développement urbain de Constantinople*, 1985; Wolfgang Müller-Wiener, *Bildlexikon zur Topographie Istanbuls*, 1977; Doğan Kuban, *İstanbul: Bir Kent Tarihi*, 1996.
 - Nüfus tahminleri yaklaşıktır (Mango; Halil İnalcık, "Istanbul", *Encyclopaedia of Islam*). Mahallelerin dolup boşalması bu tahminlerden türetilmiş temsili bir canlandırmadır; tek tek evler gerçek konumlarında değildir.
+
+## Afrika, Asya ve Doğu Avrupa bölgeleri (data/bolgeler/, 2026-11-21)
+Her bölge dosyasının başında o bölgede kullanılan kitaplar yazılıdır. Başlıcaları:
+- **Mezopotamya ve İran:** Van De Mieroop, *A History of the Ancient Near East* (2016); Kuhrt, *The Persian Empire* (2007); Kennedy, *The Court of the Caliphs* (2004); Axworthy, *Iran: Empire of the Mind* (2008); Encyclopaedia Iranica.
+- **Arabistan ve Levant:** Hoyland, *Arabia and the Arabs* (2001); Kennedy, *The Prophet and the Age of the Caliphates* (2016); Riley-Smith, *The Crusades* (2014); Rogan, *The Arabs* (2009).
+- **Bozkır ve Orta Asya:** Golden, *Central Asia in World History* (2011); Beckwith, *Empires of the Silk Road* (2009); Manz, *The Rise and Rule of Tamerlane* (1989).
+- **Hindistan:** Thapar, *Early India* (2002); Keay, *India: A History* (2010); Eaton, *India in the Persianate Age* (2019); Guha, *India After Gandhi* (2007).
+- **Çin:** Ebrey, *The Cambridge Illustrated History of China* (2010); Lewis, *The Early Chinese Empires* (2007); Spence, *The Search for Modern China* (2013).
+- **Japonya ve Kore:** Totman, *A History of Japan* (2005); Jansen, *The Making of Modern Japan* (2000); Seth, *A Concise History of Korea* (2016).
+- **Güneydoğu Asya:** Osborne, *Southeast Asia* (2013); Coedès, *The Indianized States of Southeast Asia* (1968); Higham, *The Civilization of Angkor* (2001).
+- **Kuzey ve Batı Afrika:** Iliffe, *Africans* (2017); Abun-Nasr, *A History of the Maghrib* (1987); Gomez, *African Dominion* (2018); UNESCO *General History of Africa*.
+- **Doğu ve Güney Afrika:** Phillipson, *Foundations of an African Civilisation: Aksum* (2012); Horton & Middleton, *The Swahili* (2000); Pikirayi, *The Zimbabwe Culture* (2001); Thompson, *A History of South Africa* (2014).
+- **Doğu Avrupa ve Rusya:** Hosking, *Russia and the Russians* (2011); Plokhy, *The Gates of Europe* (2015); Davies, *God's Playground* (2005); Figes, *A People's Tragedy* (1996).
+- Köle ticareti rakamları: Trans-Atlantic Slave Trade Database (slavevoyages.org). Nüfus rakamları kaba tahminlerdir (McEvedy & Jones, *Atlas of World Population History*; BM nüfus verileri).
+
+## Amerika ve Okyanusya bölgeleri (data/bolgeler/, 2026-11-21)
+- **Kuzey Amerika:** Mann, *1491* (2005); Pauketat, *Cahokia* (2009); Taylor, *American Colonies* (2001); Wood, *Empire of Liberty* (2009); McPherson, *Battle Cry of Freedom* (1988); Morton, *A Short History of Canada* (2017).
+- **Mezoamerika ve Karayipler:** Coe & Houston, *The Maya* (2015); Martin & Grube, *Chronicle of the Maya Kings and Queens* (2008); Townsend, *Fifth Sun* (2019); Restall, *When Montezuma Met Cortés* (2018); Meyer vd., *The Course of Mexican History* (2017).
+- **Güney Amerika:** Moseley, *The Incas and Their Ancestors* (2001); MacQuarrie, *The Last Days of the Incas* (2007); Lynch, *Simón Bolívar* (2006); Skidmore & Smith, *Modern Latin America* (2014); Fausto, *A Concise History of Brazil* (2014).
+- **Okyanusya:** Kirch, *On the Road of the Winds* (2017); Thompson, *Sea People* (2019); Clark, *A Short History of Australia* (2006); King, *The Penguin History of New Zealand* (2003); Hunt & Lipo, *The Statues That Walked* (2011).

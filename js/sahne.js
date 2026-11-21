@@ -677,7 +677,7 @@ window.Sahne = (() => {
       shape([x - bw * 0.14, y - wh, x + bw * 0.14, y - wh, x + bw * 0.14, y - wh - hh * 0.1, x - bw * 0.14, y - wh - hh * 0.1], cd, lw);
       dome(x, y - wh - hh * 0.1, bw * 0.13, m.kubbe || '#d8c49c');
     }
-    const nm = m.minare || 1;
+    const nm = m.minare ?? 1;
     for (let i = 0; i < nm; i++) { const mx = nm === 1 ? x + bw * 0.42 : x + (i % 2 ? 1 : -1) * bw * (0.44 - Math.floor(i / 2) * 0.12); minaret(mx, y, hh, Math.max(1.6 * u, 2.2 * k), m.stil, col); }
     g.restore();
     if (p < 1) crane(x + bw * 0.55, y, hh * 0.9);
@@ -909,8 +909,112 @@ window.Sahne = (() => {
       if (f < 3) { g.fillStyle = 'rgba(60,40,20,0.55)'; const n = 14; for (let i = 0; i < n; i++) { const ax = x - w + (i + 0.5) * w * 2 / n, aw = w / n * 0.55; g.beginPath(); g.moveTo(ax - aw, fy - 1); g.lineTo(ax - aw, fy - fh * 0.5); g.arc(ax, fy - fh * 0.5, aw, Math.PI, 0); g.lineTo(ax + aw, fy - 1); g.fill(); } } }
     if (m.ruin && st.Y <= m.ruin) { g.fillStyle = TM.plato; g.beginPath(); g.moveTo(x + bw * 0.1, y - hh); g.lineTo(x + bw / 2 + 2, y - hh); g.lineTo(x + bw / 2 + 2, y - hh * 0.45); g.fill(); }
   }
+  // ---------- Asya ve Afrika yapıları ----------
+  function drawPagoda(m, p, x, y, k) { // Çin, Kore, Japonya: kat kat kıvrık çatılı kule ya da salon (kat: 1 = salon)
+    const bw = m.b * k, hh = m.h * k, lw = Math.max(1.1, 1.3 * u), n = m.kat || 5, duvar = m.renk || '#b8432f', cati = m.cati || '#3d4a4c';
+    g.save(); clipUp(x, y, bw * 1.3 + hh, hh * Math.max(0.12, p) + 6);
+    const taban = hh * 0.08; shape([x - bw * 0.55, y, x + bw * 0.55, y, x + bw * 0.5, y - taban, x - bw * 0.5, y - taban], '#d9cfbd', lw);
+    let yy = y - taban; const katH = (hh * 0.86) / n;
+    for (let i = 0; i < n; i++) {
+      const w = bw * (n === 1 ? 0.42 : 0.4 - i * 0.24 / n), wh = katH * (n === 1 ? 0.55 : 0.6), rw = w * 1.55 + 3 * k, rh = katH * 0.36;
+      shape([x - w, yy, x + w, yy, x + w, yy - wh, x - w, yy - wh], duvar, lw);
+      g.fillStyle = 'rgba(40,20,10,0.35)'; for (let j = -2; j <= 2; j++) g.fillRect(x + j * w * 0.36 - 1.2 * k, yy - wh * 0.85, 2.4 * k, wh * 0.7);
+      const ry = yy - wh; g.beginPath(); g.moveTo(x - rw, ry - rh * 0.55); g.quadraticCurveTo(x - rw * 0.7, ry + rh * 0.1, x - w * 0.9, ry); g.lineTo(x + w * 0.9, ry);
+      g.quadraticCurveTo(x + rw * 0.7, ry + rh * 0.1, x + rw, ry - rh * 0.55); g.quadraticCurveTo(x + rw * 0.5, ry - rh * 0.6, x + w * 0.5, ry - rh); g.lineTo(x - w * 0.5, ry - rh);
+      g.quadraticCurveTo(x - rw * 0.5, ry - rh * 0.6, x - rw, ry - rh * 0.55); g.closePath(); g.fillStyle = cati; g.fill(); g.strokeStyle = OUT; g.lineWidth = lw; g.stroke();
+      yy = ry - rh;
+    }
+    L(x, yy, x, yy - katH * 0.7, Math.max(1, 1.2 * k), '#8a7a4a'); for (let i = 1; i <= 3; i++) L(x - 2 * k, yy - katH * 0.18 * i, x + 2 * k, yy - katH * 0.18 * i, Math.max(1, 0.8 * k), '#8a7a4a');
+    g.restore(); if (p < 1) crane(x + bw * 0.6, y, hh * 0.8);
+  }
+  function drawStupa(m, p, x, y, k) { // Budist stupa; teras > 0 ise Borobudur gibi basamaklı
+    const bw = m.b * k, hh = m.h * k, lw = Math.max(1.1, 1.3 * u), col = m.renk || '#ece4d2', ter = m.teras || 0;
+    g.save(); clipUp(x, y, bw + hh, hh * Math.max(0.12, p) + 6);
+    let yy = y, w = bw / 2;
+    const th = ter ? hh * 0.45 / ter : hh * 0.12;
+    for (let i = 0; i < Math.max(1, ter); i++) { shape([x - w, yy, x + w, yy, x + w * 0.94, yy - th, x - w * 0.94, yy - th], i % 2 ? '#a69a86' : '#b8ad98', lw); yy -= th; w *= ter ? 0.84 : 0.8; }
+    const r = Math.min(w * 0.95, (hh - (y - yy)) * 0.55);
+    g.beginPath(); g.moveTo(x - r, yy); g.arc(x, yy, r, Math.PI, 0); g.closePath(); g.fillStyle = col; g.fill(); g.strokeStyle = OUT; g.lineWidth = lw; g.stroke();
+    const ty = yy - r; shape([x - r * 0.22, ty + 1, x + r * 0.22, ty + 1, x + r * 0.22, ty - r * 0.2, x - r * 0.22, ty - r * 0.2], '#d8cdb8', lw);
+    for (let i = 0; i < 4; i++) { const cw = r * (0.3 - i * 0.06); shape([x - cw, ty - r * (0.24 + i * 0.13), x + cw, ty - r * (0.24 + i * 0.13), x + cw * 0.8, ty - r * (0.31 + i * 0.13), x - cw * 0.8, ty - r * (0.31 + i * 0.13)], m.altin ? '#e0b84a' : '#cfc3ab', Math.max(0.8, lw * 0.7)); }
+    if (m.altin) { g.fillStyle = 'rgba(230,190,70,0.55)'; g.beginPath(); g.moveTo(x - r, yy); g.arc(x, yy, r, Math.PI, 0); g.fill(); }
+    g.restore(); if (p < 1) crane(x + bw * 0.55, y, hh * 0.8);
+  }
+  function drawZiggurat(m, p, x, y, k) { // Mezopotamya: kerpiç basamaklı tapınak, ortada merdiven
+    const bw = m.b * k, hh = m.h * k, lw = Math.max(1.2, 1.4 * u), n = m.kat || 3;
+    g.save(); clipUp(x, y, bw + hh, hh * Math.max(0.15, p) + 6);
+    let yy = y; const kh = hh * 0.78 / n;
+    for (let i = 0; i < n; i++) { const w = bw / 2 * (1 - i * 0.26); shape([x - w, yy, x + w, yy, x + w * 0.95, yy - kh, x - w * 0.95, yy - kh], i % 2 ? '#c49a62' : '#b88a52', lw);
+      g.strokeStyle = 'rgba(90,60,30,0.35)'; g.lineWidth = 1; for (let j = 1; j < 6; j++) { g.beginPath(); g.moveTo(x - w * 0.95, yy - kh * j / 6); g.lineTo(x + w * 0.95, yy - kh * j / 6); g.stroke(); } yy -= kh; }
+    shape([x - bw * 0.07, y, x + bw * 0.07, y, x + bw * 0.04, y - hh * 0.78, x - bw * 0.04, y - hh * 0.78], '#d8b47c', lw);
+    const tw = bw * 0.12; shape([x - tw, yy, x + tw, yy, x + tw, yy - hh * 0.16, x - tw, yy - hh * 0.16], m.renk || '#3a6ab0', lw);
+    g.restore(); if (p < 1) crane(x + bw * 0.55, y, hh * 0.9);
+  }
+  function drawSahel(m, p, x, y, k) { // Sahel kerpiç camisi (Cenne, Timbuktu): payandalar, dışarı taşan hurma kirişleri
+    const bw = m.b * k, hh = m.h * k, lw = Math.max(1.2, 1.4 * u), col = m.renk || '#b98250', koyu = '#9a6a3e';
+    g.save(); clipUp(x, y, bw + hh, hh * Math.max(0.15, p) + 6);
+    const wh = hh * 0.55; shape([x - bw / 2, y, x + bw / 2, y, x + bw / 2, y - wh, x - bw / 2, y - wh], col, lw);
+    const kule = (cx, w, h) => { g.beginPath(); g.moveTo(cx - w, y); g.lineTo(cx - w * 0.75, y - h); g.quadraticCurveTo(cx, y - h - w * 1.1, cx + w * 0.75, y - h); g.lineTo(cx + w, y); g.closePath(); g.fillStyle = col; g.fill(); g.strokeStyle = OUT; g.lineWidth = lw; g.stroke();
+      g.strokeStyle = '#5a3a20'; g.lineWidth = Math.max(1, 0.9 * k); for (let j = 1; j < 6; j++) { const yy = y - h * j / 6; g.beginPath(); g.moveTo(cx - w * 1.15, yy); g.lineTo(cx - w * 0.6, yy); g.moveTo(cx + w * 0.6, yy); g.lineTo(cx + w * 1.15, yy); g.stroke(); } };
+    const nk = Math.max(3, m.n || 5); for (let i = 0; i < nk; i++) { const cx = x - bw / 2 + (i + 0.5) * bw / nk; kule(cx, Math.max(2 * k, bw / nk * 0.16), wh * 1.1); }
+    kule(x - bw * 0.3, bw * 0.06, hh * 0.92); kule(x, bw * 0.07, hh); kule(x + bw * 0.3, bw * 0.06, hh * 0.92);
+    g.fillStyle = koyu; g.fillRect(x - bw / 2, y - 3 * k, bw, 3 * k);
+    g.restore(); if (p < 1) crane(x + bw * 0.55, y, hh * 0.9);
+  }
+  function drawPrang(m, p, x, y, k) { // Khmer tapınağı (Angkor): galeri ve lotus tomurcuğu kuleler
+    const bw = m.b * k, hh = m.h * k, lw = Math.max(1.1, 1.3 * u), col = m.renk || '#a79c86';
+    g.save(); clipUp(x, y, bw + hh, hh * Math.max(0.15, p) + 6);
+    shape([x - bw / 2, y, x + bw / 2, y, x + bw * 0.47, y - hh * 0.14, x - bw * 0.47, y - hh * 0.14], '#8f8572', lw);
+    shape([x - bw * 0.4, y - hh * 0.14, x + bw * 0.4, y - hh * 0.14, x + bw * 0.38, y - hh * 0.3, x - bw * 0.38, y - hh * 0.3], col, lw);
+    const kule = (cx, w, h0, h) => { g.beginPath(); g.moveTo(cx - w, h0); g.bezierCurveTo(cx - w * 1.1, h0 - h * 0.6, cx - w * 0.35, h0 - h * 0.9, cx, h0 - h); g.bezierCurveTo(cx + w * 0.35, h0 - h * 0.9, cx + w * 1.1, h0 - h * 0.6, cx + w, h0); g.closePath(); g.fillStyle = col; g.fill(); g.strokeStyle = OUT; g.lineWidth = lw; g.stroke();
+      g.strokeStyle = 'rgba(60,50,35,0.45)'; g.lineWidth = 1; for (let j = 1; j < 6; j++) { const yy = h0 - h * j / 6.5, ww = w * (1 - j * 0.13); g.beginPath(); g.moveTo(cx - ww, yy); g.lineTo(cx + ww, yy); g.stroke(); } };
+    const b0 = y - hh * 0.3; kule(x - bw * 0.3, bw * 0.06, b0, hh * 0.45); kule(x + bw * 0.3, bw * 0.06, b0, hh * 0.45); kule(x - bw * 0.15, bw * 0.07, b0, hh * 0.55); kule(x + bw * 0.15, bw * 0.07, b0, hh * 0.55); kule(x, bw * 0.09, b0, hh * 0.7);
+    g.restore(); if (p < 1) crane(x + bw * 0.55, y, hh * 0.9);
+  }
+  function drawSur(m, p, x, y, k) { // Çin Seddi gibi tepeleri aşan sur ve gözetleme kuleleri
+    const bw = m.b * k, hh = m.h * k, lw = Math.max(1.1, 1.3 * u), col = m.renk || '#a99c84', n = 28;
+    const yer = i => y - hh * 0.55 * Math.sin(i / n * Math.PI) * (0.6 + 0.4 * Math.sin(i * 0.7 + m.wx)), wy = 9 * k;
+    const son = Math.max(1, Math.round(n * Math.min(1, p * 1.05)));
+    g.beginPath(); g.moveTo(x - bw / 2, y); for (let i = 0; i <= son; i++) g.lineTo(x - bw / 2 + bw * i / n, yer(i)); for (let i = son; i >= 0; i--) g.lineTo(x - bw / 2 + bw * i / n, yer(i) - wy); g.closePath();
+    g.fillStyle = col; g.fill(); g.strokeStyle = OUT; g.lineWidth = lw; g.stroke();
+    g.fillStyle = col; for (let i = 0; i <= son; i++) { const bx = x - bw / 2 + bw * i / n; g.fillRect(bx - 1.3 * k, yer(i) - wy - 2.5 * k, 2.6 * k, 2.5 * k); }
+    for (let i = 3; i <= son; i += 6) { const bx = x - bw / 2 + bw * i / n, by = yer(i) - wy; shape([bx - 5 * k, by + wy, bx + 5 * k, by + wy, bx + 5 * k, by - 9 * k, bx - 5 * k, by - 9 * k], '#b8ab92', lw); g.fillStyle = 'rgba(40,25,10,0.5)'; g.fillRect(bx - 1.5 * k, by - 6 * k, 3 * k, 4 * k); }
+  }
+  function drawHeykel(m, p, x, y, k) { // ayakta heykeller: stil moai | isa | ozgurluk
+    const hh = m.h * k, bw = m.b * k, lw = Math.max(1.1, 1.3 * u);
+    g.save(); clipUp(x, y, bw + hh, hh * Math.max(0.1, p) + 6);
+    if (m.stil === 'moai') {
+      const n = m.n || 5; shape([x - bw / 2, y, x + bw / 2, y, x + bw / 2 - 3 * k, y - hh * 0.12, x - bw / 2 + 3 * k, y - hh * 0.12], '#8a8478', lw);
+      for (let i = 0; i < n; i++) { const cx = x - bw / 2 + (i + 0.5) * bw / n, w = Math.min(bw / n * 0.36, hh * 0.18), b0 = y - hh * 0.12;
+        shape([cx - w, b0, cx + w, b0, cx + w * 0.95, b0 - hh * 0.45, cx - w * 0.95, b0 - hh * 0.45], '#6e6a62', lw);
+        shape([cx - w * 0.95, b0 - hh * 0.45, cx + w * 0.95, b0 - hh * 0.45, cx + w * 0.9, b0 - hh * 0.88, cx + w * 0.2, b0 - hh * 0.92, cx - w * 0.9, b0 - hh * 0.88], '#7a756c', lw);
+        shape([cx + w * 0.2, b0 - hh * 0.8, cx + w * 1.1, b0 - hh * 0.6, cx + w * 0.6, b0 - hh * 0.55], '#5e5a52', Math.max(0.8, lw * 0.6));
+        g.fillStyle = '#3a342c'; g.fillRect(cx - w * 0.5, b0 - hh * 0.75, w * 0.8, 1.6 * k);
+        if (m.pukao) circ(cx, b0 - hh * 0.95, w * 0.55, '#a8503a', lw); }
+    } else {
+      const ped = hh * (m.stil === 'ozgurluk' ? 0.45 : 0.2), col = m.stil === 'ozgurluk' ? '#6fa58f' : '#e8e4dc', b0 = y - ped, fh = hh - ped, w = Math.max(3 * k, bw * 0.18);
+      shape([x - bw / 2, y, x + bw / 2, y, x + bw * 0.32, b0, x - bw * 0.32, b0], m.stil === 'ozgurluk' ? '#c8b89a' : '#b8b0a2', lw);
+      shape([x - w, b0, x + w, b0, x + w * 0.55, b0 - fh * 0.78, x - w * 0.55, b0 - fh * 0.78], col, lw);
+      if (m.stil === 'isa') { shape([x - fh * 0.4, b0 - fh * 0.74, x + fh * 0.4, b0 - fh * 0.74, x + fh * 0.4, b0 - fh * 0.68, x - fh * 0.4, b0 - fh * 0.68], col, lw); circ(x, b0 - fh * 0.86, w * 0.45, col, lw); }
+      else { circ(x, b0 - fh * 0.85, w * 0.42, col, lw); L(x + w * 0.4, b0 - fh * 0.7, x + w * 0.9, b0 - fh * 1.05, Math.max(1.5, w * 0.3), col);
+        g.fillStyle = '#ffb347'; g.beginPath(); g.ellipse(x + w * 0.95, b0 - fh * 1.1, w * 0.22, w * 0.4, 0, 0, 7); g.fill();
+        g.strokeStyle = col; g.lineWidth = Math.max(1, k); for (let i = -2; i <= 2; i++) { g.beginPath(); g.moveTo(x, b0 - fh * 0.9); g.lineTo(x + i * w * 0.35, b0 - fh * 1.02); g.stroke(); } }
+    }
+    g.restore(); if (p < 1) crane(x + bw * 0.6, y, hh * 0.9);
+  }
+  function drawOpera(m, p, x, y, k) { // Sidney Opera Binası: beyaz yelken kabukları
+    const bw = m.b * k, hh = m.h * k, lw = Math.max(1.1, 1.3 * u);
+    g.save(); clipUp(x, y, bw + hh, hh * Math.max(0.1, p) + 6);
+    shape([x - bw / 2, y, x + bw / 2, y, x + bw / 2, y - hh * 0.18, x - bw / 2, y - hh * 0.18], '#c8a88a', lw);
+    const yel = (cx, w, h, yon) => { g.beginPath(); g.moveTo(cx - w * yon, y - hh * 0.18); g.quadraticCurveTo(cx - w * 0.2 * yon, y - hh * 0.18 - h * 1.1, cx + w * yon, y - hh * 0.18 - h); g.lineTo(cx + w * 0.6 * yon, y - hh * 0.18); g.closePath(); g.fillStyle = '#f6f4ee'; g.fill(); g.strokeStyle = OUT; g.lineWidth = lw; g.stroke(); };
+    yel(x - bw * 0.3, bw * 0.12, hh * 0.55, 1); yel(x - bw * 0.15, bw * 0.13, hh * 0.75, 1); yel(x, bw * 0.13, hh * 0.82, 1); yel(x + bw * 0.18, bw * 0.12, hh * 0.6, 1); yel(x + bw * 0.32, bw * 0.1, hh * 0.45, 1);
+    g.restore(); if (p < 1) crane(x + bw * 0.55, y, hh * 0.9);
+  }
   function structTop(m, p, y, k) {
     switch (m.type) {
+      case 'heykel': case 'opera': return y - m.h * k * Math.max(0.2, p);
+      case 'pagoda': case 'stupa': case 'ziggurat': case 'sahel': case 'prang': return y - m.h * k * Math.max(0.2, p);
+      case 'sur': return y - m.h * k * 0.75;
       case 'sphinx': return y - 30 * k;
       case 'suntemple': return y - 56 * k;
       case 'temple': return y - m.h * k * (p >= 1 ? 1.3 : 1);
@@ -958,6 +1062,14 @@ window.Sahne = (() => {
       case 'nemrut': return drawNemrut(m, p, x, y, k);
       case 'gothic': return drawGothic(m, p, x, y, k);
       case 'arena': return drawArena(m, p, x, y, k);
+      case 'pagoda': return drawPagoda(m, p, x, y, k);
+      case 'stupa': return drawStupa(m, p, x, y, k);
+      case 'ziggurat': return drawZiggurat(m, p, x, y, k);
+      case 'sahel': return drawSahel(m, p, x, y, k);
+      case 'prang': return drawPrang(m, p, x, y, k);
+      case 'sur': return drawSur(m, p, x, y, k);
+      case 'heykel': return drawHeykel(m, p, x, y, k);
+      case 'opera': return drawOpera(m, p, x, y, k);
       default: return drawPyramid(m, p, x, y, k);
     }
   }

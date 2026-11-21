@@ -4,7 +4,7 @@
   const S = window.Sahne, M = window.Harita, MIS = window.MISIR || {};
   const BG = window.BOLGE || { id: 'misir', ad: 'Mısır', ikon: '🏺', hakkinda: 'Bu çağda Mısır', simgeAd: "Mısır'ın simgeleri", bugunAd: 'Bugünkü Mısır', antikAd: 'Antik Mısır', uc3: true, kultur: true };
   // bölge seçici (Mısır / Anadolu): sayfa o bölgenin verileriyle yeniden açılır
-  { const bs = document.querySelector('#bolge'); if (bs) { bs.value = BG.id; bs.addEventListener('change', () => { location.href = location.pathname + (bs.value === 'dunya' ? '' : '?bolge=' + bs.value); }); } }
+  { const bs = document.querySelector('#bolge'); if (bs) { const BL = window.BOLGELER || {}; if (window.KITALAR) bs.innerHTML = '<option value="dunya">🌍 Tüm Dünya</option>' + window.KITALAR.map(k => `<optgroup label="${k.ikon} ${k.ad}">${k.b.filter(b => BL[b]).map(b => `<option value="${b}">${BL[b].ikon} ${BL[b].ad}</option>`).join('')}</optgroup>`).join(''); bs.value = BG.id; bs.addEventListener('change', () => { location.href = location.pathname + (bs.value === 'dunya' ? '' : '?bolge=' + bs.value); }); } }
   { const ai = document.querySelector('#about-ikon'), at = document.querySelector('#about-tx'); if (ai) ai.textContent = BG.ikon; if (at) at.textContent = ' ' + BG.ad + ' hakkında'; }
   if (BG.mevsimler) document.querySelectorAll('[data-season]').forEach(b => { const v = BG.mevsimler[b.dataset.season]; if (v) { b.textContent = v[0]; b.title = v[1]; } });
   if (!BG.uc3) document.body.classList.add('uc3yok');
@@ -69,7 +69,8 @@
 
   // ---------- çağ seçimi ----------
   const eraSel = $('#era');
-  eraSel.innerHTML = PLACES.map(p => `<option value="${p.id}">${DUNYA && p.bolge ? BLR[p.bolge].ikon + ' ' : ''}${p.kisa} (${p.aralikAd})</option>`).join('');
+  const eraOpt = p => `<option value="${p.id}">${p.kisa} (${p.aralikAd})</option>`;
+  eraSel.innerHTML = DUNYA ? eraOpt(ALL) + BSIRA.map(b => `<optgroup label="${BLR[b].ikon} ${BLR[b].ad}">${PARTS.filter(p => p.bolge === b).map(eraOpt).join('')}</optgroup>`).join('') : PLACES.map(eraOpt).join('');
   eraSel.value = P.id;
   eraSel.addEventListener('change', () => switchPlace(eraSel.value));
   function switchPlace(id, year) {
@@ -232,13 +233,20 @@
       <p class="kim">Bütün bölgeler aynı zaman çizelgesinde. Bir bölgenin canlı sahnesine girmek için kartındaki düğmeye bas, ya da yukarıdan bölge seç.</p>
       <div class="headbtns"><button class="symbtn">⭐ ${BG.simgeAd}</button>${s3Dugme()}</div></div>`;
     if (near.length) h += `<div class="now">${near.slice(0, 5).map(ev => `<div>📌 <b>${YIL.fmt(ev.y)}:</b> ${ev.t}</div>`).join('')}</div>`;
-    for (const b of BSIRA) {
+    const KT = window.KITALAR || [{ id: 'hepsi', ad: 'Bölgeler', ikon: '🌍', b: BSIRA }];
+    for (const kt of KT) {
+      const bl = kt.b.filter(b => BSIRA.includes(b) && bolgeAn(b, y)); if (!bl.length) continue;
+      const disari = bl.filter(b => { const a = bolgeAn(b, y); return y > a.from || y < a.to; });
+      h += `<h3 class="kitabas">${kt.ikon} ${kt.ad}</h3>`;
+    for (const b of bl) {
       const Bb = BLR[b], a = bolgeAn(b, y); if (!a) continue;
       const btn = `<div class="gos"><button class="phbtn" data-gitbolge="${b}">🎬 Sahnesine git</button><button class="phbtn" data-kurebolge="${b}">🌍 Küreden yaklaş</button></div>`;
-      if (y > a.from || y < a.to) { h += card(Bb.ikon, Bb.ad, `<p><small>Bu yıl için henüz anlatım yok · ${YIL.aralik(a.from, a.to)}</small></p>${btn}`); continue; }
+      if (y > a.from || y < a.to) continue;
       const ins = (a.p ? a.p.monuments : []).filter(m => !m.minor && !m.eski && S.progress(m, y) >= 0 && ((m.stop && y > m.stop) || (!m.stop && S.progress(m, y) < 1))).map(m => m.ad);
       const kim = a.r && a.r.kisa !== '?' ? `👑 <b>${a.r.ad}</b> <small>${YIL.aralik(a.r.from, a.r.to)}</small>` : '👑 <small>Bilinen bir hükümdar yok</small>';
       h += card(Bb.ikon, `${Bb.ad} <small>· ${a.p ? a.p.kisa : 'Ara dönem'}</small>`, `<p>${kim}</p>${a.e ? `<p>${a.e.gundem}</p>` : ''}${ins.length ? `<p>🏗️ <b>Süren inşaat:</b> ${ins.slice(0, 4).join(', ')}${ins.length > 4 ? '…' : ''}</p>` : ''}${gecimOf(b, y) ? `<p>🌾 <b>Geçim:</b> ${ilkCumle(gecimOf(b, y).t)}</p>` : ''}${btn.replace('</div>', `${COG[b] ? `<button class="phbtn" data-topraklar="${b}">🗺️ Bu topraklar</button>` : ''}</div>`)}`);
+    }
+      if (disari.length) h += `<p class="kitadisi"><small>Bu yıl için anlatımı olmayan: ${disari.map(b => { const a = bolgeAn(b, y); return `<button class="phbtn" data-y="${y > a.from ? a.from : a.to}" title="${YIL.aralik(a.from, a.to)}">${BLR[b].ikon} ${BLR[b].ad}</button>`; }).join(' ')}</small></p>`;
     }
     h += card('🐪', 'Ticaret yolları ve yolculuklar', yollarHTML(y));
     h += card('⏩', 'Hızlı git', `<div class="chips">${P.hizli.map(q => `<button data-y="${q.y}">${q.ad}</button>`).join('')}</div>`);
@@ -265,7 +273,10 @@
   function yearCard(y) {
     if (DUNYA) {
       $('#yc-year').textContent = YIL.fmt(y); $('#yc-ago').textContent = YIL.once(y);
-      $('#yc-ruler').textContent = BSIRA.map(b => { const a = bolgeAn(b, y); return a && a.p ? BLR[b].ikon + ' ' + a.p.kisa : null; }).filter(Boolean).join(' · ');
+      // küre hangi bölgeye bakıyorsa önce o bölgeler (en yakın 3)
+      const v = window.Dunya && window.Dunya.view, uz = b => { const m = BLR[b].isaret || BLR[b].merkez; if (!v || !m) return 0; const dl = ((m[1] - v.lon + 540) % 360) - 180; return (m[0] - v.lat) ** 2 + (dl * Math.cos(v.lat * Math.PI / 180)) ** 2; };
+      const L = BSIRA.map(b => { const a = bolgeAn(b, y); return a && a.p ? [uz(b), BLR[b].ikon + ' ' + a.p.kisa] : null; }).filter(Boolean).sort((a, b) => a[0] - b[0]);
+      $('#yc-ruler').textContent = L.slice(0, 3).map(x => x[1]).join(' · ') + (L.length > 3 ? ` · +${L.length - 3} bölge` : '');
       $('#yc-site').textContent = '🌍 Tüm Dünya'; $('#yc-city').hidden = true; return;
     }
     const r = pick(P.rulers, y);
@@ -290,15 +301,21 @@
     tg.setTransform(DPR, 0, 0, DPR, 0, 0); tg.clearRect(0, 0, TW, TH);
     tg.textBaseline = 'middle'; tg.textAlign = 'center';
     const x0 = yearX(P.from);
-    if (DUNYA) BSIRA.forEach((b, i) => {
-      const y0 = 4 + i * 13, renk = [['#8a5a2b', '#a46d38'], ['#8e3b32', '#a9493d'], ['#2f5a8a', '#3d6ea3']][i % 3];
-      PARTS.filter(p => p.bolge === b).forEach((p, j) => {
-        const a = yearX(Math.min(p.from, P.from)), bb = yearX(Math.max(p.to, P.to)); if (bb <= a) return;
-        tg.fillStyle = renk[j % 2]; tg.fillRect(a, y0, bb - a, 12);
-        tg.fillStyle = '#fff'; tg.font = '600 9.5px system-ui'; const t1 = BLR[b].ikon + ' ' + p.kisa;
-        const t = tg.measureText(t1).width < bb - a - 4 ? t1 : tg.measureText(p.kisa).width < bb - a - 4 ? p.kisa : ''; if (t) tg.fillText(t, (a + bb) / 2, y0 + 6.5);
+    if (DUNYA) {
+      // her kıta bir sıra; içinde her bölge ince bir şerit (bölgenin çağları iki tonla)
+      const KT = window.KITALAR || [{ id: 'hepsi', ad: '', ikon: '', b: BSIRA }], RENK = { afrika: ['#9a6a2e', '#b8843e'], asya: ['#8e3b32', '#ad5446'], avrupa: ['#2f5a8a', '#4a76a8'], amerika: ['#2e7a4e', '#46966a'], okyanusya: ['#2a8a9a', '#46a8b8'], hepsi: ['#6a5a4a', '#8a7a6a'] };
+      const rh = Math.min(13, Math.floor(40 / KT.length)), fs = Math.min(9.5, rh + 0.5);
+      KT.forEach((kt, i) => {
+        const y0 = 4 + i * rh, bl = kt.b.filter(b => BSIRA.includes(b)), lh = (rh - 1) / Math.max(1, bl.length), rk = RENK[kt.id] || RENK.hepsi;
+        tg.fillStyle = 'rgba(255,255,255,0.05)'; tg.fillRect(0, y0, TW, rh - 1);
+        bl.forEach((b, k) => PARTS.filter(p => p.bolge === b).forEach((p, j) => {
+          const a = yearX(Math.min(p.from, P.from)), bb = yearX(Math.max(p.to, P.to)); if (bb <= a) return;
+          tg.fillStyle = rk[(j + k) % 2]; tg.fillRect(a, y0 + k * lh, bb - a, Math.max(1, lh - 0.6));
+        }));
+        tg.font = `700 ${fs}px system-ui`; const t = `${kt.ikon} ${kt.ad} · ${bl.length}`, w = tg.measureText(t).width + 10;
+        tg.fillStyle = 'rgba(25,18,12,0.82)'; tg.fillRect(2, y0, w, rh - 1); tg.fillStyle = '#f5e6c8'; tg.textAlign = 'left'; tg.fillText(t, 7, y0 + rh / 2); tg.textAlign = 'center';
       });
-    });
+    }
     else for (const d of P.dynasties) {
       const a = yearX(Math.min(d.from, P.from)), b = yearX(Math.max(d.to, P.to)); if (b <= a) continue;
       tg.fillStyle = d.renk; tg.globalAlpha = 0.85; tg.fillRect(a, 4, b - a, 14); tg.globalAlpha = 1;
@@ -607,6 +624,8 @@
     document.body.classList.toggle('maponly', v === 'harita');
     document.body.classList.toggle('globeonly', v === 'dunya');
     if (v !== 'sahne' && !DUNYA) $('#citycard').hidden = true;
+    // tek bölge modunda küre ilk açıldığında o bölgeye döner (Amerika ve Okyanusya başlangıç görünümünün arkasında kalıyor)
+    if (v === 'dunya' && !DUNYA && !setView.kureGitti && BG.merkez && window.Dunya) { setView.kureGitti = true; window.Dunya.goEgypt(BG.merkez, Math.min(BG.merkezZ || 3, 3)); }
     modGuncelle();
   }
   function modGuncelle() { document.querySelectorAll('[data-mod]').forEach(b => b.classList.toggle('on', (b.dataset.mod === 'kesfet' && view === 'dunya') || (b.dataset.mod === 'sahne' && view === 'sahne'))); }

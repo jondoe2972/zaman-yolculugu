@@ -803,3 +803,7 @@ body:not(.globeonly) .kp-kure { display: none; }
 .kisi-hayat { padding-left: 20px; }
 .kisi-hayat li { margin-bottom: 10px; line-height: 1.5; }
 .kisi-hayat small { display: block; color: #8a6a4a; margin: 2px 0 4px; }
+/* Tüm Dünya paneli: kıta başlıkları */
+.kitabas { margin: 14px 2px 6px; font: 700 13px/1.2 system-ui; letter-spacing: .04em; text-transform: uppercase; color: #c9b48e; border-bottom: 1px solid rgba(201,180,142,.25); padding-bottom: 4px; }
+.kitadisi { margin: 2px 2px 10px; color: #a89878; line-height: 2; }
+.kitadisi .phbtn { margin: 0 2px; }
