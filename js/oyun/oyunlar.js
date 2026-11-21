@@ -22,6 +22,9 @@
     ],
     toprak: [
       'js/oyun/topraklar.js?v=3'
+    ],
+    hayvan: [
+      'js/oyun/hayvan-oyun.js?v=1'
     ]
   };
   const dosyaSoz = new Map();
@@ -64,8 +67,12 @@
     if (window.HangisiEski && window.HangisiEski.rekor) return window.HangisiEski.rekor();
     try { return JSON.parse(localStorage['zy-eski-ist'] || 'null')?.rekor || 0; } catch (e) { return 0; }
   }
+  function hayvanRekor() {
+    if (window.HayvanOyunu && window.HayvanOyunu.rekor) return window.HayvanOyunu.rekor();
+    try { return JSON.parse(localStorage['zy-hayvan-ist'] || 'null')?.seriRekor || 0; } catch (e) { return 0; }
+  }
 
-  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt'];
+  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun'];
   function digerleriniKapat(haricId) {
     for (const id of OYUN_KUTULARI) {
       if (id === haricId) continue;
@@ -106,7 +113,15 @@
       }
     },
     {
-      id: 'toprak', kutu: 'topraklar', ikon: '📍', ad: 'Bu Toprakların Tarihi', yeni: true,
+      id: 'hayvan', kutu: 'hayvan-oyun', ikon: '🐾', ad: 'Hayvanlar Alemi', yeni: true,
+      alt: () => { const r = hayvanRekor(); return r ? `Bu hayvan nerede yaşar? + Doğa Bilgini · 🏆 Seri: ${r}` : 'Fotoğraftan yaşam bölgesini bil + 8 soruluk doğa testi'; },
+      ac: async () => {
+        await paketYukle('hayvan');
+        if (window.HayvanOyunu) window.HayvanOyunu.ac();
+      }
+    },
+    {
+      id: 'toprak', kutu: 'topraklar', ikon: '📍', ad: 'Bu Toprakların Tarihi',
       alt: 'Bir şehir ya da küreden nokta seç: 5.000 yıllık devlet şeridi',
       ac: async () => {
         await paketYukle('toprak');
@@ -115,8 +130,18 @@
     },
     {
       id: 'aa', kutu: 'sasirt', ikon: '🤯', ad: 'Şaşırt Beni',
-      alt: () => `Tarihten ${window.AyniAnda ? window.AyniAnda.adet : 'yüzlerce'} şaşırtıcı bilgi; haritada gör ve paylaş`,
+      alt: 'Tarihten şaşırtıcı bilgiler; tek tıkla haritada gör ve paylaş',
       ac: () => window.AyniAnda && window.AyniAnda.sasirt(true)
+    },
+    {
+      id: 'kesif', kutu: 'modal', ikon: '🧭', ad: 'Keşif Defterim',
+      alt: 'Okyanuslar, hayvanlar, dağlar ve kültürlerdeki ilerlemen',
+      ac: () => window.ZY && window.ZY.openKesif && window.ZY.openKesif()
+    },
+    {
+      id: 'rehber', kutu: 'hosgeldin', ikon: '❓', ad: 'Hızlı Rehber',
+      alt: '6 sahnelik animasyonlu tanıtımı tekrar izle',
+      ac: () => window.ZY && window.ZY.rehberAc && window.ZY.rehberAc()
     }
   ];
 
@@ -186,6 +211,8 @@
     setTimeout(() => paketYukle('eski').then(() => window.HangisiEski && window.HangisiEski.ac()).catch(() => {}), 500);
   } else if (oyunQ === 'toprak') {
     setTimeout(() => paketYukle('toprak').then(() => window.ToprakTarihi && window.ToprakTarihi.ac()).catch(() => {}), 500);
+  } else if (oyunQ === 'hayvan') {
+    setTimeout(() => paketYukle('hayvan').then(() => window.HayvanOyunu && window.HayvanOyunu.ac()).catch(() => {}), 500);
   } else if (oyunQ === 'sasirt') {
     setTimeout(() => window.AyniAnda && window.AyniAnda.sasirt(true), 400);
   } else if (qs.get('dog') && DUNYA) {

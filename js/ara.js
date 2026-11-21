@@ -25,6 +25,10 @@
     for (const c of (ZY() && ZY().cities()) || []) add({ tur: 'Şehir', ikon: c.cap ? '⭐' : '🏙️', ad: c.ad, alt: (window.SEHIR_BILGI || {})[c.ad]?.bugun || 'Antik şehir', kw: [(window.SEHIR_BILGI || {})[c.ad]?.bugun], oncelik: 4, act: () => ZY().openCity(c.ad) });
     for (const e of window.OLAYLAR || []) add({ tur: ({ savas: 'Savaş', deniz: 'Deniz savaşı', antlasma: 'Antlaşma', afet: 'Afet', olay: 'Önemli olay' })[e.tur] || 'Olay', ikon: ({ savas: '⚔️', antlasma: '📜', afet: '🌋', olay: '🏛️' })[e.tur] || '•', ad: e.ad, alt: `${YIL.fmt(e.y)}`, kw: e.taraflar || [], oncelik: 2, act: () => ZY().openEvent(e.id) });
     for (const t of (window.KULTUR || {}).tanrilar || []) add({ tur: 'Tanrı', ikon: '🙏', ad: t.ad, alt: t.unvan, kw: [t.wiki, t.id], oncelik: 3, act: () => ZY().openGod(t.id) });
+    for (const o of (window.ATLAS_OKYANUS || {}).okyanuslar || []) add({ tur: o.tur === 'deniz' ? 'Deniz' : 'Okyanus', ikon: o.ik || '🌊', ad: o.ad, alt: o.yuzolcum, kw: [o.w], oncelik: 5, act: () => ZY().openOkyanus(o.id) });
+    for (const h of window.ATLAS_HAYVANLAR || []) add({ tur: 'Hayvan', ikon: h.ik || '🐾', ad: h.ad, alt: `${h.bolge} · ${h.durum}`, kw: [h.bolge, h.kita, h.w], oncelik: 4, act: () => ZY().openHayvan(h.id) });
+    for (const cg of window.ATLAS_COGRAFYA || []) add({ tur: ({ dag: 'Dağ', col: 'Çöl / Bozkır', havza: 'Tarihî Havza', nehir: 'Nehir' })[cg.tur] || 'Coğrafya', ikon: ({ dag: '🏔️', col: '🏜️', havza: '🌿', nehir: '🌊' })[cg.tur] || '🗺️', ad: cg.ad, alt: cg.konum, kw: [cg.konum, cg.w], oncelik: 5, act: () => ZY().openCografya(cg.id) });
+    for (const d of window.DONUM_NOKTALARI || []) add({ tur: 'Büyük Olay', ikon: '⚡', ad: d.ad, alt: `${d.yilYazi} · ${d.yer}`, kw: [d.yer, d.w], oncelik: 6, act: () => ZY().openDonum(d.id) });
     return out;
   }
   function search(q) {

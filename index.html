@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Dünya tarihini interaktif kürede keşfet, o dönemde bir gününü yaşa ve tarih oyunlarını oyna.">
 <meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23241b14'/%3E%3Cpath d='M18 12h28v6c0 7-6 11-11 14 5 3 11 7 11 14v6H18v-6c0-7 6-11 11-14-5-3-11-7-11-14v-6z' fill='none' stroke='%23ffd666' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 18h18c0 4-4 7-9 10-5-3-9-6-9-10zm9 18c5 3 9 6 9 10H23c0-4 4-7 9-10z' fill='%23ffd666'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/stil.css?v=58">
+<link rel="stylesheet" href="css/stil.css?v=60">
 </head>
 <body>
 <header class="top">
@@ -31,6 +31,7 @@
   </nav>
   <label class="place"><select id="bolge" class="bolgesel" aria-label="Bölge seç"><option value="dunya">🌍 Tüm Dünya</option><option value="misir">🏺 Mısır</option><option value="anadolu">🏛️ Anadolu</option><option value="avrupa">🏰 Avrupa</option></select><select id="era" aria-label="Çağ seç"></select></label>
   <button id="buyil" class="buyil" aria-expanded="false" title="Bu yılın özeti: hükümdar, gündem, geçim, savaşlar">📖<span> Bu yıl</span></button>
+  <button id="rehber-ac" class="rehber-btn" title="Hızlı rehberi tekrar izle" aria-label="Uygulama rehberi">?</button>
 </header>
 <main class="app">
   <section class="stage">
@@ -66,8 +67,16 @@
     <button id="katbtn" class="katbtn" aria-expanded="false" title="Haritada neler gösterilsin?">🗂️<span> Katmanlar</span></button>
     <div id="katman" class="katpop" hidden>
       <div class="kp-kure">
+        <div class="kp-modlar" role="group" aria-label="Atlas görünümü">
+          <button type="button" data-atlas="tarih" class="on">🏛️ Tarih Atlası</button>
+          <button type="button" data-atlas="doga">🌿 Doğa Atlası</button>
+        </div>
         <b>Haritada göster</b>
         <label><input type="checkbox" data-kat="sinir" checked><span>🗺️ Dönemin sınırları</span></label>
+        <label><input type="checkbox" data-kat="donum"><span>⚡ Dünyayı değiştiren büyük olaylar</span><i></i></label>
+        <label><input type="checkbox" data-kat="akinti"><span>🌊 Akıntılar, girdaplar ve fırtınalar</span><i></i></label>
+        <label><input type="checkbox" data-kat="hayvan"><span>🐾 Bölge hayvanları (yıla göre)</span><i></i></label>
+        <label><input type="checkbox" data-kat="cografya"><span>🏔️ Dağlar, çöller ve tarihî havzalar</span><i></i></label>
         <label><input type="checkbox" data-kat="goc" checked><span>🧬 İnsanlığın yayılışı (MÖ 3000 öncesi)</span></label>
         <label><input type="checkbox" data-kat="ticaret" checked><span>🐪 Ticaret yolları</span><i></i></label>
         <label><input type="checkbox" data-kat="yolculuk"><span>🧭 Ünlü yolculuklar ve seferler</span><i></i></label>
@@ -78,6 +87,7 @@
         <label><input type="checkbox" data-kat="olay"><span>🏛️ Önemli olaylar</span><i></i></label>
         <label><input type="checkbox" data-kat="kaynak"><span>⛏️ Yeraltı kaynakları</span><i></i></label>
         <div class="kp-aralik">Olaylar: seçili yılın ±<select id="aralik"><option value="1">1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100" selected>100</option><option value="250">250</option><option value="500">500</option></select> yıl çevresi</div>
+        <button type="button" id="kesif-ac" class="kp-kesif">🧭 Keşif Defterim <small id="kesif-say"></small></button>
       </div>
       <div class="kp-sahne">
         <b>Mevsim</b>
@@ -136,26 +146,15 @@
 <div id="hosgeldin" class="hosgeldin" hidden>
   <div class="hg-kart" role="dialog" aria-modal="true" aria-labelledby="hg-baslik">
     <button class="hg-x" title="Kapat" aria-label="Kapat">✕</button>
-    <div class="hg-ust">
-      <span class="hg-logo">⏳</span>
-      <h1 id="hg-baslik">Zaman Yolculuğu'na Hoş Geldin</h1>
-      <p>Binlerce yıllık dünya tarihini nasıl keşfetmek istersin?</p>
+    <div id="hg-icerik" class="hg-icerik"></div>
+    <div class="hg-alt">
+      <div id="hg-noktalar" class="hg-noktalar" role="tablist" aria-label="Rehber adımları"></div>
+      <div class="hg-yon">
+        <button type="button" class="hg-geri" data-hg="geri">‹ Geri</button>
+        <button type="button" class="hg-gec-kucuk" data-hg="kapat">Geç</button>
+        <button type="button" class="hg-ileri" data-hg="ileri">İleri ›</button>
+      </div>
     </div>
-    <div class="hg-sec">
-      <button class="hg-btn" data-hg="kesfet">
-        <span class="hg-ik">🌍</span>
-        <span><b>Tarihi Keşfet</b><small>Dünya küresini döndür, sınırların ve uygarlıkların değişimini izle</small></span>
-      </button>
-      <button class="hg-btn" data-hg="oyun">
-        <span class="hg-ik">🎮</span>
-        <span><b>Eğlenceli Oyunlar Oyna</b><small>Ben Kimim?, Sınırdan Bil ve şaşırtıcı tarih bilgileriyle kendini dene</small></span>
-      </button>
-      <button class="hg-btn" data-hg="yasa">
-        <span class="hg-ik">🧑‍🌾</span>
-        <span><b>O Dönemde Yaşa</b><small>Başka bir çağdan bir hayat seç, şafaktan geceye bir gününü yaşa</small></span>
-      </button>
-    </div>
-    <button class="hg-gec" data-hg="kapat">Pencereyi kapatıp serbestçe gez</button>
   </div>
 </div>
 <div id="arama" class="arama" hidden>
@@ -186,18 +185,23 @@
 <script src="data/cografya.js?v=1"></script>
 <script src="data/roller.js?v=2"></script>
 <script src="data/sinir/sinir-dizin.js?v=1"></script>
-<script src="js/dunya.js?v=66"></script>
+<script src="data/atlas/okyanus.js?v=1"></script>
+<script src="data/atlas/hayvanlar.js?v=1"></script>
+<script src="data/atlas/cografya-bolge.js?v=1"></script>
+<script src="data/atlas/kultur.js?v=1"></script>
+<script src="data/atlas/donum-noktalari.js?v=2"></script>
+<script src="js/dunya.js?v=70"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
 <script src="data/yapilar/avrupa.js?v=1"></script>
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="js/sahne-harita.js?v=6"></script>
-<script src="js/uygulama.js?v=65"></script>
+<script src="js/uygulama.js?v=67"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
-<script src="js/ayni-anda.js?v=5"></script>
-<script src="js/oyun/oyunlar.js?v=7"></script>
-<script src="js/ara.js?v=7"></script>
+<script src="js/ayni-anda.js?v=6"></script>
+<script src="js/oyun/oyunlar.js?v=10"></script>
+<script src="js/ara.js?v=9"></script>
 </body>
 </html>

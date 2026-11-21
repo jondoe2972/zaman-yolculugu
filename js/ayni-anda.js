@@ -38,10 +38,8 @@ window.AyniAnda = (() => {
     if (!ac.hidden) acikCiz();
   }
   function acikCiz() {
-    const kalan = A.filter(x => !gor.has(x.k)).length;
     ac.innerHTML = `<small class="aa-tarih">📅 ${tarih(f)}</small><b>${esc(f.k)}</b><p>${esc(f.t)}</p>
-      <div class="aa-alt"><button data-aa="git" class="ana" title="Yılı ${tarih(f)} yap${f.ll ? ', küreyi olayın yerine çevir' : ''}">⏳ O zamana git</button><button data-aa="sonraki">↻ Başka</button>${f.w ? `<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(f.w.replace(/ /g, '_'))}" target="_blank" rel="noopener" title="Bilginin kaynağı (İngilizce Vikipedi)">🔎 Kaynak</a>` : ''}<button data-aa="paylas" title="Panoya kopyala">📋</button><button data-aa="kapat" class="aa-x" title="Kapat">✕</button></div>
-      <small>${A.length} bilgiden ${A.length - kalan} tanesini gördün</small>`;
+      <div class="aa-alt"><button data-aa="git" class="ana" title="Yılı ${tarih(f)} yap${f.ll ? ', küreyi olayın yerine çevir' : ''}">⏳ O zamana git</button><button data-aa="sonraki">↻ Başka</button>${f.w ? `<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(f.w.replace(/ /g, '_'))}" target="_blank" rel="noopener" title="Bilginin kaynağı (İngilizce Vikipedi)">🔎 Kaynak</a>` : ''}<button data-aa="paylas" title="Panoya kopyala">📋</button><button data-aa="kapat" class="aa-x" title="Kapat">✕</button></div>`;
     yukseklik();
   }
   function yukseklik() { const st = kart.parentElement.getBoundingClientRect(), r = ac.getBoundingClientRect(); ac.style.maxHeight = Math.max(120, st.bottom - r.top - 12) + 'px'; }
@@ -75,7 +73,6 @@ window.AyniAnda = (() => {
 
   function sbCiz(anim) {
     if (!sbEl || !sf) return;
-    const gorulen = A.filter(x => gor.has(x.k)).length;
     sbEl.innerHTML = `
       <div class="sbk-ust">
         <span class="sbk-roz">🤯 Şaşırt Beni</span>
@@ -91,14 +88,13 @@ window.AyniAnda = (() => {
         <button data-sbk="yeni">🎲 Bir Tane Daha</button>
         <button data-sbk="paylas">📋 Paylaş</button>
         ${sf.w ? `<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(sf.w.replace(/ /g, '_'))}" target="_blank" rel="noopener">🔎 Kaynak</a>` : ''}
-      </div>
-      <small class="sbk-say">${gorulen} / ${A.length} şaşırtıcı bilgi keşfedildi</small>`;
+      </div>`;
   }
 
   function sasirt(yeni = true) {
     sonEtkilesim = Date.now();
     acKapa(false);
-    for (const id of ['sinirbil', 'hayat', 'eski-oyun', 'topraklar']) {
+    for (const id of ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'hayvan-oyun']) {
       const e = document.getElementById(id); if (e) e.hidden = true;
     }
     if (!sbEl && stage) {
