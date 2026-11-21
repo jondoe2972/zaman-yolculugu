@@ -22,7 +22,7 @@
     const mons = (ZY() && ZY().monuments()) || [];
     for (const m of mons) if (!m.gen && ZY().coords(m.id)) add({ tur: 'Yapı', ikon: '🏗️', ad: m.ad, alt: `${m.yer || ''} · ${YIL.fmt(m.start)}`, kw: [m.yer, m.id], oncelik: 3, act: () => ZY().showMonument(m.id) });
     for (const c of (ZY() && ZY().cities()) || []) add({ tur: 'Şehir', ikon: c.cap ? '⭐' : '🏙️', ad: c.ad, alt: (window.SEHIR_BILGI || {})[c.ad]?.bugun || 'Antik şehir', kw: [(window.SEHIR_BILGI || {})[c.ad]?.bugun], oncelik: 4, act: () => ZY().openCity(c.ad) });
-    for (const e of window.OLAYLAR || []) add({ tur: ({ savas: 'Savaş', antlasma: 'Antlaşma', afet: 'Afet', olay: 'Önemli olay' })[e.tur] || 'Olay', ikon: ({ savas: '⚔️', antlasma: '📜', afet: '🌋', olay: '🏛️' })[e.tur] || '•', ad: e.ad, alt: `${YIL.fmt(e.y)}`, kw: e.taraflar || [], oncelik: 2, act: () => ZY().openEvent(e.id) });
+    for (const e of window.OLAYLAR || []) add({ tur: ({ savas: 'Savaş', deniz: 'Deniz savaşı', antlasma: 'Antlaşma', afet: 'Afet', olay: 'Önemli olay' })[e.tur] || 'Olay', ikon: ({ savas: '⚔️', antlasma: '📜', afet: '🌋', olay: '🏛️' })[e.tur] || '•', ad: e.ad, alt: `${YIL.fmt(e.y)}`, kw: e.taraflar || [], oncelik: 2, act: () => ZY().openEvent(e.id) });
     for (const t of (window.KULTUR || {}).tanrilar || []) add({ tur: 'Tanrı', ikon: '🙏', ad: t.ad, alt: t.unvan, kw: [t.wiki, t.id], oncelik: 3, act: () => ZY().openGod(t.id) });
     return out;
   }

@@ -49,7 +49,7 @@
   const yeni = (id, ad, ikon, kita, o) => ({
     id, ad, ikon, kita, uc3: false, kultur: false, hakkinda: 'Bu çağda ' + ad, antikAd: ad, hukumdar: 'hükümdar',
     simgeGiris: `${o.ilgi} simgeleri: yerler, olaylar ve eserler.`, simgeAlt: o.simgeAlt, simgeAd: `${o.ilgi} simgeleri`, mevsimler: MEV_KUZEY,
-    dosyalar: [`data/bolgeler/${id}.js?v=2`, ...ORTAK], ...o
+    dosyalar: [`data/bolgeler/${id}.js?v=3`, ...ORTAK], ...o
   });
   Object.assign(B, {
     mezopotamya: yeni('mezopotamya', 'Mezopotamya ve İran', '🦁', 'asya', {
@@ -200,7 +200,9 @@
   window.BOLGELER = B; window.BOLGE_SIRA = SIRA;
   window.BOLGE = B[id];
   // senkron yükleme: sıra korunur, motor dosyaları bunlardan sonra çalışır
-  if (id !== 'dunya') { for (const f of B[id].dosyalar) document.write(`<script src="${f}"><\/script>`); return; }
+  // bölge verilerinden sonra: deniz savaşları (bütün dünya) ve Yaşa hayatları
+  const SON = '<script src="data/deniz.js?v=1"><\/script><script>window.__denizEkle()<\/script><script src="data/yasam.js?v=1"><\/script><script src="data/yasam-asya.js?v=1"><\/script><script src="data/yasam-amerika.js?v=1"><\/script><script src="data/devlet-notlari.js?v=1"><\/script>';
+  if (id !== 'dunya') { for (const f of B[id].dosyalar) document.write(`<script src="${f}"><\/script>`); document.write(SON); return; }
 
   // ---- Tüm Dünya: bölgeler aynı global adlara yazdığı için sırayla yüklenir; her bölgeden sonra veriler toplanır ----
   const GLB = ['PLACES', 'MISIR', 'SINIRLAR', 'OLAYLAR', 'SEHIR_BILGI', 'KULTUR'];
@@ -237,4 +239,5 @@
     document.write(`<script>window.__bolgeTopla('${b}')<\/script>`);
   }
   document.write('<script>window.__bolgeBirlestir()<\/script>');
+  document.write(SON);
 })();

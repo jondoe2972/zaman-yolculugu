@@ -148,10 +148,93 @@
     const uz = kmYol(t.pts);
     showModal({ ikon: t.tur === 'deniz' ? '⛵' : '🐪', title: t.ad, sub: `${t.cikis} → ${t.varis}`, tabs: [{ ad: 'Genel', html: `${rowsHTML([['Nereden nereye', `${t.cikis} → ${t.varis}`], ['Kullanıldığı yıllar', `${YIL.fmt(t.from)} – ${t.to <= -2026 ? 'bugün' : YIL.fmt(t.to)} (yaklaşık)`], ['Taşınan mallar', t.mal], ['Yol', `${t.tur === 'deniz' ? 'Deniz' : 'Kara'} · yaklaşık ${fmt(Math.round(uz / 100) * 100)} km`]])}<p>${t.not}</p><div class="gos"><button class="phbtn" data-yolharita="${t.id}">🌍 Haritada göster</button></div>` }] });
   }
+  // ---------- devlet penceresi: kürede bir devlete (adına, ⓘ düğmesine ya da sınırlarının içine) tıklayınca ----------
+  // Elle yazılmış notlar (data/devlet-notlari.js) + Wikidata (başkent, dil, din, öncül, ardıl, kişiler, olaylar) + Vikipedi özeti ve fotoğraflar
+  const WD = 'https://www.wikidata.org/w/api.php?format=json&origin=*&action=wbgetentities&languages=tr|en&ids=';
+  const wdCache = new Map();
+  const wdGet = (ids, props) => { const key = props + ids.join('|'); if (!wdCache.has(key)) wdCache.set(key, fetch(WD + ids.join('|') + '&props=' + props).then(r => r.json()).then(j => j.entities || {}).catch(() => ({}))); return wdCache.get(key); };
+  const sparql = q => { const key = 'sp' + q; if (!wdCache.has(key)) wdCache.set(key, fetch('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(q)).then(r => r.json()).then(j => j.results.bindings).catch(() => [])); return wdCache.get(key); };
+  const wdYil = t => { if (!t) return null; const m = /^([+-]?)0*(\d+)/.exec(String(t)); if (!m) return null; return m[1] === '-' ? +m[2] : -(+m[2]); };
+  const qId = u => (u || '').split('/').pop();
+  const resim = (u, w = 160) => u ? u.replace(/^http:/, 'https:') + '?width=' + w : '';
+  async function devletVeri(k) {
+    if (!k.q) return null;
+    const ent = (await wdGet([k.q], 'claims|sitelinks'))[k.q]; if (!ent) return null;
+    const C = ent.claims || {}, it = p => (C[p] || []).map(c => c.mainsnak.datavalue && c.mainsnak.datavalue.value && c.mainsnak.datavalue.value.id).filter(Boolean);
+    const zaman = p => { const c = (C[p] || [])[0]; return c && c.mainsnak.datavalue ? wdYil(c.mainsnak.datavalue.value.time) : null; };
+    const qy = (c, p) => { const v = ((c.qualifiers || {})[p] || [])[0]; return v && v.datavalue ? wdYil(v.datavalue.value.time) : null; }, yy = Math.round(Y);
+    const bk = (C.P36 || []).filter(c => { const a = qy(c, 'P580'), b = qy(c, 'P582'); return (a == null || a >= yy) && (b == null || b <= yy); }).map(c => c.mainsnak.datavalue && c.mainsnak.datavalue.value.id).filter(Boolean);
+    const alan = { baskent: (bk.length ? bk : it('P36')).slice(0, 4), dil: it('P37').slice(0, 4), din: it('P140').slice(0, 3), para: it('P38').slice(0, 2), yonetim: it('P122').slice(0, 2),
+      onceki: [...new Set([...it('P1365'), ...it('P155')])].slice(0, 6), sonraki: [...new Set([...it('P1366'), ...it('P156')])].slice(0, 6) };
+    const hepsi = [...new Set(Object.values(alan).flat())];
+    const lab = hepsi.length ? await wdGet(hepsi, 'labels') : {};
+    const ad = q => { const l = (lab[q] || {}).labels || {}; return (l.tr || l.en || {}).value || null; };
+    const out = {}; for (const [k2, v] of Object.entries(alan)) out[k2] = v.map(ad).filter(Boolean);
+    out.kurulus = zaman('P571'); out.yikilis = zaman('P576');
+    out.trwiki = ((ent.sitelinks || {}).trwiki || {}).title; out.enwiki = ((ent.sitelinks || {}).enwiki || {}).title;
+    return out;
+  }
   function openDevlet(k) {
-    const bit = k.y0 <= -2024 ? 'bugün' : YIL.fmt(k.y0);
-    const rows = [['Ad', k.tr && k.tr !== k.n ? `${k.tr} <small>(${esc(k.n)})</small>` : esc(k.n)], ['Bu sınırların geçerli olduğu yıllar', `${YIL.fmt(k.y1)} – ${bit}`], ['Yüzölçümü', `yaklaşık ${fmt(k.a)} km²`]];
-    showModal({ ikon: '🗺️', title: k.tr || k.n, sub: `${YIL.fmt(k.y1)} – ${bit}`, tabs: [{ ad: 'Genel', html: `${rowsHTML(rows)}${k.w ? `<p><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(k.w.replace(/ /g, '_'))}" target="_blank" rel="noopener">Vikipedi'de oku ↗</a></p>` : ''}<p class="note">Sınırlar: Cliopatria (Seshat Global History Databank, CC BY 4.0). Sadeleştirilmiştir; kıyılar kara haritasına kırpılır. Tarihî sınırlar çoğu zaman kesin değildir.</p>` }] });
+    const N = (window.DEVLET_NOT || {})[k.n] || {}, ad = N.tr || k.tr || k.n, bit = k.y0 <= -2024 ? 'bugün' : YIL.fmt(k.y0);
+    const veri = devletVeri(k);
+    const cipler = L => L && L.length ? `<div class="dv-cip">${L.map(x => `<span>${esc(x)}</span>`).join('')}</div>` : '';
+    const genel = `<div class="kisi-ust"><div class="kisi-foto dv-foto"></div><div>${rowsHTML([['Ad', ad !== k.n ? `${esc(ad)} <small>(${esc(k.n)})</small>` : esc(ad)], [k.y1 === k.y0 ? 'Bu harita' : 'Bu sınırların yılları', k.y1 === k.y0 ? `${YIL.fmt(k.y1)} yılının sınırları` : `${YIL.fmt(k.y1)} – ${bit}`], ['Yüzölçümü', `yaklaşık ${fmt(k.a)} km²`]])}</div></div>
+      ${N.koken ? `<h4>🧭 Kökeni</h4><p>${N.koken}</p>` : ''}${N.halk ? `<h4>👥 Halklar</h4><p>${N.halk}</p>` : ''}
+      <div class="dv-wd"><p class="note">Ayrıntılar yükleniyor…</p></div>
+      <h4>📖 Kısaca</h4><div class="dv-ozet"><p class="note">Vikipedi\'den özet yükleniyor…</p></div>`;
+    const tabs = [
+      { ad: '🏛️ Genel', html: genel, onShow: async b => {
+        const v = await veri, kutu = b.querySelector('.dv-wd'); if (!b.contains(kutu)) return;
+        const sat = [];
+        const dil = N.dil || (v && v.dil.join(', ')), din = N.din || (v && v.din.join(', '));
+        if (v && (v.kurulus != null || v.yikilis != null)) sat.push(['Devletin ömrü', `${v.kurulus != null ? YIL.fmt(v.kurulus) : '?'} – ${v.yikilis != null ? YIL.fmt(v.yikilis) : (k.y0 <= -2024 ? 'bugün' : '?')}`]);
+        if (v && v.baskent.length) sat.push(['Başkent', esc(v.baskent.join(', '))]);
+        if (dil) sat.push(['Dil', esc(dil)]); if (din) sat.push(['Din', esc(din)]);
+        if (v && v.yonetim.length) sat.push(['Yönetim', esc(v.yonetim.join(', '))]); if (v && v.para.length) sat.push(['Para', esc(v.para.join(', '))]);
+        const onc = N.onceki || (v && v.onceki), son = N.sonraki || (v && v.sonraki);
+        kutu.innerHTML = (sat.length ? rowsHTML(sat) : '') + (onc && onc.length ? `<h4>⬅️ Hangi devletin devamı?</h4>${cipler(onc)}` : '') + (son && son.length ? `<h4>➡️ Yerini kim aldı?</h4>${cipler(son)}` : '') + (!sat.length && !(onc || []).length && !N.koken ? '<p class="note">Bu devlet için ayrıntılı kayıt bulunamadı.</p>' : '');
+        const oz = b.querySelector('.dv-ozet'), fk = b.querySelector('.dv-foto');
+        try {
+          const u = v && v.trwiki ? 'https://tr.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(v.trwiki.replace(/ /g, '_')) : k.w ? 'https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(k.w.replace(/ /g, '_')) : null;
+          if (!u) { oz.innerHTML = ''; return; }
+          const o = await fetch(u).then(r => r.json()); if (!b.contains(oz)) return;
+          if (o.thumbnail) fk.innerHTML = `<img src="${esc(o.thumbnail.source)}" alt="${esc(ad)}">`;
+          oz.innerHTML = `<p>${esc(o.extract || '')}</p>${v && v.trwiki ? '' : '<p class="note">Türkçe Vikipedi\'de madde bulunamadı; İngilizce özet gösteriliyor.</p>'}${o.content_urls ? `<p><a href="${esc(o.content_urls.desktop.page)}" target="_blank" rel="noopener">Vikipedi\'de devamını oku ↗</a></p>` : ''}`;
+        } catch (e) { oz.innerHTML = '<p class="note">Özet yüklenemedi.</p>'; }
+      } },
+      { ad: '👥 Kişiler', html: '<div class="dv-kisiler"><p class="note">Kişiler yükleniyor…</p></div>', onShow: async b => {
+        const kutu = b.querySelector('.dv-kisiler'), v = await veri;
+        // 1) Ben kimim? oyunundaki ünlülerden devlet ayaktayken yaşamış ve bu sınırların içinde doğmuş olanlar (yerel, Türkçe)
+        const bas = v && v.kurulus != null ? v.kurulus : k.y1, son = v && v.yikilis != null ? v.yikilis : k.y0;
+        const yerel = (window.KIM || []).filter(p => p.ll && p.dogum >= son && p.olum <= bas && DN.icerir(k, p.ll[0], p.ll[1]));
+        let h = '';
+        if (N.kisi && N.kisi.length) h += `<h4>⭐ Önemli kişiler</h4>${cipler(N.kisi)}`;
+        if (yerel.length) h += `<h4>🎭 Bu sınırların içinde doğmuş ünlüler <small>(doğdukları yıl orası başka bir devlete ait olabilir)</small></h4><div class="dv-grid">${yerel.map(p => `<button class="dv-kisi" data-tani="${p.id}"><b>${esc(p.ad)}</b><small>${YIL.aralik(p.dogum, p.olum)} · ${esc(p.alan || '')}</small></button>`).join('')}</div>`;
+        kutu.innerHTML = h + '<h4>🌐 Bu devletin vatandaşı olarak kayıtlı en tanınmış kişiler</h4><div class="dv-wdk"><p class="note">Wikidata\'dan yükleniyor…</p></div>';
+        kutu.querySelectorAll('[data-tani]').forEach(x => x.addEventListener('click', () => window.BenKimim && window.BenKimim.tani(x.dataset.tani)));
+        const wk = kutu.querySelector('.dv-wdk'); if (!k.q) { wk.innerHTML = '<p class="note">Kayıt yok.</p>'; return; }
+        const r = await sparql(`SELECT ?p ?pLabel ?img ?b ?d ?sl ?trw WHERE { ?p wdt:P27 wd:${k.q}; wdt:P31 wd:Q5; wikibase:sitelinks ?sl. OPTIONAL{?p wdt:P18 ?img} OPTIONAL{?p wdt:P569 ?b} OPTIONAL{?p wdt:P570 ?d} OPTIONAL{?trw schema:about ?p; schema:isPartOf <https://tr.wikipedia.org/>} SERVICE wikibase:label { bd:serviceParam wikibase:language "tr,en". } } ORDER BY DESC(?sl) LIMIT 40`);
+        if (!b.contains(wk)) return;
+        const gor = new Set(), L = r.filter(x => !gor.has(x.p.value) && gor.add(x.p.value)).slice(0, 16);
+        wk.innerHTML = L.length ? `<div class="dv-grid">${L.map(x => { const by = wdYil(x.b && x.b.value), dy = wdYil(x.d && x.d.value), url = x.trw ? x.trw.value : 'https://www.wikidata.org/wiki/' + qId(x.p.value);
+          return `<a class="dv-kisi" href="${esc(url)}" target="_blank" rel="noopener">${x.img ? `<img src="${esc(resim(x.img.value, 96))}" alt="" loading="lazy">` : '<i>👤</i>'}<b>${esc(x.pLabel.value)}</b><small>${by != null ? YIL.fmt(by) : '?'}${dy != null ? ' – ' + YIL.fmt(dy) : ''}</small></a>`; }).join('')}</div><p class="note">Kaynak: Wikidata (vatandaşlık kaydı olan kişiler, tanınırlığa göre).</p>` : '<p class="note">Wikidata\'da bu devlete bağlı kişi kaydı bulunamadı.</p>';
+      } },
+      { ad: '⚔️ Olaylar', html: '<div class="dv-olaylar"><p class="note">Olaylar yükleniyor…</p></div>', onShow: async b => {
+        const kutu = b.querySelector('.dv-olaylar'), v = await veri;
+        const y0 = v && v.kurulus != null ? v.kurulus : k.y1, y1 = v && v.yikilis != null ? v.yikilis : k.y0;
+        const yerel = (window.OLAYLAR || []).filter(e => e.ll && e.y <= y0 && e.y >= y1 && DN.icerir(k, e.ll[0], e.ll[1])).sort((a, b2) => b2.y - a.y);
+        let h = yerel.length ? `<h4>📍 Bu sınırların içinde yaşanan olaylar <small>(olay anında orası başka bir devlete ait olabilir)</small></h4><ul class="evs olaylist">${yerel.map(e => `<li data-dvolay="${e.id}">${{ savas: '⚔️', deniz: '⚓', afet: '🌋', antlasma: '📜', olay: '🏛️' }[e.tur] || '📌'} <b>${YIL.fmt(e.y)}</b> ${esc(e.ad)}</li>`).join('')}</ul>` : '';
+        kutu.innerHTML = h + '<h4>🌐 Bu devletin katıldığı savaş ve olaylar</h4><div class="dv-wde"><p class="note">Wikidata\'dan yükleniyor…</p></div>';
+        kutu.querySelectorAll('[data-dvolay]').forEach(x => x.addEventListener('click', () => { const e = (window.OLAYLAR || []).find(o => o.id === x.dataset.dvolay); if (e) openEvent(e); }));
+        const we = kutu.querySelector('.dv-wde'); if (!k.q) { we.innerHTML = ''; return; }
+        const r = await sparql(`SELECT ?e ?eLabel ?t ?t2 ?sl ?trw WHERE { ?e wdt:P710 wd:${k.q}; wikibase:sitelinks ?sl. OPTIONAL{?e wdt:P585 ?t} OPTIONAL{?e wdt:P580 ?t2} OPTIONAL{?trw schema:about ?e; schema:isPartOf <https://tr.wikipedia.org/>} SERVICE wikibase:label { bd:serviceParam wikibase:language "tr,en". } } ORDER BY DESC(?sl) LIMIT 40`);
+        if (!b.contains(we)) return;
+        const gor = new Set(), L = r.filter(x => !gor.has(x.e.value) && gor.add(x.e.value)).slice(0, 15).map(x => ({ ...x, yil: wdYil((x.t || x.t2 || {}).value) })).sort((a, b2) => (b2.yil ?? -9999) - (a.yil ?? -9999));
+        we.innerHTML = L.length ? `<ul class="evs">${L.map(x => `<li><a href="${esc(x.trw ? x.trw.value : 'https://www.wikidata.org/wiki/' + qId(x.e.value))}" target="_blank" rel="noopener"><b>${x.yil != null ? YIL.fmt(x.yil) : ''}</b> ${esc(x.eLabel.value)}</a></li>`).join('')}</ul>` : '<p class="note">Wikidata\'da kayıt bulunamadı.</p>';
+      } }
+    ];
+    if (k.w) tabs.push(photoTab(k.w, 12, true));
+    showModal({ ikon: '🗺️', title: ad, sub: k.y1 === k.y0 ? `${YIL.fmt(k.y1)} yılının sınırları` : `${YIL.fmt(k.y1)} – ${bit} sınırları`, tabs });
   }
   function openYolculuk(j) {
     showModal({ ikon: '🧭', title: j.ad, sub: `${YIL.fmt(j.y)} · ${j.sure}`, tabs: [{ ad: 'Hikâyesi', html: `${rowsHTML([['Ne zaman', YIL.fmt(j.y)], ['Kim', j.kim], ['Nasıl', j.nasil], ['Ne kadar sürdü', `<b>${j.sure}</b>`], ['Mesafe', `yaklaşık ${fmt(j.km)} km`]])}<p>${j.not}</p><div class="gos"><button class="phbtn" data-yolcugoster="${j.id}">🌍 Haritada göster (${YIL.fmt(j.y)})</button></div>` }] });
@@ -196,7 +279,7 @@
     h += `<div class="head"><div class="dyn" style="--c:${d.renk}">${d.ad} · ${Q.kisa}</div>
       <div class="ruler"><span class="crown">👑</span><div><b>${r.ad}</b><small>${YIL.aralik(r.from, r.to)} · saltanatının ${ry}. yılı</small></div></div>
       <p class="kim">${r.kim}</p>
-      <div class="headbtns"><button class="aboutbtn">${BG.ikon} ${BG.hakkinda} <small>(${BG.kultur ? 'din, tanrılar, bilim…' : 'halklar, din, yaşam…'})</small></button><button class="symbtn">⭐ ${BG.simgeAd}</button>${s3Dugme()}${yasaVar() ? '<button class="symbtn lifebtn">🎭 Bu dönemde yaşasaydım…</button>' : ''}</div></div>`;
+      <div class="headbtns"><button class="aboutbtn">${BG.ikon} ${BG.hakkinda} <small>(${BG.kultur ? 'din, tanrılar, bilim…' : 'halklar, din, yaşam…'})</small></button><button class="symbtn">⭐ ${BG.simgeAd}</button>${s3Dugme()}${true ? '<button class="symbtn lifebtn">🎭 Bu dönemde yaşasaydım…</button>' : ''}</div></div>`;
     for (const o of olumYakin(y)) h += `<div class="now death">⚱️ <b>${YIL.fmt(o.y)}:</b> ${o.kim} öldü. <button class="phbtn" data-mumya="${o.id}">Mumyasını ve lahdini gör</button></div>`;
     if (near.length) h += `<div class="now">${near.map(ev => `<div>📌 <b>${YIL.fmt(ev.y)}:</b> ${ev.t}</div>`).join('')}</div>`;
     h += card('📣', 'Ülkenin gündemi', `<p>${e.gundem}</p>`, 'big');
@@ -262,7 +345,7 @@
     const tp = ev.target.closest('[data-topraklar]'); if (tp) { const b = tp.dataset.topraklar; return showModal({ ikon: BLR[b].ikon, title: `${BLR[b].ad}: bu topraklar`, sub: YIL.fmt(Math.round(Y)), tabs: [{ ad: 'Coğrafya', html: topraklarHTML(b, Math.round(Y)) }] }); }
     if (ev.target.closest('.aboutbtn')) return openCountry();
     if (ev.target.closest('.s3btn')) return sehir3dAc();
-    if (ev.target.closest('.lifebtn')) return openLife();
+    if (ev.target.closest('.lifebtn')) return openYasam();
     const mu = ev.target.closest('[data-mumya]'); if (mu) return openMummy(mu.dataset.mumya);
     if (ev.target.closest('.symbtn')) return openSymbols();
     const inf = ev.target.closest('[data-info]'); if (inf) return openInfo(inf.dataset.info);
@@ -451,7 +534,7 @@
     if (dragG.moved || Math.hypot(dx, dy) > 4) { dragG.moved = true; DN.drag(dx, dy); dragG.x = ev.clientX; dragG.y = ev.clientY; }
   });
   const endG = ev => {
-    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') showMonument(h.it.id, h.kids, h); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
+    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') showMonument(h.it.id, h.kids, h); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (!h && DN.sinirAcik) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
     gpts.delete(ev.pointerId); if (!gpts.size) dragG = null;
   };
   gcv.addEventListener('pointerup', endG); gcv.addEventListener('pointercancel', endG);
@@ -502,7 +585,7 @@
     if (e.target.closest('.cc-x')) { $('#citycard').hidden = true; return; }
     if (e.target.closest('.cc-more')) { const c = (MIS.sehirler || []).find(x => x.ad === $('#citycard').dataset.city); if (c) openCityModal(c); }
   });
-  const OLAY_TUR = { savas: '⚔️ Savaş', afet: '🌋 Doğal afet', antlasma: '📜 Antlaşma', olay: '🏛️ Önemli olay' };
+  const OLAY_TUR = { savas: '⚔️ Savaş', deniz: '⚓ Deniz savaşı', afet: '🌋 Doğal afet', antlasma: '📜 Antlaşma', olay: '🏛️ Önemli olay' };
   const AFET_TUR = { deprem: 'Deprem', tsunami: 'Deprem ve dev dalga', sel: 'Sel', yangin: 'Yangın', yanardag: 'Yanardağ patlaması', kuraklik: 'Kuraklık', salgin: 'Salgın hastalık' };
   function openEvent(e) {
     const rows = [['Tarih', `${YIL.fmt(e.y)}${e.y < 100 ? '' : ' (yaklaşık)'}`], ['Tür', e.tur === 'afet' ? AFET_TUR[e.alt] || 'Doğal afet' : OLAY_TUR[e.tur]], ['Tarihî önemi', '★'.repeat(e.onem) + '☆'.repeat(Math.max(0, 5 - e.onem))]];
@@ -510,7 +593,7 @@
     if (e.kazanan) rows.push(['Kazanan', `<b>${e.kazanan}</b>`]);
     if (e.kuvvetler) rows.push(['Kuvvetler', e.kuvvetler]);
     const inRange = e.y <= P.from && e.y >= P.to;
-    showModal({ ikon: { savas: '⚔️', afet: '🌋', antlasma: '📜', olay: '🏛️' }[e.tur], title: e.ad, sub: `${YIL.fmt(e.y)}`, tabs: [
+    showModal({ ikon: { savas: '⚔️', deniz: '⚓', afet: '🌋', antlasma: '📜', olay: '🏛️' }[e.tur], title: e.ad, sub: `${YIL.fmt(e.y)}`, tabs: [
       { ad: 'Genel', html: `${rowsHTML(rows)}${e.ozet ? `<p>${e.ozet}</p>` : ''}${e.sonuc ? `<h4>Sonuç</h4><p>${e.sonuc}</p>` : ''}${inRange ? `<div class="gos"><button class="phbtn" data-go="${e.y}">⏩ Zaman çizelgesini ${YIL.fmt(e.y)}'e götür</button></div>` : ''}<p class="note">Antik kaynaklardaki asker sayıları çoğu zaman abartılıdır; rakamlar yaklaşıktır.</p>` },
       ...(e.wiki ? [photoTab(e.wiki, 8)] : [])] });
   }
@@ -523,7 +606,7 @@
   function olayListesi() {
     const evs = (window.OLAYLAR || []).filter(e => DN.layers[e.tur] && Math.abs(Y - e.y) <= DN.aralik).sort((a, b) => b.y - a.y);
     if (!evs.length) return '<p>Bu yıla ±100 yıl uzaklıkta kayıtlı bir savaş, afet ya da antlaşma yok.</p>';
-    return `<ul class="evs olaylist">${evs.map(e => `<li data-olay="${e.id}" class="${Math.abs(e.y - Y) <= 5 ? 'on' : ''}">${e.tur === 'savas' ? '⚔️' : e.tur === 'afet' ? '🌋' : '📜'} <b>${YIL.fmt(e.y)}</b> ${e.ad} ${'★'.repeat(e.onem)}</li>`).join('')}</ul>`;
+    return `<ul class="evs olaylist">${evs.map(e => `<li data-olay="${e.id}" class="${Math.abs(e.y - Y) <= 5 ? 'on' : ''}">${e.tur === 'savas' ? '⚔️' : e.tur === 'deniz' ? '⚓' : e.tur === 'afet' ? '🌋' : '📜'} <b>${YIL.fmt(e.y)}</b> ${e.ad} ${'★'.repeat(e.onem)}</li>`).join('')}</ul>`;
   }
   $('#panel').addEventListener('click', ev => {
     const o = ev.target.closest('[data-olay]'); if (!o) return;
@@ -532,7 +615,7 @@
     DN.goTo(e.ll[0], e.ll[1], 7); openEvent(e);
   });
   // ---------- katman menüsü (sağ üstte 🗂️) ----------
-  const KATLAR = ['savas', 'antlasma', 'afet', 'olay', 'kaynak', 'ticaret', 'yolculuk'];
+  const KATLAR = ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'ticaret', 'yolculuk'];
   const katSay = k => k === 'kaynak' ? kaynakAktif().length : k === 'ticaret' ? (window.TICARET_YOLLARI || []).filter(t => Y <= t.from && Y >= t.to).length
     : k === 'yolculuk' ? (window.YOLCULUKLAR || []).filter(j => Math.abs(Y - j.y) <= DN.aralik).length : (window.OLAYLAR || []).filter(e => e.tur === k && Math.abs(Y - e.y) <= DN.aralik).length;
   function renderOlayPanel() {
@@ -646,7 +729,38 @@
     const oneri = (window.ROLLER || []).map(r => ({ r, y: r.to <= -2026 ? -2000 : Math.round((r.from + r.to) / 2) }));
     showModal({ ikon: '🧑‍🌾', title: 'O dönemde yaşasaydın…', sub: `${YIL.fmt(Math.round(Y))} için henüz rol yok`, tabs: [{ ad: 'Nereye gidelim?', html: `<p>Bu yıl ve bölge için hazır bir rol yok. Bir hayat seç, seni o yıla götüreyim:</p><div class="secim">${oneri.map(({ r, y }) => `<button data-yasagit="${r.bolge}|${y}">${r.ikon} <b>${r.ad}</b><small>${BLR[r.bolge] ? BLR[r.bolge].ad : r.bolge} · ${YIL.fmt(y)}</small></button>`).join('')}<button data-yasagit="misir|2560">🌾 <b>Çiftçi, kâtip, piramit işçisi…</b><small>Mısır · ${YIL.fmt(2560)}</small></button></div>` }] });
   }
-  function yasaAc() { if (yasaVar()) openLife(); else yasaYok(); }
+  // ---------- Yaşa (yeni): kıta → dönem → hayat (data/yasam*.js) ----------
+  const SINIF = { lider: '👑 Lider', ciftci: '🌾 Çiftçi', isci: '⚒️ İşçi', tuccar: '⚖️ Tüccar', asker: '⚔️ Asker', alim: '📜 Bilgin', zanaat: '🛠️ Meslek' };
+  const yasamBul = id => { for (const k of window.YASAM || []) for (const d of k.donemler) { const r = d.roller.find(x => x.id === id); if (r) return { k, d, r }; } return null; };
+  const yasamOpt = (d, r) => ({ tapinak: true, tema: d.tema || 'avrupa', giyim: d.giyim || 'antik', tac: r.sinif === 'lider' ? (d.giyim === 'modern' ? 'yok' : 'tac') : r.sinif === 'asker' && d.giyim !== 'modern' ? 'migfer' : 'yok' });
+  function openYasam() {
+    const y = Math.round(Y), { guc, halk } = rolListesi(), KT = window.YASAM || [];
+    const kart = (d, r) => `<button class="rolecard" data-yrol="${r.id}"><canvas data-yrolcv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small><i class="ysm-sinif">${SINIF[r.sinif] || ''}</i> ${r.kim}</small></button>`;
+    const tabs = KT.map(k => ({ ad: `${k.ikon} ${k.ad}`, html: `<p class="note">Bir dönem ve bir hayat seç: o insanın bir gününü, ne yediğini, nasıl bir evde yaşadığını ve hangi koşullarda çalıştığını gör.</p>${k.donemler.map(d => {
+        const simdi = y <= d.from && y >= d.to;
+        return `<div class="ysm-donem${simdi ? ' simdi' : ''}"><h4>${d.ad} <small>${d.aralik} · ${d.yer}</small>${simdi ? '<span class="ysm-rozet">seçili yıl bu dönemde</span>' : ''}</h4><div class="rolegrid">${d.roller.map(r => kart(d, r)).join('')}</div></div>`; }).join('')}`,
+      onShow: b => b.querySelectorAll('[data-yrolcv]').forEach(cvEl => { const o = yasamBul(cvEl.dataset.yrolcv); if (o) liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, o.r.gun[Math.min(1, o.r.gun.length - 1)], t, A, yasamOpt(o.d, o.r))), false); }) }));
+    if (guc.length + halk.length) {
+      const eski = r => `<button class="rolecard${r.guc ? ' guc' : ''}" data-role="${r.id}"><canvas data-rolecv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small>${fill(r.kim, rolDegisken(r))}</small></button>`, tum = [...guc, ...halk];
+      tabs.unshift({ ad: `⭐ ${YIL.fmt(y)}`, html: `<p class="note">Seçili yıl ve bölge için özel, ayrıntılı hayatlar.</p>${guc.length ? `<h4 class="rolbas">👑 Güç sahibi hayatlar</h4><div class="rolegrid">${guc.map(eski).join('')}</div>` : ''}${halk.length ? `<h4 class="rolbas">🌾 Sıradan hayatlar</h4><div class="rolegrid">${halk.map(eski).join('')}</div>` : ''}`,
+        onShow: b => b.querySelectorAll('[data-rolecv]').forEach(cvEl => { const r = tum.find(x => x.id === cvEl.dataset.rolecv); liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, r.adimlar[1], t, A, rolCizimOpt(r))), false); }) });
+    }
+    // açılış sekmesi: seçili bölgenin kıtası (Tüm Dünya'da Asya); bu yıla özel roller varsa onlar
+    const kita = BG.kita || (DUNYA ? 'asya' : 'avrupa'), ki = Math.max(0, KT.findIndex(k => k.kita === kita));
+    showModal({ ikon: '🧑‍🌾', title: 'Yaşa: başka bir çağda bir gün', sub: 'Önce kıtayı, sonra dönemi ve hayatı seç', tabs, open: guc.length + halk.length ? 0 : ki });
+  }
+  function openYasamRol(id) {
+    const o = yasamBul(id); if (!o) return; const { k, d, r } = o, opt = yasamOpt(d, r), n = r.gun.length;
+    const icinde = Y <= d.from && Y >= d.to, orta = d.to <= -2026 ? -2000 : Math.round((d.from + d.to) / 2);
+    const tabs = r.gun.map((st, i) => ({ ad: `${i + 1}. ${st.saat}`, html: `<canvas class="lifecv"></canvas><p class="lifetext">${st.metin}</p><div class="gos"><button class="phbtn" data-next="${i + 1}">${i + 1 < n ? 'Sonraki ▶' : 'Ne yerdin, nasıl yaşardın? ▶'}</button></div>`,
+      onShow: b => liveCanvas(b.querySelector('.lifecv'), (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, st, t, A, opt)), true) }));
+    tabs.push({ ad: '🍲 Yemek ve ev', html: `<h4>🍲 Ne yerdin?</h4><p>${r.yemek}</p><h4>🏠 Nasıl bir evde yaşardın?</h4><p>${r.ev}</p><div class="gos"><button class="phbtn" data-next="${n + 1}">Koşulların nasıldı? ▶</button></div>` });
+    tabs.push({ ad: '⚖️ Koşullar', html: `<h4>⚖️ Çalışma, haklar, sağlık</h4><ul class="hap">${r.sartlar.map(s => `<li>${s.replace(/^([^:]+):/, '<b>$1:</b>')}</li>`).join('')}</ul><div class="gos"><button class="phbtn" data-next="${n + 2}">Ne hissederdin? ▶</button></div>` });
+    tabs.push({ ad: '💭 Ne hissederdin?', html: `<h4>💭 Ne hissederdin?</h4><p>${r.his}</p><h4>📌 Gerçekler</h4><ul class="hap">${r.gercek.map(x => `<li>${x}</li>`).join('')}</ul>
+      <div class="gos">${icinde ? '' : `<button class="phbtn" data-ygit="${orta}">⏩ Zamanı ${YIL.fmt(orta)}'e götür</button>`}<button class="phbtn" data-yasa="1">🧑‍🌾 Başka bir hayat seç</button></div>` });
+    showModal({ ikon: r.ikon, title: `${r.ad} olarak bir gün`, sub: `${k.ikon} ${d.ad} · ${d.aralik} · ${d.yer}`, tabs });
+  }
+  function yasaAc() { openYasam(); }
   document.querySelectorAll('[data-mod]').forEach(b => b.addEventListener('click', () => {
     const m = b.dataset.mod;
     if (m === 'kesfet') { kartlariKapat(); setView('dunya'); }
@@ -689,7 +803,9 @@
     const gb = e.target.closest('[data-god]'); if (gb) { openGod(gb.dataset.god); return; }
     const mb = e.target.closest('[data-mumya]'); if (mb) { openMummy(mb.dataset.mumya); return; }
     const rb = e.target.closest('[data-role]'); if (rb) { openRole(rb.dataset.role); return; }
-    if (e.target.closest('.lifebtn')) { openLife(); return; }
+    if (e.target.closest('.lifebtn') || e.target.closest('[data-yasa]')) { openYasam(); return; }
+    const yr = e.target.closest('[data-yrol]'); if (yr) { openYasamRol(yr.dataset.yrol); return; }
+    const yy = e.target.closest('[data-ygit]'); if (yy) { setYear(+yy.dataset.ygit, true); playingBeforeModal = false; closeModal(); return; }
     const s3m = e.target.closest('[data-s3]'); if (s3m) { sehir3dAc(s3m.dataset.s3); return; }
     const yh = e.target.closest('[data-yolharita]'); if (yh) { const t = TICARET_YOLLARI.find(x => x.id === yh.dataset.yolharita); DN.setLayer('ticaret', true); playingBeforeModal = false; yolHaritada(t.pts, kmYol(t.pts)); return; }
     const yg2 = e.target.closest('[data-yolcugoster]'); if (yg2) { const j = YOLCULUKLAR.find(x => x.id === yg2.dataset.yolcugoster); DN.setLayer('yolculuk', true); playingBeforeModal = false; yolHaritada(j.pts, j.km, j.y); return; }

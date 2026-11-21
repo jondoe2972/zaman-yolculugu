@@ -12,7 +12,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false };
+  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false };
 
   // ---------- veri ----------
   const VERI = window.DUNYA_VERI || { kara: [], nehir: [] };
@@ -199,7 +199,7 @@ window.Dunya = (() => {
     g.save(); daireKirp(A.e, t * uzak(A.e, B.bb)); if (sekilYol(B)) g.fill('evenodd'); g.restore();          // kazanılan yer yayılır
     g.save(); daireKirp(B.e, (1 - t) * uzak(B.e, A.bb)); if (sekilYol(A)) g.fill('evenodd'); g.restore();    // kaybedilen yer çekilir
   }
-  const sinirAd = k => k.tr || k.n;
+  const sinirAd = k => ((window.DEVLET_NOT || {})[k.n] || {}).tr || k.tr || k.n;
 
   // ---------- simgeler (yapıların küçük resimleri) ----------
   function sh(x, y, s) { g.fillStyle = 'rgba(0,0,0,0.28)'; g.beginPath(); g.ellipse(x, y + s * 0.75, s * 1.1, s * 0.25, 0, 0, 7); g.fill(); }
@@ -318,6 +318,9 @@ window.Dunya = (() => {
     if (e.tur === 'savas') {
       for (let i = 0; i < 7; i++) { const ph = (T * 0.35 + i / 7 + seed) % 1; puff(x + Math.sin(i * 2.1 + T * 0.6) * s * 0.5 + ph * s * 0.9, y - s * 0.4 - ph * s * 3.2, s * (0.35 + ph * 0.9), 'rgba(60,55,50,A)', 0.55 * (1 - ph) * k); }
       for (let i = 0; i < 5; i++) { const ph = (T * 1.6 + i / 5 + seed) % 1; puff(x + (rnd(i) - 0.5) * s * 1.6, y + s * 0.55 - ph * s * 1.1, s * 0.22 * (1 - ph) + 0.6, i % 2 ? 'rgba(255,170,40,A)' : 'rgba(230,70,30,A)', 0.9 * (1 - ph) * k); }
+    } else if (e.tur === 'deniz') { // top dumanı ve su sıçramaları
+      for (let i = 0; i < 5; i++) { const ph = (T * 0.4 + i / 5 + seed) % 1; puff(x + Math.sin(i * 2.3 + T * 0.5) * s * 0.6 + ph * s * 0.7, y - s * 0.3 - ph * s * 2.4, s * (0.3 + ph * 0.7), 'rgba(90,90,95,A)', 0.5 * (1 - ph) * k); }
+      for (let i = 0; i < 4; i++) { const ph = (T * 1.3 + i / 4 + seed) % 1; puff(x + (rnd(i + 7) - 0.5) * s * 3, y + s * 0.3 - Math.sin(ph * Math.PI) * s * 1.1, s * 0.2 + 0.5, 'rgba(200,235,255,A)', 0.85 * (1 - ph) * k); }
     } else if (e.tur === 'afet') {
       switch (e.alt) {
         case 'yangin':
@@ -350,12 +353,16 @@ window.Dunya = (() => {
   }
   // olay simgeleri: çapraz kılıçlar (savaş), dalga, çatlak, alev, yanardağ, güneş (kuraklık), salgın, mühürlü belge (antlaşma)
   function evIcon(e, x, y, s) {
-    const bg = { savas: '#a8322a', afet: '#c9701e', antlasma: '#2f6fa8', olay: '#7a4fb0' }[e.tur] || '#555';
+    const bg = { savas: '#a8322a', deniz: '#1f5f8f', afet: '#c9701e', antlasma: '#2f6fa8', olay: '#7a4fb0' }[e.tur] || '#555';
     g.fillStyle = bg; g.strokeStyle = '#fff6dc'; g.lineWidth = 1.6; g.beginPath(); g.arc(x, y, s, 0, 7); g.fill(); g.stroke();
     g.save(); g.translate(x, y); const k = s / 10; g.scale(k, k); g.lineCap = 'round'; g.lineJoin = 'round';
     const W_ = '#fff6dc';
     if (e.tur === 'savas') {
       for (const sd of [-1, 1]) { g.save(); g.rotate(sd * 0.78); g.strokeStyle = W_; g.lineWidth = 2.2; g.beginPath(); g.moveTo(0, -7); g.lineTo(0, 4); g.stroke(); g.lineWidth = 2.6; g.beginPath(); g.moveTo(-3, 4); g.lineTo(3, 4); g.stroke(); g.lineWidth = 2; g.beginPath(); g.moveTo(0, 4); g.lineTo(0, 7.5); g.stroke(); g.restore(); }
+    } else if (e.tur === 'deniz') { // yelkenli gemi
+      g.fillStyle = W_; g.beginPath(); g.moveTo(-7, 3); g.lineTo(7, 3); g.lineTo(4.5, 6.5); g.lineTo(-4.5, 6.5); g.closePath(); g.fill();
+      g.strokeStyle = W_; g.lineWidth = 1.6; g.beginPath(); g.moveTo(0, 3); g.lineTo(0, -8); g.stroke();
+      g.beginPath(); g.moveTo(1, -7.5); g.lineTo(6.5, 1.5); g.lineTo(1, 1.5); g.closePath(); g.fill(); g.beginPath(); g.moveTo(-1, -5.5); g.lineTo(-5.5, 1.5); g.lineTo(-1, 1.5); g.closePath(); g.fill();
     } else if (e.tur === 'olay') {
       g.fillStyle = W_; g.fillRect(-6, 4, 12, 2.4); g.fillRect(-6, -6, 12, 2.2);
       for (let i = 0; i < 3; i++) g.fillRect(-5 + i * 4, -4, 2, 8);
@@ -405,6 +412,12 @@ window.Dunya = (() => {
       if (placed.some(q => hit(b, q))) continue;
       if (L.pri < 85 && OBS.some(q => hit(b, q))) continue;
       placed.push(b); text(L.x, L.y, L.t, o);
+      if (o.bilgi) { // devlet adının yanında bilgi düğmesi
+        const bx = x0 + tw + 11, by = L.y, br = Math.max(6, sz * 0.55);
+        g.fillStyle = 'rgba(255,250,240,0.92)'; g.strokeStyle = 'rgba(80,40,15,0.75)'; g.lineWidth = 1.4; g.beginPath(); g.arc(bx, by, br, 0, 7); g.fill(); g.stroke();
+        g.fillStyle = '#6a3a14'; g.font = `700 ${Math.round(br * 1.45)}px Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('i', bx, by + 0.5); g.textBaseline = 'alphabetic';
+        hits.push({ kind: 'devlet', k: o.bilgi, x0: bx - br - 3, x1: bx + br + 3, y0: by - br - 3, y1: by + br + 3 });
+      }
     }
     LQ.length = 0; OBS.length = 0;
   }
@@ -506,7 +519,7 @@ window.Dunya = (() => {
         const px = Math.sqrt(k.a) / 111 * R() * D; if (px < 55) continue;
         const [x, y, z] = P(...k.e); if (z <= 0.08) continue;
         const ad = sinirAd(k).toLocaleUpperCase('tr'), sz = clamp(9 + Math.log10(k.a) * 0.9, 10, 14);
-        lab(60 + Math.log10(k.a) * 6, x, y, ad, { col: '#fffaf0', size: sz, w: 600, serif: true, ls: 1.5, haloCol: 'rgba(80,40,15,0.55)' });
+        lab(60 + Math.log10(k.a) * 6, x, y, ad, { col: '#fffaf0', size: sz, w: 600, serif: true, ls: 1.5, haloCol: 'rgba(80,40,15,0.55)', bilgi: k });
         hits.push({ kind: 'devlet', k, x0: x - ad.length * sz * 0.36, x1: x + ad.length * sz * 0.36, y0: y - sz * 0.7, y1: y + sz * 0.7 });
       }
       // şehirler ve başkent
@@ -606,8 +619,9 @@ window.Dunya = (() => {
       g.globalAlpha = a;
       evFx(e, x, y, s, now);
       if (e.alt === 'deprem') { x += Math.sin(T * 47 + e.y) * s * 0.12; y += Math.cos(T * 39) * s * 0.08; }
-      if (now) { const pr = (T * 1.2) % 1; g.strokeStyle = e.tur === 'savas' ? `rgba(230,60,40,${1 - pr})` : e.tur === 'afet' ? `rgba(255,150,40,${1 - pr})` : e.tur === 'olay' ? `rgba(170,120,255,${1 - pr})` : `rgba(80,180,255,${1 - pr})`; g.lineWidth = 2.5; g.beginPath(); g.arc(x, y, s * (1.2 + pr * 1.6), 0, 7); g.stroke(); }
-      if (e.tur === 'savas') { g.save(); g.translate(x, y); g.rotate(Math.sin(T * 9 + e.y) > 0.6 ? 0.18 : 0); g.translate(-x, -y); evIcon(e, x, y, s); g.restore(); }
+      if (now) { const pr = (T * 1.2) % 1; g.strokeStyle = e.tur === 'savas' ? `rgba(230,60,40,${1 - pr})` : e.tur === 'deniz' ? `rgba(60,160,230,${1 - pr})` : e.tur === 'afet' ? `rgba(255,150,40,${1 - pr})` : e.tur === 'olay' ? `rgba(170,120,255,${1 - pr})` : `rgba(80,180,255,${1 - pr})`; g.lineWidth = 2.5; g.beginPath(); g.arc(x, y, s * (1.2 + pr * 1.6), 0, 7); g.stroke(); }
+      if (e.tur === 'deniz') { g.save(); g.translate(x, y); g.rotate(Math.sin(T * 1.6 + e.y) * 0.12); g.translate(-x, -y); evIcon(e, x, y, s); g.restore(); }
+      else if (e.tur === 'savas') { g.save(); g.translate(x, y); g.rotate(Math.sin(T * 9 + e.y) > 0.6 ? 0.18 : 0); g.translate(-x, -y); evIcon(e, x, y, s); g.restore(); }
       else evIcon(e, x, y, s);
       g.globalAlpha = 1;
       hits.push({ kind: 'olay', e, x0: x - s - 3, x1: x + s + 3, y0: y - s - 3, y1: y + s + 3 });
@@ -713,6 +727,15 @@ window.Dunya = (() => {
     return null;
   }
   // bir noktanın o yıl hangi devletin sınırları içinde kaldığı (oyunlar için); yoksa null
+  function llAt(x, y) {
+    const r = R(), px = (x - W / 2) / r, py = -(y - H / 2) / r, z2 = 1 - px * px - py * py; if (z2 <= 0) return null;
+    const z = Math.sqrt(z2); return [Math.asin(py * cl0 + z * sl0) / D, ((view.lon + Math.atan2(px, z * cl0 - py * sl0) / D + 540) % 360) - 180];
+  }
+  function icerir(k, la, lo) {
+    if (!k || !k.H || !k.bb || la < k.bb[0] || la > k.bb[1] || lo < k.bb[2] || lo > k.bb[3]) return false;
+    const icinde = h => { let ic = false; for (let i = 0, j = h.la.length - 1; i < h.la.length; j = i++) { if ((h.la[i] > la) !== (h.la[j] > la) && lo < (h.lo[j] - h.lo[i]) * (la - h.la[i]) / (h.la[j] - h.la[i]) + h.lo[i]) ic = !ic; } return ic; };
+    return k.H.filter(icinde).length % 2 === 1;
+  }
   async function nerede(la, lo, y) {
     const icinde = h => { let ic = false; for (let i = 0, j = h.la.length - 1; i < h.la.length; j = i++) { if ((h.la[i] > la) !== (h.la[j] > la) && lo < (h.lo[j] - h.lo[i]) * (la - h.la[i]) / (h.la[j] - h.la[i]) + h.lo[i]) ic = !ic; } return ic; };
     for (let t = 0; t < 40; t++) {
@@ -722,5 +745,5 @@ window.Dunya = (() => {
     }
     return null;
   }
-  return { devletler, kayit, nerede, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
+  return { devletler, kayit, nerede, llAt, icerir, sinirAd, get sinirAcik() { return layers.sinir; }, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
 })();
