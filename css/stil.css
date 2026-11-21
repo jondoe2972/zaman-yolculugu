@@ -728,3 +728,64 @@ body:not(.globeonly) .kp-kure { display: none; }
 .sb-ist b { display: block; font-size: 18px; color: #3a2414; }
 .sb-sonuc small { color: #8a6a4a; font-size: 12px; }
 .lnk { border: 0; background: none; color: #a0521a; text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
+
+/* ---------- ⏳ Biliyor muydun? ek ---------- */
+.aa-kart .aa-tarih { margin: 0 0 2px; color: #a0521a !important; font-weight: 700; font-size: 12px !important; }
+
+/* ---------- 🎭 Ben kimim? ---------- */
+.hayat.bk { width: min(460px, calc(100% - 28px)); padding: 12px 14px 14px; overflow-x: hidden; }
+.bk-bas b { display: block; font-family: Georgia, serif; font-size: 20px; color: #7a3a12; }
+.bk-bas small { color: #8a6a4a; }
+.bk-aciklama { margin: 8px 0 10px; font-size: 13.5px; }
+.bk-seviye { display: grid; gap: 6px; }
+.bk-seviye button { display: grid; grid-template-columns: 30px 1fr; grid-template-rows: auto auto; column-gap: 8px; align-items: center; text-align: left; border: 1px solid #e3d3b2; background: #fff; border-radius: 12px; padding: 9px 12px; cursor: pointer; font: inherit; color: #3a2414; transition: transform .15s, border-color .15s; }
+.bk-seviye button:hover { transform: translateX(3px); border-color: #d9a521; }
+.bk-seviye span { grid-row: span 2; font-size: 22px; }
+.bk-seviye b { font-size: 15px; }
+.bk-seviye small { color: #8a6a4a; font-size: 12px; }
+.bk-ist { display: block; margin-top: 8px; color: #8a6a4a; font-size: 12px; }
+.bk-ust { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-right: 30px; margin-bottom: 8px; font-size: 12.5px; color: #6a4a2a; }
+.bk-ust b { color: #3a2414; font-size: 14px; }
+.bk-rozet { border-radius: 99px; padding: 1px 8px; font-weight: 700; background: #f1e7d2; }
+.bk-izler { margin-left: auto; letter-spacing: 1px; font-size: 11px; }
+.bk-sahne { perspective: 900px; }
+.bk-kart { display: grid; grid-template-columns: 112px 1fr; gap: 12px; align-items: start; background: #fff; border: 1px solid #e9dcc0; border-radius: 14px; padding: 10px; transform-origin: 50% 50%; }
+.bk-kart.gir { animation: bkGir .42s cubic-bezier(.2,.8,.25,1); }
+.bk-kart.cik { animation: bkCik .26s ease-in forwards; }
+.bk-kart.salla { animation: bkSalla .4s; }
+@keyframes bkGir { from { opacity: 0; transform: translateX(46px) rotateY(-18deg) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes bkCik { to { opacity: 0; transform: translateX(-40px) rotateY(14deg) scale(.97); } }
+@keyframes bkSalla { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+.bk-resim { margin: 0; text-align: center; }
+.bk-resim canvas { width: 112px; height: 112px; border-radius: 10px; display: block; image-rendering: auto; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+.bk-resim figcaption { font-size: 10.5px; color: #8a6a4a; margin-top: 3px; }
+.bk-metin p { margin: 0 0 8px; font-size: 14px; line-height: 1.5; }
+.bk-hayat { background: #f6eedb; border-radius: 10px; padding: 7px 9px; font-size: 12.5px; line-height: 1.45; color: #5a3a1a; margin-bottom: 8px; }
+.bk-hayat b { display: block; font-size: 11.5px; color: #8a4f12; margin-bottom: 2px; }
+.bk-git { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; color: #6a4a2a; }
+.bk button.ikincil, .bk-dugmeler a, .bk-dugmeler button { border: 1px solid #e3d3b2; background: #fff; color: #5a3a1a; border-radius: 99px; padding: 5px 11px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: none; }
+.bk button.ana { border: 0; background: #ffd666; color: #2a1d10; border-radius: 99px; padding: 8px 14px; font: inherit; font-weight: 700; cursor: pointer; }
+.bk-alt { margin-top: 10px; }
+.bk-alt.gir { animation: bkGir .45s ease-out; }
+.bk-gir { position: relative; display: flex; gap: 6px; }
+.bk-gir input { flex: 1; min-width: 0; border: 1px solid #d9c7a2; border-radius: 99px; padding: 8px 14px; font: inherit; background: #fff; color: #3a2414; }
+.bk-oneri { position: absolute; left: 0; right: 0; bottom: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: #fff; border: 1px solid #d9c7a2; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,.2); z-index: 2; }
+.bk-oneri[hidden] { display: none; }
+.bk-oneri li { padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+.bk-oneri li.on, .bk-oneri li:hover { background: #ffefc0; }
+.bk-hata { margin: 6px 0 0; color: #a3302a; font-size: 12.5px; }
+.bk-dugmeler { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: #6a4a2a; }
+.bk-dugmeler > span { margin-right: auto; }
+.bk-dugmeler.son { justify-content: center; }
+.bk-sonuc { text-align: center; background: #f6eedb; border-radius: 14px; padding: 10px; }
+.bk-sonuc.iyi { background: #e4f2dc; }
+.bk-sonuc small { display: block; color: #6a4a2a; font-weight: 700; }
+.bk-sonuc > b { display: block; font-family: Georgia, serif; font-size: 22px; color: #7a3a12; margin: 2px 0; }
+.bk-sonuc span { display: block; font-size: 12.5px; color: #6a4a2a; }
+.bk-sonuc em { display: inline-block; margin-top: 4px; font-style: normal; font-weight: 800; color: #3a7a2a; }
+.bk-hayatin { margin-top: 8px; font-size: 12.5px; }
+.bk-hayatin summary { cursor: pointer; font-weight: 700; color: #7a3a12; }
+.bk-hayatin ol { margin: 6px 0 0; padding-left: 18px; line-height: 1.45; }
+.bk-hayatin li { margin-bottom: 4px; }
+@media (max-width: 600px) { .bk-kart { grid-template-columns: 84px 1fr; } .bk-resim canvas { width: 84px; height: 84px; } }
+@media (prefers-reduced-motion: reduce) { .bk-kart.gir, .bk-kart.cik, .bk-kart.salla, .bk-alt.gir { animation: none; } }

@@ -1,13 +1,13 @@
-// 🎮 Oyunlar menüsü: bütün oyunlar tek düğmenin altında toplanır (🎲 Doğ, 🗺️ Sınırdan Bil, ⏳ Aynı anda).
+// 🎮 Oyunlar menüsü: bütün oyunlar tek düğmenin altında toplanır (🎭 Ben kimim?, 🗺️ Sınırdan Bil, ⏳ Biliyor muydun?).
 // Yeni oyun eklemek: OYUNLAR dizisine bir satır ve js/oyun/ altına oyunun dosyası.
 'use strict';
 (() => {
   const btn = document.querySelector('[data-mod="oyun"]'); if (!btn) return;
   const DUNYA = !!(window.BOLGE && window.BOLGE.dunya);
   const OYUNLAR = [
-    { id: 'dog', ikon: '🎲', ad: 'Doğ', alt: 'Rastgele bir yılda, rastgele bir devlette doğ; bir hayat yaşa', ac: () => { if (!DUNYA) { location.href = location.pathname + '?dog=1'; return; } if (window.Hayat) window.Hayat.basla(); } },
+    { id: 'dog', ikon: '🎭', ad: 'Ben kimim?', alt: 'Ünlü biri olarak doğ; hayatından ipuçlarıyla kim olduğunu bil', yeni: true, ac: () => { if (!DUNYA) { location.href = location.pathname + '?dog=1'; return; } if (window.Hayat) window.Hayat.basla(); } },
     { id: 'sinir', ikon: '🗺️', ad: 'Sınırdan Bil', alt: () => window.SinirBil && window.SinirBil.bugunBitti() ? '✓ Bugünkü bulmaca çözüldü · serbest oyna' : 'Günlük bulmaca: sınırı gör, devleti bil', yeni: true, ac: () => window.SinirBil && window.SinirBil.ac() },
-    { id: 'aa', ikon: '⏳', ad: 'Aynı anda', alt: 'Bu yılda dünyada neler oluyordu? Şaşırtıcı bilgiler', yeni: true, ac: () => window.AyniAnda && window.AyniAnda.ac() }
+    { id: 'aa', ikon: '⏳', ad: 'Biliyor muydun?', alt: `Tarihten ${window.AYNI_ANDA ? window.AYNI_ANDA.length : 'yüzlerce'} şaşırtıcı bilgi; tek tıkla o zamana git`, ac: () => window.AyniAnda && window.AyniAnda.ac() }
   ];
   const pop = document.createElement('div'); pop.className = 'oyunpop'; pop.hidden = true; pop.setAttribute('role', 'menu');
   document.body.appendChild(pop);

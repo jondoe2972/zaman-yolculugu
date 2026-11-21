@@ -679,5 +679,15 @@ window.Dunya = (() => {
     }
     return null;
   }
-  return { devletler, kayit, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
+  // bir noktanın o yıl hangi devletin sınırları içinde kaldığı (oyunlar için); yoksa null
+  async function nerede(la, lo, y) {
+    const icinde = h => { let ic = false; for (let i = 0, j = h.la.length - 1; i < h.la.length; j = i++) { if ((h.la[i] > la) !== (h.la[j] > la) && lo < (h.lo[j] - h.lo[i]) * (la - h.la[i]) / (h.la[j] - h.la[i]) + h.lo[i]) ic = !ic; } return ic; };
+    for (let t = 0; t < 40; t++) {
+      const o = aktifSinirlar0(y);
+      if (o.length) { const L = o.map(q => q.k).filter(k => la >= k.bb[0] && la <= k.bb[1] && lo >= k.bb[2] && lo <= k.bb[3] && k.H.filter(icinde).length % 2 === 1).sort((a, b) => a.a - b.a); return L[0] || null; }
+      await new Promise(r => setTimeout(r, 250));
+    }
+    return null;
+  }
+  return { devletler, kayit, nerede, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
 })();
