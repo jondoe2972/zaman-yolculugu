@@ -789,3 +789,17 @@ body:not(.globeonly) .kp-kure { display: none; }
 .bk-hayatin li { margin-bottom: 4px; }
 @media (max-width: 600px) { .bk-kart { grid-template-columns: 84px 1fr; } .bk-resim canvas { width: 84px; height: 84px; } }
 @media (prefers-reduced-motion: reduce) { .bk-kart.gir, .bk-kart.cik, .bk-kart.salla, .bk-alt.gir { animation: none; } }
+
+/* ---------- 🎭 Ben kimim? ek ipuçları ve kişi penceresi ---------- */
+.bk-ekip { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.bk-ekip span { background: #fff3cf; border: 1px solid #f0d890; color: #5a3a0a; border-radius: 99px; padding: 2px 9px; font-size: 12px; animation: bkGir .4s ease-out; }
+.bk-ekip b { color: #3a2414; }
+.bk-tani { display: block; width: 100%; margin-top: 8px; border: 1px solid #d9a521; background: #fff8e4; color: #5a3a0a; border-radius: 12px; padding: 9px 12px; font: inherit; font-weight: 700; cursor: pointer; text-align: left; }
+.bk-tani:hover { background: #ffefc0; }
+.kisi-ust { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+.kisi-ust .tech { flex: 1; min-width: 220px; }
+.kisi-foto img { width: 140px; max-height: 190px; object-fit: cover; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,.25); }
+.kisi-ozet p { line-height: 1.55; }
+.kisi-hayat { padding-left: 20px; }
+.kisi-hayat li { margin-bottom: 10px; line-height: 1.5; }
+.kisi-hayat small { display: block; color: #8a6a4a; margin: 2px 0 4px; }

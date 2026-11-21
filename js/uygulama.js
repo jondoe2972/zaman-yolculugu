@@ -702,26 +702,30 @@
   const photoCache = new Map();
   const API = 'https://en.wikipedia.org/w/api.php?format=json&origin=*&';
   const strip = h => { const d = document.createElement('div'); d.innerHTML = h || ''; return (d.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 80); };
-  async function fetchPhotos(title) {
-    if (photoCache.has(title)) return photoCache.get(title);
+  // harita: kişiler için haritalar, planlar ve SVG çizimler de gösterilir (sefer haritaları gibi)
+  async function fetchPhotos(title, harita) {
+    const ck = title + (harita ? '|h' : '');
+    if (photoCache.has(ck)) return photoCache.get(ck);
     const q = API + 'action=query&redirects=1&generator=images&gimlimit=60&prop=imageinfo&iiprop=url|mime|size|extmetadata&iiurlwidth=900&titles=' + encodeURIComponent(title);
     const lead = API + 'action=query&redirects=1&prop=pageimages&piprop=name&titles=' + encodeURIComponent(title);
     const [j, lj] = await Promise.all([fetch(q).then(r => r.json()), fetch(lead).then(r => r.json()).catch(() => ({}))]);
     const leadName = Object.values(lj.query?.pages || {})[0]?.pageimage;
     const bad = /(logo|icon|map|karte|locator|location|flag|symbol|commons|wiki|edit|question|plan|diagram|chart|graph|sign|coa|seal|\.svg|stub|disambig|pictogram|hiero_|hieroglyph_)/i;
-    let list = Object.values(j.query?.pages || {}).map(p => ({ t: p.title, i: (p.imageinfo || [])[0] })).filter(o => o.i && /jpe?g|png/.test(o.i.mime) && o.i.width >= 500 && !bad.test(o.t));
+    const badH = /(logo|icon|locator|location|flag|symbol|commons|wiki|edit|question|sign|coa|seal|stub|disambig|pictogram|signature|imza|wappen|emblem|lock|padlock|silhouette|placeholder|allah|calligraph|audio|speaker|portal|crystal_clear|nuvola|red_pog|blank)/i;
+    const haritaAd = /(map|karte|carte|harita|mapa|campaign|battle|empire|conquest|territor|expansion|route|voyage|journey|invasion|siege)/i;
+    let list = Object.values(j.query?.pages || {}).map(p => ({ t: p.title, i: (p.imageinfo || [])[0] })).filter(o => o.i && (harita ? !badH.test(o.t) && ((/svg/.test(o.i.mime) && haritaAd.test(o.t)) || (/jpe?g|png/.test(o.i.mime) && o.i.width >= 400)) : /jpe?g|png/.test(o.i.mime) && o.i.width >= 500 && !bad.test(o.t)));
     list.sort((a, b) => (b.t.replace(/ /g, '_').endsWith(leadName || '#') ? 1 : 0) - (a.t.replace(/ /g, '_').endsWith(leadName || '#') ? 1 : 0));
     const out = list.map(o => {
       const md = o.i.extmetadata || {};
       return { src: o.i.thumburl || o.i.url, page: o.i.descriptionurl, by: strip(md.Artist?.value) || 'bilinmiyor', lic: md.LicenseShortName?.value || '', cap: strip(md.ImageDescription?.value) };
     });
-    photoCache.set(title, out);
+    photoCache.set(ck, out);
     return out;
   }
-  async function loadPhotos(title, box, n = 8) {
+  async function loadPhotos(title, box, n = 8, harita) {
     box.innerHTML = '<p class="note">Fotoğraflar yükleniyor…</p>';
     try {
-      const ph = (await fetchPhotos(title)).slice(0, n);
+      const ph = (await fetchPhotos(title, harita)).slice(0, n);
       if (!ph.length) { box.innerHTML = '<p class="note">Bu konu için uygun fotoğraf bulunamadı.</p>'; return; }
       box.innerHTML = `<div class="photos">${ph.map(p => `<figure><a href="${esc(p.page)}" target="_blank" rel="noopener"><img loading="lazy" src="${esc(p.src)}" alt="${esc(p.cap || title)}"></a>
         <figcaption>${p.cap ? esc(p.cap) + '<br>' : ''}<span>Fotoğraf: ${esc(p.by)}${p.lic ? ' · ' + esc(p.lic) : ''} · Wikimedia Commons</span></figcaption></figure>`).join('')}</div>
@@ -730,7 +734,7 @@
       box.innerHTML = '<p class="note">Fotoğraflar yüklenemedi. İnternet bağlantısını kontrol edip tekrar dene.</p>';
     }
   }
-  const photoTab = (title, n) => ({ ad: '📷 Fotoğraflar', html: '<div class="ph-box"></div>', onShow: body => loadPhotos(title, body.querySelector('.ph-box'), n) });
+  const photoTab = (title, n, harita) => ({ ad: '📷 Fotoğraflar', html: '<div class="ph-box"></div>', onShow: body => loadPhotos(title, body.querySelector('.ph-box'), n, harita) });
 
   const rowsHTML = rows => `<table class="tech">${rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>`;
   function altTab(id) {
@@ -1033,7 +1037,7 @@
   window.ZY = {
     get Y() { return Y; }, setYear: y => setYear(y, true), setView, showInScene: t => showInScene(t),
     showOnMap: (la, lo, z, ad) => { setView('dunya'); DN.goTo(la, lo, z || 60); if (DN.pin) DN.pin(la, lo, ad); },
-    showMonument: id => showMonument(id), openInfo: id => openInfo(id), openGod: id => openGod(id), openDevlet: k => openDevlet(k),
+    showMonument: id => showMonument(id), openInfo: id => openInfo(id), openGod: id => openGod(id), openDevlet: k => openDevlet(k), showModal: o => showModal(o), photoTab: (title, n, harita) => photoTab(title, n, harita),
     openCity: ad => { const c = (MIS.sehirler || []).find(x => x.ad === ad); if (c) openCity(c); },
     openEvent: id => { const e = (window.OLAYLAR || []).find(x => x.id === id); if (e) { setView('dunya'); DN.goTo(e.ll[0], e.ll[1], 7); openEvent(e); } },
     monuments: () => P.monuments || SP.monuments, cities: () => MIS.sehirler || [], coords: id => MIS.coords[id], hasInfo: id => !!bilgiOf(id)
