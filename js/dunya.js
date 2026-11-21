@@ -86,8 +86,9 @@ window.Dunya = (() => {
     }
     if (!any || maxx < -20 || minx > W + 20 || maxy < -20 || miny > H + 20) return false;
     dst.moveTo(...edgeOrPt(pts[0], cx, cy, r));
-    for (let i = 1; i < pts.length; i++) {
-      const q = pts[i];
+    prevA = pts[0][2];
+    for (let i = 1; i <= pts.length; i++) {
+      const q = pts[i === pts.length ? 0 : i];
       if (q[2] === null) { dst.lineTo(q[0], q[1]); prevA = null; }
       else {
         const a = q[2];
@@ -107,7 +108,12 @@ window.Dunya = (() => {
   function yolHazirla(r) {
     if (r._d) return r._d;
     const pts = [];
-    for (let i = 0; i < r.pts.length - 1; i++) { const a = r.pts[i], b = r.pts[i + 1], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.6)); for (let j = 0; j < n; j++) pts.push([a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n]); }
+    for (let i = 0; i < r.pts.length - 1; i++) {
+      const a = r.pts[i], b = r.pts[i + 1];
+      let dlo = b[1] - a[1]; if (dlo > 180) dlo -= 360; if (dlo < -180) dlo += 360;
+      const dla = b[0] - a[0], n = Math.max(1, Math.ceil(Math.hypot(dla, dlo) / 0.6));
+      for (let j = 0; j < n; j++) pts.push([a[0] + dla * j / n, a[1] + dlo * j / n]);
+    }
     pts.push(r.pts[r.pts.length - 1]);
     const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + km(pts[i - 1], pts[i]));
     return (r._d = { pts, cum, L: cum[cum.length - 1] || 1, p: prep(pts) });
@@ -572,8 +578,8 @@ window.Dunya = (() => {
         g.lineJoin = 'round';
         for (const [w, a] of [[14, 0.16], [5, 0.28]]) { g.strokeStyle = `rgba(232,246,252,${a})`; g.lineWidth = w; g.stroke(karaPath); }
         const lg = g.createLinearGradient(cx - r, cy - r, cx + r, cy + r); lg.addColorStop(0, '#d3e0b2'); lg.addColorStop(1, '#a9c287');
-        g.fillStyle = lg; g.fill(karaPath, 'evenodd');
-        g.save(); g.clip(karaPath, 'evenodd');
+        g.fillStyle = lg; g.fill(karaPath);
+        g.save(); g.clip(karaPath);
         g.fillStyle = dokuDesen(); g.globalAlpha = 0.55; g.fillRect(cx - r, cy - r, r * 2, r * 2); g.globalAlpha = 1;
         g.beginPath(); for (const p of COLP) polyPath(p); g.fillStyle = 'rgba(236,222,182,0.88)'; g.fill();
         g.beginPath(); for (const p of BUZ) polyPath(p); g.fillStyle = 'rgba(248,250,252,0.95)'; g.fill();
@@ -588,7 +594,7 @@ window.Dunya = (() => {
         g = lc; g.lineJoin = 'round'; let var_ = false;
         const tolPx = 1.3 / (R() * D); svNow = tolPx >= LOD[2] ? 2 : tolPx >= LOD[1] ? 1 : 0;
         for (const o of aktifSinirlar(Y)) { sinirCiz(o); var_ = true; }
-        g.globalCompositeOperation = 'destination-in'; g.fill(karaPath, 'evenodd'); g.globalCompositeOperation = 'source-over';
+        g.globalCompositeOperation = 'destination-in'; g.fill(karaPath); g.globalCompositeOperation = 'source-over';
         g = gg;
         if (var_) { g.save(); g.globalAlpha = 0.9; g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(L, 0, 0); g.restore(); }
         g.beginPath(); polyPath(HAZAR); g.fillStyle = '#93c2dc'; g.fill();
@@ -933,13 +939,87 @@ window.Dunya = (() => {
         if (shownV.some(q => Math.abs(q[0] - x) < 22 && Math.abs(q[1] - y) < 22)) continue;
         shownV.push([x, y]);
         const hov = hover && hover.kind === 'volkan' && hover.v === v;
-        const s0 = hov ? 12 : 9.5, fl = 0.8 + 0.25 * Math.sin(T * 5 + v.ll[1]);
+        const s0 = hov ? 13 : 10.5, aktif = !/uyuyan|sönmüş/i.test(v.durum || '');
+        const b = y + s0 * 0.65, tepe = y - s0 * 0.58, kr = s0 * 0.25;
         g.save();
-        g.fillStyle = '#3b2420'; g.strokeStyle = hov ? '#ffd666' : '#fca5a5'; g.lineWidth = hov ? 2 : 1.3;
-        g.beginPath(); g.moveTo(x, y - s0); g.lineTo(x + s0, y + s0 * 0.72); g.lineTo(x - s0, y + s0 * 0.72); g.closePath(); g.fill(); g.stroke();
-        // Lav zirvesi parıltısı
-        g.fillStyle = '#f97316'; g.beginPath(); g.arc(x, y - s0 * 0.82, 3.2 * fl, 0, 7); g.fill();
-        g.fillStyle = '#fde047'; g.beginPath(); g.arc(x, y - s0 * 0.85, 1.5 * fl, 0, 7); g.fill();
+        // Zemin gölgesi
+        g.fillStyle = 'rgba(20,12,8,0.32)';
+        g.beginPath(); g.ellipse(x, b + 1.2, s0 * 1.15, s0 * 0.28, 0, 0, 7); g.fill();
+        if (aktif) {
+          // 🔥 Aktif Yanardağ: düz kraterli koyu bazalt koni + lav akıntısı + patlama kıvılcımları ve yükselen kül bulutu
+          g.beginPath();
+          g.moveTo(x - s0 * 1.05, b);
+          g.quadraticCurveTo(x - s0 * 0.42, y + s0 * 0.12, x - kr, tepe);
+          g.lineTo(x + kr, tepe);
+          g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.12, x + s0 * 1.05, b);
+          g.closePath();
+          g.fillStyle = '#624d44'; g.fill();
+          // Gölgede kalan sağ yamaç
+          g.beginPath();
+          g.moveTo(x + s0 * 0.04, tepe); g.lineTo(x + kr, tepe);
+          g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.12, x + s0 * 1.05, b);
+          g.lineTo(x - s0 * 0.08, b); g.quadraticCurveTo(x + s0 * 0.12, y + s0 * 0.1, x + s0 * 0.04, tepe);
+          g.closePath();
+          g.fillStyle = '#382a24'; g.fill();
+          // Yamaçtan sızan ince lav damarı
+          g.strokeStyle = 'rgba(249,115,22,0.85)'; g.lineWidth = 1.4; g.lineCap = 'round';
+          g.beginPath(); g.moveTo(x - kr * 0.2, tepe + 1); g.quadraticCurveTo(x - s0 * 0.18, y - s0 * 0.1, x - s0 * 0.34, y + s0 * 0.18); g.stroke();
+          // Dış kontur
+          g.beginPath();
+          g.moveTo(x - s0 * 1.05, b); g.quadraticCurveTo(x - s0 * 0.42, y + s0 * 0.12, x - kr, tepe);
+          g.lineTo(x + kr, tepe); g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.12, x + s0 * 1.05, b);
+          g.closePath();
+          g.strokeStyle = hov ? '#ffd666' : '#261a14'; g.lineWidth = hov ? 1.8 : 1.1; g.stroke();
+          // Krater lavı + patlama kıvılcımları + yükselen kül bulutçukları
+          const fl = 0.8 + 0.25 * Math.sin(T * 7 + v.ll[1]);
+          g.fillStyle = '#ea580c'; g.beginPath(); g.ellipse(x, tepe, kr * 1.05, kr * 0.45, 0, 0, 7); g.fill();
+          g.fillStyle = '#fde047'; g.beginPath(); g.ellipse(x, tepe, kr * 0.58 * fl, kr * 0.24 * fl, 0, 0, 7); g.fill();
+          for (let k = 0; k < 3; k++) {
+            const ph = (T * 0.65 + k * 0.33 + (v.ll[1] * 0.02)) % 1;
+            const px = x + Math.sin(ph * 5 + k * 2) * 3.2 + (k - 1) * ph * 4;
+            const py = tepe - 2 - ph * (s0 * 1.15);
+            if (ph < 0.45) {
+              g.fillStyle = `rgba(255,140,30,${(1 - ph * 1.8).toFixed(2)})`;
+              g.beginPath(); g.arc(px, py, 1.5, 0, 7); g.fill();
+            }
+            g.fillStyle = `rgba(215,205,198,${(0.55 * (1 - ph)).toFixed(2)})`;
+            g.beginPath(); g.arc(px + ph * 2.5, py - 2, 1.8 + ph * 3.6, 0, 7); g.fill();
+          }
+        } else {
+          // 🏔️ Uyuyan / Sönmüş Dağ: sakin, sivri karlı dağ zirvesi (patlama/lav yok!)
+          const zirve = y - s0 * 0.72;
+          g.beginPath();
+          g.moveTo(x - s0 * 1.05, b);
+          g.quadraticCurveTo(x - s0 * 0.42, y + s0 * 0.08, x, zirve);
+          g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.08, x + s0 * 1.05, b);
+          g.closePath();
+          g.fillStyle = '#75665c'; g.fill();
+          // Gölge yamaç
+          g.beginPath();
+          g.moveTo(x, zirve);
+          g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.08, x + s0 * 1.05, b);
+          g.lineTo(x - s0 * 0.06, b);
+          g.quadraticCurveTo(x + s0 * 0.1, y + s0 * 0.05, x, zirve);
+          g.closePath();
+          g.fillStyle = '#4a3f39'; g.fill();
+          // Karlı zirve örtüsü
+          g.beginPath();
+          g.moveTo(x - s0 * 0.44, y - s0 * 0.05);
+          g.quadraticCurveTo(x - s0 * 0.22, y - s0 * 0.35, x, zirve);
+          g.quadraticCurveTo(x + s0 * 0.22, y - s0 * 0.35, x + s0 * 0.44, y - s0 * 0.05);
+          g.lineTo(x + s0 * 0.16, y - s0 * 0.16);
+          g.lineTo(x, y - s0 * 0.02);
+          g.lineTo(x - s0 * 0.18, y - s0 * 0.16);
+          g.closePath();
+          g.fillStyle = 'rgba(248,250,255,0.92)'; g.fill();
+          // Dış kontur
+          g.beginPath();
+          g.moveTo(x - s0 * 1.05, b);
+          g.quadraticCurveTo(x - s0 * 0.42, y + s0 * 0.08, x, zirve);
+          g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.08, x + s0 * 1.05, b);
+          g.closePath();
+          g.strokeStyle = hov ? '#ffd666' : '#2e241e'; g.lineWidth = hov ? 1.8 : 1.1; g.stroke();
+        }
         g.restore();
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         if (view.z >= 1.55 || hov) lab(hov ? 97 : 61, x, y + s0 + 9, v.ad.split(' (')[0], { size: 10.2, w: 700, col: '#ffedd5', halo: 2.8, haloCol: 'rgba(42,14,10,0.9)', kay: true });
@@ -1066,49 +1146,64 @@ window.Dunya = (() => {
         hits.push({ kind: 'magara', m, x0: x - s0 - 4, x1: x + s0 + 4, y0: y - s0 - 4, y1: y + s0 + 4 });
       }
     }
-    // 🎁 Dünya Çevresinde Gizli Sürprizler (Easter Eggs — yalnızca yaklaşınca hafif altın parıltıyla belirir)
+    // 🎁 Dünya Çevresinde Gizli Sürprizler (Easter Eggs — yalnızca o noktaya iyice yaklaşınca ince altın parıltıyla belirir)
     if (window.ATLAS_SURPRIZLER) {
       for (const sp of window.ATLAS_SURPRIZLER) {
-        if (sp.uzay || !sp.ll || view.z < (sp.minZ || 4)) continue;
+        if (sp.uzay || !sp.ll || view.z < (sp.minZ || 7)) continue;
         const [x, y, z] = P(...sp.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
         const bul = !!(window.ZY && window.ZY.surprizBulunduMu && window.ZY.surprizBulunduMu(sp.id));
         const hov = hover && hover.kind === 'surpriz' && hover.sp === sp;
-        const fa = clamp((view.z - sp.minZ) / 0.8, 0.25, 1), ph = 0.5 + 0.5 * Math.sin(T * 3 + sp.ll[0]);
-        const s0 = hov ? 12.5 : (bul ? 10 : 8.5);
-        g.save(); g.globalAlpha = hov ? 1 : fa * (bul ? 0.95 : 0.72 + ph * 0.25);
-        g.strokeStyle = `rgba(255,214,102,${0.4 + ph * 0.45})`; g.lineWidth = 1.6;
-        g.beginPath(); g.arc(x, y, s0 + 3 + ph * 4, 0, 7); g.stroke();
-        g.fillStyle = bul ? 'rgba(42,28,14,0.92)' : 'rgba(56,34,12,0.82)'; g.strokeStyle = '#ffd666'; g.lineWidth = hov ? 2.2 : 1.5;
+        const fa = clamp((view.z - sp.minZ) / 1.4, 0.18, 1), ph = 0.5 + 0.5 * Math.sin(T * 2.4 + sp.ll[0]);
+        const s0 = hov ? 12 : (bul ? 9.5 : 6.2);
+        g.save(); g.globalAlpha = hov ? 1 : fa * (bul ? 0.92 : 0.42 + ph * 0.28);
+        if (hov || bul) {
+          g.strokeStyle = `rgba(255,214,102,${0.35 + ph * 0.4})`; g.lineWidth = 1.4;
+          g.beginPath(); g.arc(x, y, s0 + 3 + ph * 3, 0, 7); g.stroke();
+        }
+        g.fillStyle = bul ? 'rgba(42,28,14,0.92)' : 'rgba(56,34,12,0.58)'; g.strokeStyle = hov ? '#ffd666' : 'rgba(255,214,102,0.75)'; g.lineWidth = hov ? 2 : 1.1;
         g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
-        g.font = `${hov ? 14 : (bul ? 12 : 11)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `${hov ? 13.5 : (bul ? 11.5 : 8.5)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
         g.fillText(bul ? sp.ik : '✨', x, y + 0.5);
         g.restore();
         if (bul && (view.z >= sp.minZ + 0.6 || hov)) lab(hov ? 98 : 50, x, y + s0 + 10, sp.ad.split(' (')[0], { size: 10, w: 700, col: '#ffe89c', halo: 2.8, haloCol: 'rgba(28,18,6,0.9)', kay: true });
-        hits.push({ kind: 'surpriz', sp, x0: x - s0 - 5, x1: x + s0 + 5, y0: y - s0 - 5, y1: y + s0 + 5 });
+        hits.push({ kind: 'surpriz', sp, x0: x - s0 - 4, x1: x + s0 + 4, y0: y - s0 - 4, y1: y + s0 + 4 });
       }
     }
     if (LQ.length) flushLabels();
     g.restore();
-    // 🛰️ Uzay boşluğundaki gizli sürpriz (Voyager Altın Plağı — küre dışındaki yıldızların arasında süzülür)
-    if (view.z < 1.85 && window.ATLAS_SURPRIZLER) {
+    // 🛰️ Uzay boşluğundaki gizli sürpriz (Voyager Altın Plağı — keşfedilmeden önce yıldızların arasında hafifçe parlayan altın bir yıldız gibi görünür)
+    if (view.z < 1.55 && window.ATLAS_SURPRIZLER) {
       const voy = window.ATLAS_SURPRIZLER.find(s => s.uzay);
       if (voy) {
-        const ang = -0.68 + Math.sin(T * 0.16) * 0.14;
-        const vx = cx + Math.cos(ang) * (r + 34), vy = cy + Math.sin(ang) * (r + 34);
+        const ang = -0.58 + Math.sin(T * 0.08) * 0.22;
+        const vx = cx + Math.cos(ang) * (r + 68), vy = cy + Math.sin(ang) * (r + 68);
         if (vx > 24 && vx < W - 24 && vy > 66 && vy < H - 40) {
           const bul = !!(window.ZY && window.ZY.surprizBulunduMu && window.ZY.surprizBulunduMu(voy.id));
           const hov = hover && hover.kind === 'surpriz' && hover.sp === voy;
-          const ph = 0.5 + 0.5 * Math.sin(T * 3.2);
+          const ph = 0.5 + 0.5 * Math.sin(T * 2.6);
           g.save();
-          g.strokeStyle = `rgba(255,214,102,${hov ? 0.85 : 0.28 + ph * 0.3})`; g.lineWidth = 1.4;
-          g.beginPath(); g.arc(vx, vy, (hov ? 15 : 11) + ph * 4, 0, 7); g.stroke();
-          g.fillStyle = 'rgba(22,26,48,0.88)'; g.strokeStyle = '#ffd666'; g.lineWidth = hov ? 2 : 1.3;
-          g.beginPath(); g.arc(vx, vy, hov ? 12 : 9.5, 0, 7); g.fill(); g.stroke();
-          g.font = `${hov ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText('🛰️', vx, vy + 0.5);
-          if (hov || bul) text(vx, vy + 20, 'Voyager 1', { size: 10, w: 700, col: '#ffe89c', halo: 2.5, haloCol: 'rgba(10,14,28,0.9)' });
+          if (hov || bul) {
+            g.strokeStyle = `rgba(255,214,102,${hov ? 0.85 : 0.35 + ph * 0.25})`; g.lineWidth = 1.2;
+            g.beginPath(); g.arc(vx, vy, (hov ? 12 : 9) + ph * 2.5, 0, 7); g.stroke();
+            g.fillStyle = 'rgba(22,26,48,0.82)'; g.strokeStyle = '#ffd666'; g.lineWidth = hov ? 1.6 : 1;
+            g.beginPath(); g.arc(vx, vy, hov ? 9.5 : 7.5, 0, 7); g.fill(); g.stroke();
+            g.font = `${hov ? 11.5 : 9.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+            g.fillText('🛰️', vx, vy + 0.5);
+            text(vx, vy + 16, 'Voyager 1', { size: 9.5, w: 700, col: '#ffe89c', halo: 2.5, haloCol: 'rgba(10,14,28,0.9)' });
+          } else {
+            // Keşfedilmeden önce: uzayda hafifçe parlayan minik altın 4-köşeli yıldız
+            const arm = 3.2 + ph * 2.4;
+            g.globalAlpha = 0.45 + ph * 0.45;
+            g.strokeStyle = '#ffe99c'; g.lineWidth = 1.1; g.lineCap = 'round';
+            g.beginPath();
+            g.moveTo(vx - arm, vy); g.lineTo(vx + arm, vy);
+            g.moveTo(vx, vy - arm); g.lineTo(vx, vy + arm);
+            g.stroke();
+            g.fillStyle = '#fff9db';
+            g.beginPath(); g.arc(vx, vy, 1.5 + ph * 0.7, 0, 7); g.fill();
+          }
           g.restore();
-          hits.push({ kind: 'surpriz', sp: voy, x0: vx - 15, x1: vx + 15, y0: vy - 15, y1: vy + 15 });
+          hits.push({ kind: 'surpriz', sp: voy, x0: vx - 10, x1: vx + 10, y0: vy - 10, y1: vy + 10 });
         }
       }
     }

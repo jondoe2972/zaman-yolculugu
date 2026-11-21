@@ -2183,37 +2183,43 @@
   const hg = $('#hosgeldin'), hgIc = $('#hg-icerik'), hgNk = $('#hg-noktalar');
   const HG_SAHNELER = [
     {
-      rozet: '1 / 6 · Dünya Atlası',
+      rozet: '1 / 7 · Dünya Atlası',
       baslik: 'Dünyayı ve Okyanusları Keşfet',
-      metin: 'Küreyi sürükleyip döndür, yakınlaş. <b>Devletlere</b> tıklayınca kültürünü, giyimini ve tarihini; <b>okyanuslara</b> dokununca canlılarını ve akıntılarını okuyabilirsin.',
+      metin: 'Küreyi sürükleyip döndür, yakınlaş. <b>Devletlere</b> tıklayınca kültürünü, ekonomisini ve tarihini; <b>okyanuslara</b> dokununca canlılarını ve akıntılarını okuyabilirsin.',
       sahne: '<div class="hgs-kure"><i class="hgs-orb"></i><span class="hgs-pin p1">🏛️</span><span class="hgs-pin p2">🌊</span><span class="hgs-pin p3">🏔️</span></div>'
     },
     {
-      rozet: '2 / 6 · Zaman Makinesi',
+      rozet: '2 / 7 · Zaman Makinesi',
       baslik: 'Alttaki Çizelgeyle 11.000 Yıl Gez',
-      metin: 'Alt çubuğu parmağınla ya da fareyle kaydır, <b>▶ Oynat</b> ile sınırların yayılışını canlı izle, <b>📅</b> ile istediğin yıla anında ışınlan.',
+      metin: 'Alt çubuğu kaydır, <b>▶ Oynat</b> ile sınırların yayılışını canlı izle, sol taraftaki kıta adlarına tıklayarak her kıtada bıraktığın yıla anında geri dön.',
       sahne: '<div class="hgs-zaman"><div class="hgs-bar"><span>MÖ 3000</span><span>MS 1</span><span>1453</span><span>Bugün</span></div><i class="hgs-imlec"></i><div class="hgs-etiket">⏳ Tarih akıyor…</div></div>'
     },
     {
-      rozet: '3 / 6 · Katmanlar (Dosyalar)',
+      rozet: '3 / 7 · Katmanlar (Dosyalar)',
       baslik: 'Tarih Atlası ve Doğa Atlası Tek Tıkla',
-      metin: 'Sağ üstteki <b>🗂️ Katmanlar</b> menüsünden <b>🌊 akıntıları, girdapları, kasırgaları</b>, <b>🐾 bölge hayvanlarını</b> ve <b>🏔️ Himalaya, Gobi, Bereketli Hilal</b> gibi tarihî bölgeleri aç.',
-      sahne: '<div class="hgs-katlar"><span>🌊 Akıntılar</span><span>🌀 Girdaplar</span><span>🐾 Hayvanlar</span><span>🏔️ Dağlar & Çöller</span><span>🐪 Ticaret Yolları</span></div>'
+      metin: 'Sağ üstteki <b>🗂️ Katmanlar</b> menüsünden <b>🌊 akıntıları ve göç yollarını</b>, <b>🐾 bölge hayvanlarını</b>, <b>🌋 yanardağları</b> ve <b>⚓ dünya limanlarını</b> açabilirsin.',
+      sahne: '<div class="hgs-katlar"><span>🌊 Akıntılar</span><span>🐋 Göçler</span><span>🐾 Hayvanlar</span><span>🌋 Yanardağlar</span><span>⚓ Limanlar</span></div>'
     },
     {
-      rozet: '4 / 6 · Canlı Sahne & Yaşa',
+      rozet: '4 / 7 · Canlı Sahne & Yaşa',
       baslik: 'O Dönemde Bir Gününü Yaşa',
       metin: '<b>🎬 Sahne</b> modunda yapıların yılına göre yükselişini izle; <b>🧑‍🌾 Yaşa</b> modunda seçtiğin çağdan bir insan olup şafaktan geceye bir gününü deneyimle.',
-      sahne: '<div class="hgs-yasa"><span>🏺 MÖ 2560</span><i>→</i><span>⚔️ MS 1453</span><i>→</i><span>🧑‍🌾 95 Farklı Hayat</span></div>'
+      sahne: '<div class="hgs-yasa"><span>🏺 MÖ 2560</span><i>→</i><span>⚔️ MS 1453</span><i>→</i><span>🧑‍🌾 Farklı Hayatlar</span></div>'
     },
     {
-      rozet: '5 / 6 · Oyunlar & Keşif Defteri',
-      baslik: '6 Eğlenceli Oyunla Kendini Dene',
-      metin: '<b>🎭 Ben Kimim?</b> (Günün Kişisi), <b>⚖️ Hangisi Daha Eski?</b>, <b>🗺️ Sınırdan Bil</b>, <b>🐾 Hayvanlar Alemi</b>, <b>📍 Bu Toprakların Tarihi</b> ve <b>🤯 Şaşırt Beni</b> seni bekliyor.',
-      sahne: '<div class="hgs-oyunlar"><span>🎭</span><span>⚖️</span><span>🗺️</span><span>🐾</span><span>📍</span><span>🤯</span></div>'
+      rozet: '5 / 7 · Oyunlar & Yarışmalar',
+      baslik: 'Tarih ve Doğa Oyunlarıyla Kendini Dene',
+      metin: '<b>🎭 Ben Kimim?</b>, <b>📸 Burası Neresi & Hangi Çağ?</b>, <b>⚖️ Hangisi Daha Eski?</b>, <b>🗺️ Sınırdan Bil</b>, <b>🐾 Hayvanlar Alemi</b> ve <b>📅 Tarihte Bugün</b> seni bekliyor.',
+      sahne: '<div class="hgs-oyunlar"><span>🎭</span><span>📸</span><span>⚖️</span><span>🗺️</span><span>🐾</span><span>📅</span></div>'
     },
     {
-      rozet: '6 / 6 · Hazırsın!',
+      rozet: '6 / 7 · 🎁 Gizli Sürprizler',
+      baslik: 'Sürpriz Yumurtaları Bulabilecek misin?',
+      metin: 'Dünyanın ve uzay boşluğunun gizli köşelerine <b>sürpriz yumurtalar (Easter Eggs)</b> sakladık! Yalnızca doğru yere <b>iyice yaklaşınca</b> beliren minik altın parıltıyı yakala; keşif yaptıkça ve oyun oynadıkça kazandığın <b>XP</b> ile <b>🧭 Keşif Defterim</b>\'de yeni ipuçlarının kilidi açılır.',
+      sahne: '<div class="hgs-katlar"><span>🛰️ Uzayda</span><span>🏛️ Kayıp Kıta</span><span>⚙️ Antik Sır</span><span>🤿 Derinlikler</span><span>✨ +Daha Fazlası</span></div>'
+    },
+    {
+      rozet: '7 / 7 · Hazırsın!',
       baslik: 'Yolculuğa Nereden Başlayalım?',
       metin: 'İstediğin zaman sağ üstteki <b>?</b> düğmesinden bu rehberi tekrar açabilirsin.',
       son: true

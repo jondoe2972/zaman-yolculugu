@@ -18,7 +18,7 @@ window.ATLAS_HAYVAN_GOC = [
     neden: 'Baja lagünlerinin tuzlu ve sığ suları yavruların kolayca yüzmesini sağlar ve onları katil balinalardan (orka) korur.',
     pusula: 'Kıyı şeridini, su sıcaklığını ve kıta sahanlığının derinliğini takip ederek neredeyse sahilden kopmadan yol alırlar.',
     ilginc: 'Bir gri balina ömrü boyunca (60-70 yıl) Dünya ile Ay arasındaki mesafeye eşdeğer (~800.000 km) yol yüzer.',
-    pts: [[64, -168], [55, -158], [46, -126], [35, -122], [25, -112]],
+    pts: [[64, -168], [58, -169], [54, -164], [52, -148], [47, -126], [37, -123], [26, -113.5]],
     w: 'Gray whale'
   },
   {
@@ -68,7 +68,7 @@ window.ATLAS_HAYVAN_GOC = [
     neden: 'Sıcak tropikal kumsallar yumurtaların kuluçkası için şarttır; soğuk Kaliforniya akıntısı ise en sevdikleri yiyecek olan denizanalarıyla doludur.',
     pusula: 'Yavruyken yumurtadan çıktığı kumsalın kendine özgü manyetik "parmak izini" beynine kazır ve 20 yıl sonra aynı sahile döner.',
     ilginc: 'Kuroshio ve Kuzey Pasifik akıntılarını adeta bir yürüyen bant gibi kullanarak enerjisini korur.',
-    pts: [[-0.5, 132], [12, 145], [28, 165], [38, -160], [36, -124]],
+    pts: [[-0.5, 132], [12, 145], [28, 165], [38, 200], [36, 236]],
     w: 'Leatherback sea turtle'
   },
   {
@@ -78,7 +78,7 @@ window.ATLAS_HAYVAN_GOC = [
     neden: 'Okyanus hızla büyümek için bol besin sunar; sığ ve serin dağ dereleri ise yumurtaların yırtıcılardan korunması için idealdir.',
     pusula: 'Okyanusta manyetik alanla kıyıya ulaşır, nehir ağzına gelince ise inanılmaz koku alma duyusuyla doğduğu derenin kokusunu tanır!',
     ilginc: 'Nehre dönen somonlar ayılara ve kartallara besin olurken, artıkları orman toprağına okyanus azotu taşıyarak dev çam ağaçlarını besler.',
-    pts: [[58, -135], [53, -150], [49, -172], [54, -162], [60, -151]],
+    pts: [[57.5, -136], [53, -150], [49, -170], [54, -158], [59.5, -151.5]],
     w: 'Salmon run'
   },
   {
