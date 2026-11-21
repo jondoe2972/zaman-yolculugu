@@ -175,7 +175,7 @@
     return out;
   }
   function openDevlet(k) {
-    const N = (window.DEVLET_NOT || {})[k.n] || {}, ad = N.tr || k.tr || k.n, bit = k.y0 <= -2024 ? 'bugün' : YIL.fmt(k.y0);
+    const N = (window.DEVLET_NOT || {})[k.n] || {}, ad = DN.sinirAd(k, Math.round(Y)), bit = k.y0 <= -2024 ? 'bugün' : YIL.fmt(k.y0);
     const veri = devletVeri(k);
     const cipler = L => L && L.length ? `<div class="dv-cip">${L.map(x => `<span>${esc(x)}</span>`).join('')}</div>` : '';
     const genel = `<div class="kisi-ust"><div class="kisi-foto dv-foto"></div><div>${rowsHTML([['Ad', ad !== k.n ? `${esc(ad)} <small>(${esc(k.n)})</small>` : esc(ad)], [k.y1 === k.y0 ? 'Bu harita' : 'Bu sınırların yılları', k.y1 === k.y0 ? `${YIL.fmt(k.y1)} yılının sınırları` : `${YIL.fmt(k.y1)} – ${bit}`], ['Yüzölçümü', `yaklaşık ${fmt(k.a)} km²`]])}</div></div>
@@ -477,8 +477,14 @@
   cv.addEventListener('pointerleave', () => S.setHover(null));
 
   // ---------- harita ----------
-  function mapItems() {
+  // kure: küre için ünlü yapılar (data/yapilar) da eklenir; o yıl ayakta olanlar, önemlerine göre farklı yakınlıkta belirir
+  const YP_Z = { 5: 2.6, 4: 3.6, 3: 5.5, 2: 8, 1: 12 }, YP_W = { 5: 5e6, 4: 2e6, 3: 6e5, 2: 2e5, 1: 6e4 };
+  function mapItems(kure) {
     const out = [], seen = new Set(), co = MIS.coords || {};
+    if (kure) for (const y of window.YAPILAR || []) {
+      if (!y.ll || Y > y.y || (y.yik != null && Y <= y.yik)) continue;
+      out.push({ id: 'yp:' + y.id, lm: y, ad: y.ad, type: y.t, ll: y.ll, p: 1, w: YP_W[y.o] || 1e5, st: 'bitti', zmin: YP_Z[y.o] || 8, o: y.o });
+    }
     for (const p of [SP, ...PARTS]) for (const m of p.monuments) {
       if (seen.has(m.id) || !co[m.id] || m.minor) continue;
       const pr = S.progress(m, Y); if (pr < 0) continue;
@@ -534,7 +540,7 @@
     if (dragG.moved || Math.hypot(dx, dy) > 4) { dragG.moved = true; DN.drag(dx, dy); dragG.x = ev.clientX; dragG.y = ev.clientY; }
   });
   const endG = ev => {
-    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') showMonument(h.it.id, h.kids, h); else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (!h && DN.sinirAcik) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
+    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (!h && DN.sinirAcik) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
     gpts.delete(ev.pointerId); if (!gpts.size) dragG = null;
   };
   gcv.addEventListener('pointerup', endG); gcv.addEventListener('pointercancel', endG);
@@ -660,6 +666,7 @@
   // ---------- küredeki yapıya tıklayınca: sahneye geç ----------
   // küredeki simgeye tıklanınca: o yapının kartı hemen açılır; aynı simgede toplanan yakın yapılar kartta düğme olur
   function showMonument(id, kids, hit) {
+    if (/^yp:/.test(id)) { openYapi(id, kids); return; }
     showMonument0(id);
     const card = $('#citycard'), m = monOf(id) || PARTS.flatMap(p => p.monuments).find(x => x.id === id);
     if (!kids || !kids.length || card.hidden || !m || card.querySelector('.cc-title').textContent !== m.ad) return;
@@ -674,9 +681,11 @@
       const durum = pr < 0 ? 'henüz başlanmadı' : m.ruin && Y <= m.ruin ? 'harabe' : m.stop && Y <= m.stop ? 'yarım kaldı' : pr >= 1 ? 'tamamlanmış' : `inşaat sürüyor, %${Math.round(pr * 100)}`;
       const b0 = bilgiOf(id), bi = b0 && b0.ref ? bilgiOf(b0.ref) : b0, card = $('#citycard');
       card.querySelector('.cc-title').textContent = m.ad;
-      card.querySelector('.cc-body').innerHTML = `<p><small>${BLR[p.bolge].ikon} ${BLR[p.bolge].ad} · ${m.yer || ''}</small></p><p><b>${YIL.fmt(Math.round(Y))}:</b> ${durum}</p>${bi && bi.neden ? `<p>${bi.neden}</p>` : ''}
+      const wt = (MIS.wiki || {})[id];
+      card.querySelector('.cc-body').innerHTML = `${wt ? `<div class="kapak kucuk" data-kapak="${esc(wt)}"></div>` : ''}<p><small>${BLR[p.bolge].ikon} ${BLR[p.bolge].ad} · ${m.yer || ''}</small></p><p><b>${YIL.fmt(Math.round(Y))}:</b> ${durum}</p>${bi && bi.neden ? `<p>${bi.neden}</p>` : ''}
         <div class="gos"><button class="phbtn" data-ccinfo="${id}">ℹ️ Bilgi kartı</button><button class="phbtn icbtn" data-ccgit="${p.bolge}" data-ccyapi="${id}">🎬 Sahnede gör</button></div>`;
       card.dataset.city = ''; card.querySelector('.cc-more').hidden = true; kartGoster();
+      kapakYukle(card.querySelector('.kapak'));
       return;
     }
     const m = SP.monuments.find(x => x.id === id);
@@ -686,10 +695,11 @@
     const durum = p < 0 ? 'henüz başlanmadı' : m.ruin && Y <= m.ruin ? 'harabe' : m.stop && Y <= m.stop ? 'yarım kaldı' : p >= 1 ? 'tamamlanmış' : `inşaat sürüyor, %${Math.round(p * 100)}`;
     const card = $('#citycard');
     card.querySelector('.cc-title').textContent = m.ad;
-    card.querySelector('.cc-body').innerHTML = `<p><b>${YIL.fmt(Math.round(Y))}:</b> ${durum}</p>${b ? `<p>${b.neden}</p>` : ''}
+    const wt = (MIS.wiki || {})[id];
+    card.querySelector('.cc-body').innerHTML = `${wt ? `<div class="kapak kucuk" data-kapak="${esc(wt)}"></div>` : ''}<p><b>${YIL.fmt(Math.round(Y))}:</b> ${durum}</p>${b ? `<p>${b.neden}</p>` : ''}
       <div class="gos">${has3D(id) ? `<button class="phbtn icbtn" data-cc3d="${id}">🧊 3D'de gör</button>` : ''}<button class="phbtn" data-ccinfo="${id}">ℹ️ Bilgi kartı</button>${K.ic.eslesme[id] ? `<button class="phbtn icbtn" data-ccic="${id}">🔍 İçine gir</button>` : ''}</div>`;
     card.dataset.city = ''; card.querySelector('.cc-more').hidden = true;
-    kartGoster();
+    kartGoster(); kapakYukle(card.querySelector('.kapak'));
   }
   $('#citycard').addEventListener('click', e => {
     const s3b = e.target.closest('[data-s3]'); if (s3b) return sehir3dAc(s3b.dataset.s3);
@@ -796,6 +806,8 @@
     if (go) { setYear(+go.dataset.go, true); playingBeforeModal = false; closeModal(); return; }
     const sh = e.target.closest('[data-show]');
     if (sh) { playingBeforeModal = false; closeModal(); showInScene(JSON.parse(sh.dataset.show)); return; }
+    const yg0 = e.target.closest('[data-yapigit]'); if (yg0) { playingBeforeModal = false; yapiKurede(yg0.dataset.yapigit); return; }
+    const yy0 = e.target.closest('[data-yakinyapi]'); if (yy0) { const i = yy0.dataset.yakinyapi; if (/^yp:/.test(i)) openYapi(i); else showMonument(i); return; }
     const ph = e.target.closest('[data-photos]');
     if (ph) { const box = ph.parentElement.querySelector('.ph-box'); ph.remove(); loadPhotos(ph.dataset.photos, box, 6); return; }
     const u3 = e.target.closest('[data-u3]'); if (u3) { open3D(u3.dataset.u3); return; }
@@ -871,6 +883,82 @@
   }
   const photoTab = (title, n, harita) => ({ ad: '📷 Fotoğraflar', html: '<div class="ph-box"></div>', onShow: body => loadPhotos(title, body.querySelector('.ph-box'), n, harita) });
 
+  // ---------- kapak fotoğrafı: Vikipedi sayfasının ana görseli (yalnızca özgür lisanslı), çekeni ve lisansıyla ----------
+  const kapakCache = new Map();
+  async function kapakFoto(title) {
+    if (kapakCache.has(title)) return kapakCache.get(title);
+    const j = await fetch(API + 'action=query&redirects=1&prop=pageimages&piprop=name|thumbnail&pithumbsize=1000&titles=' + encodeURIComponent(title)).then(r => r.json());
+    const p = Object.values(j.query?.pages || {})[0] || {};
+    let o = null;
+    if (p.thumbnail && p.pageimage) {
+      const f = await fetch(API + 'action=query&prop=imageinfo&iiprop=url|extmetadata&titles=' + encodeURIComponent('File:' + p.pageimage)).then(r => r.json()).catch(() => ({}));
+      const ii = ((Object.values(f.query?.pages || {})[0] || {}).imageinfo || [])[0] || {}, md = ii.extmetadata || {};
+      o = { src: p.thumbnail.source, page: ii.descriptionurl || 'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(p.pageimage), by: strip(md.Artist?.value) || 'bilinmiyor', lic: md.LicenseShortName?.value || '' };
+    }
+    kapakCache.set(title, o);
+    return o;
+  }
+  async function kapakYukle(box) {
+    if (!box || !box.dataset.kapak) return;
+    box.innerHTML = '<div class="kapak-bos">📷</div>';
+    try {
+      const o = await kapakFoto(box.dataset.kapak);
+      if (!box.isConnected) return;
+      if (!o) { box.remove(); return; }
+      box.innerHTML = `<a href="${esc(o.page)}" target="_blank" rel="noopener"><img src="${esc(o.src)}" alt=""></a><small>Fotoğraf: ${esc(o.by)}${o.lic ? ' · ' + esc(o.lic) : ''} · Wikimedia Commons</small>`;
+    } catch (e) { if (box.isConnected) box.remove(); }
+  }
+  // Vikipedi özeti: Türkçe sayfası varsa onun, yoksa İngilizce sayfanın giriş paragrafı
+  const ozetCache = new Map();
+  async function vikiOzet(w) {
+    if (ozetCache.has(w)) return ozetCache.get(w);
+    const j = await fetch(API + 'action=query&redirects=1&prop=langlinks&lllang=tr&titles=' + encodeURIComponent(w)).then(r => r.json());
+    const tr = (Object.values(j.query?.pages || {})[0] || {}).langlinks?.[0]?.['*'];
+    const u = tr ? 'https://tr.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(tr.replace(/ /g, '_')) : 'https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(w.replace(/ /g, '_'));
+    const s = await fetch(u).then(r => r.json());
+    const o = { metin: s.extract || '', link: s.content_urls?.desktop?.page, tr: !!tr };
+    ozetCache.set(w, o);
+    return o;
+  }
+
+  // ---------- 🏛️ ünlü yapı kartı (data/yapilar): açılır açılmaz fotoğraf, kısa bilgi, Vikipedi özeti ----------
+  const YAPI = new Map((window.YAPILAR || []).map(y => [y.id, y]));
+  const YP_IKON = { mosque: '🕌', kabe: '🕋', church: '⛪', citadel: '🏰', saray: '🏯', tower: '🗼', eyfel: '🗼', gokdelen: '🏙️', modcity: '🏙️', kopru: '🌉', museum: '🏛️', kolonad: '🏛️', arena: '🏟️', heykel: '🗿', anit: '🗿', kemer: '🏛️', torii: '⛩️', pagoda: '🛕', prang: '🛕', stupa: '☸️', turbe: '🕌', tac: '🕌', sahel: '🕌', city: '🏛️', rocktemple: '⛰️', sur: '🧱', dam: '🌊', lighthouse: '🗼', opera: '🎭', obelisk: '🗿', step: '🛕', terrace: '⛰️', mastaba: '⛰️', temple: '🛕', ziggurat: '🛕' };
+  const YP_ONEM = { 5: 'Dünyaca ünlü', 4: 'Çok ünlü', 3: 'Ülke çapında ünlü', 2: 'Bölgesinde ünlü', 1: 'Yerel halkın sevdiği' };
+  function openYapi(id, kids) {
+    const y = YAPI.get(String(id).replace(/^yp:/, '')); if (!y) return;
+    const yilYazi = y.yil || YIL.fmt(y.y);
+    const yakin = (kids || []).map(o => o.it).filter(it => it.id !== 'yp:' + y.id);
+    const ayakta = Y <= y.y && (y.yik == null || Y > y.yik);
+    const icindeyil = v => v <= P.from && v >= P.to;
+    const rows = [['Yer', `${esc(y.sehir)}, ${esc(y.ulke)}`], ['Yapım', esc(yilYazi)], ...(y.yik != null ? [['Yıkıldı', YIL.fmt(y.yik)]] : []), ['Ünü', YP_ONEM[y.o] || '']];
+    const genel = `<div class="kapak" data-kapak="${esc(y.w)}"></div>
+      ${ayakta ? '' : `<span class="pill">${YIL.fmt(Math.round(Y))}: ${Y > y.y ? 'henüz yapılmadı' : 'artık yok'}</span>`}
+      <p class="yp-k">${esc(y.k)}</p>${rowsHTML(rows)}
+      ${y.i ? `<div class="did"><b>💡 Biliyor muydun?</b><p>${esc(y.i)}</p></div>` : ''}
+      <h4>📖 Vikipedi'den</h4><div class="yp-ozet"><p class="note">Özet yükleniyor…</p></div>
+      <div class="gos"><button class="phbtn" data-yapigit="${y.id}">🌍 Kürede göster</button>${icindeyil(y.y) && Y > y.y ? `<button class="phbtn" data-go="${y.y}">⏩ Yapıldığı yıla git</button>` : ''}</div>
+      ${yakin.length ? `<div class="yakin"><small>📍 Aynı yerde ${yakin.length} yapı daha:</small><div class="chips">${yakin.slice(0, 10).map(it => `<button data-yakinyapi="${esc(it.id)}">${esc(it.ad)}</button>`).join('')}</div></div>` : ''}`;
+    const tabs = [
+      { ad: 'Genel', html: genel, onShow: async body => {
+        kapakYukle(body.querySelector('.kapak'));
+        const kutu = body.querySelector('.yp-ozet');
+        try {
+          const o = await vikiOzet(y.w); if (!kutu.isConnected) return;
+          kutu.innerHTML = o.metin ? `<p>${esc(o.metin)}</p>${o.tr ? '' : '<p class="note">Türkçe Vikipedi\'de bu yapının sayfası yok; İngilizce özet gösteriliyor.</p>'}<p><a href="${esc(o.link || 'https://en.wikipedia.org/wiki/' + encodeURIComponent(y.w))}" target="_blank" rel="noopener">Vikipedi\'de devamını oku ↗</a></p>` : '<p class="note">Özet bulunamadı.</p>';
+        } catch (e) { if (kutu.isConnected) kutu.innerHTML = '<p class="note">Özet yüklenemedi. İnternet bağlantısını kontrol edip tekrar dene.</p>'; }
+      } },
+      ...(y.d || []).map(([ad, html]) => ({ ad, html })),
+      photoTab(y.w, 8)
+    ];
+    showModal({ ikon: YP_IKON[y.t] || '🏛️', title: y.ad, sub: `${esc(y.sehir)}, ${esc(y.ulke)} · ${esc(yilYazi)}`, tabs });
+  }
+  function yapiKurede(id) {
+    const y = YAPI.get(id); if (!y) return;
+    closeModal(); if (view !== 'dunya') setView('dunya');
+    DN.goTo(y.ll[0], y.ll[1], Math.max(DN.view.z, YP_Z[y.o] + 4, 8)); DN.pin(y.ll[0], y.ll[1], y.ad);
+  }
+
   const rowsHTML = rows => `<table class="tech">${rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>`;
   function altTab(id) {
     const a = (MIS.alt || {})[id]; if (!a) return null;
@@ -915,6 +1003,8 @@
     const at = altTab(b0.ref || id); if (at) tabs.splice(1, 0, at);
     if (icOf(id)) { const sc = K.ic.sahneler[icOf(id)]; tabs.splice(1, 0, { ad: '🖼️ Duvar resimleri', html: `<h4>${sc.ad}</h4><p>${sc.alt}.</p><p>İçeri girince duvardaki resimlerin ve yazıtların ne anlama geldiğini numaralara tıklayarak öğrenebilirsin.</p><button class="phbtn icbtn" data-ic="${id}">🔍 Yakınlaş: içine gir</button><p class="note">${sc.not}</p>` }); }
     const wt = (MIS.wiki || {})[id]; if (wt) tabs.push(photoTab(wt, 8));
+    // kart açılır açılmaz yapının gerçek bir fotoğrafı (Vikipedi sayfasının ana görseli)
+    if (wt) { tabs[0].html = `<div class="kapak" data-kapak="${esc(wt)}"></div>` + tabs[0].html; tabs[0].onShow = body => kapakYukle(body.querySelector('.kapak')); }
     showModal({ ikon: b.ikon, title: m ? m.ad.replace(/ \((basamaklı|düz yüzlü kaplama)\)/, '') : fallbackName, sub: `${m ? m.yer + ' · ' : ''}${b.donem}`, tabs });
   }
   function openNile() {
@@ -1160,7 +1250,7 @@
       S.draw(g, W, H, DPR, Y, dt, camX);
     } else if (view === 'dunya') {
       $('#follow').style.display = 'none';
-      window.Dunya.draw(gg, W, H, DPR, dt, Y, mapItems(), mapCities());
+      window.Dunya.draw(gg, W, H, DPR, dt, Y, mapItems(true), mapCities());
     } else {
       $('#follow').style.display = 'none';
       M.draw(mg, W, H, DPR, dt, mapItems(), mapCities(), `${YIL.fmt(iy)} · ${SP.kisa}`);
@@ -1175,7 +1265,8 @@
     showMonument: id => showMonument(id), openInfo: id => openInfo(id), openGod: id => openGod(id), openDevlet: k => openDevlet(k), showModal: o => showModal(o), photoTab: (title, n, harita) => photoTab(title, n, harita),
     openCity: ad => { const c = (MIS.sehirler || []).find(x => x.ad === ad); if (c) openCity(c); },
     openEvent: id => { const e = (window.OLAYLAR || []).find(x => x.id === id); if (e) { setView('dunya'); DN.goTo(e.ll[0], e.ll[1], 7); openEvent(e); } },
-    monuments: () => P.monuments || SP.monuments, cities: () => MIS.sehirler || [], coords: id => MIS.coords[id], hasInfo: id => !!bilgiOf(id)
+    monuments: () => P.monuments || SP.monuments, cities: () => MIS.sehirler || [], coords: id => MIS.coords[id], hasInfo: id => !!bilgiOf(id),
+    openYapi: id => openYapi(id), yapiKurede: id => yapiKurede(id)
   };
   window.__zy = { get Y() { return Y; }, get camX() { return camX; }, get follow() { return follow; }, setYear: y => setYear(y, true), snap: wx => { follow = false; camX = wx ?? S.focus(Y).wx; }, setView, switchPlace, openInfo, openCity: ad => openCity((MIS.sehirler || []).find(c => c.ad === ad)), showMonument: id => showMonument(id), open3D: id => open3D(id) };
   updPlay();
