@@ -29,6 +29,7 @@
     for (const h of window.ATLAS_HAYVANLAR || []) add({ tur: 'Hayvan', ikon: h.ik || '🐾', ad: h.ad, alt: `${h.bolge} · ${h.durum}`, kw: [h.bolge, h.kita, h.w], oncelik: 4, act: () => ZY().openHayvan(h.id) });
     for (const cg of window.ATLAS_COGRAFYA || []) add({ tur: ({ dag: 'Dağ', col: 'Çöl / Bozkır', havza: 'Tarihî Havza', nehir: 'Nehir' })[cg.tur] || 'Coğrafya', ikon: ({ dag: '🏔️', col: '🏜️', havza: '🌿', nehir: '🌊' })[cg.tur] || '🗺️', ad: cg.ad, alt: cg.konum, kw: [cg.konum, cg.w], oncelik: 5, act: () => ZY().openCografya(cg.id) });
     for (const d of window.DONUM_NOKTALARI || []) add({ tur: 'Büyük Olay', ikon: '⚡', ad: d.ad, alt: `${d.yilYazi} · ${d.yer}`, kw: [d.yer, d.w], oncelik: 6, act: () => ZY().openDonum(d.id) });
+    for (const m of window.ATLAS_MAGARALAR || []) add({ tur: 'Tarihöncesi Kazı', ikon: '🪨', ad: m.ad, alt: `${m.donem} · ${m.yer}`, kw: [m.yer, m.w], oncelik: 5, act: () => ZY().openMagara(m.id) });
     return out;
   }
   function search(q) {

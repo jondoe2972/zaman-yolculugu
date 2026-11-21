@@ -20,7 +20,8 @@ window.SinirBil = (() => {
   function karistir(n, tohum) { const a = [...Array(n).keys()]; let s = tohum * 2654435761 >>> 0; const r = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); for (let i = n - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   function gununDevleti(g) { const T = L(), tur = Math.floor(g / T.length); return T[karistir(T.length, tur + 7)[((g % T.length) + T.length) % T.length]]; }
 
-  let el = null, s = null;
+  let el = null, s = null, zor = 'orta';
+  const ZOR = { kolay: { ad: 'Kolay', kiyi: 0, harf: 2, xp: 15 }, orta: { ad: 'Orta', kiyi: 2, harf: 4, xp: 25 }, zor: { ad: 'Zor', kiyi: 4, harf: 9, xp: 40 } };
   const kayitAnahtar = g => 'zy-sinir-' + g;
   const depoYaz = (k, v) => { try { localStorage[k] = JSON.stringify(v); } catch (e) { /* gizli mod */ } };
   const ist = () => { try { return JSON.parse(localStorage['zy-sinir-ist'] || '') } catch (e) { return { oyun: 0, kazan: 0, seri: 0, enSeri: 0, son: null, dag: [0, 0, 0, 0, 0, 0] }; } };
@@ -30,7 +31,8 @@ window.SinirBil = (() => {
     const cv = el.querySelector('canvas'), r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
     const W = Math.round(r.width), H = Math.round(r.height); if (!W) return;
     cv.width = W * dpr; cv.height = H * dpr; const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const kiyi = s.yanlis >= 2 || s.bitti;
+    const zAyar = s.serbest ? (ZOR[s.zor || 'orta'] || ZOR.orta) : ZOR.orta;
+    const kiyi = s.yanlis >= zAyar.kiyi || s.bitti;
     g.fillStyle = kiyi ? '#a9cbd9' : '#f1e7d2'; g.fillRect(0, 0, W, H);
     if (!s.k) { g.fillStyle = '#8a6a4a'; g.font = '14px Georgia, serif'; g.textAlign = 'center'; g.fillText(s.hata ? 'Sınır yüklenemedi' : 'Sınır yükleniyor…', W / 2, H / 2); return; }
     const [la0, lo0] = s.k.e, s0 = Math.sin(la0 * D), c0 = Math.cos(la0 * D);
@@ -59,9 +61,10 @@ window.SinirBil = (() => {
       : `<li><b>${esc(t.ad)}</b><span>${t.d.toLocaleString('tr-TR')} km</span><span>${t.yon}</span><span>%${Math.max(0, Math.round(100 - t.d / 200))}</span></li>`;
   }
   function ipucuHTML() {
-    const h = s.hedef, ip = [];
-    ip.push(s.yanlis >= 2 || s.bitti ? '🗺️ Kıyılar açıldı' : `🗺️ Kıyılar ${2 - s.yanlis} yanlış sonra`);
-    ip.push(s.yanlis >= 4 || s.bitti ? `🔤 İlk harf: <b>${esc(h.ad[0])}</b> · ${h.ad.split(' ')[0].length} harfli ilk sözcük` : `🔤 İlk harf ${4 - s.yanlis} yanlış sonra`);
+    const h = s.hedef, zAyar = s.serbest ? (ZOR[s.zor || 'orta'] || ZOR.orta) : ZOR.orta, ip = [];
+    ip.push(s.yanlis >= zAyar.kiyi || s.bitti ? '🗺️ Kıyılar açıldı' : `🗺️ Kıyılar ${zAyar.kiyi - s.yanlis} yanlış sonra`);
+    if (zAyar.harf < 9 || s.bitti) ip.push(s.yanlis >= zAyar.harf || s.bitti ? `🔤 İlk harf: <b>${esc(h.ad[0])}</b> · ${h.ad.split(' ')[0].length} harfli ilk sözcük` : `🔤 İlk harf ${zAyar.harf - s.yanlis} yanlış sonra`);
+    else ip.push('🔥 Zor mod: harf ipucu yok');
     return ip.map(x => `<span>${x}</span>`).join('');
   }
   function sonucHTML() {
@@ -75,7 +78,8 @@ window.SinirBil = (() => {
   }
   function goster() {
     const h = s.hedef;
-    el.innerHTML = `<div class="sb-ust"><b>🗺️ Sınırdan Bil</b><small>${s.serbest ? 'Serbest oyun' : `#${s.g + 1} · bugünün bulmacası`}</small><button class="sb-x" title="Kapat">✕</button></div>
+    el.innerHTML = `<div class="sb-ust"><b>🗺️ Sınırdan Bil</b><small>${s.serbest ? `Serbest · ${(ZOR[s.zor || 'orta'] || ZOR.orta).ad}` : `#${s.g + 1} · bugünün bulmacası`}</small><button class="sb-x" title="Kapat">✕</button></div>
+      <div class="oz-bar"><button type="button" class="oz-btn${!s.serbest ? ' on' : ''}" data-sb="gunluk">📅 Günlük</button>${Object.entries(ZOR).map(([k, v]) => `<button type="button" class="oz-btn${s.serbest && s.zor === k ? ' on' : ''}" data-sb-zor="${k}">${v.ad}</button>`).join('')}</div>
       <canvas class="sb-cv" aria-label="Bulmaca devletinin sınırı"></canvas>
       <p class="sb-soru">${YIL.fmt(h.y)} yılında bu sınırlara sahip devlet hangisi?</p>
       <div class="sb-ipucu">${ipucuHTML()}</div>
@@ -115,7 +119,11 @@ window.SinirBil = (() => {
     const dogru = d.ad === s.hedef.ad, mesafe = dogru ? 0 : Math.max(1, km(d.e, s.hedef.e));
     s.tahmin.push({ ad: d.ad, d: mesafe, yon: dogru ? '🎯' : yon(d.e, s.hedef.e) });
     if (!dogru) s.yanlis++;
-    if (dogru || s.tahmin.length >= HAK) { s.bitti = true; s.kazandi = dogru; if (!s.serbest) istYaz(); }
+    if (dogru || s.tahmin.length >= HAK) {
+      s.bitti = true; s.kazandi = dogru;
+      if (!s.serbest) istYaz();
+      if (dogru && window.ZY && window.ZY.xpEkle) window.ZY.xpEkle(s.serbest ? (ZOR[s.zor || 'orta'] || ZOR.orta).xp : 30, 'sinir');
+    }
     if (!s.serbest) depoYaz(kayitAnahtar(s.g), { t: s.tahmin, b: s.bitti, k: s.kazandi });
     goster();
   }
@@ -128,17 +136,20 @@ window.SinirBil = (() => {
     return `🗺️ Sınırdan Bil ${s.serbest ? '(serbest)' : '#' + (s.g + 1)} · ${s.kazandi ? s.tahmin.length : 'X'}/${HAK}\n${sat.join('\n')}\n${location.origin}${location.pathname}?oyun=sinir`;
   }
   function tikla(ev) {
+    const zr = ev.target.closest('[data-sb-zor]');
+    if (zr) { zor = zr.dataset.sbZor; const T = L(); let h; do { h = T[Math.floor(Math.random() * T.length)]; } while (s && s.hedef && h.ad === s.hedef.ad); baslat(h, true, zor); return; }
     const b = ev.target.closest('[data-sb], .sb-x, .sb-oneri li'); if (!b) return;
     if (b.classList.contains('sb-x')) return kapat();
     if (b.dataset.ad) return tahminEt(b.dataset.ad);
     const k = b.dataset.sb;
+    if (k === 'gunluk') return ac();
     if (k === 'tahmin') { const li = el.querySelector('.sb-oneri li.on') || el.querySelector('.sb-oneri li'); if (li) tahminEt(li.dataset.ad); else { const inp = el.querySelector('input'); oneri(); const ilk = el.querySelector('.sb-oneri li'); if (ilk && adaylar(inp.value).length === 1) tahminEt(ilk.dataset.ad); else uyari('Listeden bir devlet seç (yazmaya başlayınca öneriler çıkar).'); } }
     else if (k === 'paylas') { const t = paylasMetni(); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = '✓ Kopyalandı'; }, () => { b.textContent = 'Kopyalanamadı'; }); }
     else if (k === 'kure') { const h = s.hedef; kapat(); if (window.ZY) { window.ZY.setView('dunya'); window.ZY.setYear(h.y); } if (window.Dunya) window.Dunya.goTo(h.e[0], h.e[1], 3); }
-    else if (k === 'serbest') { const T = L(); let h; do { h = T[Math.floor(Math.random() * T.length)]; } while (h.ad === s.hedef.ad); baslat(h, true); }
+    else if (k === 'serbest') { const T = L(); let h; do { h = T[Math.floor(Math.random() * T.length)]; } while (h.ad === s.hedef.ad); baslat(h, true, zor); }
   }
-  async function baslat(hedef, serbest) {
-    s = { g: gunNo(), hedef, serbest, tahmin: [], yanlis: 0, bitti: false, kazandi: false, k: null, olcek: null };
+  async function baslat(hedef, serbest, zSec) {
+    s = { g: gunNo(), hedef, serbest, zor: zSec || zor, tahmin: [], yanlis: 0, bitti: false, kazandi: false, k: null, olcek: null };
     if (!serbest) { try { const o = JSON.parse(localStorage[kayitAnahtar(s.g)] || 'null'); if (o) { s.tahmin = o.t; s.bitti = o.b; s.kazandi = o.k; s.yanlis = o.t.filter(t => t.d !== 0).length; } } catch (e) { } }
     goster();
     const bu = s, k = window.Dunya && await window.Dunya.kayit(hedef.n, hedef.y);

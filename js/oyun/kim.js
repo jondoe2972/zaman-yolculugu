@@ -155,7 +155,7 @@ window.Hayat = window.BenKimim = (() => {
   function sonraki() { if (!s || s.bitti || s.i >= s.p.k.length - 1) return; if (s.izler[s.i] === '⬜') s.izler[s.i] = '⬛'; s.i++; gunKaydet(); kartCiz(true); altCiz(); }
   function bitir() {
     s.bitti = true; for (let i = s.i + 1; i < s.izler.length; i++) s.izler[i] = '⬜';
-    const I = oku('zy-kim-ist', { puan: 0, oyun: 0, bilinen: 0 }); I.oyun++; if (s.bildi) I.bilinen++; I.puan += s.puan; yaz('zy-kim-ist', I);
+    const I = oku('zy-kim-ist', { puan: 0, oyun: 0, bilinen: 0 }); I.oyun++; if (s.bildi) { I.bilinen++; if (window.ZY && window.ZY.xpEkle) window.ZY.xpEkle(Math.max(15, Math.round((s.puan || 30) / 4)), 'kim'); } I.puan += s.puan; yaz('zy-kim-ist', I);
     if (s.gunluk) {
       gunKaydet();
       const GI = gunIst();

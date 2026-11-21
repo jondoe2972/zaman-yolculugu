@@ -12,7 +12,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, akinti: false, hayvan: false, cografya: false, donum: false };
+  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, akinti: false, hayvan: false, cografya: false, donum: false };
 
   // ---------- veri ----------
   const VERI = window.DUNYA_VERI || { kara: [], nehir: [] };
@@ -949,8 +949,80 @@ window.Dunya = (() => {
         hits.push({ kind: 'donum', d: dn, x0: x - s0 - 4, x1: x + s0 + 4, y0: y - s0 - 4, y1: y + s0 + 4 });
       }
     }
+    // 🪨 Tarihöncesi Mağaralar ve İlk Yerleşimler (MÖ 3000 ve öncesinde kamp ateşli mağara simgesiyle görünür)
+    if (layers.magara && Y >= 3000 && window.ATLAS_MAGARALAR) {
+      const ma = clamp((Y - 3000) / 400, 0.25, 1);
+      const shownM = [];
+      for (const m of window.ATLAS_MAGARALAR) {
+        const [x, y, z] = P(...m.ll); if (z <= 0.1 || x < -24 || x > W + 24 || y < -24 || y > H + 24) continue;
+        if (shownM.some(q => Math.abs(q[0] - x) < 26 && Math.abs(q[1] - y) < 26)) continue;
+        shownM.push([x, y]);
+        const hov = hover && hover.kind === 'magara' && hover.m === m;
+        const s0 = hov ? 12.5 : 10;
+        g.save();
+        g.globalAlpha = hov ? 1 : ma;
+        // Taş mağara kemeri
+        g.fillStyle = '#5c4b3c'; g.strokeStyle = hov ? '#ffd666' : '#f4e3c2'; g.lineWidth = hov ? 2.2 : 1.4;
+        g.beginPath(); g.arc(x, y + 1, s0, Math.PI, 0); g.lineTo(x + s0, y + s0 * 0.65); g.lineTo(x - s0, y + s0 * 0.65); g.closePath(); g.fill(); g.stroke();
+        // Karanlık mağara ağzı
+        g.fillStyle = '#1b120b';
+        g.beginPath(); g.arc(x, y + s0 * 0.2, s0 * 0.56, Math.PI, 0); g.lineTo(x + s0 * 0.56, y + s0 * 0.62); g.lineTo(x - s0 * 0.56, y + s0 * 0.62); g.closePath(); g.fill();
+        // Titreyen kamp ateşi kıvılcımı
+        const fl = 0.85 + Math.sin(T * 7 + m.ll[1]) * 0.2;
+        g.fillStyle = '#ff8c2a'; g.beginPath(); g.arc(x, y + s0 * 0.34, s0 * 0.28 * fl, 0, 7); g.fill();
+        g.fillStyle = '#ffe57f'; g.beginPath(); g.arc(x, y + s0 * 0.32, s0 * 0.14 * fl, 0, 7); g.fill();
+        g.restore();
+        obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
+        if (view.z >= 1.55 || hov) lab(hov ? 97 : 64, x, y + s0 + 10, m.ad.split(' (')[0], { size: 10.5, w: 700, col: '#ffe8c2', halo: 3, haloCol: 'rgba(28,16,8,0.9)', serif: true, kay: true });
+        hits.push({ kind: 'magara', m, x0: x - s0 - 4, x1: x + s0 + 4, y0: y - s0 - 4, y1: y + s0 + 4 });
+      }
+    }
+    // 🎁 Dünya Çevresinde Gizli Sürprizler (Easter Eggs — yalnızca yaklaşınca hafif altın parıltıyla belirir)
+    if (window.ATLAS_SURPRIZLER) {
+      for (const sp of window.ATLAS_SURPRIZLER) {
+        if (sp.uzay || !sp.ll || view.z < (sp.minZ || 4)) continue;
+        const [x, y, z] = P(...sp.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+        const bul = !!(window.ZY && window.ZY.surprizBulunduMu && window.ZY.surprizBulunduMu(sp.id));
+        const hov = hover && hover.kind === 'surpriz' && hover.sp === sp;
+        const fa = clamp((view.z - sp.minZ) / 0.8, 0.25, 1), ph = 0.5 + 0.5 * Math.sin(T * 3 + sp.ll[0]);
+        const s0 = hov ? 12.5 : (bul ? 10 : 8.5);
+        g.save(); g.globalAlpha = hov ? 1 : fa * (bul ? 0.95 : 0.72 + ph * 0.25);
+        g.strokeStyle = `rgba(255,214,102,${0.4 + ph * 0.45})`; g.lineWidth = 1.6;
+        g.beginPath(); g.arc(x, y, s0 + 3 + ph * 4, 0, 7); g.stroke();
+        g.fillStyle = bul ? 'rgba(42,28,14,0.92)' : 'rgba(56,34,12,0.82)'; g.strokeStyle = '#ffd666'; g.lineWidth = hov ? 2.2 : 1.5;
+        g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
+        g.font = `${hov ? 14 : (bul ? 12 : 11)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(bul ? sp.ik : '✨', x, y + 0.5);
+        g.restore();
+        if (bul && (view.z >= sp.minZ + 0.6 || hov)) lab(hov ? 98 : 50, x, y + s0 + 10, sp.ad.split(' (')[0], { size: 10, w: 700, col: '#ffe89c', halo: 2.8, haloCol: 'rgba(28,18,6,0.9)', kay: true });
+        hits.push({ kind: 'surpriz', sp, x0: x - s0 - 5, x1: x + s0 + 5, y0: y - s0 - 5, y1: y + s0 + 5 });
+      }
+    }
     if (LQ.length) flushLabels();
     g.restore();
+    // 🛰️ Uzay boşluğundaki gizli sürpriz (Voyager Altın Plağı — küre dışındaki yıldızların arasında süzülür)
+    if (view.z < 1.85 && window.ATLAS_SURPRIZLER) {
+      const voy = window.ATLAS_SURPRIZLER.find(s => s.uzay);
+      if (voy) {
+        const ang = -0.68 + Math.sin(T * 0.16) * 0.14;
+        const vx = cx + Math.cos(ang) * (r + 34), vy = cy + Math.sin(ang) * (r + 34);
+        if (vx > 24 && vx < W - 24 && vy > 66 && vy < H - 40) {
+          const bul = !!(window.ZY && window.ZY.surprizBulunduMu && window.ZY.surprizBulunduMu(voy.id));
+          const hov = hover && hover.kind === 'surpriz' && hover.sp === voy;
+          const ph = 0.5 + 0.5 * Math.sin(T * 3.2);
+          g.save();
+          g.strokeStyle = `rgba(255,214,102,${hov ? 0.85 : 0.28 + ph * 0.3})`; g.lineWidth = 1.4;
+          g.beginPath(); g.arc(vx, vy, (hov ? 15 : 11) + ph * 4, 0, 7); g.stroke();
+          g.fillStyle = 'rgba(22,26,48,0.88)'; g.strokeStyle = '#ffd666'; g.lineWidth = hov ? 2 : 1.3;
+          g.beginPath(); g.arc(vx, vy, hov ? 12 : 9.5, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText('🛰️', vx, vy + 0.5);
+          if (hov || bul) text(vx, vy + 20, 'Voyager 1', { size: 10, w: 700, col: '#ffe89c', halo: 2.5, haloCol: 'rgba(10,14,28,0.9)' });
+          g.restore();
+          hits.push({ kind: 'surpriz', sp: voy, x0: vx - 15, x1: vx + 15, y0: vy - 15, y1: vy + 15 });
+        }
+      }
+    }
     // uzaktan medeniyet işareti
     const isaretler = DM ? (window.BOLGE_SIRA || []).map(id => window.BOLGELER[id]) : [window.BOLGE || { isaret: [27, 31], ad: 'Mısır' }];
     const ia = DM ? ka : 1 - ez;
@@ -1023,6 +1095,8 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'cografya') tip(hover.x1 + 6, hover.y0, hover.cg.ad, `${hover.cg.konum} · tıkla: tarihî önemi ve fotoğraf`);
     else if (hover && hover.kind === 'hatyapi') tip(hover.x1 + 6, hover.y0, hover.hy.ad, `${hover.hy.yer} · ${hover.hy.uzunluk} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'donum') tip(hover.x1 + 6, hover.y0, `⚡ ${hover.d.ad}`, `${hover.d.yilYazi} · ${hover.d.yer} · tıkla: dünyayı nasıl değiştirdi?`);
+    else if (hover && hover.kind === 'magara') tip(hover.x1 + 6, hover.y0, `🪨 ${hover.m.ad}`, `${hover.m.donem} · ${hover.m.yer} · tıkla: kazı buluntuları ve nüfus`);
+    else if (hover && hover.kind === 'surpriz') { const bul = !!(window.ZY && window.ZY.surprizBulunduMu && window.ZY.surprizBulunduMu(hover.sp.id)); tip(hover.x1 + 6, hover.y0, bul ? `${hover.sp.ik} ${hover.sp.ad}` : '✨ Gizli Sürpriz!', bul ? `${hover.sp.yer} · tıkla: hikâyesi` : 'Keşfetmek için tıkla! (+35 XP)'); }
     else if (hover && hover.kind === 'sehir') tip(hover.x1 + 6, hover.y0, hover.c.ad + (hover.c.cap ? ' (başkent)' : ''), hover.c.not || '');
   }
   function tip(x, y, t1, t2) {

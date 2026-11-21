@@ -11,20 +11,20 @@
       'data/oyun/kim-zor.js?v=2',
       'data/oyun/kim-dunya.js?v=1',
       'js/oyun/cizimler.js?v=4',
-      'js/oyun/kim.js?v=8'
+      'js/oyun/kim.js?v=9'
     ],
     sinir: [
       'data/oyun/sinir-bil.js?v=1',
-      'js/oyun/sinir-bil.js?v=4'
+      'js/oyun/sinir-bil.js?v=5'
     ],
     eski: [
-      'js/oyun/hangisi-eski.js?v=1'
+      'js/oyun/hangisi-eski.js?v=2'
     ],
     toprak: [
       'js/oyun/topraklar.js?v=3'
     ],
     hayvan: [
-      'js/oyun/hayvan-oyun.js?v=1'
+      'js/oyun/hayvan-oyun.js?v=2'
     ]
   };
   const dosyaSoz = new Map();

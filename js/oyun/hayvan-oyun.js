@@ -40,7 +40,12 @@ window.HayvanOyunu = (() => {
     } catch (e) { /* çevrimdışı */ }
   }
 
-  let el = null, s = null;
+  let el = null, s = null, zorluk = 'orta';
+  const ZORLUK = {
+    kolay: { ad: 'Kolay', sik: 3, ipucu: true, xp: 5 },
+    orta:  { ad: 'Orta',  sik: 4, ipucu: false, xp: 8 },
+    zor:   { ad: 'Zor',   sik: 5, ipucu: false, xp: 12 }
+  };
   const ist = () => oku('zy-hayvan-ist', { seriRekor: 0, testRekor: 0, oyun: 0 });
   const istKaydet = fn => { const I = ist(); fn(I); yaz('zy-hayvan-ist', I); return I; };
 
@@ -67,6 +72,7 @@ window.HayvanOyunu = (() => {
         <div><b>🐾 Hayvanlar Alemi</b><small>${L.length} bölge ve okyanus canlısıyla kendini dene</small></div>
         <button class="ho-x" title="Kapat" aria-label="Kapat">✕</button>
       </div>
+      <div class="oz-bar">${Object.entries(ZORLUK).map(([k, v]) => `<button type="button" class="oz-btn${zorluk === k ? ' on' : ''}" data-ho-zor="${k}">${v.ad}</button>`).join('')}</div>
       <div class="ho-modlar">
         <button data-ho="nerede" class="ho-mod">
           <span>📍</span>
@@ -81,7 +87,8 @@ window.HayvanOyunu = (() => {
 
   // ---------- Mod 1: 📍 Nerede Yaşar? (Seri) ----------
   function neredeBasla() {
-    const L = karistir(window.ATLAS_HAYVANLAR || []);
+    const tum = window.ATLAS_HAYVANLAR || [];
+    const L = karistir(zorluk === 'kolay' ? tum.filter(x => x.durum !== 'Nesli Tükendi') : tum);
     if (!L.length) return;
     s = { mod: 'nerede', havuz: L, idx: 0, seri: 0, izler: [], secim: null, bitti: false, secenekler: [] };
     neredeTur();
@@ -90,7 +97,8 @@ window.HayvanOyunu = (() => {
     if (s.idx >= s.havuz.length) { s.havuz = karistir(window.ATLAS_HAYVANLAR || []); s.idx = 0; }
     const h = s.havuz[s.idx];
     const dogru = kitaEtiket(h);
-    const diger = karistir([...new Set(Object.values(KITA_GRUPLARI))].filter(x => x !== dogru)).slice(0, 3);
+    const z = ZORLUK[zorluk] || ZORLUK.orta;
+    const diger = karistir([...new Set(Object.values(KITA_GRUPLARI))].filter(x => x !== dogru)).slice(0, z.sik - 1);
     s.hedef = h;
     s.dogru = dogru;
     s.secenekler = karistir([dogru, ...diger]);
@@ -106,10 +114,10 @@ window.HayvanOyunu = (() => {
     neredeCiz();
   }
   function neredeCiz() {
-    const h = s.hedef, I = ist(), acik = s.secim != null, src = fotoCache.get(h.w);
+    const h = s.hedef, I = ist(), acik = s.secim != null, src = fotoCache.get(h.w), z = ZORLUK[zorluk] || ZORLUK.orta;
     const dogruMu = acik && s.secim === s.dogru;
-    // İpucunda kıta/ülke adını direkt vermeden yaşam ortamı + beslenme göster
-    const ip = `🍽️ ${h.beslenme} · 🛡️ ${h.durum}`;
+    // Kolay modda yaşam ortamı ipucu da görünür; Zor modda ipucu gizli
+    const ip = zorluk === 'zor' ? `🛡️ ${h.durum}` : z.ipucu ? `🌿 ${h.habitat} · 🍽️ ${h.beslenme}` : `🍽️ ${h.beslenme} · 🛡️ ${h.durum}`;
     kutu().innerHTML = `
       <div class="ho-ust">
         <div><b>📍 Bu Hayvan Nerede Yaşar?</b><small>Doğal yaşam bölgesini seç</small></div>
@@ -272,6 +280,8 @@ window.HayvanOyunu = (() => {
 
   function tikla(ev) {
     if (ev.target.closest('.ho-x')) return kapat();
+    const zr = ev.target.closest('[data-ho-zor]');
+    if (zr) { zorluk = zr.dataset.hoZor; secim(); return; }
     const op = ev.target.closest('[data-ho-op]');
     if (op && s && s.mod === 'nerede' && s.secim == null) {
       s.secim = op.dataset.hoOp;
@@ -279,6 +289,7 @@ window.HayvanOyunu = (() => {
         s.seri++;
         s.izler.push('🟩');
         istKaydet(I => { if (s.seri > I.seriRekor) I.seriRekor = s.seri; });
+        if (window.ZY && window.ZY.xpEkle) window.ZY.xpEkle((ZORLUK[zorluk] || ZORLUK.orta).xp, 'hayvan');
       } else {
         s.izler.push('🟥');
         s.bitti = true;
@@ -291,7 +302,7 @@ window.HayvanOyunu = (() => {
     if (idBtn && s && s.mod === 'test' && s.secim == null) {
       s.secim = idBtn.dataset.hoId;
       const dogru = s.secim === s.sorular[s.idx].dogru.id;
-      if (dogru) s.dogruSayi++;
+      if (dogru) { s.dogruSayi++; if (window.ZY && window.ZY.xpEkle) window.ZY.xpEkle((ZORLUK[zorluk] || ZORLUK.orta).xp, 'hayvan'); }
       s.izler.push(dogru ? '🟩' : '🟥');
       testCiz();
       return;

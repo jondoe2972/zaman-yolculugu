@@ -1198,3 +1198,16 @@ body:not(.globeonly):not(.maponly) .citycard { bottom: 76px; }
   .hg-icerik { min-height: 260px; }
   .hg-sahne { height: 132px; }
 }
+
+/* ---------- Oyun zorluk çubuğu, Ekonomi etiketleri ve Gizli Sürprizler ---------- */
+.oz-bar{display:flex;gap:6px;padding:6px 14px 4px;flex-wrap:wrap}
+.oz-btn{border:1px solid rgba(138,106,58,.4);background:rgba(255,255,255,.55);color:#3a2414;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;transition:.15s}
+.oz-btn:hover{border-color:#a87228;background:#fff7e0}
+.oz-btn.on{background:#3a2414;color:#ffd666;border-color:#3a2414}
+.ek-etiketler{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.sp-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.sp-kart{padding:10px 12px;border-radius:10px;border:1px solid rgba(138,106,58,.28);background:rgba(255,250,238,.7)}
+.sp-kart.sp-bul{border-color:rgba(68,140,80,.45);background:rgba(232,248,234,.75)}
+.sp-kart.sp-kilit{opacity:.75;background:rgba(235,228,214,.55)}
+.sp-ust{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.sp-kart p{margin:4px 0;font-size:13px;line-height:1.45}

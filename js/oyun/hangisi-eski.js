@@ -46,17 +46,25 @@ window.HangisiEski = (() => {
     return fotoIstek;
   }
 
-  // Seri arttıkça yıl farkı daralır ve daha az bilinen yapılar da devreye girer
+  const ZORLUK = {
+    kolay: { ad: 'Kolay', minOnem: 4, minFark: 400, maxFark: 4500, xp: 5 },
+    orta:  { ad: 'Orta',  minOnem: 2, minFark: 80,  maxFark: 1200, xp: 8 },
+    zor:   { ad: 'Zor',   minOnem: 1, minFark: 5,   maxFark: 180,  xp: 12 }
+  };
+  let zorluk = 'orta';
+
+  // Zorluğa ve seriye göre iki yapı seçer
   function ciftSec(seri, gorulen) {
     const tum = havuz();
     if (tum.length < 2) return null;
-    const minOnem = seri < 3 ? 4 : seri < 7 ? 3 : seri < 12 ? 2 : 1;
+    const z = ZORLUK[zorluk] || ZORLUK.orta;
+    const minOnem = zorluk === 'orta' ? (seri < 3 ? 4 : seri < 7 ? 3 : 2) : z.minOnem;
     let aday = tum.filter(x => (x.o || 1) >= minOnem && !gorulen.has(x.id));
     if (aday.length < 6) aday = tum.filter(x => !gorulen.has(x.id));
     if (aday.length < 2) { gorulen.clear(); aday = tum; }
 
-    const minFark = seri < 3 ? 180 : seri < 7 ? 60 : 12;
-    const maxFark = seri < 3 ? 2800 : seri < 6 ? 1200 : seri < 10 ? 600 : 350;
+    const minFark = z.minFark;
+    const maxFark = zorluk === 'orta' ? (seri < 3 ? 1600 : seri < 7 ? 900 : 450) : z.maxFark;
 
     let enIyi = null;
     for (let deneme = 0; deneme < 60; deneme++) {
@@ -177,6 +185,7 @@ window.HangisiEski = (() => {
         <div class="eo-sayac"><span>🔥 <b>${s.seri}</b></span><span>🏆 <b>${Math.max(I.rekor, s.seri)}</b></span></div>
         <button class="eo-x" title="Kapat" aria-label="Kapat">✕</button>
       </div>
+      <div class="oz-bar">${Object.entries(ZORLUK).map(([k, v]) => `<button type="button" class="oz-btn${zorluk === k ? ' on' : ''}" data-eo-zor="${k}">${v.ad}</button>`).join('')}</div>
       <div class="eo-alan">
         ${kartHTML(s.cift[0], 0)}
         <span class="eo-vs" aria-hidden="true">VS</span>
@@ -208,6 +217,7 @@ window.HangisiEski = (() => {
       s.izler.push('🟩');
       const I = ist();
       if (s.seri > I.rekor) { s.rekorKirildi = true; istKaydet(s.seri, false); }
+      if (window.ZY && window.ZY.xpEkle) window.ZY.xpEkle((ZORLUK[zorluk] || ZORLUK.orta).xp, 'eski');
     } else {
       s.izler.push('🟥');
       s.bitti = true;
@@ -243,6 +253,8 @@ window.HangisiEski = (() => {
 
   function tikla(ev) {
     if (ev.target.closest('.eo-x')) return kapat();
+    const zr = ev.target.closest('[data-eo-zor]');
+    if (zr) { zorluk = zr.dataset.eoZor; basla(); return; }
     const kr = ev.target.closest('[data-eo-kure]');
     if (kr) {
       ev.stopPropagation();
