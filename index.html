@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Zaman Yolculuğu · Mısır</title>
 <meta name="description" content="Zaman çizelgesini kaydır, Antik Mısır'da piramitlerin yükselişini canlı bir sahnede izle.">
-<link rel="stylesheet" href="css/stil.css?v=55">
+<link rel="stylesheet" href="css/stil.css?v=56">
 </head>
 <body>
 <header class="top">
@@ -76,6 +76,18 @@
           <button data-season="semu" title="Şemu: hasat mevsimi (yaklaşık Mart-Haziran)">🌾 Hasat</button>
         </div>
       </div>
+    </div>
+    <div id="skharita" class="skharita" hidden>
+      <canvas id="skh-cv" aria-label="Sahnenin haritası: kırmızı nokta bulunduğun yer"></canvas>
+      <button id="skh-buyut" class="skh-buyut" title="Haritayı büyüt">⤢</button>
+    </div>
+    <div id="skbuyuk" class="skbuyuk" hidden role="dialog" aria-label="Sahnenin haritası">
+      <div class="skb-ust"><div><b>🗺️ Sahnede neredesin?</b><small id="skb-alt"></small></div><button class="skb-x" title="Kapat">✕</button></div>
+      <div class="skb-govde"><canvas id="skb-cv"></canvas>
+        <div class="skb-ctl"><button data-skb="in" title="Yakınlaştır">＋</button><button data-skb="out" title="Uzaklaştır">－</button><button data-skb="fit" title="Bütün sahneyi göster">⤢</button></div>
+      </div>
+      <div class="skb-lej"><span><i class="lj-bura"></i>Buradasın</span><span><i class="lj-gor"></i>Ekranda gördüğün kısım</span><span><i class="lj-bitti"></i>Ayakta</span><span><i class="lj-ins"></i>Yapılıyor</span><span><i class="lj-harabe"></i>Harabe</span></div>
+      <p class="skb-not">Bir yapıya, bir yer adına ya da kesik çizgi üstünde bir yere dokun: sahne oraya gider.</p>
     </div>
     <div id="ipucu" class="ipucu" hidden></div>
     <div id="citycard" class="citycard" hidden><div class="cc-head"><b class="cc-title"></b><button class="cc-x" title="Kapat">✕</button></div><div class="cc-body"></div><button class="phbtn cc-more">ℹ️ Daha fazla bilgi ve fotoğraflar</button></div>
@@ -164,7 +176,8 @@
 <script src="data/yapilar/asya.js?v=1"></script>
 <script src="data/yapilar/avrupa.js?v=1"></script>
 <script src="data/yapilar/amerika.js?v=1"></script>
-<script src="js/uygulama.js?v=58"></script>
+<script src="js/sahne-harita.js?v=6"></script>
+<script src="js/uygulama.js?v=62"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=3"></script>

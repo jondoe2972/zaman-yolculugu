@@ -943,3 +943,44 @@ body:not(.globeonly):not(.maponly) .citycard { bottom: 76px; }
 .ysm-yil-form .phbtn { margin: 0; }
 .ysm-kita { margin: 16px 0 2px; font-size: 16px; color: #5a3a1a; }
 .ysm-rozet.soluk { background: #c9b28a; }
+
+/* ---------- sahnenin haritası ---------- */
+.skharita { position: absolute; right: 12px; top: 56px; z-index: 4; width: 250px; height: 180px; border-radius: 12px; overflow: hidden; background: #a8cde0; border: 2px solid rgba(32,22,14,.75); box-shadow: 0 6px 18px rgba(0,0,0,.28); }
+.skharita[hidden], .maponly .skharita, .globeonly .skharita, .dunyamod .skharita, .maponly .skbuyuk, .globeonly .skbuyuk { display: none; }
+#skh-cv { width: 100%; height: 100%; display: block; }
+.skh-buyut { position: absolute; right: 5px; top: 5px; width: 26px; height: 26px; border: 0; border-radius: 7px; background: rgba(32,22,14,.8); color: #fff3d6; font-size: 14px; cursor: pointer; line-height: 1; }
+.skh-buyut:hover { background: #ffd666; color: #2a1d10; }
+.skbuyuk { position: absolute; inset: 12px; z-index: 9; display: flex; flex-direction: column; max-width: 980px; margin: 0 auto; background: #fbf4e4; color: #3a2414; border-radius: 16px; box-shadow: 0 14px 40px rgba(0,0,0,.45); overflow: hidden; }
+.skbuyuk[hidden] { display: none; }
+.skb-ust { display: flex; align-items: center; gap: 10px; padding: 10px 12px 8px 16px; }
+.skb-ust > div { flex: 1; min-width: 0; }
+.skb-ust b { font-size: 16px; }
+.skb-ust small { display: block; color: #8a7254; font-size: 12.5px; margin-top: 1px; }
+.skb-x { width: 36px; height: 36px; border: 0; border-radius: 50%; background: #efe2c4; color: #3a2414; font-size: 16px; cursor: pointer; flex: none; }
+.skb-govde { position: relative; flex: 1; min-height: 0; margin: 0 10px; border-radius: 12px; overflow: hidden; border: 1px solid #d9c49a; }
+#skb-cv { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+.skb-ctl { position: absolute; right: 8px; top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.skb-ctl button { width: 36px; height: 36px; border: 0; border-radius: 9px; background: rgba(32,22,14,.82); color: #fff3d6; font-size: 17px; cursor: pointer; }
+.skb-lej { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 8px 16px 0; font-size: 12.5px; color: #5a4128; }
+.skb-lej span { display: inline-flex; align-items: center; gap: 6px; }
+.skb-lej i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; }
+.lj-bura { background: #d62828; box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(214,40,40,.4); }
+.lj-gor { width: 20px !important; height: 6px !important; border-radius: 3px !important; background: #ffd666; box-shadow: 0 0 0 1.5px rgba(60,35,10,.5); }
+.lj-bitti { background: #5a3a1a; } .lj-ins { background: #e8892a; } .lj-harabe { background: #9b9081; }
+.skb-not { margin: 4px 16px 12px; font-size: 12.5px; color: #8a7254; }
+/* "🎯 Şantiyeye dön": yer şeridinin hemen üstünde, ortada */
+.follow { right: auto; left: 50%; transform: translateX(-50%); bottom: 72px; z-index: 3; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+.alt-gizli .follow { bottom: calc(126px + env(safe-area-inset-bottom)); }
+@media (max-width: 860px) {
+  .skharita { width: 72px; height: 72px; right: 8px; top: 50px; border-radius: 12px; cursor: pointer; }
+  .s3hizli:not([hidden]) ~ .skharita { top: 92px; }
+  .skh-buyut { display: none; }
+  .skbuyuk { inset: 6px; border-radius: 14px; }
+  .skb-ust b { font-size: 15px; }
+  .skb-govde { margin: 0 6px; }
+  .skb-lej { padding: 6px 10px 0; gap: 3px 10px; font-size: 11.5px; }
+  .skb-not { margin: 3px 10px 10px; font-size: 11.5px; }
+  .follow { top: auto; right: auto; bottom: 66px; }
+  .alt-gizli .follow { bottom: calc(120px + env(safe-area-inset-bottom)); }
+  body:not(.globeonly):not(.maponly) .yearcard { max-width: calc(100% - 96px); }
+}

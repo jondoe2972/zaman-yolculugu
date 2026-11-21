@@ -64,7 +64,13 @@
   const camRange = () => { const xs = SP.sites.map(s => s.wx); return [Math.min(...xs) - 800, Math.max(...xs) + 800]; };
   function syncScenePart() {
     const np = partFor(Y);
-    if (np !== SP) { SP = np; S.prepare(SP); S.initAgents(); camX = S.focus(Y).wx; follow = true; }
+    if (np !== SP) {
+      // çağ değişti: kullanıcı bir yerde duruyorsa yeni çağın sahnesinde aynı yere (gerçek konuma en yakın noktaya) geçilir
+      const SH = window.SahneHarita, co = MIS.coords || {}, eski = !follow && SH ? SH.yol(SP, co) : null, ll = eski ? SH.wxLL(eski, camX) : null;
+      SP = np; S.prepare(SP); S.initAgents(); camX = S.focus(Y).wx; follow = true; camHedef = null;
+      const yeni = ll ? SH.yol(SP, co) : null, r = yeni ? SH.llWx(yeni, ll[0], ll[1]) : null;
+      if (r && r.km < 40) { camX = r.wx; follow = false; }
+    }
   }
 
   // ---------- çağ seçimi ----------
@@ -100,7 +106,9 @@
   resize();
 
   // ---------- zaman ----------
-  function setYear(y, fromUser) { Y = clamp(y, P.to, P.from); if (fromUser) follow = true; }
+  // Yıl değişince kamera yerinde kalır: kullanıcı sahnede bir yer seçtiyse (follow = false) orada durur;
+  // şantiyeye yalnızca "🎯 Şantiyeye dön" ile döner. (Eskiden her yıl değişiminde şantiyeye atlıyordu.)
+  function setYear(y) { Y = clamp(y, P.to, P.from); }
   // zaman çizelgesinin görünen aralığı: tlA (eski uç, MÖ +) – tlB (yeni uç); null = bütün tarih (yakınlaştırma için)
   let tlA = null, tlB = null;
   const vA = () => tlA ?? P.from, vB = () => tlB ?? P.to;
@@ -618,12 +626,14 @@
     if (!ac) return;
     const yon = sahneYonu(SP), i = ysSimdi(), f = S.focus(Y);
     ysL.innerHTML = `<div class="ys-bas">${yon ? `Soldan sağa, <b>${YON_EK[yon.sol][0]}</b> <b>${YON_EK[yon.sag][1]}</b>` : 'Soldan sağa'}</div>`
+      + (skYol() ? '<button data-harita="1"><span>🗺️</span>Haritada gör</button>' : '')
       + `<button data-sant="1"><span>🎯</span>Bu yılın şantiyesi: ${esc(f.ad || '')}</button>`
       + ysYer.map((s, j) => `<button data-i="${j}" class="${j === i ? 'on' : ''}"><span>${j === i ? '📍' : '·'}</span>${esc(ysAd(s))}</button>`).join('');
   }
   ys.querySelector('.ys-ad').addEventListener('click', ev => { ev.stopPropagation(); ysListe(); });
   ysL.addEventListener('click', ev => {
     const b = ev.target.closest('button'); if (!b) return;
+    if (b.dataset.harita) { skbAc(); return; }
     if (b.dataset.sant) { follow = true; camHedef = null; cityFocus = null; ysListe(false); return; }
     const s = ysYer[+b.dataset.i]; if (s) ysGit(s.wx);
   });
@@ -634,6 +644,105 @@
   const ysBirak = () => { ysSurukle = false; };
   ysCubuk.addEventListener('pointerup', ysBirak); ysCubuk.addEventListener('pointercancel', ysBirak);
   document.addEventListener('click', ev => { if (!ev.target.closest('#yerserit')) ysListe(false); });
+
+  // ---------- sahnenin haritası (js/sahne-harita.js) ----------
+  // Masaüstünde sağ üstte küçük harita: tıklanan yere sahne gider, ⤢ büyütür. Telefonda küçük harita bir düğme: dokununca büyük harita açılır.
+  const SH = window.SahneHarita, skh = $('#skharita'), skhCv = $('#skh-cv'), skb = $('#skbuyuk'), skbCv = $('#skb-cv');
+  const telefon = () => matchMedia('(max-width: 860px)').matches;
+  let skhO = null, skhHits = [], skhHover = null, skhAn = '', skbV = null, skbO = null, skbHits = [], skbHover = null, skbFit = 1;
+  const skYol = () => SH ? SH.yol(SP, MIS.coords || {}) : null;
+  const skBurada = () => ysYer.length ? ysYer[ysSimdi()] : null;
+  const skCam = () => { const vw = W / S.scale(H); return [camX - vw / 2, camX, camX + vw / 2]; };
+  function skYapilar() {
+    const co = MIS.coords || {}, out = [];
+    for (const m of SP.monuments) {
+      if (!co[m.id] || m.minor || m.gen) continue;
+      const pr = S.progress(m, Y); if (pr < 0) continue;
+      const harabe = m.ruin && Y <= m.ruin, ins = (m.stop && Y > m.stop) || (!m.stop && pr < 1);
+      out.push({ id: m.id, ad: m.ad, tip: m.type, ll: co[m.id], wx: m.wx, st: harabe ? 'harabe' : ins ? 'ins' : (m.stop && Y <= m.stop ? 'harabe' : 'bitti') });
+    }
+    return out;
+  }
+  const tuvalBoy = (c, w, h) => { const a = Math.round(w * DPR), b = Math.round(h * DPR); if (c.width !== a || c.height !== b) { c.width = a; c.height = b; } const x = c.getContext('2d'); x.setTransform(DPR, 0, 0, DPR, 0, 0); return x; };
+  // Küçük harita bulunduğun yere odaklanır ve seninle kayar: genişliği ekranda gördüğün kısmın yaklaşık 5 katı (en az 30 km).
+  // (Bütün sahneyi sığdırınca yakın yerler, ör. Gize ile Ebu Ruvaş, üst üste biniyordu.) Bütün sahne büyük haritada.
+  function skhGorunum(yl, w, h) {
+    const fit = SH.sigdir(yl, w, h, w < 120 ? 0.1 : 0.13), p = yl.pts;
+    let km = 0; for (let i = 1; i < p.length; i++) km += Math.hypot(p[i].la - p[i - 1].la, (p[i].lo - p[i - 1].lo) * Math.cos(p[i].la * Math.PI / 180)) * 111;
+    const kmWx = km / Math.max(1, p[p.length - 1].wx - p[0].wx), gorKm = Math.max(30, (W / S.scale(H)) * kmWx * 5);
+    const s = clamp(w / (gorKm / 111), fit.s, fit.s * 30), [la, lo] = SH.wxLL(yl, clamp(camX, p[0].wx, p[p.length - 1].wx));
+    return s <= fit.s * 1.15 ? fit : { la, lo, s };
+  }
+  function skhCiz() {
+    const yl = skYol(); skh.hidden = !yl; if (!yl) return;
+    const w = skhCv.clientWidth, h = skhCv.clientHeight; if (!w || !h) return;
+    const T = performance.now(), an = [w, h, DPR, Math.round(camX), Math.round(Y), skhHover, SP.id, Math.floor(T / 90)].join('|');
+    if (an === skhAn) return; skhAn = an;
+    skhO = { yl, v: skhGorunum(yl, w, h), yapilar: skYapilar(), yerler: ysYer, burada: skBurada(), cam: skCam(), hover: skhHover, T: T / 1000 };
+    skhHits = SH.ciz(tuvalBoy(skhCv, w, h), 'mini', w, h, DPR, skhO);
+  }
+  function skbCiz() {
+    const yl = skYol(); if (!yl) { skbKapat(); return; }
+    const w = skbCv.clientWidth, h = skbCv.clientHeight; if (!w || !h) return;
+    if (!skbV || skbV.sp !== SP || skbV.w !== w || skbV.h !== h) { skbV = { ...SH.sigdir(yl, w, h, 0.08), sp: SP, w, h }; skbFit = skbV.s; }
+    skbO = { yl, v: skbV, yapilar: skYapilar(), yerler: ysYer, burada: skBurada(), cam: skCam(), buyuk: true, hover: skbHover, T: performance.now() / 1000 };
+    skbHits = SH.ciz(tuvalBoy(skbCv, w, h), 'buyuk', w, h, DPR, skbO);
+    const alt = `${YIL.fmt(Y)} · ${SP.kisa || SP.baslik || ''}`; if ($('#skb-alt').textContent !== alt) $('#skb-alt').textContent = alt;
+  }
+  function skbAc() { skbV = null; skbHover = null; skb.hidden = false; ysListe(false); }
+  function skbKapat() { skb.hidden = true; }
+  const skGit = hit => { if (hit) ysGit(hit.wx); };
+  // küçük harita
+  skhCv.addEventListener('click', ev => {
+    if (telefon()) { skbAc(); return; }
+    if (!skhO) return; const [x, y] = cvPos(skhCv, ev);
+    skGit(SH.sec(skhO, skhHits, skhCv.clientWidth, skhCv.clientHeight, x, y, 22));
+  });
+  skhCv.addEventListener('pointermove', ev => {
+    if (telefon() || !skhO) return; const [x, y] = cvPos(skhCv, ev);
+    const h = SH.sec(skhO, skhHits, skhCv.clientWidth, skhCv.clientHeight, x, y, 22);
+    skhHover = h && h.tur === 'yapi' ? h.id : null; skhCv.style.cursor = h ? 'pointer' : 'default';
+  });
+  skhCv.addEventListener('pointerleave', () => { skhHover = null; });
+  $('#skh-buyut').addEventListener('click', ev => { ev.stopPropagation(); skbAc(); });
+  // büyük harita: sürükle, tekerlek / iki parmakla yakınlaş, dokun ve git
+  const skbZoom = (f, x, y) => {
+    const v = skbV, w = skbV.w, h = skbV.h; if (x == null) { x = w / 2; y = h / 2; }
+    const [la, lo] = SH.ters(v, w, h, x, y); v.s = clamp(v.s * f, skbFit / 25, skbFit * 12);
+    const cs = Math.cos(v.la * Math.PI / 180); v.la = la + (y - h / 2) / v.s; v.lo = lo - (x - w / 2) / (cs * v.s);
+  };
+  const skbKaydir = (dx, dy) => { const v = skbV, cs = Math.cos(v.la * Math.PI / 180); v.la += dy / v.s; v.lo -= dx / (cs * v.s); };
+  const skbP = new Map(); let skbS = null;
+  skbCv.addEventListener('pointerdown', ev => {
+    skbP.set(ev.pointerId, [ev.clientX, ev.clientY]); try { skbCv.setPointerCapture(ev.pointerId); } catch (e) { /* */ }
+    if (skbP.size >= 2 && skbS) { skbS.moved = true; skbS.d0 = null; skbS.m = null; return; }
+    skbS = { x: ev.clientX, y: ev.clientY, moved: false, d0: null };
+  });
+  skbCv.addEventListener('pointermove', ev => {
+    if (skbP.has(ev.pointerId)) skbP.set(ev.pointerId, [ev.clientX, ev.clientY]);
+    if (!skbV) return;
+    if (skbP.size >= 2 && skbS) {
+      const [a, b] = [...skbP.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), r = skbCv.getBoundingClientRect(), m = [(a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top];
+      if (skbS.d0 && d > 10) { skbKaydir(m[0] - skbS.m[0], m[1] - skbS.m[1]); skbZoom(clamp(d / skbS.d0, 0.8, 1.25), m[0], m[1]); }
+      skbS.d0 = d; skbS.m = m; return;
+    }
+    if (!skbS || !skbP.has(ev.pointerId)) { if (!telefon() && skbO) { const [x, y] = cvPos(skbCv, ev), h = SH.sec(skbO, skbHits, skbV.w, skbV.h, x, y); skbHover = h && h.tur === 'yapi' ? h.id : null; skbCv.style.cursor = h ? 'pointer' : 'grab'; } return; }
+    const dx = ev.clientX - skbS.x, dy = ev.clientY - skbS.y;
+    if (skbS.moved || Math.hypot(dx, dy) > 6) { skbS.moved = true; skbKaydir(dx, dy); skbS.x = ev.clientX; skbS.y = ev.clientY; }
+  });
+  const skbBirak = ev => {
+    if (skbS && !skbS.moved && skbP.size <= 1 && skbO && ev.type === 'pointerup') {
+      const [x, y] = cvPos(skbCv, ev), hit = SH.sec(skbO, skbHits, skbV.w, skbV.h, x, y);
+      if (hit) { skGit(hit); skbKapat(); }
+    }
+    skbP.delete(ev.pointerId);
+    if (!skbP.size) skbS = null; else if (skbS) { const [k] = [...skbP.values()]; skbS.x = k[0]; skbS.y = k[1]; skbS.d0 = null; skbS.m = null; }
+  };
+  skbCv.addEventListener('pointerup', skbBirak); skbCv.addEventListener('pointercancel', skbBirak);
+  skbCv.addEventListener('wheel', ev => { ev.preventDefault(); if (!skbV) return; const [x, y] = cvPos(skbCv, ev); skbZoom(ev.deltaY < 0 ? 1.2 : 1 / 1.2, x, y); }, { passive: false });
+  skb.querySelector('.skb-ctl').addEventListener('click', ev => { const b = ev.target.closest('[data-skb]'); if (!b || !skbV) return; const k = b.dataset.skb; if (k === 'fit') skbV = null; else skbZoom(k === 'in' ? 1.5 : 1 / 1.5); });
+  skb.querySelector('.skb-x').addEventListener('click', skbKapat);
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !skb.hidden) skbKapat(); });
 
   // ---------- harita ----------
   // kure: küre için ünlü yapılar (data/yapilar) da eklenir; o yıl ayakta olanlar, önemlerine göre farklı yakınlıkta belirir
@@ -899,6 +1008,7 @@
     document.body.classList.toggle('maponly', v === 'harita');
     document.body.classList.toggle('globeonly', v === 'dunya');
     if (v !== 'sahne' && !DUNYA) $('#citycard').hidden = true;
+    if (v !== 'sahne') $('#skbuyuk').hidden = true;
     // tek bölge modunda küre ilk açıldığında o bölgeye döner (Amerika ve Okyanusya başlangıç görünümünün arkasında kalıyor)
     if (v === 'dunya' && !DUNYA && !setView.kureGitti && BG.merkez && window.Dunya) { setView.kureGitti = true; window.Dunya.goEgypt(BG.merkez, Math.min(BG.merkezZ || 3, 3)); }
     modGuncelle();
@@ -1473,7 +1583,7 @@
     $('#tarihpop').hidden = true; $('#tarihgit').classList.remove('on');
     toast(`📅 <b>${YIL.fmt(y)}</b>`);
   });
-  $('#play').addEventListener('click', () => { if (Y <= P.to) Y = P.from; playing = !playing; follow = true; updPlay(); });
+  $('#play').addEventListener('click', () => { if (Y <= P.to) Y = P.from; playing = !playing; updPlay(); });
   $('#back').addEventListener('click', () => { setYear(Math.round(Y) + 1, true); });
   $('#fwd').addEventListener('click', () => { setYear(Math.round(Y) - 1, true); });
   $('#speed').value = String(speed);
@@ -1507,7 +1617,7 @@
       else if (camHedef != null) { const d = camHedef - camX; if (Math.abs(d) < 2) { camX = camHedef; camHedef = null; } else camX += d * (1 - Math.exp(-dt * 3.5)); }
       $('#follow').style.display = follow ? 'none' : 'block';
       S.draw(g, W, H, DPR, Y, dt, camX);
-      ysGuncelle();
+      ysGuncelle(); skhCiz(); if (!skb.hidden) skbCiz();
     } else if (view === 'dunya') {
       $('#follow').style.display = 'none';
       window.Dunya.draw(gg, W, H, DPR, dt, Y, mapItems(true), mapCities());
