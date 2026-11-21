@@ -10,26 +10,40 @@ window.Hayat = window.BenKimim = (() => {
   const SEVIYE = { 1: { ad: 'Kolay', ikon: '🟢', alt: 'Herkesin bildiği ünlüler · doğum yeri, alanı ve ilk harfi ipucu olarak verilir', kat: 1 }, 2: { ad: 'Orta', ikon: '🟡', alt: 'Tarih meraklılarının bildikleri · doğum yeri ve alanı ipucu olarak verilir', kat: 1.5 }, 3: { ad: 'Zor', ikon: '🔴', alt: 'Az tanınan ama iz bırakmış kişiler · ek ipucu yok', kat: 2 } };
   // ek ipuçları: [hangi karttan itibaren görünür] (kolayda daha çok, zorda hiç)
   const EK = { 1: { ulke: 0, alan: 0, harf: 2 }, 2: { ulke: 0, alan: 2 }, 3: {} };
-  const PUAN = [100, 75, 50, 30, 15], HAK = 3, KABA = [3, 2, 2, 1, 1];
+  const PUAN = [100, 75, 50, 30, 15], HAK = 3, KABA = [3, 2, 2, 1, 1], BASLANGIC = Date.UTC(2026, 10, 21);
   let el = null, s = null;
   const oku = (k, v) => { try { return JSON.parse(localStorage[k] || 'null') || v; } catch (e) { return v; } };
   const yaz = (k, v) => { try { localStorage[k] = JSON.stringify(v); } catch (e) { } };
+  const gunNo = () => { const t = new Date(); return Math.max(0, Math.floor((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - BASLANGIC) / 864e5)); };
+  const karistir = (n, tohum) => { const a = [...Array(n).keys()]; let st = tohum * 2654435761 >>> 0; const r = () => ((st = (st * 1664525 + 1013904223) >>> 0) / 4294967296); for (let i = n - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const gununKisisi = g => { const L = KIM(); if (!L.length) return null; const tur = Math.floor(g / L.length); return L[karistir(L.length, tur + 13)[((g % L.length) + L.length) % L.length]]; };
+  const gunAnahtar = g => 'zy-kim-gun-' + g;
+  const gunIst = () => oku('zy-kim-gun-ist', { oyun: 0, kazan: 0, seri: 0, enSeri: 0, son: null });
+  const bugunBitti = () => !!oku(gunAnahtar(gunNo()), null)?.bitti;
   const yasYazi = (p, y) => { const a = p.dogum - y; return a <= 0 ? 'doğum' : a > 150 ? `ölümünden ${Math.round(-(p.olum - y))} yıl sonra` : `${a} yaşında`; };
 
   function kutu() {
-    if (!el) { el = document.createElement('div'); el.id = 'hayat'; el.className = 'hayat bk'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Ben kimim?'); document.querySelector('.stage').appendChild(el); el.addEventListener('click', tikla); el.addEventListener('keydown', tus); el.addEventListener('input', ev => { if (ev.target.matches('.bk-gir input')) oneri(); }); }
+    if (!el) { el = document.createElement('div'); el.id = 'hayat'; el.className = 'hayat bk'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Ben kimim?'); document.querySelector('.stage').appendChild(el); el.addEventListener('click', tikla); el.addEventListener('keydown', tus); el.addEventListener('input', ev => { if (ev.target.matches('.bk-gir input')) oneri(); }); window.addEventListener('keydown', ev => { if (ev.key === 'Escape' && el && !el.hidden) kapat(); }); }
     el.hidden = false; yukseklik(); return el;
   }
   // kart yıl kartının altında kalsın, üst üste binmesin
   function yukseklik() { if (!el || el.hidden) return; const st = el.parentElement.getBoundingClientRect(), yc = document.querySelector('.yearcard'), alt = yc ? yc.getBoundingClientRect().bottom - st.top : 0; el.style.maxHeight = Math.max(260, st.height - alt - 26) + 'px'; }
-  window.addEventListener('resize', yukseklik); setInterval(yukseklik, 1500);
+  window.addEventListener('resize', yukseklik);
   // ---------- 1. zorluk seçimi ----------
   function secim() {
-    s = null; const I = oku('zy-kim-ist', { puan: 0, oyun: 0, bilinen: 0 });
+    s = null;
+    const I = oku('zy-kim-ist', { puan: 0, oyun: 0, bilinen: 0 });
+    const g = gunNo(), gKay = oku(gunAnahtar(g), null), GI = gunIst();
+    const gAlt = gKay && gKay.bitti
+      ? (gKay.bildi ? `✓ Bugünkü kişi bilindi (${gKay.puan} puan) · sonucu ve paylaşım kartını gör` : '✓ Bugünkü bulmaca tamamlandı · cevabı ve paylaşım kartını gör')
+      : `Herkese aynı gün aynı ünlü · günlük serini koru${GI.seri ? ` (🔥 ${GI.seri} seri)` : ''}`;
     kutu().innerHTML = `<button class="hy-x" title="Kapat">✕</button>
       <div class="bk-bas"><b>🎭 Ben kimim?</b><small>Tarihten ünlü biri olarak doğacaksın</small></div>
       <p class="bk-aciklama">Kartlar hayatını baştan sona anlatır; her kartta bir ipucu resmi var. <b>Kim olduğunu tahmin et.</b> Ne kadar erken bilirsen o kadar çok puan alırsın; 3 yanlış hakkın var.</p>
-      <div class="bk-seviye">${[1, 2, 3].map(z => `<button data-bk="seviye" data-z="${z}"><span>${SEVIYE[z].ikon}</span><b>${SEVIYE[z].ad}</b><small>${SEVIYE[z].alt} · puan ×${SEVIYE[z].kat}</small></button>`).join('')}</div>
+      <div class="bk-seviye">
+        <button data-bk="gunluk" class="bk-gunluk"><span>📅</span><b>Günün Kişisi · #${g + 1}</b><small>${gAlt}</small></button>
+        ${[1, 2, 3].map(z => `<button data-bk="seviye" data-z="${z}"><span>${SEVIYE[z].ikon}</span><b>${SEVIYE[z].ad}</b><small>${SEVIYE[z].alt} · puan ×${SEVIYE[z].kat}</small></button>`).join('')}
+      </div>
       ${I.oyun ? `<small class="bk-ist">Şimdiye kadar ${I.oyun} hayat · ${I.bilinen} doğru · toplam ${I.puan} puan</small>` : ''}`;
   }
   // ---------- 2. oyun ----------
@@ -38,9 +52,30 @@ window.Hayat = window.BenKimim = (() => {
     let aday = L.filter(p => !gor.includes(p.id)); if (!aday.length) { yaz('zy-kim-gor', gor.filter(id => !L.some(p => p.id === id))); aday = L; }
     const p = aday[Math.floor(Math.random() * aday.length)]; yaz('zy-kim-gor', [...oku('zy-kim-gor', []), p.id]); return p;
   }
+  function gunKaydet() {
+    if (!s || !s.gunluk) return;
+    yaz(gunAnahtar(s.g), { i: s.i, yanlis: s.yanlis, izler: s.izler, bitti: s.bitti, bildi: s.bildi, puan: s.puan, denenen: s.denenen || [] });
+  }
+  function baslaGun() {
+    const g = gunNo(), p = gununKisisi(g);
+    if (!p) return secim();
+    const kay = oku(gunAnahtar(g), null);
+    s = {
+      z: 2, p, gunluk: true, g,
+      i: kay ? Math.min(kay.i || 0, p.k.length - 1) : 0,
+      yanlis: kay ? kay.yanlis || 0 : 0,
+      izler: kay && kay.izler && kay.izler.length === p.k.length ? kay.izler : p.k.map(() => '⬜'),
+      bitti: !!(kay && kay.bitti),
+      bildi: !!(kay && kay.bildi),
+      puan: kay ? kay.puan || 0 : 0,
+      denenen: kay ? kay.denenen || [] : []
+    };
+    kutu().innerHTML = `<button class="hy-x" title="Kapat">✕</button><div class="bk-ust"></div><div class="bk-sahne"><div class="bk-kart"></div></div><div class="bk-alt"></div>`;
+    kartCiz(false); altCiz();
+  }
   function basla(z) {
     if (!z) return secim();
-    s = { z, p: kisiSec(z), i: 0, yanlis: 0, izler: [], bitti: false, bildi: false, puan: 0 };
+    s = { z, p: kisiSec(z), gunluk: false, i: 0, yanlis: 0, izler: [], bitti: false, bildi: false, puan: 0 };
     s.izler = s.p.k.map(() => '⬜');
     kutu().innerHTML = `<button class="hy-x" title="Kapat">✕</button><div class="bk-ust"></div><div class="bk-sahne"><div class="bk-kart"></div></div><div class="bk-alt"></div>`;
     kartCiz(false); altCiz();
@@ -48,7 +83,8 @@ window.Hayat = window.BenKimim = (() => {
   const kart = () => s.p.k[s.i];
   function ustCiz() {
     const k = kart(), y = k[0];
-    el.querySelector('.bk-ust').innerHTML = `<span class="bk-rozet z${s.z}">${SEVIYE[s.z].ikon} ${SEVIYE[s.z].ad}</span><b>Kart ${s.i + 1}</b><span>📅 ${YIL.fmt(y)} · ${yasYazi(s.p, y)}</span><span class="bk-izler" aria-label="İlerleme">${s.izler.map((x, i) => i === s.i && x === '⬜' ? '🔳' : x).join('')}</span>${ipucuHTML()}`;
+    const roz = s.gunluk ? `📅 Günün Kişisi #${s.g + 1}` : `${SEVIYE[s.z].ikon} ${SEVIYE[s.z].ad}`;
+    el.querySelector('.bk-ust').innerHTML = `<span class="bk-rozet z${s.z}">${roz}</span><b>Kart ${s.i + 1}</b><span>📅 ${YIL.fmt(y)} · ${yasYazi(s.p, y)}</span><span class="bk-izler" aria-label="İlerleme">${s.izler.map((x, i) => i === s.i && x === '⬜' ? '🔳' : x).join('')}</span>${ipucuHTML()}`;
   }
   function ipucuHTML() {
     const e = EK[s.z], p = s.p, L = [];
@@ -111,26 +147,51 @@ window.Hayat = window.BenKimim = (() => {
   function tahmin(ad) {
     if (s.bitti) return; s.denenen = [...(s.denenen || []), ad];
     if (ad === s.p.ad) { s.izler[s.i] = '🟩'; s.bildi = true; s.puan = Math.max(0, Math.round(PUAN[s.i] * SEVIYE[s.z].kat) - s.yanlis * 10); return bitir(); }
-    s.yanlis++; s.izler[s.i] = '🟥'; ustCiz();
+    s.yanlis++; s.izler[s.i] = '🟥'; gunKaydet(); ustCiz();
     const ka = el.querySelector('.bk-kart'); ka.classList.remove('salla'); void ka.offsetWidth; ka.classList.add('salla');
     if (s.yanlis >= HAK) return bitir();
     altCiz(`${esc(ad)} değilsin. ${HAK - s.yanlis} hakkın kaldı.`); el.querySelector('.bk-gir input').focus();
   }
-  function sonraki() { if (s.izler[s.i] === '⬜') s.izler[s.i] = '⬛'; s.i++; kartCiz(true); altCiz(); }
+  function sonraki() { if (!s || s.bitti || s.i >= s.p.k.length - 1) return; if (s.izler[s.i] === '⬜') s.izler[s.i] = '⬛'; s.i++; gunKaydet(); kartCiz(true); altCiz(); }
   function bitir() {
     s.bitti = true; for (let i = s.i + 1; i < s.izler.length; i++) s.izler[i] = '⬜';
     const I = oku('zy-kim-ist', { puan: 0, oyun: 0, bilinen: 0 }); I.oyun++; if (s.bildi) I.bilinen++; I.puan += s.puan; yaz('zy-kim-ist', I);
+    if (s.gunluk) {
+      gunKaydet();
+      const GI = gunIst();
+      if (GI.son !== s.g) {
+        GI.oyun++;
+        if (s.bildi) { GI.kazan++; GI.seri = GI.son === s.g - 1 ? GI.seri + 1 : 1; GI.enSeri = Math.max(GI.enSeri, GI.seri); }
+        else GI.seri = 0;
+        GI.son = s.g;
+        yaz('zy-kim-gun-ist', GI);
+      }
+    }
     const k = kart(), cv = el.querySelector('.bk-kart canvas'); if (cv && window.OyunCizim) window.OyunCizim.ciz(cv, k[1], k[0], k[4] || s.p.ll, 1, false);
     ustCiz(); altCiz(); el.querySelector('.bk-alt').classList.add('gir');
   }
   function sonucHTML() {
     const p = s.p;
-    return `<div class="bk-sonuc ${s.bildi ? 'iyi' : ''}"><small>${s.bildi ? `🎉 Bildin! ${s.i + 1}. kartta` : '🙈 Bu sefer olmadı'}</small><b>${esc(p.ad)}</b><span>${esc(p.kim)} · ${YIL.aralik(p.dogum, p.olum)}</span>${s.bildi ? `<em>+${s.puan} puan</em>` : ''}</div>
+    let gunEk = '';
+    if (s.gunluk) {
+      const GI = gunIst(), yarin = new Date(); yarin.setHours(24, 0, 0, 0);
+      const kalan = Math.max(0, yarin - new Date()), sa = Math.floor(kalan / 36e5), dk = Math.floor(kalan / 6e4) % 60;
+      gunEk = `<div class="sb-ist"><span><b>${GI.oyun}</b> gün</span><span><b>%${GI.oyun ? Math.round(100 * GI.kazan / GI.oyun) : 0}</b> başarı</span><span><b>🔥 ${GI.seri}</b> seri</span><span><b>🏆 ${GI.enSeri}</b> en iyi</span></div>
+        <small class="bk-geri-say">Yeni Günün Kişisi ${sa} sa ${dk} dk sonra</small>`;
+    }
+    return `<div class="bk-sonuc ${s.bildi ? 'iyi' : ''}"><small>${s.bildi ? `🎉 Bildin! ${s.i + 1}. kartta` : '🙈 Bu sefer olmadı'}</small><b>${esc(p.ad)}</b><span>${esc(p.kim)} · ${YIL.aralik(p.dogum, p.olum)}</span>${s.bildi ? `<em>+${s.puan} puan</em>` : ''}<div class="bk-sonuc-iz">${s.izler.join('')}</div></div>
+      ${gunEk}
       <details class="bk-hayatin"><summary>📜 Bütün hayatı (${p.k.length} kart)</summary><ol>${p.k.map(k => `<li><b>${YIL.fmt(k[0])}</b> ${esc(k[2])}</li>`).join('')}</ol></details>
       <button data-bk="tani" class="bk-tani">🔎 ${esc(p.ad)} kimdi? Fotoğraflar ve ayrıntılar</button>
-      <div class="bk-dugmeler son"><button data-bk="yeni" class="ana">🎲 Yeni hayat</button><button data-bk="paylas">📋 Paylaş</button><a href="https://tr.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(p.ad)}" target="_blank" rel="noopener">📖 Vikipedi</a><button data-bk="seviyeler" class="ikincil">Zorluk</button></div>`;
+      <div class="bk-dugmeler son"><button data-bk="paylas" class="${s.gunluk ? 'ana' : ''}">📋 Skoru Paylaş</button><button data-bk="${s.gunluk ? 'seviyeler' : 'yeni'}" class="${s.gunluk ? '' : 'ana'}">${s.gunluk ? '🎲 Serbest Oyna' : '🎲 Yeni hayat'}</button><a href="https://tr.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(p.ad)}" target="_blank" rel="noopener">📖 Vikipedi</a>${s.gunluk ? '' : '<button data-bk="seviyeler" class="ikincil">Zorluk</button>'}</div>`;
   }
-  function paylasMetni() { return `🎭 Ben kimim? · ${SEVIYE[s.z].ad}\n${s.izler.join('')} ${s.bildi ? `${s.i + 1}. kartta bildim · ${s.puan} puan` : 'bilemedim'}\n${location.origin}${location.pathname}?dog=1`; }
+  function paylasMetni() {
+    if (s.gunluk) {
+      const GI = gunIst();
+      return `🎭 Ben kimim? #${s.g + 1} · Günün Kişisi\n${s.izler.join('')} · ${s.bildi ? `${s.i + 1}. kartta bildim (${s.puan} puan)` : 'bilemedim'}${GI.seri > 1 ? `\n🔥 Günlük seri: ${GI.seri}` : ''}\n${location.origin}${location.pathname}?oyun=kim`;
+    }
+    return `🎭 Ben kimim? · ${SEVIYE[s.z].ad}\n${s.izler.join('')} ${s.bildi ? `${s.i + 1}. kartta bildim · ${s.puan} puan` : 'bilemedim'}\n${location.origin}${location.pathname}?dog=1`;
+  }
   // ---------- küreye git ----------
   async function git() {
     const k = kart(), y = k[0], ll = k[4] || s.p.ll;
@@ -145,7 +206,8 @@ window.Hayat = window.BenKimim = (() => {
     if (b.classList.contains('hy-x')) return kapat();
     if (b.dataset.ad) return tahmin(b.dataset.ad);
     const k = b.dataset.bk;
-    if (k === 'seviye') basla(+b.dataset.z);
+    if (k === 'gunluk') baslaGun();
+    else if (k === 'seviye') basla(+b.dataset.z);
     else if (k === 'tahmin') tahminDugme();
     else if (k === 'sonraki') sonraki();
     else if (k === 'pes') { s.izler[s.i] = '⬛'; bitir(); }
@@ -184,5 +246,5 @@ window.Hayat = window.BenKimim = (() => {
     ].filter(Boolean) });
   }
   function kapat() { if (el) el.hidden = true; }
-  return { basla: () => secim(), kapat, oyna: basla, tani: id => { const p = KIM().find(x => x.id === id); if (p) kisiAc(p); } };
+  return { basla: () => secim(), gunluk: baslaGun, bugunBitti, kapat, oyna: basla, tani: id => { const p = KIM().find(x => x.id === id); if (p) kisiAc(p); } };
 })();

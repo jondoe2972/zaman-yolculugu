@@ -37,7 +37,7 @@ window.KIM.push(
     [-1805, "at", "Heyet atsız kalmışken kendi halkına rastladın; kabilenin şefi ağabeyin çıktı ve atları o sağladı.", null, [45.0, -113.5]],
     [-1812, "sikke", "Genç yaşta öldün. Yıllar sonra resmin bir dolarlık madeni paraya basıldı.", null, [45.5, -100.4]]] },
   { id: "bilgekagan", ad: "Bilge Kağan", alt: ["Bilge Kaan", "Mogilyan"], z: 3, ulke: "Moğolistan", alan: "Kağan", kim: "Orhun Yazıtları'nın Göktürk kağanı", ll: [47.56, 102.83], dogum: -683, olum: -734, w: "Bilge Qaghan", k: [
-    [-683, "cadir", "Bozkırda, devleti yeniden kuran bir kağanın oğlu olarak doğdun."],
+    [-683, "cadir", "Bozkırda, devleti yeniden kuran bir hükümdarın oğlu olarak doğdun."],
     [-716, "tac", "Kardeşin Kül Tigin'in yardımıyla tahta oturdun.", "Göktürkler at sırtında yaşar, kımız içer; demircilikleriyle ünlüdürler."],
     [-720, "kalkan", "Komşu boylarla ve güneydeki büyük imparatorlukla savaşıp devletini güçlendirdin."],
     [-731, "tablet", "Kardeşin ölünce onun için yazılı taş bir anıt diktirdin."],

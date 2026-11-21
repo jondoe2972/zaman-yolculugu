@@ -962,3 +962,136 @@ body:not(.globeonly):not(.maponly) .citycard { bottom: 76px; }
   .hg-btn b { font-size: 14.5px; }
 }
 @media (prefers-reduced-motion: reduce) { .hosgeldin, .hg-kart { animation: none; } }
+
+
+/* ---------- 🎭 Ben kimim?: Günün Kişisi ek stilleri ---------- */
+.bk-seviye button.bk-gunluk { background: linear-gradient(135deg, #fff5d6, #ffe6a0); border-color: #d9a028; }
+.bk-seviye button.bk-gunluk:hover { background: linear-gradient(135deg, #fff0c2, #ffdc7d); border-color: #b87e14; }
+.bk-sonuc-iz { margin-top: 6px; font-size: 16px; letter-spacing: 2px; }
+.bk-geri-say { display: block; text-align: center; color: #8a6a4a; font-size: 12px; margin: 2px 0 6px; }
+
+/* ---------- ⚖️ Hangisi Daha Eski? ---------- */
+.eski-oyun { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10; width: min(680px, calc(100% - 20px)); max-height: calc(100% - 20px); overflow-y: auto; background: #fbf4e4; color: #3a2414; border-radius: 18px; padding: 14px 16px 16px; box-shadow: 0 18px 46px rgba(0,0,0,.48); font-size: 14px; }
+.eski-oyun[hidden] { display: none; }
+.eo-ust { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.eo-bas { flex: 1; min-width: 0; }
+.eo-bas b { display: block; font-family: Georgia, serif; font-size: 19px; color: #7a3a12; }
+.eo-bas small { color: #8a6a4a; font-size: 12.5px; }
+.eo-sayac { display: flex; gap: 6px; font-size: 13px; }
+.eo-sayac span { background: #f1e3c4; border: 1px solid #e0cba0; border-radius: 99px; padding: 3px 10px; white-space: nowrap; }
+.eo-x { border: 0; background: rgba(0,0,0,.07); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; flex: none; font-size: 15px; }
+.eo-x:hover { background: rgba(0,0,0,.14); }
+.eo-alan { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; }
+.eo-vs { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%); z-index: 2; width: 36px; height: 36px; border-radius: 50%; background: #241b14; color: #ffd666; font-weight: 800; font-size: 12px; display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0,0,0,.3); border: 2px solid #fbf4e4; pointer-events: none; }
+.eo-kart { display: flex; flex-direction: column; background: #fff; border: 2px solid #e4d2ad; border-radius: 14px; overflow: hidden; cursor: pointer; transition: transform .16s, border-color .16s, box-shadow .16s, opacity .2s; }
+.eo-kart:hover:not(.dogru):not(.yanlis):not(.soluk) { transform: translateY(-2px); border-color: #d9a028; box-shadow: 0 8px 20px rgba(90,55,15,.16); }
+.eo-kart.dogru { border-color: #4c9a5a; background: #f2fbf2; cursor: default; }
+.eo-kart.yanlis { border-color: #c84b3c; background: #fdf2f0; cursor: default; }
+.eo-kart.soluk { opacity: .78; cursor: default; }
+.eo-foto { position: relative; width: 100%; aspect-ratio: 16 / 10; background: linear-gradient(135deg, #efe2c4, #dfd0ae); display: grid; place-items: center; overflow: hidden; }
+.eo-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.eo-ik { font-size: 46px; opacity: .75; }
+.eo-yil-rozet { position: absolute; left: 8px; bottom: 8px; background: rgba(24,18,12,.88); color: #ffd666; font-weight: 800; font-size: 14px; padding: 3px 10px; border-radius: 99px; box-shadow: 0 3px 10px rgba(0,0,0,.3); animation: hgAc .22s ease-out; }
+.eo-yil-rozet.gizli { background: rgba(24,18,12,.68); color: #f3e7d0; font-size: 13px; animation: none; }
+.eo-bilgi { padding: 10px 12px 8px; flex: 1; }
+.eo-bilgi b { display: block; font-size: 15.5px; color: #2a1a0e; line-height: 1.25; }
+.eo-bilgi small { display: block; color: #7a5f3e; font-size: 12px; margin-top: 3px; }
+.eo-acik { margin: 5px 0 0; font-size: 12px; color: #5a4228; line-height: 1.35; }
+.eo-kure { align-self: flex-start; margin: 0 10px 10px; border: 1px solid #dfd0ae; background: #fbf4e4; color: #4a3018; border-radius: 99px; padding: 4px 10px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.eo-kure:hover { background: #ffe9a8; border-color: #d9a028; }
+.eo-ipucu { text-align: center; margin: 10px 0 0; color: #7a5f3e; font-size: 13px; }
+.eo-sonuc { margin-top: 12px; padding: 11px 14px; border-radius: 14px; text-align: center; background: #f3e7cd; animation: hgAc .2s ease-out; }
+.eo-sonuc.iyi { background: #e3f3de; }
+.eo-sonuc.bitti { background: #fae7e2; }
+.eo-sonuc > b { display: block; font-size: 15px; color: #2a1a0e; }
+.eo-sonuc > small { display: block; margin: 4px 0 8px; color: #5a4228; font-size: 12.5px; line-height: 1.4; }
+.eo-sonuc button { border: 1px solid #d9c194; background: #fff; color: #3a2414; border-radius: 99px; padding: 8px 16px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+.eo-sonuc button.ana { border: 0; background: #ffd666; color: #2a1d10; }
+.eo-sonuc button.ana:hover { background: #ffca3a; }
+.eo-skor { display: flex; justify-content: center; gap: 18px; margin: 6px 0 4px; font-size: 13px; color: #6a4a2a; }
+.eo-skor b { font-size: 18px; color: #2a1a0e; }
+.eo-izler { font-size: 15px; letter-spacing: 1px; margin: 4px 0 6px; }
+.eo-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+@media (max-width: 640px) {
+  .eski-oyun { padding: 12px; width: calc(100% - 14px); max-height: calc(100% - 14px); }
+  .eo-alan { grid-template-columns: 1fr; gap: 10px; }
+  .eo-vs { top: 50%; width: 32px; height: 32px; font-size: 11px; }
+  .eo-foto { aspect-ratio: 16 / 8; }
+  .eo-bas b { font-size: 17px; }
+}
+
+/* ---------- 🤯 Şaşırt Beni düğmesi ve hap kartı ---------- */
+.sasirtbtn { position: absolute; left: 14px; bottom: 14px; z-index: 3; display: none; align-items: center; gap: 6px; background: rgba(24,18,12,.88); color: #ffe7a3; border: 1px solid rgba(255,214,102,.38); border-radius: 99px; padding: 8px 14px; font-weight: 700; font-size: 13.5px; cursor: pointer; backdrop-filter: blur(4px); box-shadow: 0 6px 18px rgba(0,0,0,.32); transition: transform .15s, background .15s, color .15s; }
+.globeonly .sasirtbtn { display: inline-flex; }
+.sasirtbtn:hover { background: #ffd666; color: #2a1d10; border-color: #ffd666; transform: translateY(-1px); }
+.alt-gizli .sasirtbtn { bottom: calc(64px + env(safe-area-inset-bottom)); }
+@media (max-width: 860px) {
+  .sasirtbtn { left: 10px; bottom: 10px; padding: 7px 12px; font-size: 12.5px; }
+}
+.sasirt { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10; width: min(470px, calc(100% - 22px)); max-height: calc(100% - 24px); overflow-y: auto; background: #fbf4e4; color: #3a2414; border-radius: 18px; padding: 16px 18px 14px; box-shadow: 0 18px 46px rgba(0,0,0,.48), 0 0 0 1px rgba(255,214,102,.35); }
+.sasirt[hidden] { display: none; }
+.sbk-ust { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.sbk-roz { background: #241b14; color: #ffd666; font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 99px; }
+.sbk-tar { font-size: 12.5px; font-weight: 700; color: #8a4f12; }
+.sbk-x { margin-left: auto; border: 0; background: rgba(0,0,0,.07); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; }
+.sbk-govde.gir { animation: hgAc .22s ease-out; }
+.sbk-govde h3 { margin: 0 0 8px; font-family: Georgia, serif; font-size: 20px; line-height: 1.3; color: #2a1a0e; }
+.sbk-govde p { margin: 0 0 14px; font-size: 15px; line-height: 1.55; color: #4a3420; }
+.sbk-alt { display: flex; flex-wrap: wrap; gap: 7px; }
+.sbk-alt button, .sbk-alt a { border: 1px solid #dcc8a0; background: #fff; color: #4a3018; border-radius: 99px; padding: 7px 13px; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; }
+.sbk-alt button:hover, .sbk-alt a:hover { background: #f3e4c2; }
+.sbk-alt .ana { border: 0; background: #ffd666; color: #2a1d10; }
+.sbk-alt .ana:hover { background: #ffca3a; }
+.sbk-say { display: block; margin-top: 10px; color: #8a6e4b; font-size: 11.5px; }
+
+/* ---------- 📍 Bu Toprakların Tarihi ---------- */
+.topraklar-mod { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10; width: min(520px, calc(100% - 20px)); max-height: calc(100% - 20px); display: flex; flex-direction: column; background: #fbf4e4; color: #3a2414; border-radius: 18px; padding: 14px 16px; box-shadow: 0 18px 46px rgba(0,0,0,.48); font-size: 14px; }
+.topraklar-mod[hidden] { display: none; }
+.tt-ust { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
+.tt-ust > div { flex: 1; min-width: 0; }
+.tt-ust b { display: block; font-family: Georgia, serif; font-size: 19px; color: #7a3a12; }
+.tt-ust small { color: #8a6a4a; font-size: 12.5px; }
+.tt-x { border: 0; background: rgba(0,0,0,.07); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; flex: none; font-size: 15px; }
+.tt-kont { display: flex; gap: 7px; margin-bottom: 8px; flex-shrink: 0; }
+.tt-ara { position: relative; flex: 1; min-width: 0; }
+.tt-ara input { width: 100%; border: 1px solid #d9c49a; border-radius: 99px; padding: 8px 13px; background: #fff; color: #2a1a0e; font: inherit; font-size: 13.5px; }
+.tt-oneri { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 4; margin: 0; padding: 4px; list-style: none; background: #fff; border: 1px solid #d9c49a; border-radius: 12px; box-shadow: 0 10px 26px rgba(0,0,0,.22); max-height: 220px; overflow-y: auto; }
+.tt-oneri[hidden] { display: none; }
+.tt-oneri li { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 7px 10px; border-radius: 8px; cursor: pointer; }
+.tt-oneri li.on, .tt-oneri li:hover { background: #ffefc4; }
+.tt-oneri li small { color: #8a6a4a; font-size: 11.5px; }
+.tt-kuresec { border: 1px solid #c9a46a; background: #fff8e8; color: #3a2414; border-radius: 99px; padding: 7px 12px; font-weight: 700; font-size: 12.5px; cursor: pointer; white-space: nowrap; }
+.tt-kuresec:hover { background: #ffd666; border-color: #ffd666; color: #2a1d10; }
+.tt-cipler { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; flex-shrink: 0; }
+.tt-cipler button { border: 1px solid #e0cba0; background: #fff; color: #5a3a1a; border-radius: 99px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.tt-cipler button:hover { background: #f3e4c2; }
+.tt-cipler button.on { background: #241b14; color: #ffd666; border-color: #241b14; }
+.tt-sonuc { flex: 1; min-height: 0; overflow-y: auto; padding-right: 2px; }
+.tt-yukle { padding: 24px 12px; text-align: center; color: #7a5f3e; font-size: 14px; }
+.tt-yukle span { display: block; font-size: 26px; margin-bottom: 6px; }
+.tt-bos { color: #7a5f3e; font-size: 13.5px; line-height: 1.5; margin: 8px 0; }
+.tt-ozet { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #f3e4c2; border-radius: 12px; padding: 9px 12px; margin-bottom: 10px; }
+.tt-ozet b { font-size: 15.5px; color: #2a1a0e; }
+.tt-ozet small { display: block; color: #6a4a2a; font-size: 12px; margin-top: 1px; }
+.tt-ozet .ana { border: 0; background: #ffd666; color: #2a1d10; border-radius: 99px; padding: 6px 13px; font-weight: 700; font-size: 12.5px; cursor: pointer; white-space: nowrap; }
+.tt-serit { list-style: none; margin: 0 0 8px; padding: 2px 0 2px 18px; position: relative; }
+.tt-serit::before { content: ''; position: absolute; left: 6px; top: 10px; bottom: 10px; width: 2px; background: #d9bf8c; }
+.tt-serit li { position: relative; margin-bottom: 7px; }
+.tt-nokta { position: absolute; left: -16px; top: 13px; width: 10px; height: 10px; border-radius: 50%; background: #c98a2e; border: 2px solid #fbf4e4; box-shadow: 0 0 0 1px #c98a2e; }
+.tt-serit li.bugun .tt-nokta { background: #3a8a4a; box-shadow: 0 0 0 2px rgba(58,138,74,.35); }
+.tt-satir { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #e6d6b4; border-radius: 11px; padding: 4px 6px 4px 10px; }
+.tt-satir:hover { border-color: #d9a028; background: #fffbf0; }
+.tt-git { flex: 1; min-width: 0; border: 0; background: transparent; text-align: left; cursor: pointer; padding: 4px 0; color: inherit; }
+.tt-git small { display: block; font-size: 11.5px; font-weight: 700; color: #9a5a18; }
+.tt-git b { display: block; font-size: 14.5px; color: #2a1a0e; }
+.tt-bilgi { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #e2d0a8; background: #fbf4e4; color: #6a3a14; font-family: Georgia, serif; font-weight: 700; font-size: 14px; cursor: pointer; flex: none; }
+.tt-bilgi:hover { background: #ffd666; border-color: #ffd666; }
+.tt-not { margin: 4px 0 0; font-size: 11.5px; color: #8a6e4b; }
+.tt-secbar { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); z-index: 10; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 24px); background: rgba(24,18,12,.94); color: #fff3d6; border: 1.5px solid #ffd666; border-radius: 99px; padding: 8px 10px 8px 16px; font-size: 13px; box-shadow: 0 10px 28px rgba(0,0,0,.45); }
+.tt-secbar[hidden] { display: none; }
+.tt-secbar button { border: 0; background: #ffd666; color: #2a1d10; border-radius: 99px; padding: 5px 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+@media (max-width: 600px) {
+  .topraklar-mod { width: calc(100% - 14px); max-height: calc(100% - 14px); padding: 12px; }
+  .tt-kont { flex-direction: column; }
+  .tt-kuresec { width: 100%; }
+}

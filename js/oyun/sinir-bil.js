@@ -16,12 +16,13 @@ window.SinirBil = (() => {
   }
   const kare = d => d === 0 ? '🟩' : d < 1000 ? '🟨' : d < 3000 ? '🟧' : '🟥';
   // gün numarası (yerel tarih) ve o günün devleti: listenin tohumlu karışımı, her turda yeni karışım
-  function gunNo() { const t = new Date(); return Math.floor((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - BASLANGIC) / 864e5); }
+  function gunNo() { const t = new Date(); return Math.max(0, Math.floor((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - BASLANGIC) / 864e5)); }
   function karistir(n, tohum) { const a = [...Array(n).keys()]; let s = tohum * 2654435761 >>> 0; const r = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); for (let i = n - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   function gununDevleti(g) { const T = L(), tur = Math.floor(g / T.length); return T[karistir(T.length, tur + 7)[((g % T.length) + T.length) % T.length]]; }
 
   let el = null, s = null;
   const kayitAnahtar = g => 'zy-sinir-' + g;
+  const depoYaz = (k, v) => { try { localStorage[k] = JSON.stringify(v); } catch (e) { /* gizli mod */ } };
   const ist = () => { try { return JSON.parse(localStorage['zy-sinir-ist'] || '') } catch (e) { return { oyun: 0, kazan: 0, seri: 0, enSeri: 0, son: null, dag: [0, 0, 0, 0, 0, 0] }; } };
 
   // ---------- çizim: hedefin merkezine bakan ortografik izdüşüm ----------
@@ -95,11 +96,17 @@ window.SinirBil = (() => {
   function oneri() {
     const inp = el.querySelector('input'), ul = el.querySelector('.sb-oneri'), A = adaylar(inp.value); secili = 0;
     ul.hidden = !A.length; ul.innerHTML = A.map((d, i) => `<li data-ad="${esc(d.ad)}" class="${i === 0 ? 'on' : ''}">${esc(d.ad)}</li>`).join('');
+    const h = el.querySelector('.sb-hata'); if (h) h.remove();
+  }
+  function uyari(msg) {
+    let h = el.querySelector('.sb-hata');
+    if (!h) { h = document.createElement('p'); h.className = 'bk-hata sb-hata'; h.setAttribute('role', 'alert'); const g0 = el.querySelector('.sb-gir'); if (g0) g0.after(h); }
+    h.textContent = msg;
   }
   function tus(ev) {
     const ul = el.querySelector('.sb-oneri'), li = [...ul.querySelectorAll('li')];
     if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { if (!li.length) return; ev.preventDefault(); secili = (secili + (ev.key === 'ArrowDown' ? 1 : -1) + li.length) % li.length; li.forEach((x, i) => x.classList.toggle('on', i === secili)); }
-    else if (ev.key === 'Enter') { ev.preventDefault(); if (li[secili]) tahminEt(li[secili].dataset.ad); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); if (li[secili]) tahminEt(li[secili].dataset.ad); else uyari('Listeden bir devlet seç (yazmaya başlayınca öneriler çıkar).'); }
     else if (ev.key === 'Escape') kapat();
   }
   function tahminEt(ad) {
@@ -109,12 +116,12 @@ window.SinirBil = (() => {
     s.tahmin.push({ ad: d.ad, d: mesafe, yon: dogru ? '🎯' : yon(d.e, s.hedef.e) });
     if (!dogru) s.yanlis++;
     if (dogru || s.tahmin.length >= HAK) { s.bitti = true; s.kazandi = dogru; if (!s.serbest) istYaz(); }
-    if (!s.serbest) localStorage[kayitAnahtar(s.g)] = JSON.stringify({ t: s.tahmin, b: s.bitti, k: s.kazandi });
+    if (!s.serbest) depoYaz(kayitAnahtar(s.g), { t: s.tahmin, b: s.bitti, k: s.kazandi });
     goster();
   }
   function istYaz() {
     const I = ist(); I.oyun++; if (s.kazandi) { I.kazan++; I.dag[s.tahmin.length - 1]++; I.seri = I.son === s.g - 1 ? I.seri + 1 : 1; I.enSeri = Math.max(I.enSeri, I.seri); } else I.seri = 0;
-    I.son = s.kazandi ? s.g : null; localStorage['zy-sinir-ist'] = JSON.stringify(I);
+    I.son = s.kazandi ? s.g : null; depoYaz('zy-sinir-ist', I);
   }
   function paylasMetni() {
     const sat = s.tahmin.map(t => t.d === 0 ? '🟩 🎯' : `${kare(t.d)} ${t.yon} ${t.d.toLocaleString('tr-TR')} km`);
@@ -125,7 +132,7 @@ window.SinirBil = (() => {
     if (b.classList.contains('sb-x')) return kapat();
     if (b.dataset.ad) return tahminEt(b.dataset.ad);
     const k = b.dataset.sb;
-    if (k === 'tahmin') { const li = el.querySelector('.sb-oneri li.on') || el.querySelector('.sb-oneri li'); if (li) tahminEt(li.dataset.ad); else { const inp = el.querySelector('input'); oneri(); const ilk = el.querySelector('.sb-oneri li'); if (ilk && adaylar(inp.value).length === 1) tahminEt(ilk.dataset.ad); } }
+    if (k === 'tahmin') { const li = el.querySelector('.sb-oneri li.on') || el.querySelector('.sb-oneri li'); if (li) tahminEt(li.dataset.ad); else { const inp = el.querySelector('input'); oneri(); const ilk = el.querySelector('.sb-oneri li'); if (ilk && adaylar(inp.value).length === 1) tahminEt(ilk.dataset.ad); else uyari('Listeden bir devlet seç (yazmaya başlayınca öneriler çıkar).'); } }
     else if (k === 'paylas') { const t = paylasMetni(); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = '✓ Kopyalandı'; }, () => { b.textContent = 'Kopyalanamadı'; }); }
     else if (k === 'kure') { const h = s.hedef; kapat(); if (window.ZY) { window.ZY.setView('dunya'); window.ZY.setYear(h.y); } if (window.Dunya) window.Dunya.goTo(h.e[0], h.e[1], 3); }
     else if (k === 'serbest') { const T = L(); let h; do { h = T[Math.floor(Math.random() * T.length)]; } while (h.ad === s.hedef.ad); baslat(h, true); }
@@ -141,6 +148,7 @@ window.SinirBil = (() => {
     if (!el) {
       el = document.createElement('div'); el.id = 'sinirbil'; el.className = 'sinirbil'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Sınırdan Bil');
       document.querySelector('.stage').appendChild(el); el.addEventListener('click', tikla);
+      window.addEventListener('keydown', ev => { if (ev.key === 'Escape' && el && !el.hidden) kapat(); });
       window.addEventListener('resize', () => { if (el && !el.hidden && s) { s.olcek = null; ciz(); } });
     }
     el.hidden = false; baslat(gununDevleti(gunNo()), false);

@@ -205,7 +205,7 @@ window.KIM.push(
     [-1956, "yildiz", "Televizyonda dans ederken kalçalarını oynatman olay oldu; 'Rock'n Roll'un Kralı' diye anıldın.", null, [40.76, -73.98]],
     [-1958, "kalkan", "Ününün zirvesindeyken askere gittin ve Almanya'da görev yaptın.", null, [50.33, 8.75]]] },
   { id: "barismanco", ad: "Barış Manço", alt: ["Manço"], z: 1, ulke: "Türkiye", alan: "Müzisyen", kim: "Anadolu rock'ın öncüsü", ll: [41.01, 28.98], dogum: -1943, olum: -1999, w: "Barış Manço", k: [
-    [-1943, "ev", "İstanbul'da, savaş yıllarında doğdun; adın barış dileğiyle konuldu.", "Savaş yıllarında ekmek karneyle alınıyor; radyo evlerin en değerli eşyası."],
+    [-1943, "ev", "İstanbul'da, İkinci Dünya Savaşı yıllarında doğdun; adın bu zor dönemin sona ermesi dileğiyle konuldu.", "Savaş yıllarında ekmek karneyle alınıyor; radyo evlerin en değerli eşyası."],
     [-1958, "gitar", "Lisede ilk müzik grubunu kurdun."],
     [-1963, "kalem", "Belçika'da sanat okudun ve Avrupa'da konserler verdin.", null, [51.05, 3.72]],
     [-1975, "nota", "Anadolu ezgilerini rock ile birleştiren şarkılar yaptın: 'Dağlar Dağlar', 'Gülpembe'.", null, [41.01, 28.98]],

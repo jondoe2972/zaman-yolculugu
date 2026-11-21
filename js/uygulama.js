@@ -53,7 +53,7 @@
   const mcv = $('#map'), mg = mcv.getContext('2d');
   const gcv = $('#globe'), gg = gcv.getContext('2d');
   const tcv = $('#timeline'), tg = tcv.getContext('2d');
-  let W = 0, H = 0, TW = 0, TH = 0, DPR = 1;
+  let W = 0, H = 0, TW = 0, TH = 0, DPR = 1, tlSonAn = '';
   let Y = QS.get('yil') && !isNaN(+QS.get('yil')) ? clamp(+QS.get('yil'), P.to, P.from) : P.start, playing = false, speed = P.composite ? 10 : 2, shown = null;
   let camX = 0, camHedef = null, follow = true, last = performance.now();
   let hoverEv = null, view = 'sahne';
@@ -94,12 +94,14 @@
 
   // ---------- boyut ----------
   function resize() {
-    DPR = Math.min(2, window.devicePixelRatio || 1);
     const r = cv.parentElement.getBoundingClientRect();
+    // Büyük masaüstü ekranlarda DPR'ı 1.5 ile sınırlamak piksel yükünü ~%44 azaltır; telefonlarda tam 2x korunur
+    DPR = Math.min(r.width * r.height > 900000 ? 1.5 : 2, window.devicePixelRatio || 1);
     W = r.width; H = r.height;
     for (const c of [cv, mcv, gcv]) { c.width = Math.round(W * DPR); c.height = Math.round(H * DPR); }
     const t = tcv.getBoundingClientRect();
     TW = t.width; TH = t.height; tcv.width = Math.round(TW * DPR); tcv.height = Math.round(TH * DPR);
+    tlSonAn = '';
   }
   window.addEventListener('resize', resize);
   resize();
@@ -443,10 +445,13 @@
 
   // ---------- zaman çizelgesi ----------
   function drawTL() {
-    tg.setTransform(DPR, 0, 0, DPR, 0, 0); tg.clearRect(0, 0, TW, TH);
-    tg.textBaseline = 'middle'; tg.textAlign = 'center';
     // yakınlaştırılmışken seçili yıl görünen aralıktan çıkarsa çizelge onu ortaya alacak biçimde kayar (oynatırken de)
     if (tlA != null && (Y > vA() || Y < vB())) { const s = vA() - vB(); tlAralik(Y + s / 2, Y - s / 2); }
+    const an = `${Math.round(Y * 2)}|${tlA}|${tlB}|${hoverEv ? hoverEv.y + hoverEv.t : ''}|${TW}|${TH}|${DPR}|${P.id}`;
+    if (an === tlSonAn) return;
+    tlSonAn = an;
+    tg.setTransform(DPR, 0, 0, DPR, 0, 0); tg.clearRect(0, 0, TW, TH);
+    tg.textBaseline = 'middle'; tg.textAlign = 'center';
     const x0 = yearX(P.from);
     if (DUNYA) {
       // her kıta bir sıra; içinde her bölge ince bir şerit (bölgenin çağları iki tonla)
@@ -737,7 +742,11 @@
   // ---------- harita ----------
   // kure: küre için ünlü yapılar (data/yapilar) da eklenir; o yıl ayakta olanlar, önemlerine göre farklı yakınlıkta belirir
   const YP_Z = { 5: 2.6, 4: 3.6, 3: 5.5, 2: 8, 1: 12 }, YP_W = { 5: 5e6, 4: 2e6, 3: 6e5, 2: 2e5, 1: 6e4 };
+  let miAn = '', miKureOnb = [], miHarOnb = [], mcAn = '', mcOnb = [];
   function mapItems(kure) {
+    const an = `${Math.round(Y)}|${SP.id}|${kure ? 1 : 0}`;
+    if (kure && an === miAn) return miKureOnb;
+    if (!kure && an === miAn) return miHarOnb;
     const out = [], seen = new Set(), co = MIS.coords || {};
     if (kure) for (const y of window.YAPILAR || []) {
       if (!y.ll || Y > y.y || (y.yik != null && Y <= y.yik)) continue;
@@ -751,10 +760,16 @@
       const ins = (m.stop && Y > m.stop) || (!m.stop && pr < 1);
       out.push({ id: m.id, ad: m.ad, type: m.type, ll: co[m.id], p: pr, w: S.vol(m), st: ruined ? 'harabe' : ins ? 'ins' : (m.stop && Y <= m.stop ? 'harabe' : 'bitti') });
     }
+    miAn = an;
+    if (kure) miKureOnb = out; else miHarOnb = out;
     return out;
   }
   function mapCities() {
-    return (MIS.sehirler || []).filter(c => Y <= c.from && Y >= c.to).map(c => ({ ...c, cap: (c.b || []).some(([a, b]) => Y <= a && Y >= b) }));
+    const an = `${Math.round(Y)}|${SP.id}`;
+    if (an === mcAn) return mcOnb;
+    mcAn = an;
+    mcOnb = (MIS.sehirler || []).filter(c => Y <= c.from && Y >= c.to).map(c => ({ ...c, cap: (c.b || []).some(([a, b]) => Y <= a && Y >= b) }));
+    return mcOnb;
   }
   let dragM = null; const pts = new Map();
   mcv.addEventListener('pointerdown', ev => {
@@ -819,7 +834,10 @@
     if (dragG.iki) DN.hold(); // iki parmaktan sonra kalan parmakla savrulma olmasın
   });
   const endG = ev => {
-    if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (!h && DN.sinirAcik) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
+    if (dragG && !dragG.moved && gpts.size <= 1) {
+      if (typeof window.__kureSec === 'function') { const cb = window.__kureSec; window.__kureSec = null; cb(DN.llAt(...cvPos(gcv, ev))); }
+      else { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (!h && DN.sinirAcik) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
+    }
     gpts.delete(ev.pointerId);
     if (!gpts.size) dragG = null;
     else if (dragG) { const [k] = [...gpts.values()]; dragG.x = k[0]; dragG.y = k[1]; dragG.d0 = null; dragG.m = null; DN.hold(); }
@@ -1570,16 +1588,25 @@
   document.querySelectorAll('[data-season]').forEach(b => b.addEventListener('click', () => {
     S.setSeason(b.dataset.season); document.querySelectorAll('[data-season]').forEach(x => x.classList.toggle('on', x === b));
   }));
+  const KUTU_IDS = ['modal', 'hosgeldin', 'arama', 'wiki', 'tarihpop', 'skbuyuk', 'ic', 'hayat', 'sinirbil', 'eski-oyun', 'topraklar', 'sasirt'];
+  const kutuAcikMi = () => KUTU_IDS.some(id => { const e = document.getElementById(id); return e && !e.hidden; });
   window.addEventListener('keydown', e => {
-    const hg = $('#hosgeldin');
-    if (e.target.tagName === 'SELECT' || !modal.hidden || (hg && !hg.hidden)) return;
+    const t = e.target;
+    if ((t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) || kutuAcikMi()) return;
     if (e.key === 'ArrowLeft') setYear(yilAdim(Y, e.shiftKey ? 10 : 1), true);
     else if (e.key === 'ArrowRight') setYear(yilAdim(Y, e.shiftKey ? -10 : -1), true);
     else if (e.key === ' ') { e.preventDefault(); $('#play').click(); }
   });
 
   // ---------- döngü ----------
+  let sonArkaCiz = 0;
   function frame(now) {
+    // Oyun ya da pencere açıkken ve zaman akmıyorken arka plan küresini ~10 FPS'e düşür (masaüstü CPU/GPU rahatlasın)
+    if (!playing && kutuAcikMi() && now - sonArkaCiz < 100) {
+      requestAnimationFrame(frame);
+      return;
+    }
+    sonArkaCiz = now;
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     if (playing) {
       const before = Y;

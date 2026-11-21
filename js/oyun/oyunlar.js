@@ -6,16 +6,22 @@
   const PAKET = {
     kim: [
       'data/oyun/kim.js?v=2',
-      'data/oyun/kim-kolay.js?v=1',
+      'data/oyun/kim-kolay.js?v=2',
       'data/oyun/kim-orta.js?v=1',
-      'data/oyun/kim-zor.js?v=1',
+      'data/oyun/kim-zor.js?v=2',
       'data/oyun/kim-dunya.js?v=1',
       'js/oyun/cizimler.js?v=4',
-      'js/oyun/kim.js?v=5'
+      'js/oyun/kim.js?v=8'
     ],
     sinir: [
       'data/oyun/sinir-bil.js?v=1',
-      'js/oyun/sinir-bil.js?v=2'
+      'js/oyun/sinir-bil.js?v=4'
+    ],
+    eski: [
+      'js/oyun/hangisi-eski.js?v=1'
+    ],
+    toprak: [
+      'js/oyun/topraklar.js?v=3'
     ]
   };
   const dosyaSoz = new Map();
@@ -42,20 +48,41 @@
     return p;
   }
 
+  const gunNo = () => {
+    const t = new Date();
+    return Math.max(0, Math.floor((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(2026, 10, 21)) / 864e5));
+  };
   function sinirBugunBitti() {
     if (window.SinirBil) return window.SinirBil.bugunBitti();
-    try {
-      const t = new Date(), g = Math.floor((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(2026, 10, 21)) / 864e5);
-      return !!JSON.parse(localStorage['zy-sinir-' + g] || 'null')?.b;
-    } catch (e) { return false; }
+    try { return !!JSON.parse(localStorage['zy-sinir-' + gunNo()] || 'null')?.b; } catch (e) { return false; }
+  }
+  function kimBugunBitti() {
+    if (window.BenKimim && window.BenKimim.bugunBitti) return window.BenKimim.bugunBitti();
+    try { return !!JSON.parse(localStorage['zy-kim-gun-' + gunNo()] || 'null')?.bitti; } catch (e) { return false; }
+  }
+  function eskiRekor() {
+    if (window.HangisiEski && window.HangisiEski.rekor) return window.HangisiEski.rekor();
+    try { return JSON.parse(localStorage['zy-eski-ist'] || 'null')?.rekor || 0; } catch (e) { return 0; }
+  }
+
+  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt'];
+  function digerleriniKapat(haricId) {
+    for (const id of OYUN_KUTULARI) {
+      if (id === haricId) continue;
+      const e = document.getElementById(id);
+      if (e) e.hidden = true;
+    }
+    const sb = document.getElementById('tt-secbar');
+    if (sb) sb.hidden = true;
+    window.__kureSec = null;
   }
 
   const btn = document.querySelector('[data-mod="oyun"]');
   const DUNYA = !!(window.BOLGE && window.BOLGE.dunya);
   const OYUNLAR = [
     {
-      id: 'dog', ikon: '🎭', ad: 'Ben kimim?',
-      alt: 'Ünlü biri olarak doğ; hayatından ipuçlarıyla kim olduğunu bil', yeni: true,
+      id: 'dog', kutu: 'hayat', ikon: '🎭', ad: 'Ben kimim?',
+      alt: () => kimBugunBitti() ? '✓ Günün Kişisi çözüldü · serbest oyna' : '📅 Günün Kişisi + 3 zorluk · ipuçlarıyla ünlüyü bil',
       ac: async () => {
         if (!DUNYA) { location.href = location.pathname + '?dog=1'; return; }
         await paketYukle('kim');
@@ -63,24 +90,40 @@
       }
     },
     {
-      id: 'sinir', ikon: '🗺️', ad: 'Sınırdan Bil',
-      alt: () => sinirBugunBitti() ? '✓ Bugünkü bulmaca çözüldü · serbest oyna' : 'Günlük bulmaca: sınırı gör, devleti bil', yeni: true,
+      id: 'eski', kutu: 'eski-oyun', ikon: '⚖️', ad: 'Hangisi Daha Eski?', yeni: true,
+      alt: () => { const r = eskiRekor(); return r ? `İki ünlü yapıdan hangisi daha eski? · 🏆 Rekor: ${r}` : 'İki ünlü yapıdan hangisi daha önce yapıldı? Seri yap!'; },
+      ac: async () => {
+        await paketYukle('eski');
+        if (window.HangisiEski) window.HangisiEski.ac();
+      }
+    },
+    {
+      id: 'sinir', kutu: 'sinirbil', ikon: '🗺️', ad: 'Sınırdan Bil',
+      alt: () => sinirBugunBitti() ? '✓ Bugünkü bulmaca çözüldü · serbest oyna' : 'Günlük bulmaca: sınırı gör, devleti bil',
       ac: async () => {
         await paketYukle('sinir');
         if (window.SinirBil) window.SinirBil.ac();
       }
     },
     {
-      id: 'aa', ikon: '⏳', ad: 'Biliyor muydun?',
-      alt: `Tarihten ${window.AYNI_ANDA ? window.AYNI_ANDA.length : 'yüzlerce'} şaşırtıcı bilgi; tek tıkla o zamana git`,
-      ac: () => window.AyniAnda && window.AyniAnda.ac()
+      id: 'toprak', kutu: 'topraklar', ikon: '📍', ad: 'Bu Toprakların Tarihi', yeni: true,
+      alt: 'Bir şehir ya da küreden nokta seç: 5.000 yıllık devlet şeridi',
+      ac: async () => {
+        await paketYukle('toprak');
+        if (window.ToprakTarihi) window.ToprakTarihi.ac();
+      }
+    },
+    {
+      id: 'aa', kutu: 'sasirt', ikon: '🤯', ad: 'Şaşırt Beni',
+      alt: () => `Tarihten ${window.AyniAnda ? window.AyniAnda.adet : 'yüzlerce'} şaşırtıcı bilgi; haritada gör ve paylaş`,
+      ac: () => window.AyniAnda && window.AyniAnda.sasirt(true)
     }
   ];
 
   let pop = null;
   function ciz() {
     if (!pop) return;
-    pop.innerHTML = '<b class="op-bas">🎮 Oyunlar</b>' + OYUNLAR.map(o => `<button data-oyun="${o.id}" role="menuitem"><span class="op-ik">${o.ikon}</span><span><b>${o.ad}${o.yeni ? ' <i>yeni</i>' : ''}</b><small>${typeof o.alt === 'function' ? o.alt() : o.alt}</small></span></button>`).join('');
+    pop.innerHTML = '<b class="op-bas">🎮 Oyunlar ve Keşif</b>' + OYUNLAR.map(o => `<button data-oyun="${o.id}" role="menuitem"><span class="op-ik">${o.ikon}</span><span><b>${o.ad}${o.yeni ? ' <i>yeni</i>' : ''}</b><small>${typeof o.alt === 'function' ? o.alt() : o.alt}</small></span></button>`).join('');
   }
   function konum() {
     if (!pop || !btn) return;
@@ -95,8 +138,7 @@
       pop.hidden = false;
       konum();
       // Menü açıldığında oyun paketlerini arka planda sessizce hazırlamaya başla
-      paketYukle('kim').catch(() => {});
-      paketYukle('sinir').catch(() => {});
+      for (const ad of Object.keys(PAKET)) paketYukle(ad).catch(() => {});
     } else {
       pop.hidden = true;
     }
@@ -105,7 +147,7 @@
   }
 
   window.OyunYukle = Object.assign(ad => paketYukle(ad), {
-    hepsi: () => Promise.all(['kim', 'sinir'].map(paketYukle)),
+    hepsi: () => Promise.all(Object.keys(PAKET).map(paketYukle)),
     menuAc: () => goster(true)
   });
 
@@ -121,10 +163,7 @@
       const b = ev.target.closest('[data-oyun]'); if (!b) return;
       const o = OYUNLAR.find(x => x.id === b.dataset.oyun); if (!o) return;
       goster(false);
-      for (const id of ['sinirbil', 'hayat']) {
-        const e = document.getElementById(id);
-        if (e && id !== { dog: 'hayat', sinir: 'sinirbil' }[o.id]) e.hidden = true;
-      }
+      digerleriniKapat(o.kutu);
       try {
         await o.ac();
       } catch (err) {
@@ -138,8 +177,17 @@
   }
 
   const qs = new URLSearchParams(location.search);
-  if (qs.get('oyun') === 'sinir') {
+  const oyunQ = qs.get('oyun');
+  if (oyunQ === 'sinir') {
     setTimeout(() => paketYukle('sinir').then(() => window.SinirBil && window.SinirBil.ac()).catch(() => {}), 500);
+  } else if (oyunQ === 'kim' && DUNYA) {
+    setTimeout(() => paketYukle('kim').then(() => window.BenKimim && window.BenKimim.gunluk()).catch(() => {}), 500);
+  } else if (oyunQ === 'eski') {
+    setTimeout(() => paketYukle('eski').then(() => window.HangisiEski && window.HangisiEski.ac()).catch(() => {}), 500);
+  } else if (oyunQ === 'toprak') {
+    setTimeout(() => paketYukle('toprak').then(() => window.ToprakTarihi && window.ToprakTarihi.ac()).catch(() => {}), 500);
+  } else if (oyunQ === 'sasirt') {
+    setTimeout(() => window.AyniAnda && window.AyniAnda.sasirt(true), 400);
   } else if (qs.get('dog') && DUNYA) {
     setTimeout(() => paketYukle('kim').then(() => window.Hayat && window.Hayat.basla()).catch(() => {}), 500);
   }
