@@ -1,5 +1,5 @@
 // 🎲 Rastgele doğ: rastgele bir yılda, o yıl var olan rastgele bir devlette doğ; hayatını aşama aşama yaşa.
-// Konum: Cliopatria sınırlarından (Dunya.devletler). Kartlar: data/hayat-olaylar.js, bulmacalar: data/hayat-bulmaca.js.
+// Konum: Cliopatria sınırlarından (Dunya.devletler). Kartlar: data/oyun/hayat-olaylar.js, bulmacalar: data/oyun/hayat-bulmaca.js.
 // Bayraklar (evli, cocuk, toprak…) ve unvanlar (usta, kadı, komutan, vezir, hükümdar…) hayatın yolunu belirler.
 'use strict';
 window.Hayat = (() => {

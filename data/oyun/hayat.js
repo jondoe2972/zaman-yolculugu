@@ -52,7 +52,7 @@ window.HAYAT = {
     { id: 'isci', ad: '🏭 Fabrikada çalışmaya başla', sinif: ['koylu', 'isci', 'zanaat'], donem: ['modern'] },
     { id: 'okul', ad: '🎓 Okula devam et, meslek sahibi ol', sinif: ['isci', 'memur', 'tuccar', 'zanaat', 'koylu', 'soylu', 'din', 'saray', 'asker'], donem: ['modern'] }
   ],
-  // olaylar ve bulmacalar: data/hayat-olaylar.js ve data/hayat-bulmaca.js
+  // olaylar ve bulmacalar: data/oyun/hayat-olaylar.js ve data/oyun/hayat-bulmaca.js
   olaylar: [],
   // her aşamada bir "biliyor muydun"
   bilgiler: {

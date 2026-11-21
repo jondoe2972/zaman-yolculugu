@@ -669,5 +669,15 @@ window.Dunya = (() => {
     for (let i = 0; i < 40; i++) { const o = aktifSinirlar0(y); if (o.length) return o.map(q => ({ ad: q.k.tr || q.k.n, n: q.k.n, a: q.k.a, e: q.k.e, bb: q.k.bb, w: q.k.w })); await new Promise(r => setTimeout(r, 250)); }
     return [];
   }
-  return { devletler, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
+  // bir devletin o yılki sınır kaydı (oyunlar için): halkalar [enlem], [boylam] dizileri olarak
+  async function kayit(n, y) {
+    const i = dilimNo(y); dilimIste(i);
+    for (let t = 0; t < 80; t++) {
+      const K = DILIM[i];
+      if (K) { const k = K.find(q => q.n === n && y <= q.y1 && y >= q.y0); return k ? { n: k.n, ad: k.tr || k.n, e: k.e, bb: k.bb, w: k.w, H: k.H.map(h => ({ la: h.la, lo: h.lo })) } : null; }
+      await new Promise(r => setTimeout(r, 250));
+    }
+    return null;
+  }
+  return { devletler, kayit, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
 })();
