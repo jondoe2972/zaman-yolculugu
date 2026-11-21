@@ -33,6 +33,7 @@
     for (const lm of window.ATLAS_LIMANLAR || []) add({ tur: 'Liman', ikon: '⚓', ad: lm.ad, alt: `${lm.ulke} · ${lm.rol}`, kw: [lm.ulke, lm.w], oncelik: 5, act: () => ZY().openLiman(lm.id) });
     for (const nr of window.ATLAS_NEHIRLER || []) add({ tur: 'Nehir', ikon: '🏞️', ad: nr.ad, alt: `${nr.uzunluk} · ${nr.havza}`, kw: [nr.havza, nr.w], oncelik: 5, act: () => ZY().openNehir(nr.id) });
     for (const hg of window.ATLAS_HAYVAN_GOC || []) add({ tur: 'Göç Döngüsü', ikon: hg.ik || '🐋', ad: hg.ad, alt: hg.mesafe, kw: [hg.w], oncelik: 5, act: () => ZY().openHayvanGoc(hg.id) });
+    for (const v of (window.ATLAS_VOLKANLAR || {}).volkanlar || []) add({ tur: 'Yanardağ', ikon: '🌋', ad: v.ad, alt: `${v.ulke} · ${v.yukseklik}`, kw: [v.ulke, v.w], oncelik: 5, act: () => ZY().openVolkan(v.id) });
     return out;
   }
   function search(q) {

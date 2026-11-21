@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Dünya tarihini interaktif kürede keşfet, o dönemde bir gününü yaşa ve tarih oyunlarını oyna.">
 <meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23241b14'/%3E%3Cpath d='M18 12h28v6c0 7-6 11-11 14 5 3 11 7 11 14v6H18v-6c0-7 6-11 11-14-5-3-11-7-11-14v-6z' fill='none' stroke='%23ffd666' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 18h18c0 4-4 7-9 10-5-3-9-6-9-10zm9 18c5 3 9 6 9 10H23c0-4 4-7 9-10z' fill='%23ffd666'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/stil.css?v=61">
+<link rel="stylesheet" href="css/stil.css?v=62">
 </head>
 <body>
 <header class="top">
@@ -71,26 +71,37 @@
           <button type="button" data-atlas="tarih" class="on">🏛️ Tarih Atlası</button>
           <button type="button" data-atlas="doga">🌿 Doğa Atlası</button>
         </div>
-        <b>Haritada göster</b>
-        <label><input type="checkbox" data-kat="sinir" checked><span>🗺️ Dönemin sınırları</span></label>
-        <label><input type="checkbox" data-kat="donum"><span>⚡ Dünyayı değiştiren büyük olaylar</span><i></i></label>
-        <label><input type="checkbox" data-kat="akinti"><span>🌊 Akıntılar, girdaplar ve fırtınalar</span><i></i></label>
-        <label><input type="checkbox" data-kat="hayvan"><span>🐾 Bölge hayvanları (yıla göre)</span><i></i></label>
-        <label><input type="checkbox" data-kat="hayvangoc"><span>🐋 Hayvanların yıllık göç döngüsü</span><i></i></label>
-        <label><input type="checkbox" data-kat="cografya"><span>🏔️ Dağlar, çöller ve tarihî havzalar</span><i></i></label>
-        <label><input type="checkbox" data-kat="nehir"><span>🏞️ Dünya nehirleri (büyüklüğe göre)</span><i></i></label>
-        <label><input type="checkbox" data-kat="liman"><span>⚓ Dünya çapındaki önemli limanlar</span><i></i></label>
-        <label><input type="checkbox" data-kat="goc" checked><span>🧬 İnsanlığın yayılışı (MÖ 3000 öncesi)</span></label>
-        <label><input type="checkbox" data-kat="magara" checked><span>🪨 Tarihöncesi mağaralar (MÖ 3000 öncesi)</span><i></i></label>
-        <label><input type="checkbox" data-kat="ticaret" checked><span>🐪 Ticaret yolları</span><i></i></label>
-        <label><input type="checkbox" data-kat="yolculuk"><span>🧭 Ünlü yolculuklar ve seferler</span><i></i></label>
-        <label><input type="checkbox" data-kat="savas"><span>⚔️ Savaşlar</span><i></i></label>
-        <label><input type="checkbox" data-kat="deniz"><span>⚓ Deniz savaşları</span><i></i></label>
-        <label><input type="checkbox" data-kat="antlasma"><span>📜 Antlaşmalar</span><i></i></label>
-        <label><input type="checkbox" data-kat="afet"><span>🌋 Doğal afetler</span><i></i></label>
-        <label><input type="checkbox" data-kat="olay"><span>🏛️ Önemli olaylar</span><i></i></label>
-        <label><input type="checkbox" data-kat="kaynak"><span>⛏️ Yeraltı kaynakları</span><i></i></label>
-        <div class="kp-aralik">Olaylar: seçili yılın ±<select id="aralik"><option value="1">1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100" selected>100</option><option value="250">250</option><option value="500">500</option></select> yıl çevresi</div>
+        <div class="kp-sekmeler" role="tablist" aria-label="Katman kategorileri">
+          <button type="button" data-kpsek="tarih" class="on">🏛️ Tarih<em></em></button>
+          <button type="button" data-kpsek="doga">🌿 Doğa<em></em></button>
+          <button type="button" data-kpsek="olaylar">⚔️ Olaylar<em></em></button>
+        </div>
+        <div class="kp-grup" data-kpgrup="tarih">
+          <label><input type="checkbox" data-kat="sinir" checked><span>🗺️ Dönemin sınırları</span></label>
+          <label><input type="checkbox" data-kat="donum"><span>⚡ Dünyayı değiştiren büyük olaylar</span><i></i></label>
+          <label><input type="checkbox" data-kat="ticaret" checked><span>🐪 Ticaret yolları</span><i></i></label>
+          <label><input type="checkbox" data-kat="liman"><span>⚓ Dünya çapındaki önemli limanlar</span><i></i></label>
+          <label><input type="checkbox" data-kat="yolculuk"><span>🧭 Ünlü yolculuklar ve seferler</span><i></i></label>
+          <label><input type="checkbox" data-kat="goc" checked><span>🧬 İnsanlığın yayılışı (MÖ 3000 öncesi)</span></label>
+          <label><input type="checkbox" data-kat="magara" checked><span>🪨 Tarihöncesi mağaralar (MÖ 3000 öncesi)</span><i></i></label>
+          <label><input type="checkbox" data-kat="kaynak"><span>⛏️ Yeraltı kaynakları</span><i></i></label>
+        </div>
+        <div class="kp-grup" data-kpgrup="doga" hidden>
+          <label><input type="checkbox" data-kat="akinti"><span>🌊 Akıntılar, girdaplar ve fırtınalar</span><i></i></label>
+          <label><input type="checkbox" data-kat="hayvan"><span>🐾 Bölge hayvanları (yıla göre)</span><i></i></label>
+          <label><input type="checkbox" data-kat="hayvangoc"><span>🐋 Hayvanların yıllık göç döngüsü</span><i></i></label>
+          <label><input type="checkbox" data-kat="cografya"><span>🏔️ Dağlar, çöller ve tarihî havzalar</span><i></i></label>
+          <label><input type="checkbox" data-kat="nehir"><span>🏞️ Dünya nehirleri (büyüklüğe göre)</span><i></i></label>
+          <label><input type="checkbox" data-kat="volkan"><span>🌋 Yanardağlar ve Ateş Çemberi</span><i></i></label>
+        </div>
+        <div class="kp-grup" data-kpgrup="olaylar" hidden>
+          <label><input type="checkbox" data-kat="savas"><span>⚔️ Savaşlar</span><i></i></label>
+          <label><input type="checkbox" data-kat="deniz"><span>⚓ Deniz savaşları</span><i></i></label>
+          <label><input type="checkbox" data-kat="antlasma"><span>📜 Antlaşmalar</span><i></i></label>
+          <label><input type="checkbox" data-kat="afet"><span>🌋 Doğal afetler</span><i></i></label>
+          <label><input type="checkbox" data-kat="olay"><span>🏛️ Önemli olaylar</span><i></i></label>
+          <div class="kp-aralik">Seçili yılın ±<select id="aralik"><option value="1">1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100" selected>100</option><option value="250">250</option><option value="500">500</option></select> yıl çevresi</div>
+        </div>
         <button type="button" id="kesif-ac" class="kp-kesif">🧭 Keşif Defterim <small id="kesif-say"></small></button>
       </div>
       <div class="kp-sahne">
@@ -199,19 +210,21 @@
 <script src="data/atlas/limanlar.js?v=1"></script>
 <script src="data/atlas/nehirler.js?v=1"></script>
 <script src="data/atlas/hayvan-goc.js?v=1"></script>
+<script src="data/atlas/volkanlar.js?v=1"></script>
+<script src="data/atlas/tarihte-bugun.js?v=1"></script>
 <script src="data/atlas/donum-noktalari.js?v=2"></script>
-<script src="js/dunya.js?v=72"></script>
+<script src="js/dunya.js?v=73"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
 <script src="data/yapilar/avrupa.js?v=1"></script>
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="js/sahne-harita.js?v=6"></script>
-<script src="js/uygulama.js?v=69"></script>
+<script src="js/uygulama.js?v=70"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=6"></script>
-<script src="js/oyun/oyunlar.js?v=12"></script>
-<script src="js/ara.js?v=11"></script>
+<script src="js/oyun/oyunlar.js?v=13"></script>
+<script src="js/ara.js?v=12"></script>
 </body>
 </html>

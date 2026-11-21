@@ -25,6 +25,9 @@
     ],
     hayvan: [
       'js/oyun/hayvan-oyun.js?v=3'
+    ],
+    foto: [
+      'js/oyun/foto-tahmin.js?v=1'
     ]
   };
   const dosyaSoz = new Map();
@@ -113,12 +116,25 @@
       }
     },
     {
-      id: 'hayvan', kutu: 'hayvan-oyun', ikon: '🐾', ad: 'Hayvanlar Alemi', yeni: true,
+      id: 'hayvan', kutu: 'hayvan-oyun', ikon: '🐾', ad: 'Hayvanlar Alemi',
       alt: () => { const r = hayvanRekor(); return r ? `Bu hayvan nerede yaşar? + Doğa Bilgini · 🏆 Seri: ${r}` : 'Fotoğraftan yaşam bölgesini bil + Doğa Bilgini yarışması'; },
       ac: async () => {
         await paketYukle('hayvan');
         if (window.HayvanOyunu) window.HayvanOyunu.ac();
       }
+    },
+    {
+      id: 'foto', kutu: 'foto-oyun', ikon: '📸', ad: 'Burası Neresi & Hangi Çağ?', yeni: true,
+      alt: 'Fotoğrafa bak, haritada yerini işaretle ve çağını tahmin et',
+      ac: async () => {
+        await paketYukle('foto');
+        if (window.FotoTahmin) window.FotoTahmin.ac();
+      }
+    },
+    {
+      id: 'bugun', kutu: 'modal', ikon: '📅', ad: 'Tarihte Bugün', yeni: true,
+      alt: 'Takvimde bugüne damga vuran olayları gör ve o güne git',
+      ac: () => window.ZY && window.ZY.openTarihteBugun && window.ZY.openTarihteBugun()
     },
     {
       id: 'toprak', kutu: 'topraklar', ikon: '📍', ad: 'Bu Toprakların Tarihi',
@@ -213,6 +229,8 @@
     setTimeout(() => paketYukle('toprak').then(() => window.ToprakTarihi && window.ToprakTarihi.ac()).catch(() => {}), 500);
   } else if (oyunQ === 'hayvan') {
     setTimeout(() => paketYukle('hayvan').then(() => window.HayvanOyunu && window.HayvanOyunu.ac()).catch(() => {}), 500);
+  } else if (oyunQ === 'foto') {
+    setTimeout(() => paketYukle('foto').then(() => window.FotoTahmin && window.FotoTahmin.ac()).catch(() => {}), 500);
   } else if (oyunQ === 'sasirt') {
     setTimeout(() => window.AyniAnda && window.AyniAnda.sasirt(true), 400);
   } else if (qs.get('dog') && DUNYA) {

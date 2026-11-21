@@ -12,7 +12,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, akinti: false, hayvan: false, cografya: false, nehir: false, hayvangoc: false, liman: false, donum: false };
+  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, akinti: false, hayvan: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false };
 
   // ---------- veri ----------
   const VERI = window.DUNYA_VERI || { kara: [], nehir: [] };
@@ -916,6 +916,36 @@ window.Dunya = (() => {
         hits.push({ kind: 'liman', lm, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
       }
     }
+    // 🌋 Tektonik Fay Kuşakları (Ateş Çemberi) ve Ünlü Yanardağlar (data/atlas/volkanlar.js)
+    if (layers.volkan && window.ATLAS_VOLKANLAR) {
+      for (const f of window.ATLAS_VOLKANLAR.faylar || []) {
+        const d = yolHazirla(f), hov = hover && hover.kind === 'fay' && hover.f === f;
+        g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+        g.beginPath(); linePath(d.p);
+        g.strokeStyle = hov ? 'rgba(255,214,102,0.55)' : 'rgba(239,68,68,0.28)'; g.lineWidth = hov ? 8 : 5.5; g.stroke();
+        g.strokeStyle = hov ? '#ffd666' : 'rgba(249,115,22,0.9)'; g.lineWidth = hov ? 2.6 : 1.7; g.setLineDash([6, 4]); g.stroke(); g.setLineDash([]);
+        g.restore();
+        for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.06) hits.unshift({ kind: 'fay', f, x0: x - 7, x1: x + 7, y0: y - 7, y1: y + 7 }); }
+      }
+      const shownV = [];
+      for (const v of window.ATLAS_VOLKANLAR.volkanlar || []) {
+        const [x, y, z] = P(...v.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+        if (shownV.some(q => Math.abs(q[0] - x) < 22 && Math.abs(q[1] - y) < 22)) continue;
+        shownV.push([x, y]);
+        const hov = hover && hover.kind === 'volkan' && hover.v === v;
+        const s0 = hov ? 12 : 9.5, fl = 0.8 + 0.25 * Math.sin(T * 5 + v.ll[1]);
+        g.save();
+        g.fillStyle = '#3b2420'; g.strokeStyle = hov ? '#ffd666' : '#fca5a5'; g.lineWidth = hov ? 2 : 1.3;
+        g.beginPath(); g.moveTo(x, y - s0); g.lineTo(x + s0, y + s0 * 0.72); g.lineTo(x - s0, y + s0 * 0.72); g.closePath(); g.fill(); g.stroke();
+        // Lav zirvesi parıltısı
+        g.fillStyle = '#f97316'; g.beginPath(); g.arc(x, y - s0 * 0.82, 3.2 * fl, 0, 7); g.fill();
+        g.fillStyle = '#fde047'; g.beginPath(); g.arc(x, y - s0 * 0.85, 1.5 * fl, 0, 7); g.fill();
+        g.restore();
+        obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
+        if (view.z >= 1.55 || hov) lab(hov ? 97 : 61, x, y + s0 + 9, v.ad.split(' (')[0], { size: 10.2, w: 700, col: '#ffedd5', halo: 2.8, haloCol: 'rgba(42,14,10,0.9)', kay: true });
+        hits.push({ kind: 'volkan', v, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
+      }
+    }
     // 🐾 Bölge hayvanları ve okyanus canlıları (nesli tükenenler yıla göre görünür — data/atlas/hayvanlar.js)
     if (layers.hayvan && window.ATLAS_HAYVANLAR && view.z >= 1.35) {
       const minD = clamp(40 - view.z * 2.5, 24, 38);
@@ -1155,6 +1185,8 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'nehir') tip(hover.x1 + 6, hover.y0, `🏞️ ${hover.nr.ad}`, `${hover.nr.uzunluk} · ${hover.nr.havza} · tıkla: doğa ve tarih`);
     else if (hover && hover.kind === 'hayvangoc') tip(hover.x1 + 6, hover.y0, `${hover.hg.ik} ${hover.hg.ad}`, `${hover.hg.mesafe} · tıkla: yıllık göç döngüsü`);
     else if (hover && hover.kind === 'liman') tip(hover.x1 + 6, hover.y0, `⚓ ${hover.lm.ad}`, `${hover.lm.ulke} · ${hover.lm.rol} · tıkla: liman bilgisi`);
+    else if (hover && hover.kind === 'volkan') tip(hover.x1 + 6, hover.y0, `🌋 ${hover.v.ad}`, `${hover.v.ulke} · ${hover.v.yukseklik} (${hover.v.durum}) · tıkla: patlama tarihi`);
+    else if (hover && hover.kind === 'fay') tip(hover.x1 + 6, hover.y0, `🔥 ${hover.f.ad}`, 'Tektonik fay ve deprem kuşağı · tıkla: ayrıntılar');
     else if (hover && hover.kind === 'hatyapi') tip(hover.x1 + 6, hover.y0, hover.hy.ad, `${hover.hy.yer} · ${hover.hy.uzunluk} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'donum') tip(hover.x1 + 6, hover.y0, `⚡ ${hover.d.ad}`, `${hover.d.yilYazi} · ${hover.d.yer} · tıkla: dünyayı nasıl değiştirdi?`);
     else if (hover && hover.kind === 'magara') tip(hover.x1 + 6, hover.y0, `🪨 ${hover.m.ad}`, `${hover.m.donem} · ${hover.m.yer} · tıkla: kazı buluntuları ve nüfus`);
