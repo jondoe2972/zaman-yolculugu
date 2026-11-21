@@ -56,7 +56,7 @@
   const tcv = $('#timeline'), tg = tcv.getContext('2d');
   let W = 0, H = 0, TW = 0, TH = 0, DPR = 1;
   let Y = QS.get('yil') && !isNaN(+QS.get('yil')) ? clamp(+QS.get('yil'), P.to, P.from) : P.start, playing = false, speed = P.composite ? 10 : 2, shown = null;
-  let camX = 0, follow = true, last = performance.now();
+  let camX = 0, camHedef = null, follow = true, last = performance.now();
   let hoverEv = null, view = 'sahne';
 
   S.prepare(SP); S.initAgents();
@@ -548,7 +548,7 @@
   // ---------- sahnede sürükleme ve tıklama ----------
   let dragS = null;
   const cvPos = (el, ev) => { const r = el.getBoundingClientRect(); return [ev.clientX - r.left, ev.clientY - r.top]; };
-  cv.addEventListener('pointerdown', ev => { dragS = { x: ev.clientX, c: camX, moved: false }; cv.setPointerCapture(ev.pointerId); });
+  cv.addEventListener('pointerdown', ev => { camHedef = null; ysListe(false); dragS = { x: ev.clientX, c: camX, moved: false }; cv.setPointerCapture(ev.pointerId); });
   cv.addEventListener('pointermove', ev => {
     if (!dragS) { const h = S.hitTest(...cvPos(cv, ev)); S.setHover(h ? h.id : null); cv.style.cursor = h ? 'pointer' : 'grab'; return; }
     const dx = ev.clientX - dragS.x;
@@ -559,6 +559,81 @@
     dragS = null;
   });
   cv.addEventListener('pointerleave', () => S.setHover(null));
+
+  // ---------- sahnede yer şeridi: neredesin, solunda ve sağında ne var ----------
+  // Sahne bir panorama: yerler bir çizgi boyunca dizili (wx). Hangi yönün sağa düştüğü bölgeden bölgeye değişir;
+  // anıtların gerçek konumlarından (MIS.coords) hesaplanır: wx büyüdükçe enlem/boylam nereye gidiyor?
+  const YON = ['DOĞU', 'KUZEYDOĞU', 'KUZEY', 'KUZEYBATI', 'BATI', 'GÜNEYBATI', 'GÜNEY', 'GÜNEYDOĞU'];
+  const yonAd = a => YON[((Math.round(a / (Math.PI / 4)) % 8) + 8) % 8];
+  const yonOnb = new WeakMap();
+  function sahneYonu(sp) {
+    if (yonOnb.has(sp)) return yonOnb.get(sp);
+    const co = MIS.coords || {}, n = [];
+    for (const m of sp.monuments || []) { const c = co[m.id]; if (c && typeof m.wx === 'number') n.push([m.wx, c[0], c[1]]); }
+    let yon = null;
+    if (n.length >= 3) {
+      const o0 = n[0][2]; n.forEach(p => { p[2] = o0 + ((p[2] - o0 + 540) % 360) - 180; });
+      const ort = i => n.reduce((t, p) => t + p[i], 0) / n.length, mw = ort(0), ml = ort(1), mo = ort(2), cs = Math.cos(ml * Math.PI / 180);
+      let a = 0, b = 0, v = 0;
+      for (const [w, la, lo] of n) { const d = w - mw; v += d * d; a += d * (la - ml); b += d * (lo - mo) * cs; }
+      if (v > 0 && Math.hypot(a, b) > 0) { const t = Math.atan2(a, b); yon = { sag: yonAd(t), sol: yonAd(t + Math.PI) }; }
+    }
+    yonOnb.set(sp, yon); return yon;
+  }
+  const ys = $('#yerserit'), ysCubuk = ys.querySelector('.ys-cubuk'), ysPen = ys.querySelector('.ys-pen'), ysL = ys.querySelector('.ys-liste');
+  let ysSP = null, ysYer = [], ysAralik = [0, 1], ysDurum = '';
+  const ysAd = s => s.ad; // sahnedeki yazıyla aynı (büyük harf), aranan yer kolay tanınsın
+  const YON_EK = { 'DOĞU': ['doğudan', 'doğuya'], 'KUZEYDOĞU': ['kuzeydoğudan', 'kuzeydoğuya'], 'KUZEY': ['kuzeyden', 'kuzeye'], 'KUZEYBATI': ['kuzeybatıdan', 'kuzeybatıya'], 'BATI': ['batıdan', 'batıya'], 'GÜNEYBATI': ['güneybatıdan', 'güneybatıya'], 'GÜNEY': ['güneyden', 'güneye'], 'GÜNEYDOĞU': ['güneydoğudan', 'güneydoğuya'] };
+  function ysHazirla() {
+    ysSP = SP; const gor = new Set();
+    ysYer = [...(SP.sites || [])].sort((a, b) => a.wx - b.wx).filter(s => !gor.has(s.ad) && gor.add(s.ad));
+    ysAralik = camRange(); const [c0, c1] = ysAralik;
+    ysCubuk.querySelectorAll('.ys-n').forEach(e => e.remove());
+    ysYer.forEach((s, i) => { const e = document.createElement('i'); e.className = 'ys-n'; e.dataset.i = i; e.style.left = ((s.wx - c0) / (c1 - c0) * 100) + '%'; ysCubuk.appendChild(e); });
+    ysDurum = ''; ysListe(false);
+  }
+  function ysGit(wx) { follow = false; camHedef = wx; ysListe(false); }
+  function ysSimdi() { let b = 0; ysYer.forEach((s, i) => { if (Math.abs(s.wx - camX) < Math.abs(ysYer[b].wx - camX)) b = i; }); return b; }
+  function ysGuncelle() {
+    if (ysSP !== SP) ysHazirla();
+    if (!ysYer.length) { ys.hidden = true; return; }
+    ys.hidden = false;
+    const [c0, c1] = ysAralik, vw = W / S.scale(H), sp = c1 - c0;
+    ysPen.style.left = clamp((camX - vw / 2 - c0) / sp * 100, 0, 100) + '%';
+    ysPen.style.width = clamp(vw / sp * 100, 4, 100) + '%';
+    const i = ysSimdi(), yon = sahneYonu(SP), d = i + '|' + (yon ? yon.sag : '');
+    if (d === ysDurum) return; ysDurum = d;
+    const sol = ysYer[i - 1], sag = ysYer[i + 1];
+    ys.querySelector('.ys-ad b').textContent = ysAd(ysYer[i]);
+    const yan = (el, s, ok, yn) => { el.disabled = !s; el.querySelector('small').textContent = ok === '◀' ? `◀ ${yn || 'SOL'}` : `${yn || 'SAĞ'} ▶`; el.querySelector('b').textContent = s ? ysAd(s) : 'sahnenin sonu'; };
+    yan(ys.querySelector('.ys-sol'), sol, '◀', yon && yon.sol); yan(ys.querySelector('.ys-sag'), sag, '▶', yon && yon.sag);
+    ysCubuk.querySelectorAll('.ys-n').forEach(e => e.classList.toggle('on', +e.dataset.i === i));
+  }
+  ys.querySelector('.ys-sol').addEventListener('click', () => { const s = ysYer[ysSimdi() - 1]; if (s) ysGit(s.wx); });
+  ys.querySelector('.ys-sag').addEventListener('click', () => { const s = ysYer[ysSimdi() + 1]; if (s) ysGit(s.wx); });
+  function ysListe(ac) {
+    if (!ysL) return;
+    if (ac == null) ac = ysL.hidden;
+    ysL.hidden = !ac; ys.querySelector('.ys-ad').setAttribute('aria-expanded', String(ac));
+    if (!ac) return;
+    const yon = sahneYonu(SP), i = ysSimdi(), f = S.focus(Y);
+    ysL.innerHTML = `<div class="ys-bas">${yon ? `Soldan sağa, <b>${YON_EK[yon.sol][0]}</b> <b>${YON_EK[yon.sag][1]}</b>` : 'Soldan sağa'}</div>`
+      + `<button data-sant="1"><span>🎯</span>Bu yılın şantiyesi: ${esc(f.ad || '')}</button>`
+      + ysYer.map((s, j) => `<button data-i="${j}" class="${j === i ? 'on' : ''}"><span>${j === i ? '📍' : '·'}</span>${esc(ysAd(s))}</button>`).join('');
+  }
+  ys.querySelector('.ys-ad').addEventListener('click', ev => { ev.stopPropagation(); ysListe(); });
+  ysL.addEventListener('click', ev => {
+    const b = ev.target.closest('button'); if (!b) return;
+    if (b.dataset.sant) { follow = true; camHedef = null; cityFocus = null; ysListe(false); return; }
+    const s = ysYer[+b.dataset.i]; if (s) ysGit(s.wx);
+  });
+  let ysSurukle = false;
+  const ysCubukGit = ev => { const r = ysCubuk.getBoundingClientRect(), f = clamp((ev.clientX - r.left) / r.width, 0, 1); follow = false; camHedef = null; camX = ysAralik[0] + f * (ysAralik[1] - ysAralik[0]); };
+  ysCubuk.addEventListener('pointerdown', ev => { ysSurukle = true; ysListe(false); ysCubuk.setPointerCapture(ev.pointerId); ysCubukGit(ev); });
+  ysCubuk.addEventListener('pointermove', ev => { if (ysSurukle) ysCubukGit(ev); });
+  const ysBirak = () => { ysSurukle = false; };
+  ysCubuk.addEventListener('pointerup', ysBirak); ysCubuk.addEventListener('pointercancel', ysBirak);
+  document.addEventListener('click', ev => { if (!ev.target.closest('#yerserit')) ysListe(false); });
 
   // ---------- harita ----------
   // kure: küre için ünlü yapılar (data/yapilar) da eklenir; o yıl ayakta olanlar, önemlerine göre farklı yakınlıkta belirir
@@ -583,15 +658,21 @@
     return (MIS.sehirler || []).filter(c => Y <= c.from && Y >= c.to).map(c => ({ ...c, cap: (c.b || []).some(([a, b]) => Y <= a && Y >= b) }));
   }
   let dragM = null; const pts = new Map();
-  mcv.addEventListener('pointerdown', ev => { pts.set(ev.pointerId, [ev.clientX, ev.clientY]); dragM = { x: ev.clientX, y: ev.clientY, moved: false, d0: null }; mcv.setPointerCapture(ev.pointerId); });
+  mcv.addEventListener('pointerdown', ev => {
+    pts.set(ev.pointerId, [ev.clientX, ev.clientY]); mcv.setPointerCapture(ev.pointerId);
+    if (pts.size >= 2 && dragM) { dragM.moved = true; dragM.d0 = null; dragM.m = null; return; }
+    dragM = { x: ev.clientX, y: ev.clientY, moved: false, d0: null };
+  });
   mcv.addEventListener('pointermove', ev => {
     if (pts.has(ev.pointerId)) pts.set(ev.pointerId, [ev.clientX, ev.clientY]);
-    if (pts.size === 2) {
-      const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-      if (dragM.d0) { const r = mcv.getBoundingClientRect(); M.zoomAt((a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top, d / dragM.d0); }
-      dragM.d0 = d; dragM.moved = true; return;
+    if (pts.size >= 2 && dragM) {
+      const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), r = mcv.getBoundingClientRect();
+      const m = [(a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top];
+      if (dragM.d0 && d > 10) { M.pan(m[0] - dragM.m[0], m[1] - dragM.m[1]); M.zoomAt(m[0], m[1], clamp(d / dragM.d0, 0.8, 1.25)); }
+      dragM.d0 = d; dragM.m = m; dragM.moved = true; return;
     }
     if (!dragM) { const h = M.hitTest(...cvPos(mcv, ev)); M.setHover(h); mcv.style.cursor = h ? 'pointer' : 'grab'; return; }
+    if (!pts.has(ev.pointerId)) return;
     const dx = ev.clientX - dragM.x, dy = ev.clientY - dragM.y;
     if (dragM.moved || Math.hypot(dx, dy) > 5) { dragM.moved = true; M.pan(dx, dy); dragM.x = ev.clientX; dragM.y = ev.clientY; }
   });
@@ -602,7 +683,9 @@
       else if (h && h.kind === 'kume') M.zoomAt(h.cx, h.cy, 3);
       else if (h && h.kind === 'sehir') toast(`<b>${esc(h.c.ad)}</b> ${esc(h.c.not || '')}`);
     }
-    pts.delete(ev.pointerId); if (!pts.size) dragM = null;
+    pts.delete(ev.pointerId);
+    if (!pts.size) dragM = null;
+    else if (dragM) { const [k] = [...pts.values()]; dragM.x = k[0]; dragM.y = k[1]; dragM.d0 = null; dragM.m = null; }
   };
   mcv.addEventListener('pointerup', endM); mcv.addEventListener('pointercancel', endM);
   mcv.addEventListener('wheel', ev => { ev.preventDefault(); const [x, y] = cvPos(mcv, ev); M.zoomAt(x, y, ev.deltaY < 0 ? 1.18 : 1 / 1.18); }, { passive: false });
@@ -615,17 +698,32 @@
 
   // ---------- dünya küresi ----------
   const DN = window.Dunya; let dragG = null; const gpts = new Map();
-  gcv.addEventListener('pointerdown', ev => { DN.hold(); gpts.set(ev.pointerId, [ev.clientX, ev.clientY]); dragG = { x: ev.clientX, y: ev.clientY, moved: false, d0: null }; gcv.setPointerCapture(ev.pointerId); });
+  // İki parmak: parmakların ortası sabit kalacak biçimde yakınlaşır. Bir parmak kalkınca sürükleme kalan parmağın
+  // o anki yerinden yeniden başlar (eskiden eski konuma göre hesaplandığı için küre bir anda başka yere kayıyordu).
+  gcv.addEventListener('pointerdown', ev => {
+    DN.hold(); gpts.set(ev.pointerId, [ev.clientX, ev.clientY]); gcv.setPointerCapture(ev.pointerId);
+    if (gpts.size >= 2 && dragG) { dragG.moved = true; dragG.d0 = null; dragG.m = null; dragG.iki = true; return; }
+    dragG = { x: ev.clientX, y: ev.clientY, moved: false, d0: null };
+  });
   gcv.addEventListener('pointermove', ev => {
     if (gpts.has(ev.pointerId)) gpts.set(ev.pointerId, [ev.clientX, ev.clientY]);
-    if (gpts.size === 2) { const [a, b] = [...gpts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (dragG.d0) DN.zoom(d / dragG.d0); dragG.d0 = d; dragG.moved = true; return; }
+    if (gpts.size >= 2 && dragG) {
+      const [a, b] = [...gpts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), r = gcv.getBoundingClientRect();
+      const m = [(a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top];
+      if (dragG.d0 && d > 10) { DN.drag(m[0] - dragG.m[0], m[1] - dragG.m[1]); DN.zoom(clamp(d / dragG.d0, 0.8, 1.25), m[0], m[1]); DN.hold(); }
+      dragG.d0 = d; dragG.m = m; dragG.moved = true; return;
+    }
     if (!dragG) { const h = DN.hitTest(...cvPos(gcv, ev)); DN.setHover(h); gcv.style.cursor = h ? 'pointer' : 'grab'; return; }
+    if (!gpts.has(ev.pointerId)) return;
     const dx = ev.clientX - dragG.x, dy = ev.clientY - dragG.y;
     if (dragG.moved || Math.hypot(dx, dy) > 4) { dragG.moved = true; DN.drag(dx, dy); dragG.x = ev.clientX; dragG.y = ev.clientY; }
+    if (dragG.iki) DN.hold(); // iki parmaktan sonra kalan parmakla savrulma olmasın
   });
   const endG = ev => {
     if (dragG && !dragG.moved && gpts.size <= 1) { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (!h && DN.sinirAcik) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else if (h && h.kind === 'yolculuk') openYolculuk(h.j); }
-    gpts.delete(ev.pointerId); if (!gpts.size) dragG = null;
+    gpts.delete(ev.pointerId);
+    if (!gpts.size) dragG = null;
+    else if (dragG) { const [k] = [...gpts.values()]; dragG.x = k[0]; dragG.y = k[1]; dragG.d0 = null; dragG.m = null; DN.hold(); }
   };
   gcv.addEventListener('pointerup', endG); gcv.addEventListener('pointercancel', endG);
   gcv.addEventListener('wheel', ev => { ev.preventDefault(); const [x, y] = cvPos(gcv, ev); DN.zoom(ev.deltaY < 0 ? 1.2 : 1 / 1.2, x, y); }, { passive: false });
@@ -663,7 +761,7 @@
     card.querySelector('.cc-body').innerHTML = cityHTML(c, true);
     card.dataset.city = c.ad; card.querySelector('.cc-more').hidden = false;
     if (best) {
-      setView('sahne'); follow = false; camX = best.wx; cityFocus = c.ad; shown = null;
+      setView('sahne'); follow = false; camHedef = null; camX = best.wx; cityFocus = c.ad; shown = null;
       kartGoster();
       toast(`📍 <b>${esc(c.ad)}</b> · ${YIL.fmt(Math.round(Y))}: şehrin o yılki görünümü`);
     } else {
@@ -774,7 +872,7 @@
     }
     const m = SP.monuments.find(x => x.id === id);
     if (!m) { openInfo(id); return; }
-    setView('sahne'); follow = false; camX = m.wx; cityFocus = m.ad.replace(/ \(.*\)$/, ''); shown = null;
+    setView('sahne'); follow = false; camHedef = null; camX = m.wx; cityFocus = m.ad.replace(/ \(.*\)$/, ''); shown = null;
     const b0 = bilgiOf(id), b = b0 && b0.ref ? bilgiOf(b0.ref) : b0, p = S.progress(m, Y);
     const durum = p < 0 ? 'henüz başlanmadı' : m.ruin && Y <= m.ruin ? 'harabe' : m.stop && Y <= m.stop ? 'yarım kaldı' : p >= 1 ? 'tamamlanmış' : `inşaat sürüyor, %${Math.round(p * 100)}`;
     const card = $('#citycard');
@@ -827,32 +925,65 @@
   const SINIF = { lider: '👑 Lider', ciftci: '🌾 Çiftçi', isci: '⚒️ İşçi', tuccar: '⚖️ Tüccar', asker: '⚔️ Asker', alim: '📜 Bilgin', zanaat: '🛠️ Meslek' };
   const yasamBul = id => { for (const k of window.YASAM || []) for (const d of k.donemler) { const r = d.roller.find(x => x.id === id); if (r) return { k, d, r }; } return null; };
   const yasamOpt = (d, r) => ({ tapinak: true, tema: d.tema || 'avrupa', giyim: d.giyim || 'antik', tac: r.sinif === 'lider' ? (d.giyim === 'modern' ? 'yok' : 'tac') : r.sinif === 'asker' && d.giyim !== 'modern' ? 'migfer' : 'yok' });
-  function openYasam() {
-    const y = Math.round(Y), { guc, halk } = rolListesi(), KT = window.YASAM || [];
+  // Yaşa yılı: Yaşa penceresinde seçilen yıl (genel zamanı değiştirmeden başka yıllar denenebilsin); ±YASA_PAY yıl içindeki hayatlar gösterilir
+  const YASA_PAY = 100, YASA_EN_ESKI = 3000;
+  let yasaYil = null;
+  const yasaCiz = b => b.querySelectorAll('[data-yrolcv]').forEach(cvEl => { const o = yasamBul(cvEl.dataset.yrolcv); if (o) liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, o.r.gun[Math.min(1, o.r.gun.length - 1)], t, A, yasamOpt(o.d, o.r))), false); });
+  // MÖ/MS sınırında 0 yılı yok: MÖ 1'den sonra MS 1 gelir
+  const yilKaydir = (y, d) => { let n = y - d; if (y > 0 && n <= 0) n -= 1; else if (y <= 0 && n > 0) n += 1; return clamp(n, -YIL.BUGUN, YASA_EN_ESKI + YASA_PAY); };
+  function yasaPencereHTML(yy, kart) {
+    const KT = window.YASAM || [], a = yy + YASA_PAY, b = Math.max(-YIL.BUGUN, yy - YASA_PAY);
+    const kita = BG.kita || (DUNYA ? 'asya' : 'avrupa');
+    const sira = [...KT].sort((p, q) => (q.kita === kita) - (p.kita === kita));
+    let n = 0;
+    const gruplar = sira.map(k => {
+      const ds = k.donemler.filter(d => d.from >= b && d.to <= a); if (!ds.length) return '';
+      return `<h3 class="ysm-kita">${k.ikon} ${k.ad}</h3>` + ds.map(d => {
+        n += d.roller.length;
+        const icinde = yy <= d.from && yy >= d.to;
+        const not = icinde ? '<span class="ysm-rozet">bu yıllarda</span>' : d.to > yy ? `<span class="ysm-rozet soluk">${YIL.ek(d.to, 'e')} kadar sürdü</span>` : `<span class="ysm-rozet soluk">${YIL.ek(d.from, 'den')} itibaren</span>`;
+        return `<div class="ysm-donem${icinde ? ' simdi' : ''}"><h4>${d.ad} ${not}<small>${d.aralik} · ${d.yer}</small></h4><div class="rolegrid">${d.roller.map(r => kart(d, r)).join('')}</div></div>`;
+      }).join('');
+    }).join('');
+    const guc = (window.ROLLER || []).filter(r => r.from >= b && r.to <= a);
+    const gucHTML = guc.length ? `<h3 class="ysm-kita">👑 Bu yıllarda güç sahibi olsaydın</h3><div class="secim">${guc.map(r => { const gy = clamp(yy, r.to, r.from); return `<button data-yasagit="${r.bolge}|${gy}">${r.ikon} <b>${r.ad}</b><small>${BLR[r.bolge] ? BLR[r.bolge].ad : r.bolge} · ${YIL.fmt(gy)}</small></button>`; }).join('')}</div>` : '';
+    const ust = `<div class="ysm-yil">
+      <div class="ysm-yil-bas">Seçtiğin yıl <b>${YIL.fmt(yy)}</b><small>${YIL.fmt(a)} ile ${YIL.fmt(b)} arasında, yani ${YASA_PAY} yıl önce ve sonra yaşanabilecek hayatlar</small></div>
+      <div class="ysm-yil-sat"><button class="phbtn" data-yyil="${yilKaydir(yy, -YASA_PAY)}">◀ −${YASA_PAY} yıl</button><button class="phbtn" data-yyil="rastgele">🎲 Rastgele</button><button class="phbtn" data-yyil="${yilKaydir(yy, YASA_PAY)}">+${YASA_PAY} yıl ▶</button></div>
+      <form class="ysm-yil-form" data-yform="1"><span>Başka bir yıl dene:</span><input type="number" min="1" step="1" inputmode="numeric" placeholder="ör. 1500" aria-label="Yıl" value="${Math.max(1, Math.abs(yy))}"><select aria-label="Çağ"><option value="ms"${yy <= 0 ? ' selected' : ''}>MS</option><option value="mo"${yy > 0 ? ' selected' : ''}>MÖ</option></select><button class="phbtn" type="submit">Bak</button></form>
+    </div>`;
+    const bos = n ? '' : `<p class="note">Bu yıllar için henüz hazır bir hayat yok. En eski hayatlar ${YIL.fmt(YASA_EN_ESKI)} civarından başlıyor.</p><div class="gos"><button class="phbtn" data-yyil="${YASA_EN_ESKI - 500}">${YIL.ek(YASA_EN_ESKI - 500, 'e')} bak</button></div>`;
+    return ust + bos + gruplar + gucHTML;
+  }
+  function openYasam(yil) {
+    yasaYil = Math.round(yil ?? Y);
+    const y = Math.round(Y), yy = yasaYil, { guc, halk } = rolListesi(), KT = window.YASAM || [];
     const kart = (d, r) => `<button class="rolecard" data-yrol="${r.id}"><canvas data-yrolcv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small><i class="ysm-sinif">${SINIF[r.sinif] || ''}</i> ${r.kim}</small></button>`;
     const tabs = KT.map(k => ({ ad: `${k.ikon} ${k.ad}`, html: `<p class="note">Bir dönem ve bir hayat seç: o insanın bir gününü, ne yediğini, nasıl bir evde yaşadığını ve hangi koşullarda çalıştığını gör.</p>${k.donemler.map(d => {
-        const simdi = y <= d.from && y >= d.to;
+        const simdi = yy <= d.from && yy >= d.to;
         return `<div class="ysm-donem${simdi ? ' simdi' : ''}"><h4>${d.ad} <small>${d.aralik} · ${d.yer}</small>${simdi ? '<span class="ysm-rozet">seçili yıl bu dönemde</span>' : ''}</h4><div class="rolegrid">${d.roller.map(r => kart(d, r)).join('')}</div></div>`; }).join('')}`,
-      onShow: b => b.querySelectorAll('[data-yrolcv]').forEach(cvEl => { const o = yasamBul(cvEl.dataset.yrolcv); if (o) liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, o.r.gun[Math.min(1, o.r.gun.length - 1)], t, A, yasamOpt(o.d, o.r))), false); }) }));
-    if (guc.length + halk.length) {
+      onShow: yasaCiz }));
+    tabs.unshift({ ad: `📅 ${YIL.fmt(yy)} ±${YASA_PAY}`, html: yasaPencereHTML(yy, kart), onShow: yasaCiz });
+    if (guc.length + halk.length && yy === y) {
       const eski = r => `<button class="rolecard${r.guc ? ' guc' : ''}" data-role="${r.id}"><canvas data-rolecv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small>${fill(r.kim, rolDegisken(r))}</small></button>`, tum = [...guc, ...halk];
-      tabs.unshift({ ad: `⭐ ${YIL.fmt(y)}`, html: `<p class="note">Seçili yıl ve bölge için özel, ayrıntılı hayatlar.</p>${guc.length ? `<h4 class="rolbas">👑 Güç sahibi hayatlar</h4><div class="rolegrid">${guc.map(eski).join('')}</div>` : ''}${halk.length ? `<h4 class="rolbas">🌾 Sıradan hayatlar</h4><div class="rolegrid">${halk.map(eski).join('')}</div>` : ''}`,
+      tabs.splice(1, 0, { ad: `⭐ ${BG.ad || 'Bu bölge'}`, html: `<p class="note">Seçili yıl ve bölge için özel, ayrıntılı hayatlar.</p>${guc.length ? `<h4 class="rolbas">👑 Güç sahibi hayatlar</h4><div class="rolegrid">${guc.map(eski).join('')}</div>` : ''}${halk.length ? `<h4 class="rolbas">🌾 Sıradan hayatlar</h4><div class="rolegrid">${halk.map(eski).join('')}</div>` : ''}`,
         onShow: b => b.querySelectorAll('[data-rolecv]').forEach(cvEl => { const r = tum.find(x => x.id === cvEl.dataset.rolecv); liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, r.adimlar[1], t, A, rolCizimOpt(r))), false); }) });
     }
-    // açılış sekmesi: seçili bölgenin kıtası (Tüm Dünya'da Asya); bu yıla özel roller varsa onlar
-    const kita = BG.kita || (DUNYA ? 'asya' : 'avrupa'), ki = Math.max(0, KT.findIndex(k => k.kita === kita));
-    showModal({ ikon: '🧑‍🌾', title: 'Yaşa: başka bir çağda bir gün', sub: 'Önce kıtayı, sonra dönemi ve hayatı seç', tabs, open: guc.length + halk.length ? 0 : ki });
+    // açılış sekmesi: seçili yılın ±100 yılındaki hayatlar (bütün kıtalar, seçili bölgenin kıtası önce)
+    showModal({ ikon: '🧑‍🌾', title: 'Yaşa: başka bir çağda bir gün', sub: `${YIL.fmt(yy)} civarında yaşasaydın nasıl bir hayatın olurdu?`, tabs, open: 0 });
   }
   function openYasamRol(id) {
     const o = yasamBul(id); if (!o) return; const { k, d, r } = o, opt = yasamOpt(d, r), n = r.gun.length;
-    const icinde = Y <= d.from && Y >= d.to, orta = d.to <= -2026 ? -2000 : Math.round((d.from + d.to) / 2);
+    // Yaşa penceresinde seçilen yıl bu dönemdeyse o yıla, değilse dönemin ortasına götürülür
+    const secili = yasaYil != null && yasaYil <= d.from && yasaYil >= d.to;
+    const orta = secili ? yasaYil : d.to <= -2026 ? -2000 : Math.round((d.from + d.to) / 2), icinde = Math.round(Y) === orta;
     const tabs = r.gun.map((st, i) => ({ ad: `${i + 1}. ${st.saat}`, html: `<canvas class="lifecv"></canvas><p class="lifetext">${st.metin}</p><div class="gos"><button class="phbtn" data-next="${i + 1}">${i + 1 < n ? 'Sonraki ▶' : 'Ne yerdin, nasıl yaşardın? ▶'}</button></div>`,
       onShow: b => liveCanvas(b.querySelector('.lifecv'), (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, st, t, A, opt)), true) }));
     tabs.push({ ad: '🍲 Yemek ve ev', html: `<h4>🍲 Ne yerdin?</h4><p>${r.yemek}</p><h4>🏠 Nasıl bir evde yaşardın?</h4><p>${r.ev}</p><div class="gos"><button class="phbtn" data-next="${n + 1}">Koşulların nasıldı? ▶</button></div>` });
     tabs.push({ ad: '⚖️ Koşullar', html: `<h4>⚖️ Çalışma, haklar, sağlık</h4><ul class="hap">${r.sartlar.map(s => `<li>${s.replace(/^([^:]+):/, '<b>$1:</b>')}</li>`).join('')}</ul><div class="gos"><button class="phbtn" data-next="${n + 2}">Ne hissederdin? ▶</button></div>` });
     tabs.push({ ad: '💭 Ne hissederdin?', html: `<h4>💭 Ne hissederdin?</h4><p>${r.his}</p><h4>📌 Gerçekler</h4><ul class="hap">${r.gercek.map(x => `<li>${x}</li>`).join('')}</ul>
-      <div class="gos">${icinde ? '' : `<button class="phbtn" data-ygit="${orta}">⏩ Zamanı ${YIL.fmt(orta)}'e götür</button>`}<button class="phbtn" data-yasa="1">🧑‍🌾 Başka bir hayat seç</button></div>` });
-    showModal({ ikon: r.ikon, title: `${r.ad} olarak bir gün`, sub: `${k.ikon} ${d.ad} · ${d.aralik} · ${d.yer}`, tabs });
+      <div class="gos">${icinde ? '' : `<button class="phbtn" data-ygit="${orta}">⏩ Zamanı oraya götür (${YIL.fmt(orta)})</button>`}<button class="phbtn" data-yasa="1">🧑‍🌾 Başka bir hayat seç</button></div>` });
+    showModal({ ikon: r.ikon, title: `${r.ad} olarak bir gün`, sub: `${k.ikon} ${secili ? `${YIL.fmt(yasaYil)} civarı · ` : ''}${d.ad} · ${d.aralik} · ${d.yer}`, tabs });
   }
   function yasaAc() { openYasam(); }
   document.querySelectorAll('[data-mod]').forEach(b => b.addEventListener('click', () => {
@@ -865,6 +996,12 @@
 
   // ---------- bilgi penceresi (sekmeli) ----------
   const modal = $('#modal');
+  // Yaşa penceresinde "Başka bir yıl dene" formu
+  modal.addEventListener('submit', e => {
+    const f = e.target.closest('[data-yform]'); if (!f) return; e.preventDefault();
+    const n = Math.round(+f.querySelector('input').value); if (!n || n < 1) return;
+    openYasam(clamp(f.querySelector('select').value === 'mo' ? n : -n, -YIL.BUGUN, 100000));
+  });
   let playingBeforeModal = false;
   function showModal(o) {
     modal.querySelector('.mi').textContent = o.ikon || 'ℹ️';
@@ -900,7 +1037,9 @@
     const gb = e.target.closest('[data-god]'); if (gb) { openGod(gb.dataset.god); return; }
     const mb = e.target.closest('[data-mumya]'); if (mb) { openMummy(mb.dataset.mumya); return; }
     const rb = e.target.closest('[data-role]'); if (rb) { openRole(rb.dataset.role); return; }
-    if (e.target.closest('.lifebtn') || e.target.closest('[data-yasa]')) { openYasam(); return; }
+    if (e.target.closest('[data-yasa]')) { openYasam(yasaYil ?? undefined); return; }
+    if (e.target.closest('.lifebtn')) { openYasam(); return; }
+    const yyb = e.target.closest('[data-yyil]'); if (yyb) { const v = yyb.dataset.yyil; openYasam(v === 'rastgele' ? Math.round(YASA_EN_ESKI - Math.random() * (YASA_EN_ESKI + YIL.BUGUN)) : +v); return; }
     const yr = e.target.closest('[data-yrol]'); if (yr) { openYasamRol(yr.dataset.yrol); return; }
     const yy = e.target.closest('[data-ygit]'); if (yy) { setYear(+yy.dataset.ygit, true); playingBeforeModal = false; closeModal(); return; }
     const s3m = e.target.closest('[data-s3]'); if (s3m) { sehir3dAc(s3m.dataset.s3); return; }
@@ -926,7 +1065,7 @@
     setView('sahne');
     if (t.id) {
       const m = SP.monuments.find(x => x.id === t.id);
-      if (m) { follow = false; camX = m.wx; }
+      if (m) { follow = false; camHedef = null; camX = m.wx; }
     }
   }
 
@@ -1364,9 +1503,11 @@
     const iy = Math.round(Y);
     if (iy !== shown) { shown = iy; buildPanel(iy); yearCard(iy); }
     if (view === 'sahne') {
-      if (follow) { const tx = S.focus(Y).wx, d = tx - camX, k = 1 - Math.exp(-dt * (Math.abs(d) > 1500 ? 1.2 : 1.8)); camX += d * k; }
+      if (follow) { camHedef = null; const tx = S.focus(Y).wx, d = tx - camX, k = 1 - Math.exp(-dt * (Math.abs(d) > 1500 ? 1.2 : 1.8)); camX += d * k; }
+      else if (camHedef != null) { const d = camHedef - camX; if (Math.abs(d) < 2) { camX = camHedef; camHedef = null; } else camX += d * (1 - Math.exp(-dt * 3.5)); }
       $('#follow').style.display = follow ? 'none' : 'block';
       S.draw(g, W, H, DPR, Y, dt, camX);
+      ysGuncelle();
     } else if (view === 'dunya') {
       $('#follow').style.display = 'none';
       window.Dunya.draw(gg, W, H, DPR, dt, Y, mapItems(true), mapCities());
@@ -1387,7 +1528,7 @@
     monuments: () => P.monuments || SP.monuments, cities: () => MIS.sehirler || [], coords: id => MIS.coords[id], hasInfo: id => !!bilgiOf(id),
     openYapi: id => openYapi(id), yapiKurede: id => yapiKurede(id)
   };
-  window.__zy = { get Y() { return Y; }, get camX() { return camX; }, get follow() { return follow; }, setYear: y => setYear(y, true), snap: wx => { follow = false; camX = wx ?? S.focus(Y).wx; }, setView, switchPlace, openInfo, openCity: ad => openCity((MIS.sehirler || []).find(c => c.ad === ad)), showMonument: id => showMonument(id), open3D: id => open3D(id) };
+  window.__zy = { get Y() { return Y; }, get camX() { return camX; }, get follow() { return follow; }, setYear: y => setYear(y, true), snap: wx => { follow = false; camHedef = null; camX = wx ?? S.focus(Y).wx; }, setView, switchPlace, openInfo, openCity: ad => openCity((MIS.sehirler || []).find(c => c.ad === ad)), showMonument: id => showMonument(id), open3D: id => open3D(id) };
   updPlay();
   if (DUNYA) { setView('dunya'); DN.goEgypt(BG.merkez, BG.merkezZ); }
   else if (QS.get('yapi')) { const id = QS.get('yapi'); syncScenePart(); setTimeout(() => showMonument(id), 50); }

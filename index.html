@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Zaman Yolculuğu · Mısır</title>
 <meta name="description" content="Zaman çizelgesini kaydır, Antik Mısır'da piramitlerin yükselişini canlı bir sahnede izle.">
-<link rel="stylesheet" href="css/stil.css?v=53">
+<link rel="stylesheet" href="css/stil.css?v=55">
 </head>
 <body>
 <header class="top">
@@ -41,6 +41,15 @@
     </div>
     <button id="tl-ac" class="tl-ac" hidden title="Zaman çizelgesini göster"><span id="tl-ac-oyna" class="tl-ac-oyna">▶</span><b id="tl-ac-yil"></b><span>▴</span></button>
     <button id="follow" class="follow">🎯 Şantiyeye dön</button>
+    <div id="yerserit" class="yerserit">
+      <button class="ys-yan ys-sol" title="Soldaki yere git"><small></small><b></b></button>
+      <div class="ys-orta">
+        <button class="ys-ad" title="Sahnedeki bütün yerler" aria-expanded="false">📍 <b></b> ▾</button>
+        <div class="ys-cubuk" title="Sahnenin tamamı: sarı çerçeve şu an gördüğün yer. Dokun ya da sürükle."><i class="ys-pen"></i></div>
+      </div>
+      <button class="ys-yan ys-sag" title="Sağdaki yere git"><small></small><b></b></button>
+      <div class="ys-liste" hidden></div>
+    </div>
     <div id="toast" class="toast"></div>
     <button id="s3hizli" class="katbtn s3hizli" hidden title="İstanbul'u 3D gez: surlar, Ayasofya, mahalleler yıl yıl">🧊<span> İstanbul 3D</span></button>
     <button id="katbtn" class="katbtn" aria-expanded="false" title="Haritada neler gösterilsin?">🗂️<span> Katmanlar</span></button>
@@ -133,7 +142,7 @@
     <div class="mbody"></div>
   </div>
 </div>
-<script src="js/yil.js?v=1"></script>
+<script src="js/yil.js?v=2"></script>
 <script src="js/bolge.js?v=7"></script>
 <script src="vendor/three/three.min.js"></script>
 <script type="importmap">{ "imports": { "three": "./vendor/three/jsm/three-shim.js" } }</script>
@@ -155,7 +164,7 @@
 <script src="data/yapilar/asya.js?v=1"></script>
 <script src="data/yapilar/avrupa.js?v=1"></script>
 <script src="data/yapilar/amerika.js?v=1"></script>
-<script src="js/uygulama.js?v=56"></script>
+<script src="js/uygulama.js?v=58"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=3"></script>
