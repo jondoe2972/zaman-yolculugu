@@ -89,6 +89,14 @@ window.Dunya = (() => {
         if ((pts[i][0] > la) !== (pts[j][0] > la) && lo < (pts[j][1] - pts[i][1]) * (la - pts[i][0]) / (pts[j][0] - pts[i][0]) + pts[i][1]) ic = !ic;
       }
     }
+    if (ic && VERI.hazar && la >= 36 && la <= 48 && lo >= 46 && lo <= 55) {
+      let hz = false;
+      for (let i = 0, j = VERI.hazar.length - 1; i < VERI.hazar.length; j = i++) {
+        const a = VERI.hazar[i], b = VERI.hazar[j];
+        if ((a[0] > la) !== (b[0] > la) && lo < (b[1] - a[1]) * (la - a[0]) / (b[0] - a[0]) + a[1]) hz = !hz;
+      }
+      if (hz) return false;
+    }
     return ic;
   }
   const NEHIR = VERI.nehir.map(r => ({ ad: r.ad, ...prep(r.p), nil: /Nile/.test(r.ad) }));
