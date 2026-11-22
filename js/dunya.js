@@ -12,7 +12,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, akinti: false, hayvan: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false };
+  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, akinti: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false };
 
   // ---------- veri ----------
   const VERI = window.DUNYA_VERI || { kara: [], nehir: [] };
@@ -1050,6 +1050,25 @@ window.Dunya = (() => {
       }
       g.globalAlpha = 1;
     }
+    // 🌿 Yöreye özgü bitkiler ve ağaçlar (data/atlas/bitkiler.js)
+    if (layers.bitki && window.ATLAS_BITKILER && view.z >= 1.35) {
+      const minD = clamp(36 - view.z * 2.2, 22, 34), shownB = [];
+      const fa = clamp((view.z - 1.35) / 0.5, 0.25, 1);
+      g.globalAlpha = fa;
+      for (const bt of window.ATLAS_BITKILER) {
+        const [x, y, z] = P(...bt.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+        if (shownB.some(q => Math.abs(q[0] - x) < minD && Math.abs(q[1] - y) < minD)) continue;
+        shownB.push([x, y]);
+        const hov = hover && hover.kind === 'bitki' && hover.bt === bt, s0 = hov ? 12.5 : 10;
+        g.fillStyle = '#e6f6e8'; g.strokeStyle = hov ? '#ffd666' : '#2e7d32'; g.lineWidth = hov ? 2.4 : 1.7;
+        g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
+        g.font = `${hov ? 14.5 : 12}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bt.ik, x, y + 1); g.textBaseline = 'alphabetic';
+        obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
+        if (view.z >= 2.4 || hov) lab(hov ? 96 : 47, x, y + s0 + 10, bt.ad.split(' (')[0], { size: 10, w: 700, col: '#dcfce7', halo: 2.8, haloCol: 'rgba(14,32,18,0.88)', kay: true });
+        hits.push({ kind: 'bitki', bt, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
+      }
+      g.globalAlpha = 1;
+    }
     // 🧱 Gerçek coğrafi hattı boyunca çizilen dev yapılar (Çin Seddi, Hadrian Duvarı, İnka Yolu, Süveyş & Panama Kanalları)
     if (layers.yapi && window.HAT_YAPILAR) {
       for (const hy of window.HAT_YAPILAR) {
@@ -1146,10 +1165,11 @@ window.Dunya = (() => {
         hits.push({ kind: 'magara', m, x0: x - s0 - 4, x1: x + s0 + 4, y0: y - s0 - 4, y1: y + s0 + 4 });
       }
     }
-    // 🎁 Dünya Çevresinde Gizli Sürprizler (Easter Eggs — yalnızca o noktaya iyice yaklaşınca ince altın parıltıyla belirir)
+    // 🎁 Dünya Çevresinde Gizli Sürprizler (Easter Eggs — yalnızca kendi tarihsel döneminde ve o noktaya iyice yaklaşınca belirir)
     if (window.ATLAS_SURPRIZLER) {
       for (const sp of window.ATLAS_SURPRIZLER) {
         if (sp.uzay || !sp.ll || view.z < (sp.minZ || 7)) continue;
+        if ((sp.from != null && Y > sp.from) || (sp.to != null && Y < sp.to)) continue;
         const [x, y, z] = P(...sp.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
         const bul = !!(window.ZY && window.ZY.surprizBulunduMu && window.ZY.surprizBulunduMu(sp.id));
         const hov = hover && hover.kind === 'surpriz' && hover.sp === sp;
@@ -1171,10 +1191,10 @@ window.Dunya = (() => {
     }
     if (LQ.length) flushLabels();
     g.restore();
-    // 🛰️ Uzay boşluğundaki gizli sürpriz (Voyager Altın Plağı — keşfedilmeden önce yıldızların arasında hafifçe parlayan altın bir yıldız gibi görünür)
+    // 🛰️ Uzay boşluğundaki gizli sürpriz (Voyager Altın Plağı — yalnızca MS 1977 ve sonrasında uzayda görünür!)
     if (view.z < 1.55 && window.ATLAS_SURPRIZLER) {
       const voy = window.ATLAS_SURPRIZLER.find(s => s.uzay);
-      if (voy) {
+      if (voy && (voy.from == null || Y <= voy.from) && (voy.to == null || Y >= voy.to)) {
         const ang = -0.58 + Math.sin(T * 0.08) * 0.22;
         const vx = cx + Math.cos(ang) * (r + 68), vy = cy + Math.sin(ang) * (r + 68);
         if (vx > 24 && vx < W - 24 && vy > 66 && vy < H - 40) {
@@ -1276,6 +1296,7 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'akinti') tip(hover.x1 + 6, hover.y0, hover.a.ad, `${hover.a.tip === 'sicak' ? '🔥 Sıcak akıntı' : '❄️ Soğuk akıntı'} · ${hover.a.hiz} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'denizolay') tip(hover.x1 + 6, hover.y0, hover.o.ad, `${hover.o.tip === 'girdap' ? '🌀 Girdap / Döngü' : '🌪️ Fırtına alanı'} · ${hover.o.yer} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'hayvan') tip(hover.x1 + 6, hover.y0, `${hover.h.ik} ${hover.h.ad}`, `${hover.h.bolge} · ${hover.h.durum} · tıkla: bilgi ve fotoğraf`);
+    else if (hover && hover.kind === 'bitki') tip(hover.x1 + 6, hover.y0, `${hover.bt.ik} ${hover.bt.ad}`, `${hover.bt.bolge} · tıkla: meyvesi ve kullanım alanları`);
     else if (hover && hover.kind === 'cografya') tip(hover.x1 + 6, hover.y0, hover.cg.ad, `${hover.cg.konum} · tıkla: tarihî önemi ve fotoğraf`);
     else if (hover && hover.kind === 'nehir') tip(hover.x1 + 6, hover.y0, `🏞️ ${hover.nr.ad}`, `${hover.nr.uzunluk} · ${hover.nr.havza} · tıkla: doğa ve tarih`);
     else if (hover && hover.kind === 'hayvangoc') tip(hover.x1 + 6, hover.y0, `${hover.hg.ik} ${hover.hg.ad}`, `${hover.hg.mesafe} · tıkla: yıllık göç döngüsü`);

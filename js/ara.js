@@ -27,6 +27,7 @@
     for (const t of (window.KULTUR || {}).tanrilar || []) add({ tur: 'Tanrı', ikon: '🙏', ad: t.ad, alt: t.unvan, kw: [t.wiki, t.id], oncelik: 3, act: () => ZY().openGod(t.id) });
     for (const o of (window.ATLAS_OKYANUS || {}).okyanuslar || []) add({ tur: o.tur === 'deniz' ? 'Deniz' : 'Okyanus', ikon: o.ik || '🌊', ad: o.ad, alt: o.yuzolcum, kw: [o.w], oncelik: 5, act: () => ZY().openOkyanus(o.id) });
     for (const h of window.ATLAS_HAYVANLAR || []) add({ tur: 'Hayvan', ikon: h.ik || '🐾', ad: h.ad, alt: `${h.bolge} · ${h.durum}`, kw: [h.bolge, h.kita, h.w], oncelik: 4, act: () => ZY().openHayvan(h.id) });
+    for (const bt of window.ATLAS_BITKILER || []) add({ tur: 'Bitki', ikon: bt.ik || '🌿', ad: bt.ad, alt: `${bt.bolge} · ${bt.kullanim.slice(0, 56)}…`, kw: [bt.bolge, bt.kullanim, bt.meyve, bt.w, 'bitki', 'ağaç'], oncelik: 5, act: () => ZY().openBitki(bt.id) });
     for (const cg of window.ATLAS_COGRAFYA || []) add({ tur: ({ dag: 'Dağ', col: 'Çöl / Bozkır', havza: 'Tarihî Havza', nehir: 'Nehir' })[cg.tur] || 'Coğrafya', ikon: ({ dag: '🏔️', col: '🏜️', havza: '🌿', nehir: '🌊' })[cg.tur] || '🗺️', ad: cg.ad, alt: cg.konum, kw: [cg.konum, cg.w], oncelik: 5, act: () => ZY().openCografya(cg.id) });
     for (const d of window.DONUM_NOKTALARI || []) add({ tur: 'Büyük Olay', ikon: '⚡', ad: d.ad, alt: `${d.yilYazi} · ${d.yer}`, kw: [d.yer, d.w], oncelik: 6, act: () => ZY().openDonum(d.id) });
     for (const m of window.ATLAS_MAGARALAR || []) add({ tur: 'Tarihöncesi Kazı', ikon: '🪨', ad: m.ad, alt: `${m.donem} · ${m.yer}`, kw: [m.yer, m.w], oncelik: 5, act: () => ZY().openMagara(m.id) });
@@ -34,6 +35,15 @@
     for (const nr of window.ATLAS_NEHIRLER || []) add({ tur: 'Nehir', ikon: '🏞️', ad: nr.ad, alt: `${nr.uzunluk} · ${nr.havza}`, kw: [nr.havza, nr.w], oncelik: 5, act: () => ZY().openNehir(nr.id) });
     for (const hg of window.ATLAS_HAYVAN_GOC || []) add({ tur: 'Göç Döngüsü', ikon: hg.ik || '🐋', ad: hg.ad, alt: hg.mesafe, kw: [hg.w], oncelik: 5, act: () => ZY().openHayvanGoc(hg.id) });
     for (const v of (window.ATLAS_VOLKANLAR || {}).volkanlar || []) add({ tur: 'Yanardağ', ikon: '🌋', ad: v.ad, alt: `${v.ulke} · ${v.yukseklik}`, kw: [v.ulke, v.w], oncelik: 5, act: () => ZY().openVolkan(v.id) });
+    for (const f of (window.ATLAS_VOLKANLAR || {}).faylar || []) add({ tur: 'Fay Kuşağı', ikon: '🔥', ad: f.ad, alt: 'Tektonik deprem ve volkan kuşağı', kw: ['deprem', 'fay', 'ateş çemberi'], oncelik: 4, act: () => ZY().openFay(f.id) });
+    for (const a of (window.ATLAS_OKYANUS || {}).akintilar || []) add({ tur: 'Akıntı', ikon: a.tip === 'sicak' ? '🔥' : '❄️', ad: a.ad, alt: `${a.tip === 'sicak' ? 'Sıcak' : 'Soğuk'} okyanus akıntısı · ${a.hiz}`, kw: ['akıntı', 'okyanus', a.w], oncelik: 5, act: () => ZY().openAkinti(a.id) });
+    for (const o of (window.ATLAS_OKYANUS || {}).olaylar || []) add({ tur: o.tip === 'girdap' ? 'Girdap' : 'Fırtına', ikon: o.tip === 'girdap' ? '🌀' : '🌪️', ad: o.ad, alt: o.yer, kw: [o.yer, 'girdap', 'fırtına', 'kasırga', o.w], oncelik: 5, act: () => ZY().openDenizOlay(o.id) });
+    for (const hy of window.HAT_YAPILAR || []) add({ tur: 'Dev Yapı', ikon: hy.tip === 'sur' ? '🧱' : hy.tip === 'kanal' ? '🚢' : '🛣️', ad: hy.ad, alt: `${hy.yer} · ${hy.uzunluk}`, kw: [hy.yer, hy.w], oncelik: 6, act: () => ZY().openHatYapi(hy.id) });
+    for (const t of window.TICARET_YOLLARI || []) add({ tur: 'Ticaret Yolu', ikon: t.tur === 'deniz' ? '⛵' : '🐪', ad: t.ad, alt: `${t.cikis} → ${t.varis}`, kw: [t.cikis, t.varis, t.mal], oncelik: 4, act: () => ZY().openYol(t.id) });
+    for (const j of window.YOLCULUKLAR || []) add({ tur: 'Ünlü Yolculuk', ikon: '🧭', ad: j.ad, alt: `${YIL.fmt(j.y)} · ${j.sure}`, kw: [j.nasil], oncelik: 4, act: () => ZY().openYolculuk(j.id) });
+    for (const k of window.KAYNAKLAR || []) add({ tur: 'Kaynak', ikon: '⛏️', ad: k.ad, alt: `${YIL.fmt(k.from)} – ${k.to <= -2026 ? 'bugün' : YIL.fmt(k.to)}`, kw: [k.tur], oncelik: 3, act: () => ZY().openKaynak(k.id) });
+    for (const h of (window.YASAM_DOGA || {}).hayvanlar || []) add({ tur: 'Yaşa · Hayvan', ikon: h.ik || '🐾', ad: h.ad, alt: `Ömür: ${h.omur} · ${h.alan}`, kw: [h.alan, h.w, 'yaşa'], oncelik: 4, act: () => ZY().openYasamDoga(h.id) });
+    for (const b of (window.YASAM_DOGA || {}).bitkiler || []) add({ tur: 'Yaşa · Bitki', ikon: b.ik || '🌿', ad: b.ad, alt: `Ömür: ${b.omur} · ${b.alan}`, kw: [b.alan, b.w, 'bitki', 'ağaç', 'yaşa'], oncelik: 4, act: () => ZY().openYasamDoga(b.id) });
     return out;
   }
   function search(q) {

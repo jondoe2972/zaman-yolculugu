@@ -295,11 +295,13 @@
     ['okyanus', '🌊 Okyanuslar ve Denizler', () => (window.ATLAS_OKYANUS?.okyanuslar || []).length],
     ['akinti', '🌀 Akıntılar, Girdaplar ve Fırtınalar', () => (window.ATLAS_OKYANUS?.akintilar || []).length + (window.ATLAS_OKYANUS?.olaylar || []).length],
     ['hayvan', '🐾 Bölge ve Okyanus Hayvanları', () => (window.ATLAS_HAYVANLAR || []).length],
+    ['bitki', '🌿 Yöreye Özgü Bitkiler ve Ağaçlar', () => (window.ATLAS_BITKILER || []).length],
     ['cografya', '🏔️ Dağlar, Çöller ve Tarihî Havzalar', () => (window.ATLAS_COGRAFYA || []).length],
     ['nehir', '🏞️ Dünya Nehirleri', () => (window.ATLAS_NEHIRLER || []).length],
     ['hayvangoc', '🐋 Hayvan Göç Döngüleri', () => (window.ATLAS_HAYVAN_GOC || []).length],
     ['liman', '⚓ Dünya Limanları', () => (window.ATLAS_LIMANLAR || []).length],
     ['volkan', '🌋 Yanardağlar ve Ateş Çemberi', () => (window.ATLAS_VOLKANLAR?.volkanlar || []).length],
+    ['yasamdoga', '🐾🌿 Hayvan ve Bitki Yaşamları', () => ((window.YASAM_DOGA?.hayvanlar || []).length + (window.YASAM_DOGA?.bitkiler || []).length)],
     ['magara', '🪨 Tarihöncesi Mağaralar ve Kazılar', () => (window.ATLAS_MAGARALAR || []).length],
     ['donum', '⚡ Dünyayı Değiştiren Büyük Olaylar', () => (window.DONUM_NOKTALARI || []).length],
     ['kultur', '👘 Uygarlık ve Ülke Kültürleri', () => (window.DEVLET_KULTUR || []).length],
@@ -433,14 +435,15 @@
   function openAkinti(a) {
     if (!a) return;
     kesifKaydet('akinti', a.id);
-    const sicak = a.tip === 'sicak';
+    const sicak = a.tip === 'sicak', mid = a.pts[Math.floor(a.pts.length / 2)];
     const genel = `<div class="kapak" data-kapak="${esc(a.w)}"></div>
       <span class="pill">${sicak ? '🔥 Sıcak Okyanus Akıntısı' : '❄️ Soğuk Okyanus Akıntısı'}</span>
       ${rowsHTML([['Akış Hızı', a.hiz]])}
       <h4>🧭 Nasıl Oluşur?</h4><p>${esc(a.neden)}</p>
       <h4>🌦️ İklime Etkisi</h4><p>${esc(a.etki)}</p>
       ${a.dogaOnemi ? `<h4>🌿 Doğa ve Canlılar İçin Önemi</h4><p>${esc(a.dogaOnemi)}</p>` : ''}
-      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(a.ilginc)}</p></div>`;
+      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(a.ilginc)}</p></div>
+      <div class="gos"><button class="phbtn icbtn" data-atlaskure="akinti|${mid[0]}|${mid[1]}|${esc((sicak ? '🔥 ' : '❄️ ') + a.ad)}">🌍 Kürede göster</button></div>`;
     showModal({ ikon: sicak ? '🔥' : '❄️', title: a.ad, sub: sicak ? 'Sıcak su akıntısı' : 'Soğuk su akıntısı', tabs: [
       { ad: '🌊 Akıntı', html: genel, onShow: b => kapakYukle(b.querySelector('.kapak')) },
       ...(a.w ? [photoTab(a.w, 6, true)] : [])
@@ -455,7 +458,8 @@
       ${rowsHTML([['Konum', o.yer]])}
       <h4>⚙️ Nasıl Oluşur?</h4><p>${esc(o.neden)}</p>
       <h4>⛵ Denizciliğe ve Doğaya Etkisi</h4><p>${esc(o.etki)}</p>
-      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(o.ilginc)}</p></div>`;
+      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(o.ilginc)}</p></div>
+      <div class="gos"><button class="phbtn icbtn" data-atlaskure="akinti|${o.ll[0]}|${o.ll[1]}|${esc((gir ? '🌀 ' : '🌪️ ') + o.ad)}">🌍 Kürede göster</button></div>`;
     showModal({ ikon: gir ? '🌀' : '🌪️', title: o.ad, sub: o.yer, tabs: [
       { ad: gir ? '🌀 Girdap' : '🌪️ Fırtına', html: genel, onShow: b => kapakYukle(b.querySelector('.kapak')) },
       ...(o.w ? [photoTab(o.w, 6)] : [])
@@ -579,7 +583,8 @@
       ${rowsHTML([['Ülke', lm.ulke], ['Tarihçe', lm.kurulus]])}
       <h4>🌍 Önemi</h4><p>${esc(lm.ozet)}</p>
       <h4>📦 Ticaret ve Taşımacılık</h4><p>${esc(lm.ticaret)}</p>
-      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(lm.ilginc)}</p></div>`;
+      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(lm.ilginc)}</p></div>
+      <div class="gos"><button class="phbtn icbtn" data-atlaskure="liman|${lm.ll[0]}|${lm.ll[1]}|${esc('⚓ ' + lm.ad)}">🌍 Kürede göster</button></div>`;
     showModal({ ikon: '⚓', title: lm.ad, sub: `${lm.ulke} · ${lm.rol}`, tabs: [
       { ad: '⚓ Liman', html: genel, onShow: b => kapakYukle(b.querySelector('.kapak')) },
       ...(lm.w ? [photoTab(lm.w, 8, true)] : [])
@@ -592,7 +597,8 @@
       <span class="pill">🏞️ ${nr.boy === 3 ? 'Dev Dünya Nehri' : nr.boy === 2 ? 'Büyük Bölgesel Nehir' : 'Önemli Tarihî & Doğal Nehir'}</span>
       ${rowsHTML([['Uzunluk', nr.uzunluk], ['Havza', nr.havza]])}
       <h4>🌿 Doğa ve Canlı Yaşamı</h4><p>${esc(nr.doga)}</p>
-      <h4>📜 Tarihteki Yeri</h4><p>${esc(nr.tarih)}</p>`;
+      <h4>📜 Tarihteki Yeri</h4><p>${esc(nr.tarih)}</p>
+      <div class="gos"><button class="phbtn icbtn" data-atlaskure="nehir|${nr.ll[0]}|${nr.ll[1]}|${esc('🏞️ ' + nr.ad)}">🌍 Kürede göster</button></div>`;
     showModal({ ikon: '🏞️', title: nr.ad, sub: `${nr.uzunluk} · ${nr.havza}`, tabs: [
       { ad: '🏞️ Nehir', html: genel, onShow: b => kapakYukle(b.querySelector('.kapak')) },
       ...(nr.w ? [photoTab(nr.w, 8, true)] : [])
@@ -601,16 +607,33 @@
   function openHayvanGoc(hg) {
     if (!hg) return;
     kesifKaydet('hayvangoc', hg.id);
+    const mid = hg.pts[Math.floor(hg.pts.length / 2)];
     const genel = `<div class="kapak" data-kapak="${esc(hg.w)}"></div>
       <span class="pill">${hg.ik} Yıllık Hayvan Göç Döngüsü</span>
       ${rowsHTML([['Yıllık Mesafe', hg.mesafe]])}
       <h4>🔄 Mevsimsel Göç Döngüsü</h4><p>${esc(hg.dongu)}</p>
       <h4>🌍 Neden Göç Ederler?</h4><p>${esc(hg.neden)}</p>
       <h4>🧭 Yönlerini Nasıl Bulurlar?</h4><p>${esc(hg.pusula)}</p>
-      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(hg.ilginc)}</p></div>`;
+      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(hg.ilginc)}</p></div>
+      <div class="gos"><button class="phbtn icbtn" data-atlaskure="hayvangoc|${mid[0]}|${mid[1]}|${esc(hg.ik + ' ' + hg.ad)}">🌍 Rotayı kürede göster</button></div>`;
     showModal({ ikon: hg.ik || '🐋', title: hg.ad, sub: hg.mesafe, tabs: [
       { ad: '🔄 Göç Döngüsü', html: genel, onShow: b => kapakYukle(b.querySelector('.kapak')) },
       ...(hg.w ? [photoTab(hg.w, 8, true)] : [])
+    ] });
+  }
+  function openBitki(bt) {
+    if (!bt) return;
+    kesifKaydet('bitki', bt.id);
+    const genel = `<div class="kapak" data-kapak="${esc(bt.w)}"></div>
+      <span class="pill">${bt.ik} Yöreye Özgü Bitki / Ağaç</span>
+      ${rowsHTML([['Yöre / Anavatan', bt.bolge], ['Meyvesi / Ürünü', bt.meyve]])}
+      <h4>🛠️ Ne İçin Kullanılır?</h4><p>${esc(bt.kullanim)}</p>
+      <h4>🌿 Özellikleri ve Yetişme Ortamı</h4><p>${esc(bt.ozellik)}</p>
+      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(bt.ilginc)}</p></div>
+      <div class="gos"><button class="phbtn icbtn" data-atlaskure="bitki|${bt.ll[0]}|${bt.ll[1]}|${esc(bt.ik + ' ' + bt.ad)}">🌍 Kürede göster</button></div>`;
+    showModal({ ikon: bt.ik || '🌿', title: bt.ad, sub: bt.bolge, tabs: [
+      { ad: '🌿 Bitki', html: genel, onShow: b => kapakYukle(b.querySelector('.kapak')) },
+      ...(bt.w ? [photoTab(bt.w, 8, true)] : [])
     ] });
   }
   function openVolkan(v) {
@@ -618,9 +641,10 @@
     kesifKaydet('volkan', v.id);
     const genel = `<div class="kapak" data-kapak="${esc(v.w)}"></div>
       <span class="pill">🌋 ${esc(v.durum)} · ${esc(v.yukseklik)}</span>
-      ${rowsHTML([['Ülke / Bölge', v.ulke], ['Ünlü Patlama', v.patlama]])}
+      ${rowsHTML([['Ülke / Bölge', v.ulke], ['En Son Patlama', v.sonPatlama], ['Patlama Sıklığı', v.siklik], ['Tarihî Büyük Patlama', v.patlama]])}
       <h4>🔥 Jeolojik Önemi</h4><p>${esc(v.ozet)}</p>
-      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(v.ilginc)}</p></div>`;
+      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(v.ilginc)}</p></div>
+      <div class="gos"><button class="phbtn icbtn" data-atlaskure="volkan|${v.ll[0]}|${v.ll[1]}|${esc('🌋 ' + v.ad)}">🌍 Kürede göster</button></div>`;
     showModal({ ikon: '🌋', title: v.ad, sub: `${v.ulke} · ${v.yukseklik}`, tabs: [
       { ad: '🌋 Yanardağ', html: genel, onShow: b => kapakYukle(b.querySelector('.kapak')) },
       ...(v.w ? [photoTab(v.w, 8, true)] : [])
@@ -665,12 +689,13 @@
     }
     DN.setLayer('akinti', doga);
     DN.setLayer('hayvan', doga);
+    DN.setLayer('bitki', doga);
     DN.setLayer('cografya', doga);
     DN.setLayer('nehir', doga);
     document.querySelectorAll('[data-atlas]').forEach(b => b.classList.toggle('on', b.dataset.atlas === mod));
     kpSekmeSec(doga ? 'doga' : 'tarih');
     renderOlayPanel();
-    toast(doga ? '🌿 <b>Doğa Atlası</b> açıldı: yapılar gizlendi; akıntılar, hayvanlar, dağlar ve nehirler görünüyor.' : '🏛️ <b>Tarih Atlası</b> açıldı: devlet sınırları, yapılar ve ticaret yolları görünüyor.');
+    toast(doga ? '🌿 <b>Doğa Atlası</b> açıldı: yapılar gizlendi; akıntılar, hayvanlar, bitkiler, dağlar ve nehirler görünüyor.' : '🏛️ <b>Tarih Atlası</b> açıldı: devlet sınırları, yapılar ve ticaret yolları görünüyor.');
   }
   // ---------- 🧬 insanlığın yolculuğu (data/goc.js) ----------
   function openGoc(bolum) {
@@ -1307,7 +1332,7 @@
   const endG = ev => {
     if (dragG && !dragG.moved && gpts.size <= 1) {
       if (typeof window.__kureSec === 'function') { const cb = window.__kureSec; window.__kureSec = null; cb(DN.llAt(...cvPos(gcv, ev))); }
-      else { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'donum') openDonum(h.d); else if (h && h.kind === 'hatyapi') openHatYapi(h.hy); else if (h && h.kind === 'magara') openMagara(h.m); else if (h && h.kind === 'surpriz') openSurpriz(h.sp); else if (h && h.kind === 'liman') openLiman(h.lm); else if (h && h.kind === 'nehir') openNehir(h.nr); else if (h && h.kind === 'hayvangoc') openHayvanGoc(h.hg); else if (h && h.kind === 'volkan') openVolkan(h.v); else if (h && h.kind === 'fay') openFay(h.f); else if (h && h.kind === 'akinti') openAkinti(h.a); else if (h && h.kind === 'denizolay') openDenizOlay(h.o); else if (h && h.kind === 'hayvan') openHayvan(h.h); else if (h && h.kind === 'cografya') openCografya(h.cg); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); else if (!h) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) { if (DN.karaMi && !DN.karaMi(ll[0], ll[1])) { const ok = okyanusBul(ll[0], ll[1]); if (ok) openOkyanus(ok); } else if (DN.sinirAcik) { DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } } } }
+      else { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'donum') openDonum(h.d); else if (h && h.kind === 'hatyapi') openHatYapi(h.hy); else if (h && h.kind === 'magara') openMagara(h.m); else if (h && h.kind === 'surpriz') openSurpriz(h.sp); else if (h && h.kind === 'liman') openLiman(h.lm); else if (h && h.kind === 'nehir') openNehir(h.nr); else if (h && h.kind === 'hayvangoc') openHayvanGoc(h.hg); else if (h && h.kind === 'volkan') openVolkan(h.v); else if (h && h.kind === 'fay') openFay(h.f); else if (h && h.kind === 'akinti') openAkinti(h.a); else if (h && h.kind === 'denizolay') openDenizOlay(h.o); else if (h && h.kind === 'hayvan') openHayvan(h.h); else if (h && h.kind === 'bitki') openBitki(h.bt); else if (h && h.kind === 'cografya') openCografya(h.cg); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); else if (!h) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) { if (DN.karaMi && !DN.karaMi(ll[0], ll[1])) { const ok = okyanusBul(ll[0], ll[1]); if (ok) openOkyanus(ok); } else if (DN.sinirAcik) { DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } } } }
     }
     gpts.delete(ev.pointerId);
     if (!gpts.size) dragG = null;
@@ -1391,11 +1416,12 @@
     DN.goTo(e.ll[0], e.ll[1], 7); openEvent(e);
   });
   // ---------- katman menüsü (sağ üstte 🗂️) ----------
-  const KATLAR = ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'ticaret', 'yolculuk', 'akinti', 'hayvan', 'cografya', 'nehir', 'hayvangoc', 'liman', 'volkan', 'donum', 'magara'];
+  const KATLAR = ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'ticaret', 'yolculuk', 'akinti', 'hayvan', 'bitki', 'cografya', 'nehir', 'hayvangoc', 'liman', 'volkan', 'donum', 'magara'];
   const katSay = k => k === 'kaynak' ? kaynakAktif().length : k === 'ticaret' ? (window.TICARET_YOLLARI || []).filter(t => Y <= t.from && Y >= t.to).length
     : k === 'yolculuk' ? (window.YOLCULUKLAR || []).filter(j => Math.abs(Y - j.y) <= DN.aralik).length
     : k === 'akinti' ? ((window.ATLAS_OKYANUS?.akintilar || []).length + (window.ATLAS_OKYANUS?.olaylar || []).length)
     : k === 'hayvan' ? (window.ATLAS_HAYVANLAR || []).filter(h => (h.from == null || Y <= h.from) && (h.to == null || Y >= h.to)).length
+    : k === 'bitki' ? (window.ATLAS_BITKILER || []).length
     : k === 'cografya' ? (window.ATLAS_COGRAFYA || []).length
     : k === 'nehir' ? (window.ATLAS_NEHIRLER || []).length
     : k === 'hayvangoc' ? (window.ATLAS_HAYVAN_GOC || []).length
@@ -1570,8 +1596,39 @@
       tabs.splice(1, 0, { ad: `⭐ ${BG.ad || 'Bu bölge'}`, html: `<p class="note">Seçili yıl ve bölge için özel, ayrıntılı hayatlar.</p>${guc.length ? `<h4 class="rolbas">👑 Güç sahibi hayatlar</h4><div class="rolegrid">${guc.map(eski).join('')}</div>` : ''}${halk.length ? `<h4 class="rolbas">🌾 Sıradan hayatlar</h4><div class="rolegrid">${halk.map(eski).join('')}</div>` : ''}`,
         onShow: b => b.querySelectorAll('[data-rolecv]').forEach(cvEl => { const r = tum.find(x => x.id === cvEl.dataset.rolecv); liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, r.adimlar[1], t, A, rolCizimOpt(r))), false); }) });
     }
+    // 🐾 Hayvan Olarak Yaşa ve 🌿 Bitki / Ağaç Olarak Yaşa sekmeleri (data/yasam-doga.js)
+    const YD = window.YASAM_DOGA;
+    if (YD) {
+      const ydKart = x => `<button class="yd-kart" data-yd="${x.id}"><span class="yd-ik">${x.ik}</span><div><b>${esc(x.ad)}</b><small>⏳ ${esc(x.omur)}</small><p>${esc(x.beslenme)}</p></div></button>`;
+      const ekIdx = (guc.length + halk.length && yy === y) ? 2 : 1;
+      tabs.splice(ekIdx, 0,
+        { ad: '🐾 Hayvan Olarak Yaşa', html: `<p class="note">Yaşayan veya nesli tükenmiş bir hayvan seç: ömrünü, nasıl beslendiğini, yaşam alanını ve bir gününü keşfet!</p><div class="yd-grid">${(YD.hayvanlar || []).map(ydKart).join('')}</div>` },
+        { ad: '🌿 Bitki Olarak Yaşa', html: `<p class="note">Bir ağaç, çöl kaktüsü, etçil bitki ya da orman mantar ağı ol: yüzlerce yıllık yaşamı ve hayatta kalma stratejilerini keşfet!</p><div class="yd-grid">${(YD.bitkiler || []).map(ydKart).join('')}</div>` }
+      );
+    }
     // açılış sekmesi: seçili yılın ±100 yılındaki hayatlar (bütün kıtalar, seçili bölgenin kıtası önce)
-    showModal({ ikon: '🧑‍🌾', title: 'Yaşa: başka bir çağda bir gün', sub: `${YIL.fmt(yy)} civarında yaşasaydın nasıl bir hayatın olurdu?`, tabs, open: 0 });
+    showModal({ ikon: '🧑‍🌾', title: 'Yaşa: insan, hayvan ya da bitki olarak…', sub: `${YIL.fmt(yy)} civarında veya doğanın kalbinde nasıl bir hayatın olurdu?`, tabs, open: 0 });
+  }
+  function openYasamDoga(id) {
+    const YD = window.YASAM_DOGA || {};
+    const o = [...(YD.hayvanlar || []), ...(YD.bitkiler || [])].find(x => x.id === id);
+    if (!o) return;
+    kesifKaydet('yasamdoga', o.id);
+    const bitki = o.tur === 'bitki';
+    const donguHTML = (o.dongu || []).map(([bas, met]) => `<div class="yd-adim"><b>${esc(bas)}</b><p>${esc(met)}</p></div>`).join('');
+    const html = `<div class="kapak" data-kapak="${esc(o.w)}"></div>
+      <span class="pill">${bitki ? '🌿 Bitki / Ağaç Yaşamı' : '🐾 Hayvan Yaşamı'} · ⏳ ${esc(o.omur)}</span>
+      ${rowsHTML([['Ömür', o.omur], ['Beslenme', o.beslenme], ['Yaşam Alanı', o.alan], ['Süper Güç', o.superguc], ['Başlıca Tehditler', o.tehdit]])}
+      <h4>🔄 ${bitki ? 'Yaşam Döngüsü ve Mevsimler' : 'Bir Günün ve Yaşam Döngün'}</h4>
+      <div class="yd-adimlar">${donguHTML}</div>
+      <div class="gos">
+        ${o.ll ? `<button class="phbtn icbtn" data-yd-kure="${o.ll[0]}|${o.ll[1]}|${esc(o.ik + ' ' + o.ad)}">🌍 Yaşam Alanını Kürede Gör</button>` : ''}
+        <button class="phbtn" data-yasa="1">← Yaşa Menüsüne Dön</button>
+      </div>`;
+    showModal({ ikon: o.ik, title: `${o.ad} Olarak Yaşa`, sub: `${o.omur} · ${o.alan}`, tabs: [
+      { ad: `${o.ik} Yaşam`, html, onShow: b => kapakYukle(b.querySelector('.kapak')) },
+      ...(o.w ? [photoTab(o.w, 8, true)] : [])
+    ] });
   }
   function openYasamRol(id) {
     const o = yasamBul(id); if (!o) return; const { k, d, r } = o, opt = yasamOpt(d, r), n = r.gun.length;
@@ -1635,6 +1692,7 @@
     const mg0 = e.target.closest('[data-magarakure]'); if (mg0) { const m = (window.ATLAS_MAGARALAR || []).find(x => x.id === mg0.dataset.magarakure); if (m) { playingBeforeModal = false; closeModal(); if (view !== 'dunya') setView('dunya'); DN.setLayer('magara', true); if (Y < 3000) setYear(5000, true); renderOlayPanel(); DN.goTo(m.ll[0], m.ll[1], 4.2); DN.pin(m.ll[0], m.ll[1], '🪨 ' + m.ad); } return; }
     const sp0 = e.target.closest('[data-surprizoku]'); if (sp0) { const sp = (window.ATLAS_SURPRIZLER || []).find(x => x.id === sp0.dataset.surprizoku); if (sp) openSurpriz(sp); return; }
     const tb0 = e.target.closest('[data-tbgun]'); if (tb0) { const [ty, la, lo, tad] = tb0.dataset.tbgun.split('|'); playingBeforeModal = false; closeModal(); if (view !== 'dunya') setView('dunya'); setYear(+ty, true); DN.goTo(+la, +lo, 4.5); DN.pin(+la, +lo, '📅 ' + tad); return; }
+    const ak0 = e.target.closest('[data-atlaskure]'); if (ak0) { const [kat, la, lo, ad] = ak0.dataset.atlaskure.split('|'); playingBeforeModal = false; closeModal(); if (view !== 'dunya') setView('dunya'); if (kat) DN.setLayer(kat, true); renderOlayPanel(); DN.goTo(+la, +lo, kat === 'hayvangoc' ? 2.6 : 5.2); DN.pin(+la, +lo, ad); return; }
     if (e.target.closest('[data-tbrastgele]')) { const L = window.TARIHTE_BUGUN || []; if (L.length) openTarihteBugun(L[Math.floor(Math.random() * L.length)]); return; }
     const aa0 = e.target.closest('[data-atlas-ac]'); if (aa0) { playingBeforeModal = false; closeModal(); if (view !== 'dunya') setView('dunya'); DN.setLayer(aa0.dataset.atlasAc, true); renderOlayPanel(); toast('🌊 Akıntılar, girdaplar ve fırtına alanları açıldı.'); return; }
     const kf0 = e.target.closest('[data-kf]'); if (kf0) {
@@ -1658,6 +1716,29 @@
     if (e.target.closest('.lifebtn')) { openYasam(); return; }
     const yyb = e.target.closest('[data-yyil]'); if (yyb) { const v = yyb.dataset.yyil; openYasam(v === 'rastgele' ? Math.round(YASA_EN_ESKI - Math.random() * (YASA_EN_ESKI + YIL.BUGUN)) : +v); return; }
     const yr = e.target.closest('[data-yrol]'); if (yr) { openYasamRol(yr.dataset.yrol); return; }
+    const yd = e.target.closest('[data-yd]'); if (yd) { openYasamDoga(yd.dataset.yd); return; }
+    const yds = e.target.closest('[data-yd-sec]'); if (yds) {
+      const [yid, sec] = yds.dataset.ydSec.split('|');
+      const YD = window.YASAM_DOGA || {};
+      const o = [...(YD.hayvanlar || []), ...(YD.bitkiler || [])].find(x => x.id === yid);
+      if (o && o.karar && o.karar[sec]) {
+        const k = o.karar[sec], kutu = yds.closest('.yd-karar'), son = kutu && kutu.querySelector('.yd-sonuc');
+        kutu.querySelectorAll('[data-yd-sec]').forEach(b => { b.disabled = true; b.classList.toggle('on', b === yds); });
+        if (son) {
+          son.hidden = false;
+          son.className = 'yd-sonuc ' + (k.dogru ? 'iyi' : 'uyari');
+          son.innerHTML = `<b>${k.dogru ? '✅ Doğru Hayatta Kalma Kararı! (+10 XP)' : '⚠️ Zorlu Seçim!'}</b><p>${esc(k.sonuc)}</p>`;
+        }
+        if (k.dogru) xpEkle(10, 'yasamdoga');
+      }
+      return;
+    }
+    const ydk = e.target.closest('[data-yd-kure]'); if (ydk) {
+      const [la, lo, ad] = ydk.dataset.ydKure.split('|');
+      playingBeforeModal = false; closeModal(); if (view !== 'dunya') setView('dunya');
+      DN.goTo(+la, +lo, 3.8); DN.pin(+la, +lo, ad);
+      return;
+    }
     const yy = e.target.closest('[data-ygit]'); if (yy) { setYear(+yy.dataset.ygit, true); playingBeforeModal = false; closeModal(); return; }
     const yh = e.target.closest('[data-yolharita]'); if (yh) { const t = TICARET_YOLLARI.find(x => x.id === yh.dataset.yolharita); DN.setLayer('ticaret', true); playingBeforeModal = false; yolHaritada(t.pts, kmYol(t.pts)); return; }
     const yg2 = e.target.closest('[data-yolcugoster]'); if (yg2) { const j = YOLCULUKLAR.find(x => x.id === yg2.dataset.yolcugoster); DN.setLayer('yolculuk', true); playingBeforeModal = false; yolHaritada(j.pts, j.km, j.y); return; }
@@ -2159,6 +2240,7 @@
     openYapi: id => openYapi(id), yapiKurede: id => yapiKurede(id),
     openOkyanus: id => { const o = (window.ATLAS_OKYANUS?.okyanuslar || []).find(x => x.id === id); if (o) openOkyanus(o); },
     openHayvan: id => { const h = (window.ATLAS_HAYVANLAR || []).find(x => x.id === id); if (h) openHayvan(h); },
+    openBitki: id => { const b = (window.ATLAS_BITKILER || []).find(x => x.id === id); if (b) openBitki(b); },
     hayvanKurede: id => hayvanKurede(id),
     openCografya: id => { const cg = (window.ATLAS_COGRAFYA || []).find(x => x.id === id); if (cg) openCografya(cg); },
     openDonum: id => { const d = (window.DONUM_NOKTALARI || []).find(x => x.id === id); if (d) openDonum(d); },
@@ -2167,6 +2249,14 @@
     openNehir: id => { const n = (window.ATLAS_NEHIRLER || []).find(x => x.id === id); if (n) openNehir(n); },
     openHayvanGoc: id => { const h = (window.ATLAS_HAYVAN_GOC || []).find(x => x.id === id); if (h) openHayvanGoc(h); },
     openVolkan: id => { const v = (window.ATLAS_VOLKANLAR?.volkanlar || []).find(x => x.id === id); if (v) openVolkan(v); },
+    openFay: id => { const f = (window.ATLAS_VOLKANLAR?.faylar || []).find(x => x.id === id); if (f) openFay(f); },
+    openAkinti: id => { const a = (window.ATLAS_OKYANUS?.akintilar || []).find(x => x.id === id); if (a) openAkinti(a); },
+    openDenizOlay: id => { const o = (window.ATLAS_OKYANUS?.olaylar || []).find(x => x.id === id); if (o) openDenizOlay(o); },
+    openHatYapi: id => { const hy = (window.HAT_YAPILAR || []).find(x => x.id === id); if (hy) openHatYapi(hy); },
+    openYol: id => { const t = (window.TICARET_YOLLARI || []).find(x => x.id === id); if (t) openYol(t); },
+    openYolculuk: id => { const j = (window.YOLCULUKLAR || []).find(x => x.id === id); if (j) openYolculuk(j); },
+    openKaynak: id => { const k = (window.KAYNAKLAR || []).find(x => x.id === id); if (k) openKaynak(k); },
+    openYasamDoga,
     openTarihteBugun,
     openSurpriz: id => { const s = (window.ATLAS_SURPRIZLER || []).find(x => x.id === id); if (s) openSurpriz(s); },
     xpEkle, surprizBulunduMu, openKesif,
