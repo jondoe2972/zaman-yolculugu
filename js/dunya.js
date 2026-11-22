@@ -25,6 +25,8 @@ window.Dunya = (() => {
     return { pts, bb: [a0, a1, o0, o1] };
   });
   function karaMi(la, lo) {
+    if (la <= -72) return true;
+    lo = ((((lo + 180) % 360) + 360) % 360) - 180;
     let ic = false;
     for (const r of KARA_BB) {
       const b = r.bb; if (la < b[0] || la > b[1] || lo < b[2] || lo > b[3]) continue;
@@ -1400,7 +1402,8 @@ window.Dunya = (() => {
   // bir noktanın o yıl hangi devletin sınırları içinde kaldığı (oyunlar için); yoksa null
   function llAt(x, y) {
     const r = R(), px = (x - W / 2) / r, py = -(y - H / 2) / r, z2 = 1 - px * px - py * py; if (z2 <= 0) return null;
-    const z = Math.sqrt(z2); return [Math.asin(py * cl0 + z * sl0) / D, ((view.lon + Math.atan2(px, z * cl0 - py * sl0) / D + 540) % 360) - 180];
+    const z = Math.sqrt(z2), rawLo = view.lon + Math.atan2(px, z * cl0 - py * sl0) / D;
+    return [Math.asin(py * cl0 + z * sl0) / D, ((((rawLo + 180) % 360) + 360) % 360) - 180];
   }
   function icerir(k, la, lo) {
     if (!k || !k.H || !k.bb || la < k.bb[0] || la > k.bb[1] || lo < k.bb[2] || lo > k.bb[3]) return false;
