@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Dünya tarihini interaktif kürede keşfet, o dönemde bir gününü yaşa ve tarih oyunlarını oyna.">
 <meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23241b14'/%3E%3Cpath d='M18 12h28v6c0 7-6 11-11 14 5 3 11 7 11 14v6H18v-6c0-7 6-11 11-14-5-3-11-7-11-14v-6z' fill='none' stroke='%23ffd666' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 18h18c0 4-4 7-9 10-5-3-9-6-9-10zm9 18c5 3 9 6 9 10H23c0-4 4-7 9-10z' fill='%23ffd666'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/stil.css?v=66">
+<link rel="stylesheet" href="css/stil.css?v=68">
 </head>
 <body>
 <header class="top">
@@ -31,6 +31,7 @@
   </nav>
   <label class="place"><select id="bolge" class="bolgesel" aria-label="Bölge seç"><option value="dunya">🌍 Tüm Dünya</option><option value="misir">🏺 Mısır</option><option value="anadolu">🏛️ Anadolu</option><option value="avrupa">🏰 Avrupa</option></select><select id="era" aria-label="Çağ seç"></select></label>
   <button id="buyil" class="buyil" aria-expanded="false" title="Bu yılın özeti: hükümdar, gündem, geçim, savaşlar">📖<span> Bu yıl</span></button>
+  <button id="sesbtn" class="rehber-btn sesbtn" title="Ses ve ambiyans ayarları" aria-label="Ses ayarları">🔊</button>
   <button id="rehber-ac" class="rehber-btn" title="Hızlı rehberi tekrar izle" aria-label="Uygulama rehberi">?</button>
 </header>
 <main class="app">
@@ -64,6 +65,15 @@
       <div class="ys-liste" hidden></div>
     </div>
     <div id="toast" class="toast"></div>
+    <div id="sespop" class="sespop" hidden role="dialog" aria-label="Ses ayarları">
+      <b>🎧 Ses ve Ambiyans</b>
+      <button type="button" id="ses-sessiz" class="ses-sustur">🔇 Tümünü Sessize Al</button>
+      <div class="ses-vol-sat"><span>🎚️ Ses</span><input type="range" id="ses-vol" min="0" max="100" value="45"><em id="ses-vol-yazi">%45</em></div>
+      <label><input type="checkbox" id="ses-muzik" checked><span>🎵 Rahatlatıcı arka plan müziği</span></label>
+      <label><input type="checkbox" id="ses-doga" checked><span>🌊 Okyanus & nehir doğa sesleri</span></label>
+      <label><input type="checkbox" id="ses-hayvan" checked><span>🐾 Hayvan sesleri eklentisi</span></label>
+      <small>Ayarların otomatik kaydedilir; tekrar açana kadar aynı kalır.</small>
+    </div>
     <div id="tbbtn" class="tbbtn" title="Tarihte Bugün: takvimde bugüne damga vuran olaylar"><button type="button" id="tbbtn-ac" class="tbbtn-ac">📅<span> Bugün</span></button><button type="button" id="tbbtn-x" class="tbbtn-x" title="Gizle" aria-label="Tarihte Bugün düğmesini gizle">✕</button></div>
     <button id="katbtn" class="katbtn" aria-expanded="false" title="Haritada neler gösterilsin?">🗂️<span> Katmanlar</span></button>
     <div id="katman" class="katpop" hidden>
@@ -97,6 +107,7 @@
           <label><input type="checkbox" data-kat="nehir"><span>🏞️ Dünya nehirleri (büyüklüğe göre)</span><i></i></label>
           <label><input type="checkbox" data-kat="volkan"><span>🌋 Yanardağlar ve Ateş Çemberi</span><i></i></label>
           <label><input type="checkbox" data-kat="kaynak"><span>⛏️ Dünya madenleri ve yeraltı kaynakları</span><i></i></label>
+          <button type="button" id="derin-ac" class="kp-kesif" style="margin-top:6px">🦖 Derin Zaman: Dinozorlar &amp; Pangea</button>
         </div>
         <div class="kp-grup" data-kpgrup="olaylar" hidden>
           <label><input type="checkbox" data-kat="savas"><span>⚔️ Savaşlar</span><i></i></label>
@@ -205,6 +216,7 @@
 <script src="data/roller.js?v=2"></script>
 <script src="data/sinir/sinir-dizin.js?v=1"></script>
 <script src="data/atlas/okyanus.js?v=2"></script>
+<script src="data/atlas/denizler-ek.js?v=1"></script>
 <script src="data/atlas/hayvanlar.js?v=4"></script>
 <script src="data/atlas/bitkiler.js?v=1"></script>
 <script src="data/atlas/doga-bolgeler.js?v=1"></script>
@@ -224,18 +236,19 @@
 <script src="data/yasam-doga-ek.js?v=2"></script>
 <script src="data/yasam-doga-ek2.js?v=1"></script>
 <script src="data/atlas/donum-noktalari.js?v=2"></script>
-<script src="js/dunya.js?v=88"></script>
+<script src="js/dunya.js?v=89"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
 <script src="data/yapilar/avrupa.js?v=1"></script>
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="js/sahne-harita.js?v=6"></script>
-<script src="js/uygulama.js?v=87"></script>
+<script src="js/uygulama.js?v=89"></script>
+<script src="js/ses.js?v=1"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=6"></script>
-<script src="js/oyun/oyunlar.js?v=15"></script>
+<script src="js/oyun/oyunlar.js?v=17"></script>
 <script src="js/ara.js?v=18"></script>
 </body>
 </html>

@@ -1306,11 +1306,81 @@ body:not(.globeonly):not(.maponly) .citycard { bottom: 76px; }
 @media (max-width: 600px) { .kapak img { height: 210px; } }
 
 /* ---------- 📅 Tarihte Bugün (Kapatılabilir Takvim Düğmesi, v66) ---------- */
-.tbbtn { position: absolute; right: 142px; top: 12px; z-index: 5; display: inline-flex; align-items: center; background: rgba(24,18,12,.86); border: 1px solid rgba(255,214,102,.24); border-radius: 99px; backdrop-filter: blur(6px); overflow: hidden; }
+.tbbtn { position: absolute; right: 146px; top: 12px; z-index: 6; display: inline-flex; align-items: center; background: rgba(24,18,12,.9); border: 1px solid rgba(255,214,102,.48); border-radius: 99px; backdrop-filter: blur(6px); overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
 .tbbtn[hidden] { display: none; }
-.tbbtn-ac { border: 0; background: transparent; color: #f3e7d0; padding: 7px 9px 7px 12px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.tbbtn-ac { border: 0; background: transparent; color: #ffe7a3; padding: 7px 9px 7px 12px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
 .tbbtn-ac:hover { background: #ffd666; color: #2a1d10; }
-.tbbtn-x { border: 0; border-left: 1px solid rgba(255,255,255,.12); background: transparent; color: #b6a481; padding: 7px 9px 7px 7px; font-size: 11px; line-height: 1; cursor: pointer; }
-.tbbtn-x:hover { background: rgba(255,255,255,.12); color: #fff; }
-body.ust-gizli .tbbtn { display: none; }
+.tbbtn-x { border: 0; border-left: 1px solid rgba(255,255,255,.15); background: transparent; color: #c9b894; padding: 7px 9px 7px 7px; font-size: 11px; line-height: 1; cursor: pointer; }
+.tbbtn-x:hover { background: rgba(255,255,255,.14); color: #fff; }
 @media (max-width: 860px) { .tbbtn { right: 54px; top: 8px; } .tbbtn-ac span { display: none; } .tbbtn-ac { padding: 6px 8px; } .tbbtn-x { padding: 6px 7px; } }
+
+/* ---------- 🦖 Derin Zaman: Dinozorlar & Pangea (v68) ---------- */
+.dz-overlay { position: fixed; inset: 0; z-index: 25; background: rgba(5,8,18,.82); backdrop-filter: blur(8px); display: grid; place-items: center; padding: 14px; }
+.dz-overlay[hidden] { display: none; }
+.dz-kutu { width: min(1040px, 100%); height: min(720px, 94vh); background: #141210; color: #f4e8ce; border: 1px solid rgba(255,214,102,.3); border-radius: 18px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.65); }
+.dz-ust { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: #1c1712; border-bottom: 1px solid rgba(255,214,102,.18); }
+.dz-ust h2 { margin: 0; font-size: 18px; color: #ffd666; }
+.dz-ust small { display: block; font-size: 12px; color: #bfb092; }
+.dz-ust-sag { display: flex; align-items: center; gap: 8px; }
+.dz-btn { border: 1px solid rgba(255,214,102,.45); background: rgba(255,214,102,.14); color: #ffe69c; border-radius: 99px; padding: 6px 13px; font-weight: 700; font-size: 13px; cursor: pointer; }
+.dz-btn:hover { background: #ffd666; color: #24180c; }
+.dz-x { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); color: #fff; font-size: 15px; cursor: pointer; }
+.dz-x:hover { background: #ffd666; color: #24180c; }
+.dz-govde { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.15fr 1fr; }
+.dz-kure-wrap { position: relative; min-height: 240px; background: #090d1a; }
+.dz-kure-wrap canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.dz-panel { overflow-y: auto; padding: 14px 16px; background: #1a1510; border-left: 1px solid rgba(255,214,102,.14); display: flex; flex-direction: column; gap: 10px; }
+.dz-etiket { display: inline-block; font-size: 11.5px; font-weight: 700; color: #ffd666; background: rgba(255,214,102,.14); border: 1px solid rgba(255,214,102,.28); border-radius: 99px; padding: 2px 10px; margin-bottom: 4px; }
+.dz-cag-bas h3 { margin: 2px 0 6px; font-size: 19px; color: #fff4d6; }
+.dz-cag-bas p { margin: 0; font-size: 13.5px; line-height: 1.5; color: #e2d4b8; }
+.dz-stat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.dz-stat div { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 7px 8px; }
+.dz-stat small { display: block; font-size: 10.5px; color: #b6a481; }
+.dz-stat b { font-size: 12px; color: #ffe7a3; }
+.dz-olay { background: rgba(255,150,50,.1); border: 1px solid rgba(255,175,75,.32); border-radius: 12px; padding: 9px 11px; font-size: 13px; line-height: 1.45; }
+.dz-olay b { color: #ffd666; display: block; margin-bottom: 3px; }
+.dz-olay p { margin: 0; color: #f2e4c8; }
+.dz-panel h4 { margin: 4px 0 2px; font-size: 14px; color: #ffd666; }
+.dz-canlilar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+.dz-ckart { display: flex; align-items: center; gap: 8px; text-align: left; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 11px; padding: 7px 9px; color: #f4e8ce; cursor: pointer; transition: border-color .15s, background .15s; }
+.dz-ckart:hover, .dz-ckart.on { border-color: #ffd666; background: rgba(255,214,102,.15); }
+.dz-ckart span { font-size: 22px; flex-shrink: 0; }
+.dz-ckart b { display: block; font-size: 12.5px; color: #fff6dc; }
+.dz-ckart small { display: block; font-size: 10.5px; color: #bfb092; }
+.dz-not { font-size: 13px; color: #b6a481; margin: 4px 0; }
+.dz-serit { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; padding: 8px 10px; background: #1c1712; border-top: 1px solid rgba(255,214,102,.18); }
+.dz-serit button { border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: #e2d4b8; border-radius: 10px; padding: 6px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 1px; font: inherit; }
+.dz-serit button span { font-size: 17px; }
+.dz-serit button b { font-size: 11px; color: #ffd666; }
+.dz-serit button small { font-size: 9.5px; color: #b6a481; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.dz-serit button.on, .dz-serit button:hover { background: rgba(255,214,102,.2); border-color: #ffd666; }
+@media (max-width: 820px) {
+  .dz-govde { grid-template-columns: 1fr; grid-template-rows: 220px 1fr; }
+  .dz-panel { border-left: 0; border-top: 1px solid rgba(255,214,102,.14); }
+  .dz-canlilar { grid-template-columns: 1fr; }
+  .dz-serit { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ---------- 🎧 Ses Paneli + Koyu Scrollbar & Modal/Çizelge Pürüz Düzeltmeleri (v68) ---------- */
+.katpop { scrollbar-width: thin; scrollbar-color: rgba(255,214,102,.35) rgba(24,18,12,.9); }
+.katpop::-webkit-scrollbar { width: 6px; }
+.katpop::-webkit-scrollbar-track { background: rgba(24,18,12,.9); }
+.katpop::-webkit-scrollbar-thumb { background: rgba(255,214,102,.32); border-radius: 6px; }
+.modal { padding: 14px; box-sizing: border-box; }
+.modal .sheet { max-height: calc(100vh - 28px); }
+.ctrl .tl-gizle { line-height: 0.7; padding-bottom: 5px; }
+.sesbtn.sessiz { opacity: .68; border-color: rgba(255,120,100,.45); }
+.sesbtn.on { background: #ffd666; color: #2a1d10; border-color: #ffd666; }
+.sespop { position: absolute; right: 12px; top: 10px; z-index: 9; width: 264px; background: rgba(24,18,12,.96); backdrop-filter: blur(10px); border: 1px solid rgba(255,214,102,.32); border-radius: 14px; padding: 12px 13px; color: #f3e7d0; box-shadow: 0 12px 32px rgba(0,0,0,.55); display: flex; flex-direction: column; gap: 7px; }
+.sespop[hidden] { display: none; }
+.sespop b { color: #ffd666; font-size: 13.5px; }
+.ses-sustur { border: 1px solid rgba(255,214,102,.32); background: rgba(255,214,102,.14); color: #ffe7a3; border-radius: 10px; padding: 7px 10px; font-weight: 700; font-size: 13px; cursor: pointer; }
+.ses-sustur:hover { background: #ffd666; color: #2a1d10; }
+.ses-sustur.on { background: #ffd666; color: #2a1d10; border-color: #ffd666; }
+.ses-vol-sat { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 2px 0; }
+.ses-vol-sat input { flex: 1; accent-color: #ffd666; cursor: pointer; }
+.ses-vol-sat em { font-style: normal; color: #ffd666; font-weight: 700; min-width: 34px; text-align: right; }
+.sespop label { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; padding: 3px 2px; border-radius: 7px; }
+.sespop label:hover { background: rgba(255,255,255,.06); }
+.sespop label input { accent-color: #ffd666; width: 15px; height: 15px; margin: 0; }
+.sespop small { font-size: 11px; color: #b6a481; line-height: 1.35; margin-top: 2px; }

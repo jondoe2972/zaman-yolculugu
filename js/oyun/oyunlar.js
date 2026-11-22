@@ -28,6 +28,10 @@
     ],
     foto: [
       'js/oyun/foto-tahmin.js?v=1'
+    ],
+    derin: [
+      'data/atlas/derin-zaman.js?v=1',
+      'js/oyun/derin-zaman.js?v=2'
     ]
   };
   const dosyaSoz = new Map();
@@ -75,7 +79,7 @@
     try { return JSON.parse(localStorage['zy-hayvan-ist'] || 'null')?.seriRekor || 0; } catch (e) { return 0; }
   }
 
-  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun'];
+  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun', 'foto-oyun', 'derin-zaman'];
   function digerleriniKapat(haricId) {
     for (const id of OYUN_KUTULARI) {
       if (id === haricId) continue;
@@ -135,6 +139,14 @@
       id: 'yayilis', kutu: 'modal', ikon: '🍵', ad: 'Yemek ve İcatların Yolculuğu', yeni: true,
       alt: 'Çay neden "Çay/Tea" oldu? Yemek, kelime ve icatların dünyaya yayılışı',
       ac: () => window.ZY && window.ZY.openYayilisGaleri && window.ZY.openYayilisGaleri()
+    },
+    {
+      id: 'derin', kutu: 'derin-zaman', ikon: '🦖', ad: 'Derin Zaman: Dinozorlar & Pangea', yeni: true,
+      alt: '4,5 milyar yıl geriye git: Pangea, dinozorlar, Megalodon ve asteroit',
+      ac: async () => {
+        await paketYukle('derin');
+        if (window.DerinZaman) window.DerinZaman.ac();
+      }
     },
     {
       id: 'toprak', kutu: 'topraklar', ikon: '📍', ad: 'Bu Toprakların Tarihi',
