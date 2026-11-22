@@ -17,11 +17,14 @@
 <meta name="twitter:description" content="Dünya tarihini interaktif kürede keşfet, o dönemde bir gününü yaşa ve tarih oyunlarını oyna.">
 <meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23241b14'/%3E%3Cpath d='M18 12h28v6c0 7-6 11-11 14 5 3 11 7 11 14v6H18v-6c0-7 6-11 11-14-5-3-11-7-11-14v-6z' fill='none' stroke='%23ffd666' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 18h18c0 4-4 7-9 10-5-3-9-6-9-10zm9 18c5 3 9 6 9 10H23c0-4 4-7 9-10z' fill='%23ffd666'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/stil.css?v=74">
+<link rel="stylesheet" href="css/stil.css?v=78">
 </head>
 <body>
 <header class="top">
+  <button id="menubtn" class="menubtn" aria-expanded="false" aria-controls="ustmenu" title="Menü">☰<span id="menubtn-ad">🌍 Keşfet</span></button>
   <div class="logo">⏳ <b>Zaman Yolculuğu</b></div>
+  <div id="ustmenu" class="ustmenu">
+  <div class="um-bas"><span>⏳ <b>Zaman Yolculuğu</b></span><button type="button" class="um-x" title="Menüyü kapat" aria-label="Menüyü kapat">✕</button></div>
   <nav class="modlar" aria-label="Mod">
     <button data-mod="kesfet" title="Küreyi döndür, dönemin sınırlarını, yollarını ve olaylarını keşfet">🌍<span>Keşfet</span></button>
     <button data-mod="sahne" title="Bir bölgenin canlı sahnesi: yapılar yılına göre yükselir">🎬<span>Sahne</span></button>
@@ -30,9 +33,14 @@
     <button id="ara" data-mod="ara" title="Ara (Ctrl+K)">🔍<span>Ara</span></button>
   </nav>
   <label class="place"><select id="bolge" class="bolgesel" aria-label="Bölge seç"><option value="dunya">🌍 Tüm Dünya</option><option value="misir">🏺 Mısır</option><option value="anadolu">🏛️ Anadolu</option><option value="avrupa">🏰 Avrupa</option></select><select id="era" aria-label="Çağ seç"></select></label>
+  <div class="um-ayar">
+  <button type="button" id="um-ses" class="rehber-btn um-ses" title="Ses ve müzik ayarları">🎧</button>
+  <button id="rehber-ac" class="rehber-btn" title="Hızlı rehberi tekrar izle" aria-label="Uygulama rehberi">?</button>
+  </div>
+  </div>
+  <div id="um-perde" class="um-perde" hidden></div>
   <button id="buyil" class="buyil" aria-expanded="false" title="Bu yılın özeti: hükümdar, gündem, geçim, savaşlar">📖<span> Bu yıl</span></button>
   <button id="sesbtn" class="rehber-btn sesbtn" title="Ses ve ambiyans ayarları" aria-label="Ses ayarları">🔊</button>
-  <button id="rehber-ac" class="rehber-btn" title="Hızlı rehberi tekrar izle" aria-label="Uygulama rehberi">?</button>
 </header>
 <main class="app">
   <section class="stage">
@@ -87,7 +95,7 @@
       <label><input type="checkbox" id="ses-hayvan" checked><span>🐾 Gerçek hayvan sesleri (aslan, balina, yunus, kurt…)</span></label>
       <small>Ayarların otomatik kaydedilir; tekrar açana kadar aynı kalır.</small>
     </div>
-    <div id="tbbtn" class="tbbtn" title="Tarihte Bugün: takvimde bugüne damga vuran olaylar"><button type="button" id="tbbtn-ac" class="tbbtn-ac">📅<span> Bugün</span></button><button type="button" id="tbbtn-x" class="tbbtn-x" title="Gizle" aria-label="Tarihte Bugün düğmesini gizle">✕</button></div>
+    <div id="tbbtn" class="tbbtn" title="Tarihte Bugün ve Tarihte Bu Yıl: bugüne ve seçtiğin yıla damga vuran olaylar"><button type="button" id="tbbtn-ac" class="tbbtn-ac">📅<span> Bugün · Bu Yıl</span></button><button type="button" id="tbbtn-x" class="tbbtn-x" title="Gizle" aria-label="Tarihte Bugün düğmesini gizle">✕</button></div>
     <button id="katbtn" class="katbtn" aria-expanded="false" title="Haritada neler gösterilsin?">🗂️<span> Katmanlar</span></button>
     <div id="katman" class="katpop" hidden>
       <div class="kp-kure">
@@ -257,7 +265,7 @@
 <script src="data/yasam-doga-ek2.js?v=1"></script>
 <script src="data/yasam-doga-antik.js?v=1"></script>
 <script src="data/atlas/donum-noktalari.js?v=2"></script>
-<script src="js/dunya.js?v=94"></script>
+<script src="js/dunya.js?v=95"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
@@ -266,12 +274,12 @@
 <script src="data/yapilar/simgeler.js?v=1"></script>
 <script src="js/sahne-harita.js?v=6"></script>
 <script src="js/kart-paylas.js?v=1"></script>
-<script src="js/uygulama.js?v=100"></script>
+<script src="js/uygulama.js?v=105"></script>
 <script src="js/ses.js?v=4"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=6"></script>
-<script src="js/oyun/oyunlar.js?v=22"></script>
+<script src="js/oyun/oyunlar.js?v=23"></script>
 <script src="js/ara.js?v=21"></script>
 </body>
 </html>

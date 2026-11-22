@@ -31,7 +31,7 @@
     ],
     derin: [
       'data/atlas/derin-zaman.js?v=2',
-      'js/oyun/derin-zaman.js?v=3'
+      'js/oyun/derin-zaman.js?v=4'
     ],
     hayattakal: [
       'data/oyun/hayatta-kal.js?v=1',
@@ -42,7 +42,7 @@
     ],
     katmanlar: [
       'data/atlas/katmanlar.js?v=1',
-      'js/oyun/katmanlar.js?v=1'
+      'js/oyun/katmanlar.js?v=2'
     ]
   };
   const dosyaSoz = new Map();
@@ -221,6 +221,13 @@
   }
   function konum() {
     if (!pop || !btn) return;
+    // Telefonda Oyunlar düğmesi soldan açılan menüde (kapanınca ekran dışında): pencere üst çubuğun altına ortalanır
+    if (window.innerWidth <= 860) {
+      const ust = document.querySelector('.top'), alt = ust ? ust.getBoundingClientRect().bottom : 50;
+      pop.style.top = (alt + 6) + 'px';
+      pop.style.left = Math.max(8, (window.innerWidth - pop.offsetWidth) / 2) + 'px';
+      return;
+    }
     const r = btn.getBoundingClientRect();
     pop.style.top = (r.bottom + 6) + 'px';
     pop.style.left = Math.max(8, Math.min(window.innerWidth - pop.offsetWidth - 8, r.left + r.width / 2 - pop.offsetWidth / 2)) + 'px';

@@ -237,6 +237,20 @@ window.Dunya = (() => {
     const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + km(pts[i - 1], pts[i]));
     return (r._d = { pts, cum, L: cum[cum.length - 1] || 1, p: prep(pts) });
   }
+  // Yol/göç/rüzgâr gibi çizgiler için tek dokunma alanı: bütün çizgi boyunca r piksel (eskiden yalnızca seyrek noktalarda küçük kutular vardı)
+  function yolHit(o, d, r) {
+    const pl = []; let cur = null, x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const pt of d.pts) {
+      const [x, y, z] = P(...pt);
+      if (z > 0.05) {
+        if (!cur) { cur = []; pl.push(cur); } cur.push(x, y);
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      } else cur = null;
+    }
+    if (!pl.length) return;
+    o.pl = pl; o.r = r; o.x0 = x0 - r; o.x1 = x1 + r; o.y0 = y0 - r; o.y1 = y1 + r;
+    hits.unshift(o);
+  }
   function yolNokta(d, s) {
     let lo = 0, hi = d.cum.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (d.cum[m] <= s) lo = m; else hi = m; }
     const f = clamp((s - d.cum[lo]) / ((d.cum[hi] - d.cum[lo]) || 1), 0, 1), a = d.pts[lo], b = d.pts[hi];
@@ -937,7 +951,7 @@ window.Dunya = (() => {
       yolUclari(d, `rgba(${col},${hov ? 1 : 0.75})`, hov);
       const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
       if (mz > 0.1 && (view.z > 2.4 || hov)) text(mx, my - 9, (deniz ? '⛵ ' : '🐪 ') + t.ad, { size: 10.5, w: 700, col: `rgb(${col})`, halo: 3, haloCol: 'rgba(250,248,236,0.85)', serif: true, it: true });
-      for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.05) hits.unshift({ kind: 'yol', t, x0: x - 6, x1: x + 6, y0: y - 6, y1: y + 6 }); }
+      yolHit({ kind: 'yol', t }, d, 7);
     }
     // ünlü yolculuklar: seçili yıla yakın olanlar; kesik çizgi, giden yolcu, süre etiketi
     if (layers.yolculuk) for (const j of window.YOLCULUKLAR || []) {
@@ -955,7 +969,7 @@ window.Dunya = (() => {
         g.fillStyle = hov ? '#2a1d10' : '#ffe7d6'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(lb, mx, my + 0.5);
         hits.push({ kind: 'yolculuk', j, x0: mx - w / 2, x1: mx + w / 2, y0: my - 10, y1: my + 10 });
       }
-      for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.05) hits.unshift({ kind: 'yolculuk', j, x0: x - 6, x1: x + 6, y0: y - 6, y1: y + 6 }); }
+      yolHit({ kind: 'yolculuk', j }, d, 7);
       g.globalAlpha = 1;
     }
     // insanlığın yayılışı (data/goc.js): MÖ 3000'den önce Homo sapiens'in Afrika'dan yayılış yolları, beşik ve tarımın doğduğu yerler;
@@ -974,7 +988,7 @@ window.Dunya = (() => {
         yolUclari(d, 'rgba(150,45,30,0.95)', true);
         const [mx, my, mz] = P(...yolNokta(d, d.L * (r.lf ?? 0.5)));
         if (mz > 0.15 && (view.z >= 1.4 || hov)) text(mx, my - 11, r.etiket, { size: 11.5, w: 700, col: '#7a2414', halo: 3, haloCol: 'rgba(255,246,230,0.9)', serif: true, it: true });
-        for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.05) hits.unshift({ kind: 'goc', r, x0: x - 8, x1: x + 8, y0: y - 8, y1: y + 8 }); }
+        yolHit({ kind: 'goc', r }, d, 8);
         g.globalAlpha = 1;
       }
       if (ea > 0) { // beşik: Doğu Afrika'da atan halka
@@ -1066,7 +1080,7 @@ window.Dunya = (() => {
         yolUclari(d, `rgba(${col},0.95)`, true);
         const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
         if (mz > 0.12 && (view.z >= 1.5 || hov)) text(mx, my - 10, (sicak ? '🔥 ' : '❄️ ') + a.ad.split(' (')[0], { size: 10.5, w: 700, col: sicak ? '#ffd9c2' : '#d2f0ff', halo: 3, haloCol: 'rgba(10,20,38,0.85)' });
-        for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.05) hits.unshift({ kind: 'akinti', a, x0: x - 7, x1: x + 7, y0: y - 7, y1: y + 7 }); }
+        yolHit({ kind: 'akinti', a }, d, 8);
         g.restore();
       }
       for (const o of OK.olaylar || []) {
@@ -1146,8 +1160,12 @@ window.Dunya = (() => {
         }
         yolUclari(d, hov ? '#fff7dc' : col, true);
         const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
-        if (mz > 0.12 && (view.z >= 1.25 || hov)) lab(hov ? 98 : 62, mx, my - 11, `${rz.ik} ${rz.ad.split(' (')[0]}`, { size: 10.5, w: 700, col: '#f0f9ff', halo: 3.2, haloCol: 'rgba(10,20,38,0.9)', kay: true });
-        for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.06) hits.unshift({ kind: 'ruzgar', rz, x0: x - 8, x1: x + 8, y0: y - 8, y1: y + 8 }); }
+        const rzAd = `${rz.ik} ${rz.ad.split(' (')[0]}`;
+        if (mz > 0.12 && (view.z >= 1.25 || hov)) {
+          lab(hov ? 98 : 62, mx, my - 11, rzAd, { size: 10.5, w: 700, col: '#f0f9ff', halo: 3.2, haloCol: 'rgba(10,20,38,0.9)', kay: true });
+          const hw = rzAd.length * 3.3 + 6; hits.push({ kind: 'ruzgar', rz, x0: mx - hw, x1: mx + hw, y0: my - 22, y1: my });
+        }
+        yolHit({ kind: 'ruzgar', rz }, d, 11);
         g.restore();
       }
     }
@@ -1270,9 +1288,13 @@ window.Dunya = (() => {
         }
         g.restore();
         const [mx, my, mz] = P(...yolNokta(d, d.L * 0.5));
-        if (mz > 0.12 && (view.z >= 1.35 || hov)) lab(hov ? 97 : 58, mx, my - 12, `${hg.ik} ${hg.ad.split(' (')[0]}`, { size: 10.5, w: 700, col: '#fff7dc', halo: 3, haloCol: 'rgba(14,24,34,0.9)', kay: true });
-        for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.06) hits.unshift({ kind: 'hayvangoc', hg, x0: x - 8, x1: x + 8, y0: y - 8, y1: y + 8 }); }
-        if (pz > 0.08) hits.push({ kind: 'hayvangoc', hg, x0: px - 12, x1: px + 12, y0: py - 12, y1: py + 12 });
+        const hgAd = `${hg.ik} ${hg.ad.split(' (')[0]}`;
+        if (mz > 0.12 && (view.z >= 1.35 || hov)) {
+          lab(hov ? 97 : 58, mx, my - 12, hgAd, { size: 10.5, w: 700, col: '#fff7dc', halo: 3, haloCol: 'rgba(14,24,34,0.9)', kay: true });
+          const hw = hgAd.length * 3.3 + 6; hits.push({ kind: 'hayvangoc', hg, x0: mx - hw, x1: mx + hw, y0: my - 23, y1: my - 1 });
+        }
+        yolHit({ kind: 'hayvangoc', hg }, d, 10);
+        if (pz > 0.08) hits.push({ kind: 'hayvangoc', hg, x0: px - 15, x1: px + 15, y0: py - 15, y1: py + 15 });
       }
     }
     // ⚓ Dünya Çapındaki Önemli Limanlar (data/atlas/limanlar.js)
@@ -1747,7 +1769,27 @@ window.Dunya = (() => {
   function darkHex(hex) { const n = parseInt(hex.slice(1), 16); const f = v => Math.round(v * 0.45); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; }
   function lightHex(hex) { const n = parseInt(hex.slice(1), 16); const f = v => Math.round(v + (255 - v) * 0.55); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; }
 
-  function hitTest(x, y) { for (let i = hits.length - 1; i >= 0; i--) { const h = hits[i]; if (x >= h.x0 && x <= h.x1 && y >= h.y0 && y <= h.y1) return h; } return null; }
+  // Çizgi hitleri (h.pl: ekrandaki görünen parçalar, h.r: tolerans) çizgiye uzaklıkla, diğerleri kutuyla denetlenir.
+  // pad > 0 (telefon dokunuşu): önce tam isabet aranır, bulunamazsa her şey pad kadar genişletilerek yeniden aranır.
+  function hitIc(h, x, y, p) {
+    if (x < h.x0 - p || x > h.x1 + p || y < h.y0 - p || y > h.y1 + p) return false;
+    if (!h.pl) return true;
+    const rr = (h.r + p) * (h.r + p);
+    for (const s of h.pl) {
+      if (s.length === 2) { if ((x - s[0]) ** 2 + (y - s[1]) ** 2 <= rr) return true; continue; }
+      for (let i = 0; i + 3 < s.length; i += 2) {
+        const ax = s[i], ay = s[i + 1], dx = s[i + 2] - ax, dy = s[i + 3] - ay, L2 = dx * dx + dy * dy;
+        const t = L2 ? clamp(((x - ax) * dx + (y - ay) * dy) / L2, 0, 1) : 0;
+        if ((x - ax - dx * t) ** 2 + (y - ay - dy * t) ** 2 <= rr) return true;
+      }
+    }
+    return false;
+  }
+  function hitTest(x, y, pad) {
+    for (let i = hits.length - 1; i >= 0; i--) if (hitIc(hits[i], x, y, 0)) return hits[i];
+    if (pad) for (let i = hits.length - 1; i >= 0; i--) if (hitIc(hits[i], x, y, pad)) return hits[i];
+    return null;
+  }
   function drag(dx, dy) { idle = 0; target = null; const k = 57 / (R() || 1); vel = [dx * k, dy * k]; view.lon -= dx * k; view.lat = clamp(view.lat + dy * k, -80, 80); }
   function release() { /* eylemsizlik: son hız korunur */ }
   function hold() { vel = [0, 0]; }

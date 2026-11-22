@@ -778,9 +778,54 @@
     ] });
   }
   const AY_AD = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-  function openTarihteBugun(ozelOlay) {
+  // 🗓️ Tarihte Bu Yıl: seçili yılın ±N yılı içindeki önemli olaylar (bütün kaynaklardan: savaş, antlaşma, afet, olay,
+  // dönüm noktası, tarihte bugün, ünlü yolculuk, Biliyor muydun? bilgisi). Yıl kuralı: MÖ pozitif, MS negatif.
+  let tbyAralik = 50, tbyFiltre = 'hepsi';
+  const TBY_TUR = { savas: '⚔️', deniz: '⚓', antlasma: '📜', afet: '🌋', olay: '🏛️', donum: '⚡', gun: '📅', yolculuk: '🧭', bilgi: '💡' };
+  const TBY_FILTRE = [['hepsi', 'Tümü', null], ['savas', '⚔️ Savaşlar', ['savas', 'deniz']], ['siyaset', '📜 Olay & antlaşma', ['antlasma', 'olay', 'donum', 'gun']], ['afet', '🌋 Afetler', ['afet']], ['bilgi', '💡 Keşif & bilgi', ['bilgi', 'yolculuk']]];
+  function tbyListe(y, ar) {
+    const L = [], gor = new Set();
+    const ekle = o => { const k = o.ad.toLocaleLowerCase('tr'); if (gor.has(k)) return; gor.add(k); L.push(o); };
+    for (const d of window.DONUM_NOKTALARI || []) if (Math.abs(d.y - y) <= ar) ekle({ tur: 'donum', y: d.y, ad: d.ad, t: d.ozet, ll: d.ll, yer: d.yer, onem: 6, ac: `donum|${d.id}` });
+    for (const e of window.OLAYLAR || []) if (e.ll && Math.abs(e.y - y) <= ar) ekle({ tur: e.tur, y: e.y, ad: e.ad, t: e.ozet || e.sonuc || '', ll: e.ll, onem: e.onem || 2, ac: `olay|${e.id}` });
+    for (const o of window.TARIHTE_BUGUN || []) if (Math.abs(o.y - y) <= ar) ekle({ tur: 'gun', y: o.y, ad: o.ad, t: o.ozet, ll: o.ll, yer: o.yer, gun: `${o.gun} ${AY_AD[o.ay]}`, onem: 4 });
+    for (const j of window.YOLCULUKLAR || []) if (j.pts && Math.abs(j.y - y) <= ar) ekle({ tur: 'yolculuk', y: j.y, ad: j.ad, t: j.not || '', ll: j.pts[0], onem: 2, ac: `yolculuk|${j.id}` });
+    for (const a of window.AYNI_ANDA || []) {
+      if (!a.d || !a.ll) continue;
+      const hi = Math.max(a.d[0], a.d[1]), lo = Math.min(a.d[0], a.d[1]);
+      if (hi - lo <= 300 && lo <= y + ar && hi >= y - ar) ekle({ tur: 'bilgi', y: clamp(y, lo, hi), donem: hi !== lo ? [hi, lo] : null, ad: a.k, t: a.t, ll: a.ll, onem: 1 });
+    }
+    return L.sort((a, b) => b.y - a.y || b.onem - a.onem);
+  }
+  function tbyHTML() {
+    const y = Math.round(Y), ar = tbyAralik, hep = tbyListe(y, ar);
+    const f = TBY_FILTRE.find(x => x[0] === tbyFiltre) || TBY_FILTRE[0];
+    const say = x => x[2] ? hep.filter(o => x[2].includes(o.tur)).length : hep.length;
+    const liste = f[2] ? hep.filter(o => f[2].includes(o.tur)) : hep;
+    const fark = oy => { const d = oy - y; return d === 0 ? 'bu yıl' : d > 0 ? `${d} yıl önce` : `${-d} yıl sonra`; };
+    const kart = o => `<div class="tby-kart${o.y === y ? ' simdi' : ''}">
+        <div class="tby-yil"><b>${o.donem ? `${YIL.fmt(o.donem[0])}–${(o.donem[0] > 0) === (o.donem[1] > 0) ? YIL.fmt(o.donem[1]).replace(/^M[ÖS] /, '') : YIL.fmt(o.donem[1])}` : YIL.fmt(o.y)}</b><small>${o.donem ? 'o yıllarda' : fark(o.y)}</small></div>
+        <div class="tby-ic">
+          <h4>${TBY_TUR[o.tur] || '•'} ${esc(o.ad)}${o.onem >= 5 ? ' <i class="tby-onemli">çok önemli</i>' : ''}</h4>
+          ${o.gun || o.yer ? `<small class="tby-yer">${o.gun ? `📅 ${o.gun}` : ''}${o.gun && o.yer ? ' · ' : ''}${o.yer ? `📍 ${esc(o.yer)}` : ''}</small>` : ''}
+          ${o.t ? `<p>${esc(o.t)}</p>` : ''}
+          <div class="tby-btn">${o.ac ? `<button class="phbtn" data-tby-ac="${esc(o.ac)}">ℹ️ Ayrıntılar</button>` : ''}<button class="phbtn icbtn" data-tbgun="${o.y}|${o.ll[0]}|${o.ll[1]}|${esc(o.ad)}">⏩ O yıla ve yere git</button></div>
+        </div></div>`;
+    return `<div class="tby-bas"><div><b>🗓️ ${YIL.fmt(y)}</b><small>${YIL.fmt(y + ar)} – ${YIL.fmt(y - ar)} arası</small></div>
+        <div class="tby-ar" role="group" aria-label="Yıl aralığı">${[10, 25, 50, 100].map(n => `<button class="${n === ar ? 'on' : ''}" data-tby-ar="${n}">±${n}</button>`).join('')}</div></div>
+      <div class="tby-filtre" role="group" aria-label="Olay türü">${TBY_FILTRE.map(x => { const n = say(x); return n || x[0] === 'hepsi' ? `<button class="${x[0] === f[0] ? 'on' : ''}" data-tby-f="${x[0]}">${x[1]} <em>${n}</em></button>` : ''; }).join('')}</div>
+      ${liste.length ? [
+        ['📍 Bu yıl', liste.filter(o => o.y === y && !o.donem).sort((a, b) => b.onem - a.onem)],
+        [`⏪ Öncesinde (${ar} yıl içinde)`, liste.filter(o => o.y > y).sort((a, b) => a.y - b.y || b.onem - a.onem)],
+        [`⏩ Sonrasında (${ar} yıl içinde)`, liste.filter(o => o.y < y).sort((a, b) => b.y - a.y || b.onem - a.onem)],
+        ['💡 O yıllarda dünyada', liste.filter(o => o.y === y && o.donem).sort((a, b) => (a.donem[0] - a.donem[1]) - (b.donem[0] - b.donem[1]))]
+      ].filter(g => g[1].length).map(g => `<h4 class="tby-grup">${g[0]} <em>${g[1].length}</em></h4>${g[1].map(kart).join('')}`).join('') : `<p class="note">Bu aralıkta kayıtlı büyük bir olay yok.</p>${ar < 100 ? '<div class="gos"><button class="phbtn" data-tby-ar="100">±100 yıla genişlet</button></div>' : ''}`}
+      <p class="note">Zaman çizelgesinde yılı değiştirip takvimi yeniden açarak başka bir yılın olaylarını görebilirsin.</p>`;
+  }
+  function tbySekme() { return { ad: '🗓️ Tarihte Bu Yıl', html: '', onShow: b => { b.innerHTML = tbyHTML(); } }; }
+  function openTarihteBugun(ozelOlay, acSekme) {
     const res = ozelOlay ? { tam: true, ay: ozelOlay.ay, gun: ozelOlay.gun, olaylar: [ozelOlay] } : (window.tarihteBugunBul ? window.tarihteBugunBul() : null);
-    if (!res || !res.olaylar.length) return;
+    if (!res || !res.olaylar.length) { showModal({ ikon: '🗓️', title: `Tarihte Bu Yıl · ${YIL.fmt(Math.round(Y))}`, sub: 'Seçtiğin yılın çevresindeki önemli olaylar', tabs: [tbySekme()] }); return; }
     const baslikTarih = `${res.gun} ${AY_AD[res.ay] || ''}`;
     const kartlar = res.olaylar.map(o => `<div class="tb-kart">
         <div class="tb-ust"><span class="pill">📅 ${o.gun} ${AY_AD[o.ay]} · ${YIL.fmt(o.y)}</span><small>📍 ${esc(o.yer)}</small></div>
@@ -790,7 +835,8 @@
       </div>`).join('');
     const html = `${res.tam ? '' : `<p class="note">Bugün (${baslikTarih}) için en yakın tarihî dönüm noktaları:</p>`}${kartlar}
       <div class="gos"><button class="phbtn" data-tbrastgele="1">🎲 Başka bir gün gör</button></div>`;
-    showModal({ ikon: '📅', title: `Tarihte Bugün · ${baslikTarih}`, sub: 'Takvimde bugüne damga vuran olaylar', tabs: [{ ad: '📅 Bugün', html }] });
+    showModal({ ikon: '📅', title: 'Tarihte Bugün & Bu Yıl', sub: `📅 ${baslikTarih} · 🗓️ ${YIL.fmt(Math.round(Y))} ve çevresi`, open: acSekme || 0,
+      tabs: [{ ad: '📅 Tarihte Bugün', html }, tbySekme()] });
   }
   function kpSekmeSec(sek) {
     const el = $('#katman'); if (!el) return;
@@ -1456,7 +1502,7 @@
   const endG = ev => {
     if (dragG && !dragG.moved && gpts.size <= 1) {
       if (typeof window.__kureSec === 'function') { const cb = window.__kureSec; window.__kureSec = null; cb(DN.llAt(...cvPos(gcv, ev))); }
-      else { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'donum') openDonum(h.d); else if (h && h.kind === 'hatyapi') openHatYapi(h.hy); else if (h && h.kind === 'magara') openMagara(h.m); else if (h && h.kind === 'tarihkazi') openKazi(h.kz, 'tarih'); else if (h && h.kind === 'fosilkazi') openKazi(h.kz, 'doga'); else if (h && h.kind === 'surpriz') openSurpriz(h.sp); else if (h && h.kind === 'liman') openLiman(h.lm); else if (h && h.kind === 'nehir') openNehir(h.nr); else if (h && h.kind === 'hayvangoc') openHayvanGoc(h.hg); else if (h && h.kind === 'volkan') openVolkan(h.v); else if (h && h.kind === 'fay') openFay(h.f); else if (h && h.kind === 'akinti') openAkinti(h.a); else if (h && h.kind === 'ruzgar') openRuzgar(h.rz); else if (h && h.kind === 'denizolay') openDenizOlay(h.o); else if (h && h.kind === 'hayvan') openHayvan(h.h); else if (h && h.kind === 'bitki') openBitki(h.bt); else if (h && h.kind === 'yayilis') { DN.setYayilis(h.yy.id); openYayilis(h.yy); } else if (h && h.kind === 'cografya') openCografya(h.cg); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); else if (!h) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) { if (DN.karaMi && !DN.karaMi(ll[0], ll[1])) { const ok = okyanusBul(ll[0], ll[1]); if (ok) openOkyanus(ok); } else { let yakinCg = null; if ((DN.layers.cografya || !DN.sinirAcik) && window.ATLAS_COGRAFYA) { const tol = Math.max(0.65, 2.4 / Math.max(1, (DN.view && DN.view.z) || 1)); let enYakin = tol * tol; for (const cg of window.ATLAS_COGRAFYA) { if (cg.tur !== 'harika' && cg.tur !== 'dag') continue; const d2 = (cg.ll[0] - ll[0]) ** 2 + (cg.ll[1] - ll[1]) ** 2; if (d2 < enYakin) { enYakin = d2; yakinCg = cg; } } } if (yakinCg) openCografya(yakinCg); else if (DN.sinirAcik) { DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else { const db = window.dogaBolgeBul && window.dogaBolgeBul(ll[0], ll[1]); if (db) openDogaBolge(db); } } } } }
+      else { const h = DN.hitTest(...cvPos(gcv, ev), ev.pointerType === 'mouse' ? 0 : 12); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'donum') openDonum(h.d); else if (h && h.kind === 'hatyapi') openHatYapi(h.hy); else if (h && h.kind === 'magara') openMagara(h.m); else if (h && h.kind === 'tarihkazi') openKazi(h.kz, 'tarih'); else if (h && h.kind === 'fosilkazi') openKazi(h.kz, 'doga'); else if (h && h.kind === 'surpriz') openSurpriz(h.sp); else if (h && h.kind === 'liman') openLiman(h.lm); else if (h && h.kind === 'nehir') openNehir(h.nr); else if (h && h.kind === 'hayvangoc') openHayvanGoc(h.hg); else if (h && h.kind === 'volkan') openVolkan(h.v); else if (h && h.kind === 'fay') openFay(h.f); else if (h && h.kind === 'akinti') openAkinti(h.a); else if (h && h.kind === 'ruzgar') openRuzgar(h.rz); else if (h && h.kind === 'denizolay') openDenizOlay(h.o); else if (h && h.kind === 'hayvan') openHayvan(h.h); else if (h && h.kind === 'bitki') openBitki(h.bt); else if (h && h.kind === 'yayilis') { DN.setYayilis(h.yy.id); openYayilis(h.yy); } else if (h && h.kind === 'cografya') openCografya(h.cg); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); else if (!h) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) { if (DN.karaMi && !DN.karaMi(ll[0], ll[1])) { const ok = okyanusBul(ll[0], ll[1]); if (ok) openOkyanus(ok); } else { let yakinCg = null; if ((DN.layers.cografya || !DN.sinirAcik) && window.ATLAS_COGRAFYA) { const tol = Math.max(0.65, 2.4 / Math.max(1, (DN.view && DN.view.z) || 1)); let enYakin = tol * tol; for (const cg of window.ATLAS_COGRAFYA) { if (cg.tur !== 'harika' && cg.tur !== 'dag') continue; const d2 = (cg.ll[0] - ll[0]) ** 2 + (cg.ll[1] - ll[1]) ** 2; if (d2 < enYakin) { enYakin = d2; yakinCg = cg; } } } if (yakinCg) openCografya(yakinCg); else if (DN.sinirAcik) { DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else { const db = window.dogaBolgeBul && window.dogaBolgeBul(ll[0], ll[1]); if (db) openDogaBolge(db); } } } } }
     }
     gpts.delete(ev.pointerId);
     if (!gpts.size) dragG = null;
@@ -1670,7 +1716,10 @@
     if (v === 'dunya' && !DUNYA && !setView.kureGitti && BG.merkez && window.Dunya) { setView.kureGitti = true; window.Dunya.goEgypt(BG.merkez, Math.min(BG.merkezZ || 3, 3)); }
     modGuncelle();
   }
-  function modGuncelle() { document.querySelectorAll('[data-mod]').forEach(b => b.classList.toggle('on', (b.dataset.mod === 'kesfet' && view === 'dunya') || (b.dataset.mod === 'sahne' && view === 'sahne'))); }
+  function modGuncelle() {
+    document.querySelectorAll('[data-mod]').forEach(b => b.classList.toggle('on', (b.dataset.mod === 'kesfet' && view === 'dunya') || (b.dataset.mod === 'sahne' && view === 'sahne')));
+    const mbAd = $('#menubtn-ad'); if (mbAd) mbAd.textContent = view === 'sahne' ? '🎬 Sahne' : '🌍 Keşfet';
+  }
   function sahneSec() {
     showModal({ ikon: '🎬', title: 'Hangi bölgenin sahnesi?', sub: `${YIL.fmt(Math.round(Y))} yılına gidilir`, tabs: [{ ad: 'Bölge seç', html: `<p>Canlı sahnede yapılar yılına göre yükselir, insanlar ve gemiler dönemine göre değişir.</p><div class="secim">${BSIRA.map(b => `<button data-gitbolge2="${b}">${BLR[b].ikon} <b>${BLR[b].ad}</b><small>${BLR[b].ad} sahnesini aç</small></button>`).join('')}</div>` }] });
   }
@@ -1860,6 +1909,21 @@
     showModal({ ikon: r.ikon, title: `${r.ad} olarak bir gün`, sub: `${k.ikon} ${secili ? `${YIL.fmt(yasaYil)} civarı · ` : ''}${d.ad} · ${d.aralik} · ${d.yer}`, tabs });
   }
   function yasaAc() { openYasam(); }
+  // ☰ Telefon menüsü: modlar, bölge/çağ seçimi ve ses/rehber soldan açılan panelde
+  (() => {
+    const mb = $('#menubtn'), um = $('#ustmenu'), perde = $('#um-perde'); if (!mb || !um) return;
+    const ac = v => { um.classList.toggle('acik', v); mb.setAttribute('aria-expanded', String(v)); if (perde) perde.hidden = !v; };
+    mb.addEventListener('click', e => { e.stopPropagation(); ac(!um.classList.contains('acik')); });
+    if (perde) perde.addEventListener('click', () => ac(false));
+    // Panelde bir düğmeye basınca (ses/oyunlar gibi kendi açılır penceresi olanlar dahil) panel kapanır
+    um.addEventListener('click', e => { if (e.target.closest('button')) ac(false); }, true);
+    um.querySelectorAll('select').forEach(s => s.addEventListener('change', () => ac(false)));
+    // Menüdeki "Ses ve müzik seçimi": üst çubuktaki 🔊 düğmesinin penceresini açar
+    const umSes = $('#um-ses'), sesBtn = $('#sesbtn'), sesPop = $('#sespop');
+    if (umSes && sesBtn) umSes.addEventListener('click', e => { e.stopPropagation(); if (!sesPop || sesPop.hidden) sesBtn.click(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && um.classList.contains('acik')) ac(false); });
+    window.matchMedia('(min-width: 861px)').addEventListener('change', m => { if (m.matches) ac(false); });
+  })();
   document.querySelectorAll('[data-mod]').forEach(b => b.addEventListener('click', () => {
     const m = b.dataset.mod;
     if (m === 'kesfet') { kartlariKapat(); setView('dunya'); }
@@ -1915,6 +1979,15 @@
     const yya = e.target.closest('[data-yy-ac]'); if (yya) { const yy = (window.ATLAS_YAYILIS || []).find(x => x.id === yya.dataset.yyAc); if (yy) openYayilis(yy); return; }
     const yyk = e.target.closest('[data-yy-kure]'); if (yyk) { const yy = (window.ATLAS_YAYILIS || []).find(x => x.id === yyk.dataset.yyKure); if (yy) { playingBeforeModal = false; closeModal(); if (view !== 'dunya') setView('dunya'); DN.setLayer('yayilis', true); if (DN.setYayilis) DN.setYayilis(yy.id); renderOlayPanel(); const mid = yy.pts && yy.pts.length ? yy.pts[Math.floor(yy.pts.length / 2)] : yy.ll; DN.goTo(mid[0], mid[1], 2.2); DN.pin(yy.ll[0], yy.ll[1], (yy.ik || '🧭') + ' ' + yy.ad); toast(`${yy.ik || '🧭'} <b>${esc(yy.ad)}</b> · Yayılış rotası kürede canlı gösteriliyor.`); } return; }
     if (e.target.closest('[data-yy-galeri]')) { openYayilisGaleri(); return; }
+    const tbyAr = e.target.closest('[data-tby-ar]'); if (tbyAr) { tbyAralik = +tbyAr.dataset.tbyAr; modal.querySelector('.mbody').innerHTML = tbyHTML(); return; }
+    const tbyF = e.target.closest('[data-tby-f]'); if (tbyF) { tbyFiltre = tbyF.dataset.tbyF; const mb = modal.querySelector('.mbody'), st = mb.scrollTop; mb.innerHTML = tbyHTML(); mb.scrollTop = st; return; }
+    const tbyAc = e.target.closest('[data-tby-ac]'); if (tbyAc) {
+      const [tur, id] = tbyAc.dataset.tbyAc.split('|');
+      if (tur === 'olay') { const ev = (window.OLAYLAR || []).find(x => x.id === id); if (ev) openEvent(ev); }
+      else if (tur === 'donum') { const d = (window.DONUM_NOKTALARI || []).find(x => x.id === id); if (d) openDonum(d); }
+      else if (tur === 'yolculuk') { const j = (window.YOLCULUKLAR || []).find(x => x.id === id); if (j) openYolculuk(j); }
+      return;
+    }
     if (e.target.closest('[data-tbrastgele]')) { const L = window.TARIHTE_BUGUN || []; if (L.length) openTarihteBugun(L[Math.floor(Math.random() * L.length)]); return; }
     const aa0 = e.target.closest('[data-atlas-ac]'); if (aa0) { playingBeforeModal = false; closeModal(); if (view !== 'dunya') setView('dunya'); DN.setLayer(aa0.dataset.atlasAc, true); renderOlayPanel(); toast('🌊 Akıntılar, girdaplar ve fırtına alanları açıldı.'); return; }
     const kf0 = e.target.closest('[data-kf]'); if (kf0) {

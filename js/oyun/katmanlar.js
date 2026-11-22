@@ -25,6 +25,12 @@
     // Masaüstünde bilgi kartı sağda olacağı için merkezi hafif sola dengele
     const offX = W > 860 ? -W * 0.13 : 0;
     const cx = W / 2 + offX + panX;
+    // Telefonda kart altta: küre kartın üstünde kalan boşluğa ortalanır ve sığacak kadar küçülür
+    if (W <= 860 && root) {
+      const kart = root.querySelector('#ke-kart'), ust = kart ? kart.getBoundingClientRect().top - root.getBoundingClientRect().top : H;
+      const bosH = clamp(ust, H * 0.4, H), Rm = Math.min(W, bosH - 40) * 0.235 * z;
+      return { cx, cy: 20 + (bosH - 20) / 2 + panY, R: Rm };
+    }
     const cy = H / 2 + panY;
     return { cx, cy, R };
   }
@@ -272,6 +278,7 @@
     const card = root.querySelector('#ke-kart');
     const prev = L[idx - 1], next = L[idx + 1];
     card.innerHTML = `
+      <button type="button" class="ke-tutamak" data-ke-ac aria-label="Kartı büyüt / küçült"><i></i></button>
       <span class="ke-tur">${k.grup === 'ic' ? '🌋 Dünya\'nın İç Katmanı' : '🌌 Atmosfer Katmanı'}</span>
       <h3>${k.ik} ${esc(k.ad)}</h3>
       <div class="ke-meta">
@@ -281,6 +288,7 @@
         <div><small>⚖️ Basınç</small><b>${esc(k.basinc)}</b></div>
       </div>
       <p class="ke-ozet">${esc(k.ozet)}</p>
+      <button type="button" class="ke-devam" data-ke-ac>Devamını oku ▾</button>
       <p class="ke-var"><b>🔭 Burada Ne Var?</b> ${esc(k.nelerVar)}</p>
       <div class="ke-bil"><b>🤯 En Şaşırtıcı Bilgi</b><p>${esc(k.sasirtici)}</p></div>
       <div class="ke-yon">
@@ -328,6 +336,12 @@
     root.querySelector('#ke-fit').addEventListener('click', () => { tz = 1; tpanX = 0; tpanY = 0; });
 
     root.addEventListener('click', ev => {
+      // Telefonda kart küçük başlar; "Devamını oku" ya da tutamak tam metni açar/kapatır
+      if (ev.target.closest('[data-ke-ac]')) {
+        const acik = root.classList.toggle('ke-kart-acik');
+        root.querySelectorAll('.ke-devam').forEach(d => { d.textContent = acik ? 'Daha az göster ▴' : 'Devamını oku ▾'; });
+        return;
+      }
       const b = ev.target.closest('[data-ke-id],[data-ke-git]');
       if (b) odakla(b.dataset.keId || b.dataset.keGit);
     });

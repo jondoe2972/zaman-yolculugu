@@ -498,6 +498,12 @@
     if (cag.asteroit) { rotLo = -82; rotLa = 20; }
     else if (cag.id === 'pangea') { rotLo = 15; rotLa = 8; }
     renderPanel();
+    // Telefonda: yeni çağın yazısı baştan görünsün, seçili çağ şeritte ortaya gelsin
+    if (window.innerWidth <= 820 && box) {
+      const gv = box.querySelector('.dz-govde'); if (gv) gv.scrollTop = 0;
+      const on = box.querySelector('.dz-serit button.on'), ser = box.querySelector('.dz-serit');
+      if (on && ser) ser.scrollTo({ left: ser.scrollLeft + on.getBoundingClientRect().left - ser.getBoundingClientRect().left - (ser.clientWidth - on.offsetWidth) / 2, behavior: 'smooth' });
+    }
   }
 
   function kur() {
