@@ -132,11 +132,6 @@
       }
     },
     {
-      id: 'bugun', kutu: 'modal', ikon: '📅', ad: 'Tarihte Bugün', yeni: true,
-      alt: 'Takvimde bugüne damga vuran olayları gör ve o güne git',
-      ac: () => window.ZY && window.ZY.openTarihteBugun && window.ZY.openTarihteBugun()
-    },
-    {
       id: 'yayilis', kutu: 'modal', ikon: '🍵', ad: 'Yemek ve İcatların Yolculuğu', yeni: true,
       alt: 'Çay neden "Çay/Tea" oldu? Yemek, kelime ve icatların dünyaya yayılışı',
       ac: () => window.ZY && window.ZY.openYayilisGaleri && window.ZY.openYayilisGaleri()

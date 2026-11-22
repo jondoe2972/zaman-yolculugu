@@ -113,8 +113,8 @@
   // zaman çizelgesinin görünen aralığı: tlA (eski uç, MÖ +) – tlB (yeni uç); null = bütün tarih (yakınlaştırma için)
   let tlA = null, tlB = null;
   const vA = () => tlA ?? P.from, vB = () => tlB ?? P.to;
-  const yearX = y => 14 + (vA() - y) / (vA() - vB()) * (TW - 28);
-  const xYear = x => vA() - (x - 14) / (TW - 28) * (vA() - vB());
+  const yearX = y => 14 + (vA() - y) / (vA() - vB()) * (TW - 66);
+  const xYear = x => vA() - (x - 14) / (TW - 66) * (vA() - vB());
   function tlAralik(a, b) {
     const tam = P.from - P.to, s = Math.max(10, a - b);
     if (s >= tam) { tlA = tlB = null; } else { a = Math.min(P.from, Math.max(P.to + s, a)); tlA = a; tlB = a - s; }
@@ -302,7 +302,7 @@
     ['hayvangoc', '🐋 Hayvan Göç Döngüleri', () => (window.ATLAS_HAYVAN_GOC || []).length],
     ['liman', '⚓ Dünya Limanları', () => (window.ATLAS_LIMANLAR || []).length],
     ['volkan', '🌋 Yanardağlar ve Ateş Çemberi', () => (window.ATLAS_VOLKANLAR?.volkanlar || []).length],
-    ['yasamdoga', '🐾🌿 Hayvan ve Bitki Yaşamları', () => ((window.YASAM_DOGA?.hayvanlar || []).length + (window.YASAM_DOGA?.bitkiler || []).length)],
+    ['yasamdoga', '🐾🌿🦠 Hayvan, Bitki ve Mikro Yaşamlar', () => ((window.YASAM_DOGA?.hayvanlar || []).length + (window.YASAM_DOGA?.bitkiler || []).length + (window.YASAM_DOGA?.mikroplar || []).length)],
     ['magara', '🪨 Tarihöncesi Mağaralar ve Kazılar', () => (window.ATLAS_MAGARALAR || []).length],
     ['donum', '⚡ Dünyayı Değiştiren Büyük Olaylar', () => (window.DONUM_NOKTALARI || []).length],
     ['kultur', '👘 Uygarlık ve Ülke Kültürleri', () => (window.DEVLET_KULTUR || []).length],
@@ -986,7 +986,7 @@
     if (DUNYA) {
       // her kıta bir sıra; sol etikette hatırlanan yıl gösterilir, tıklayınca o kıtanın yılına geçilir
       const KT = window.KITALAR || [{ id: 'hepsi', ad: '', ikon: '', b: BSIRA }], RENK = { afrika: ['#9a6a2e', '#b8843e'], asya: ['#8e3b32', '#ad5446'], avrupa: ['#2f5a8a', '#4a76a8'], amerika: ['#2e7a4e', '#46966a'], okyanusya: ['#2a8a9a', '#46a8b8'], hepsi: ['#6a5a4a', '#8a7a6a'] };
-      const rh = Math.min(13, Math.floor(40 / KT.length)), fs = Math.min(9.5, rh + 0.5);
+      const rh = Math.min(13, Math.floor(54 / KT.length)), fs = Math.min(9.5, rh - 1);
       KT.forEach((kt, i) => {
         const y0 = 4 + i * rh, bl = kt.b.filter(b => BSIRA.includes(b)), lh = (rh - 1) / Math.max(1, bl.length), rk = RENK[kt.id] || RENK.hepsi;
         tg.fillStyle = 'rgba(255,255,255,0.05)'; tg.fillRect(0, y0, TW, rh - 1);
@@ -1019,28 +1019,28 @@
     for (const m of P.monuments) {
       if (m.minor || m.eski) continue;
       const a = yearX(Math.min(m.start, P.from)), b = yearX(Math.max(m.stop || m.end, P.to)); if (b <= a) continue;
-      tg.fillStyle = m.id === 'khufu' ? '#f2c94c' : (m.stop ? '#9b8a70' : '#c9a45c'); tg.fillRect(a, 46, Math.max(2, b - a), 5);
+      tg.fillStyle = m.id === 'khufu' ? '#f2c94c' : (m.stop ? '#9b8a70' : '#c9a45c'); tg.fillRect(a, 60, Math.max(2, b - a), 4.5);
     }
     for (const ev of P.events) {
       if (ev.y > P.from || ev.y < P.to) continue;
       const x = yearX(ev.y), w = ev.k === 'w';
       tg.fillStyle = hoverEv === ev ? '#fff' : (w ? '#6bb6e0' : '#f2c94c');
-      tg.beginPath(); if (w) tg.arc(x, 60, 3.6, 0, 7); else { tg.moveTo(x, 55); tg.lineTo(x + 4.5, 63); tg.lineTo(x - 4.5, 63); tg.closePath(); } tg.fill();
+      tg.beginPath(); if (w) tg.arc(x, 71, 3.4, 0, 7); else { tg.moveTo(x, 66); tg.lineTo(x + 4.2, 74); tg.lineTo(x - 4.2, 74); tg.closePath(); } tg.fill();
     }
     tg.fillStyle = '#b9a88c'; tg.strokeStyle = '#7d6b52'; tg.font = '10px system-ui';
-    const pxYr = (TW - 28) / (vA() - vB());
+    const pxYr = (TW - 66) / (vA() - vB());
     const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000].find(v => v * pxYr >= 64) || 5000;
     const tick = [1, 2, 5, 10, 20, 25, 50, 100, 250, 500, 1000].find(v => v * pxYr >= 7) || 1000;
     for (let y = Math.ceil(vB() / tick) * tick; y <= vA(); y += tick) {
       if (y === 0) continue; // 0 yılı yok: MÖ 1'den MS 1'e geçilir
-      const x = yearX(y), big = y % step === 0; tg.beginPath(); tg.moveTo(x, 68); tg.lineTo(x, big ? 76 : 72); tg.stroke();
-      if (big) tg.fillText(`${YIL.fmt(y)}`, x, 84);
+      const x = yearX(y), big = y % step === 0; tg.beginPath(); tg.moveTo(x, 78); tg.lineTo(x, big ? 86 : 82); tg.stroke();
+      if (big) tg.fillText(`${YIL.fmt(y)}`, x, 95);
     }
     const cx = yearX(Y);
     tg.fillStyle = 'rgba(242,201,76,0.18)'; tg.fillRect(x0, 4, cx - x0, 2);
-    tg.strokeStyle = '#ffd666'; tg.lineWidth = 2; tg.beginPath(); tg.moveTo(cx, 2); tg.lineTo(cx, 77); tg.stroke();
+    tg.strokeStyle = '#ffd666'; tg.lineWidth = 2; tg.beginPath(); tg.moveTo(cx, 2); tg.lineTo(cx, 88); tg.stroke();
     tg.fillStyle = '#ffd666'; tg.beginPath(); tg.arc(cx, 2, 5, 0, 7); tg.fill();
-    tg.beginPath(); tg.arc(cx, 72, 7, 0, 7); tg.fill(); tg.strokeStyle = '#3a2414'; tg.lineWidth = 2; tg.stroke();
+    tg.beginPath(); tg.arc(cx, 82, 6.5, 0, 7); tg.fill(); tg.strokeStyle = '#3a2414'; tg.lineWidth = 2; tg.stroke();
   }
   let dragTL = false;
   const tlPos = ev => { const r = tcv.getBoundingClientRect(); return [ev.clientX - r.left, ev.clientY - r.top]; };
@@ -1646,57 +1646,69 @@
     yasaYil = Math.round(yil ?? Y);
     const y = Math.round(Y), yy = yasaYil, { guc, halk } = rolListesi(), KT = window.YASAM || [];
     const kart = (d, r) => `<button class="rolecard" data-yrol="${r.id}"><canvas data-yrolcv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small><i class="ysm-sinif">${SINIF[r.sinif] || ''}</i> ${r.kim}</small></button>`;
-    const tabs = KT.map(k => ({ ad: `${k.ikon} ${k.ad}`, html: `<p class="note">Bir dönem ve bir hayat seç: o insanın bir gününü, ne yediğini, nasıl bir evde yaşadığını ve hangi koşullarda çalıştığını gör.</p>${k.donemler.map(d => {
-        const simdi = yy <= d.from && yy >= d.to;
-        return `<div class="ysm-donem${simdi ? ' simdi' : ''}"><h4>${d.ad} <small>${d.aralik} · ${d.yer}</small>${simdi ? '<span class="ysm-rozet">seçili yıl bu dönemde</span>' : ''}</h4><div class="rolegrid">${d.roller.map(r => kart(d, r)).join('')}</div></div>`; }).join('')}`,
-      onShow: yasaCiz }));
-    tabs.unshift({ ad: `📅 ${YIL.fmt(yy)} ±${YASA_PAY}`, html: yasaPencereHTML(yy, kart), onShow: yasaCiz });
+    // 🧑‍🌾 İnsan alt sekmeleri (Seçili Yıl, varsa Bu Bölge ve Kıtalar — ana sekmeyi kalabalıklaştırmadan içeride)
+    const alt = [{ id: 'yil', ad: `📅 ${YIL.fmt(yy)} ±${YASA_PAY}`, html: yasaPencereHTML(yy, kart) }];
     if (guc.length + halk.length && yy === y) {
-      const eski = r => `<button class="rolecard${r.guc ? ' guc' : ''}" data-role="${r.id}"><canvas data-rolecv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small>${fill(r.kim, rolDegisken(r))}</small></button>`, tum = [...guc, ...halk];
-      tabs.splice(1, 0, { ad: `⭐ ${BG.ad || 'Bu bölge'}`, html: `<p class="note">Seçili yıl ve bölge için özel, ayrıntılı hayatlar.</p>${guc.length ? `<h4 class="rolbas">👑 Güç sahibi hayatlar</h4><div class="rolegrid">${guc.map(eski).join('')}</div>` : ''}${halk.length ? `<h4 class="rolbas">🌾 Sıradan hayatlar</h4><div class="rolegrid">${halk.map(eski).join('')}</div>` : ''}`,
-        onShow: b => b.querySelectorAll('[data-rolecv]').forEach(cvEl => { const r = tum.find(x => x.id === cvEl.dataset.rolecv); liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, r.adimlar[1], t, A, rolCizimOpt(r))), false); }) });
+      const eski = r => `<button class="rolecard${r.guc ? ' guc' : ''}" data-role="${r.id}"><canvas data-rolecv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small>${fill(r.kim, rolDegisken(r))}</small></button>`;
+      alt.push({ id: 'bolge', ad: `⭐ ${BG.ad || 'Bu bölge'}`, html: `<p class="note">Seçili yıl ve bölge için özel, ayrıntılı hayatlar.</p>${guc.length ? `<h4 class="rolbas">👑 Güç sahibi hayatlar</h4><div class="rolegrid">${guc.map(eski).join('')}</div>` : ''}${halk.length ? `<h4 class="rolbas">🌾 Sıradan hayatlar</h4><div class="rolegrid">${halk.map(eski).join('')}</div>` : ''}` });
     }
-    // 🐾 Hayvan Olarak Yaşa ve 🌿 Bitki / Ağaç Olarak Yaşa sekmeleri (rastgele seçim — data/yasam-doga.js)
-    const YD = window.YASAM_DOGA;
-    if (YD) {
-      const ekIdx = (guc.length + halk.length && yy === y) ? 2 : 1;
-      const rastKart = (tur, ik, bas, alt, btnAd) => `<div class="did" style="text-align:center;padding:22px 16px">
-        <div style="font-size:44px;line-height:1.1;margin-bottom:8px">${ik}</div>
-        <h3 style="margin:0 0 8px">${bas}</h3>
-        <p style="margin:0 0 16px;opacity:.9">${alt}</p>
-        <button class="phbtn icbtn" data-yd-rastgele="${tur}" style="font-size:15px;padding:10px 18px">🎲 ${btnAd}</button>
-      </div>`;
-      tabs.splice(ekIdx, 0,
-        { ad: '🐾 Hayvan Olarak Yaşa', html: rastKart('hayvan', '🐾', 'Hangi Hayvan Olarak Doğacaksın?', 'Okyanusun derinliklerinde bir balina, 4.800 km uçan bir kral kelebeği, uzayda bile yaşayan bir su ayısı ya da Buzul Çağı mamutu… Şansına hangi canlı çıkarsa onun göçünü, besin zincirindeki yerini, yaşam döngüsünü ve en şaşırtıcı sırlarını keşfet!', 'Rastgele Hayvan Olarak Yaşa') },
-        { ad: '🌿 Bitki Olarak Yaşa', html: rastKart('bitki', '🌿', 'Hangi Bitki Olarak Filizleneceksin?', 'Binlerce yıllık bir dev sekoya, sinek yakalayan etçil bir bitki, dokununca kapanıp hatırlayan küstüm otu ya da okyanus aşan bir palmiye tohumu… Şansına hangi bitki çıkarsa onun yaşam döngüsünü ve şaşırtıcı stratejilerini keşfet!', 'Rastgele Bitki Olarak Yaşa') }
-      );
+    for (const k of KT) {
+      alt.push({ id: 'k-' + k.id, ad: `${k.ikon} ${k.ad}`, html: `<p class="note">Bir dönem ve bir hayat seç: o insanın bir gününü, ne yediğini, nasıl bir evde yaşadığını ve hangi koşullarda çalıştığını gör.</p>${k.donemler.map(d => {
+        const simdi = yy <= d.from && yy >= d.to;
+        return `<div class="ysm-donem${simdi ? ' simdi' : ''}"><h4>${d.ad} <small>${d.aralik} · ${d.yer}</small>${simdi ? '<span class="ysm-rozet">seçili yıl bu dönemde</span>' : ''}</h4><div class="rolegrid">${d.roller.map(r => kart(d, r)).join('')}</div></div>`; }).join('')}` });
     }
-    // açılış sekmesi: seçili yılın ±100 yılındaki hayatlar (bütün kıtalar, seçili bölgenin kıtası önce)
-    showModal({ ikon: '🧑‍🌾', title: 'Yaşa: insan, hayvan ya da bitki olarak…', sub: `${YIL.fmt(yy)} civarında veya doğanın kalbinde nasıl bir hayatın olurdu?`, tabs, open: 0 });
+    const insanHTML = `<div class="tabs" style="margin:-14px -18px 12px;background:#efe2c4;border-radius:0">${alt.map((a, i) => `<button type="button" data-yinsan="${a.id}" class="${i === 0 ? 'on' : ''}">${a.ad}</button>`).join('')}</div>`
+      + alt.map((a, i) => `<div data-yinsan-p="${a.id}"${i === 0 ? '' : ' hidden'}>${a.html}</div>`).join('');
+    const insanCiz = b => {
+      const akt = b.querySelector('[data-yinsan-p]:not([hidden])') || b;
+      yasaCiz(akt);
+      const tum = [...guc, ...halk];
+      akt.querySelectorAll('[data-rolecv]').forEach(cvEl => { const r = tum.find(x => x.id === cvEl.dataset.rolecv); if (r) liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, r.adimlar[1], t, A, rolCizimOpt(r))), false); });
+    };
+    const ydKart = x => `<button class="yd-kart" data-yd="${esc(x.id)}"><span class="yd-ik">${x.ik}</span><div><b>${esc(x.ad)}</b><small>⏳ ${esc(x.omur)}</small></div></button>`;
+    const YD = window.YASAM_DOGA || {};
+    const rastKart = (tur, ik, bas, altM, btnAd, liste) => `<div class="did" style="text-align:center;padding:20px 16px">
+      <div style="font-size:42px;line-height:1.1;margin-bottom:8px">${ik}</div>
+      <h3 style="margin:0 0 8px">${bas}</h3>
+      <p style="margin:0 0 14px;opacity:.9">${altM}</p>
+      <button class="phbtn icbtn" data-yd-rastgele="${tur}" style="font-size:15px;padding:10px 18px">🎲 ${btnAd}</button>
+    </div>
+    ${liste && liste.length ? `<details class="yd-sec-kutu"><summary>📋 Ya da listeden merak ettiğin canlıyı kendin seç ▾</summary><div class="yd-grid">${liste.map(ydKart).join('')}</div></details>` : ''}`;
+    const tabs = [
+      { ad: '🧑‍🌾 İnsan', html: insanHTML, onShow: insanCiz },
+      { ad: '🐾 Hayvan', html: rastKart('hayvan', '🐾', 'Hangi Hayvan Olarak Doğacaksın?', 'Okyanusun derinliklerinde bir balina, 4.800 km uçan bir kral kelebeği, uzayda bile yaşayan bir su ayısı ya da Buzul Çağı mamutu… İster şansına güven, ister aşağıdan merak ettiğini seç!', 'Rastgele Hayvan Olarak Yaşa', YD.hayvanlar) },
+      { ad: '🌿 Bitki', html: rastKart('bitki', '🌿', 'Hangi Bitki Olarak Filizleneceksin?', 'Binlerce yıllık bir dev sekoya, sinek yakalayan etçil bir bitki, 2.000 yıl sadece 2 yaprak büyüten çöl fosili ya da okyanus aşan palmiye… İster rastgele çek, ister aşağıdan seç!', 'Rastgele Bitki Olarak Yaşa', YD.bitkiler) },
+      { ad: '🦠 Mikro Dünya', html: rastKart('mikrop', '🦠', 'Hangi Bakteri, Virüs ya da Mikrop Olacaksın?', 'Dünya\'ya ilk oksijeni veren siyanobakteri, uzay aracı gibi görünen bakteriyofaj virüsü, yoğurt dostu Lactobacillus ya da labirent çözen beyinsiz cıvık mantar… İster rastgele çek, ister aşağıdan seç!', 'Rastgele Mikro Canlı Olarak Yaşa', YD.mikroplar) }
+    ];
+    showModal({ ikon: '🧑‍🌾', title: 'Yaşa: insan, hayvan, bitki ya da mikro canlı…', sub: `${YIL.fmt(yy)} civarında veya doğanın kalbinde nasıl bir hayatın olurdu?`, tabs, open: 0 });
   }
   function openYasamDoga(id) {
     const YD = window.YASAM_DOGA || {};
-    const o = [...(YD.hayvanlar || []), ...(YD.bitkiler || [])].find(x => x.id === id);
+    const o = [...(YD.hayvanlar || []), ...(YD.bitkiler || []), ...(YD.mikroplar || [])].find(x => x.id === id);
     if (!o) return;
     kesifKaydet('yasamdoga', o.id);
-    const bitki = o.tur === 'bitki';
+    const bitki = o.tur === 'bitki', mikrop = o.tur === 'mikrop';
+    const turKey = mikrop ? 'mikrop' : bitki ? 'bitki' : 'hayvan';
+    const turAd = mikrop ? '🦠 Mikro Dünya Yaşamı' : bitki ? '🌿 Bitki / Ağaç Yaşamı' : '🐾 Hayvan Yaşamı';
+    const baskaAd = mikrop ? 'Mikro Canlı' : bitki ? 'Bitki' : 'Hayvan';
     const donguHTML = (o.dongu || []).map(([bas, met]) => `<div class="yd-adim"><b>${esc(bas)}</b><p>${esc(met)}</p></div>`).join('');
     const satirlar = [
       ['⏳ Yaşam Süresi', o.omur],
       ['📍 Yaşam Alanı', o.alan],
-      ['🍽️ Beslenme', o.beslenme]
+      ['🍽️ Beslenme / Enerji', o.beslenme]
     ];
-    if (o.zincir) satirlar.push(['🕸️ Besin Zincirindeki Yeri', o.zincir]);
-    if (o.goc) satirlar.push([bitki ? '🌬️ Yayılış / Göç' : '🧭 Göç Bilgisi', o.goc]);
+    if (o.zincir) satirlar.push(['🕸️ Ekosistem / Besin Zinciri', o.zincir]);
+    if (o.ureme) satirlar.push([mikrop ? '🧬 Çoğalma Süreci' : bitki ? '🌱 Üreme / Tohumlama' : '🤰 Gebelik / Üreme Süreci', o.ureme]);
+    if (o.goc) satirlar.push([bitki || mikrop ? '🌬️ Yayılış / Göç' : '🧭 Göç Bilgisi', o.goc]);
     satirlar.push(['⚡ Süper Güç', o.superguc], ['⚠️ Başlıca Tehditler', o.tehdit]);
     const html = `<div class="kapak" data-kapak="${esc(o.w)}"></div>
-      <span class="pill">${bitki ? '🌿 Bitki / Ağaç Yaşamı' : '🐾 Hayvan Yaşamı'} · ⏳ ${esc(o.omur)}</span>
+      <span class="pill">${turAd} · ⏳ ${esc(o.omur)}</span>
       ${o.sasirtici ? `<div class="did"><b>🤯 En Şaşırtıcı Bilgi</b><p>${esc(o.sasirtici)}</p></div>` : ''}
       ${rowsHTML(satirlar)}
       <h4>🔄 ${bitki ? 'Yaşam Döngüsü ve Mevsimler' : 'Yaşam Döngüsü ve Bir Günün'}</h4>
       <div class="yd-adimlar">${donguHTML}</div>
       <div class="gos">
-        <button class="phbtn icbtn" data-yd-rastgele="${bitki ? 'bitki' : 'hayvan'}" data-yd-haric="${esc(o.id)}">🎲 Başka Bir ${bitki ? 'Bitki' : 'Hayvan'} Ol</button>
+        <button class="phbtn icbtn" data-yd-rastgele="${turKey}" data-yd-haric="${esc(o.id)}">🎲 Başka Bir ${baskaAd} Ol</button>
         ${o.ll ? `<button class="phbtn" data-yd-kure="${o.ll[0]}|${o.ll[1]}|${esc(o.ik + ' ' + o.ad)}">🌍 Yaşam Alanını Kürede Gör</button>` : ''}
         <button class="phbtn" data-yasa="1">← Yaşa Menüsüne Dön</button>
       </div>`;
@@ -1794,13 +1806,42 @@
     if (e.target.closest('.lifebtn')) { openYasam(); return; }
     const yyb = e.target.closest('[data-yyil]'); if (yyb) { const v = yyb.dataset.yyil; openYasam(v === 'rastgele' ? Math.round(YASA_EN_ESKI - Math.random() * (YASA_EN_ESKI + YIL.BUGUN)) : +v); return; }
     const yr = e.target.closest('[data-yrol]'); if (yr) { openYasamRol(yr.dataset.yrol); return; }
+    const yi = e.target.closest('[data-yinsan]'); if (yi) {
+      const mbody = yi.closest('.mbody');
+      if (mbody) {
+        mbody.querySelectorAll('[data-yinsan]').forEach(b => b.classList.toggle('on', b === yi));
+        mbody.querySelectorAll('[data-yinsan-p]').forEach(p => { p.hidden = p.dataset.yinsanP !== yi.dataset.yinsan; });
+        const akt = mbody.querySelector(`[data-yinsan-p="${yi.dataset.yinsan}"]`);
+        if (akt) {
+          yasaCiz(akt);
+          const { guc, halk } = rolListesi(), tum = [...guc, ...halk];
+          akt.querySelectorAll('[data-rolecv]').forEach(cvEl => { const r = tum.find(x => x.id === cvEl.dataset.rolecv); if (r) liveCanvas(cvEl, (ctx, w, h, t) => S.drawOn(ctx, A => C.drawLife(ctx, w, h, r.adimlar[1], t, A, rolCizimOpt(r))), false); });
+        }
+      }
+      return;
+    }
     const yd = e.target.closest('[data-yd]'); if (yd) { openYasamDoga(yd.dataset.yd); return; }
     const ydr = e.target.closest('[data-yd-rastgele]'); if (ydr) {
       const YD = window.YASAM_DOGA || {};
-      const havuz = (ydr.dataset.ydRastgele === 'bitki' ? YD.bitkiler : YD.hayvanlar) || [];
+      const tip = ydr.dataset.ydRastgele;
+      const havuz = (tip === 'bitki' ? YD.bitkiler : tip === 'mikrop' ? YD.mikroplar : YD.hayvanlar) || [];
       const haric = ydr.dataset.ydHaric || '';
-      const aday = havuz.length > 1 ? havuz.filter(x => x.id !== haric) : havuz;
-      if (aday.length) openYasamDoga(aday[Math.floor(Math.random() * aday.length)].id);
+      if (!havuz.length) return;
+      let deste = {};
+      try { deste = JSON.parse(localStorage.getItem('zy-yd-deste') || '{}') || {}; } catch (err) { deste = {}; }
+      let gorulen = Array.isArray(deste[tip]) ? deste[tip] : [];
+      let aday = havuz.filter(x => !gorulen.includes(x.id));
+      if (!aday.length) {
+        gorulen = [];
+        aday = havuz.length > 1 ? havuz.filter(x => x.id !== haric) : havuz;
+        const tAd = tip === 'bitki' ? 'bitki' : tip === 'mikrop' ? 'mikro canlı' : 'hayvan';
+        toast(`🎉 Tüm ${tAd} kartlarını keşfettin! Deste yeniden karıştırıldı.`);
+      }
+      const secilen = aday[Math.floor(Math.random() * aday.length)];
+      gorulen.push(secilen.id);
+      deste[tip] = gorulen;
+      try { localStorage.setItem('zy-yd-deste', JSON.stringify(deste)); } catch (err) {}
+      openYasamDoga(secilen.id);
       return;
     }
     const yds = e.target.closest('[data-yd-sec]'); if (yds) {
@@ -1907,12 +1948,45 @@
   }
   async function kapakYukle(box) {
     if (!box || !box.dataset.kapak) return;
+    const title = box.dataset.kapak;
     box.innerHTML = '<div class="kapak-bos">📷</div>';
+    const goster = o => {
+      const a = box.querySelector('a'), im = box.querySelector('a img'), sm = box.querySelector('small');
+      if (a && im && sm) {
+        a.href = o.page; im.src = o.src;
+        sm.textContent = `Fotoğraf: ${o.by}${o.lic ? ' · ' + o.lic : ''} · Wikimedia Commons`;
+      } else {
+        box.innerHTML = `<a href="${esc(o.page)}" target="_blank" rel="noopener"><img src="${esc(o.src)}" alt=""></a><small>Fotoğraf: ${esc(o.by)}${o.lic ? ' · ' + esc(o.lic) : ''} · Wikimedia Commons</small>`;
+      }
+    };
     try {
-      const o = await kapakFoto(box.dataset.kapak);
+      const o = await kapakFoto(title);
       if (!box.isConnected) return;
-      if (!o) { box.remove(); return; }
-      box.innerHTML = `<a href="${esc(o.page)}" target="_blank" rel="noopener"><img src="${esc(o.src)}" alt=""></a><small>Fotoğraf: ${esc(o.by)}${o.lic ? ' · ' + esc(o.lic) : ''} · Wikimedia Commons</small>`;
+      if (o) goster(o);
+      // Birden fazla gerçek fotoğraf varsa kapak altına küçük galeri şeridi ekle
+      const ph = (await fetchPhotos(title, false).catch(() => [])).slice(0, 5);
+      if (!box.isConnected) return;
+      const list = [];
+      const seenSrc = new Set();
+      for (const p of (o ? [o, ...ph] : ph)) {
+        if (!p || !p.src || seenSrc.has(p.src)) continue;
+        seenSrc.add(p.src); list.push(p);
+        if (list.length >= 5) break;
+      }
+      if (!list.length) { box.remove(); return; }
+      if (!o) goster(list[0]);
+      if (list.length > 1) {
+        const bar = document.createElement('div');
+        bar.className = 'kapak-thumbs';
+        bar.innerHTML = list.map((p, i) => `<button type="button" class="${i === 0 ? 'on' : ''}" data-kf="${i}" title="Fotoğraf ${i + 1}"><img loading="lazy" src="${esc(p.src)}" alt=""></button>`).join('');
+        bar.addEventListener('click', ev => {
+          const b = ev.target.closest('[data-kf]'); if (!b) return;
+          const idx = +b.dataset.kf; if (!list[idx]) return;
+          goster(list[idx]);
+          bar.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+        });
+        box.appendChild(bar);
+      }
     } catch (e) { if (box.isConnected) box.remove(); }
   }
   // Vikipedi özeti: Türkçe sayfası varsa onun, yoksa İngilizce sayfanın giriş paragrafı
@@ -2245,6 +2319,9 @@
     renderOlayPanel();
     toast(ac ? '🌓 Canlı gece / gündüz ve şehir ışıkları açıldı (şu anki dünya saati).' : '☀️ Canlı gece / gündüz kapatıldı.');
   });
+  const tbKutu = $('#tbbtn'), tbAc = $('#tbbtn-ac'), tbX = $('#tbbtn-x');
+  if (tbAc) tbAc.addEventListener('click', () => openTarihteBugun());
+  if (tbX && tbKutu) tbX.addEventListener('click', () => { tbKutu.hidden = true; });
   gizliUygula();
 
   // ---------- 📅 tarihe git ----------

@@ -46,6 +46,7 @@
     for (const k of window.KAYNAKLAR || []) add({ tur: 'Kaynak', ikon: '⛏️', ad: k.ad, alt: `${YIL.fmt(k.from)} – ${k.to <= -2026 ? 'bugün' : YIL.fmt(k.to)}`, kw: [k.tur], oncelik: 3, act: () => ZY().openKaynak(k.id) });
     for (const h of (window.YASAM_DOGA || {}).hayvanlar || []) add({ tur: 'Yaşa · Hayvan', ikon: h.ik || '🐾', ad: h.ad, alt: `Ömür: ${h.omur} · ${h.alan}`, kw: [h.alan, h.w, 'yaşa'], oncelik: 4, act: () => ZY().openYasamDoga(h.id) });
     for (const b of (window.YASAM_DOGA || {}).bitkiler || []) add({ tur: 'Yaşa · Bitki', ikon: b.ik || '🌿', ad: b.ad, alt: `Ömür: ${b.omur} · ${b.alan}`, kw: [b.alan, b.w, 'bitki', 'ağaç', 'yaşa'], oncelik: 4, act: () => ZY().openYasamDoga(b.id) });
+    for (const m of (window.YASAM_DOGA || {}).mikroplar || []) add({ tur: 'Yaşa · Mikro Dünya', ikon: m.ik || '🦠', ad: m.ad, alt: `Ömür: ${m.omur} · ${m.alan}`, kw: [m.alan, m.w, 'mikrop', 'bakteri', 'virüs', 'yaşa'], oncelik: 4, act: () => ZY().openYasamDoga(m.id) });
     return out;
   }
   function search(q) {

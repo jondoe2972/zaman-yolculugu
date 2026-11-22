@@ -373,15 +373,38 @@ window.Sahne = (() => {
   function house(x, y, k, v) {
     g.save(); g.translate(x, y); g.scale(k, k); g.lineJoin = 'round';
     if (st.Y <= -1940) {
-      // Modern çağ: çok katlı apartman / cam cepheli şehir binaları
-      const w = 18 + Math.round(v * 10), floors = 3 + Math.floor(v * 4), h = floors * 11 + 8;
-      const bodyC = v > 0.66 ? '#cbd5e1' : v > 0.33 ? '#d8d4c8' : '#b8c4d0';
-      shape([-w, -h, w, -h, w, 0, -w, 0], bodyC, 1.1);
-      g.fillStyle = '#475569'; g.fillRect(-w - 1, -h - 3, w * 2 + 2, 3);
-      g.fillStyle = '#608bb5';
-      for (let fl = 0; fl < floors; fl++) {
-        const wy = -h + 5 + fl * 11;
-        for (let wx = -w + 4; wx <= w - 8; wx += 7) g.fillRect(wx, wy, 4.5, 6);
+      // Modern çağ: 4 farklı mimari stil (cam kule, teraslı apartman, sıcak tuğla blok, modern ofis)
+      const stil = Math.floor(v * 4) % 4;
+      if (stil === 0) {
+        // Cam cepheli yüksek kule
+        const w = 16 + Math.round(v * 6), h = 68 + Math.round(v * 26);
+        shape([-w, -h, w, -h, w, 0, -w, 0], '#a9c2d8', 1.1);
+        g.fillStyle = '#334155'; g.fillRect(-w, -h - 4, w * 2, 4);
+        g.fillStyle = '#537fa8';
+        for (let wy = -h + 5; wy < -10; wy += 9) g.fillRect(-w + 3, wy, w * 2 - 6, 4.5);
+        g.fillStyle = 'rgba(255,255,255,0.22)'; g.fillRect(-w + 3, -h + 4, 4, h - 14);
+      } else if (stil === 1) {
+        // Teraslı modern apartman
+        const w = 22, h = 44 + Math.round(v * 14);
+        shape([-w, -h, w, -h, w, 0, -w, 0], '#e2ddd2', 1.1);
+        shape([-w + 5, -h - 10, w - 5, -h - 10, w - 5, -h, -w + 5, -h], '#d2ccc0', 1);
+        g.fillStyle = '#64748b';
+        for (let wy = -h + 5; wy < -12; wy += 11) for (let wx = -w + 4; wx <= w - 9; wx += 9) g.fillRect(wx, wy, 5.5, 6);
+        g.fillStyle = '#94a3b8'; for (let wy = -h + 11; wy < -10; wy += 11) g.fillRect(-w + 2, wy, w * 2 - 4, 1.5);
+      } else if (stil === 2) {
+        // Sıcak tuğla / krem şehir bloğu
+        const w = 20, h = 38 + Math.round(v * 16);
+        shape([-w, -h, w, -h, w, 0, -w, 0], '#c99b7c', 1.1);
+        g.fillStyle = '#5c3c2e'; g.fillRect(-w - 1, -h - 3, w * 2 + 2, 3);
+        g.fillStyle = '#475569';
+        for (let wy = -h + 6; wy < -12; wy += 11) for (let wx = -w + 4; wx <= w - 8; wx += 8) g.fillRect(wx, wy, 4.5, 6.5);
+      } else {
+        // Kavisli çatılı modern iş merkezi
+        const w = 19, h = 52 + Math.round(v * 18);
+        shape([-w, -h, w, -h, w, 0, -w, 0], '#cbd5e1', 1.1);
+        g.fillStyle = '#475569'; g.beginPath(); g.arc(0, -h, w * 0.72, Math.PI, 0); g.fill();
+        g.fillStyle = '#5d86ad';
+        for (let wy = -h + 6; wy < -12; wy += 10) for (let wx = -w + 4; wx <= w - 8; wx += 7) g.fillRect(wx, wy, 4.5, 5.5);
       }
       g.fillStyle = '#334155'; g.fillRect(-4, -9, 8, 9);
       g.restore(); return;
@@ -1333,9 +1356,16 @@ window.Sahne = (() => {
     g.fillStyle = TM.kum1; g.beginPath(); g.moveTo(0, gY);
     for (let x = 0; x <= W + 20; x += 20) { const wx = camX + (x - W / 2) / (s * 0.35); g.lineTo(x, gY - (H * 0.07 + H * 0.03 * noise(wx)) * TM.dag); }
     g.lineTo(W, gY); g.closePath(); g.fill();
-    if (TM.dag > 1) { // karlı doruklar
-      g.fillStyle = 'rgba(250,252,255,0.85)';
-      for (let x = 0; x <= W + 20; x += 20) { const wx = camX + (x - W / 2) / (s * 0.35), n = noise(wx); if (n > 0.55) { const yy = gY - (H * 0.07 + H * 0.03 * n) * TM.dag; g.beginPath(); g.moveTo(x - 10, yy + 8 * u); g.lineTo(x, yy); g.lineTo(x + 10, yy + 8 * u); g.fill(); } }
+    if (TM.dag > 1) { // dağ sırtına oturan yumuşak karlı zirve şeridi
+      g.save();
+      g.beginPath(); g.moveTo(0, gY);
+      for (let x = 0; x <= W + 20; x += 20) { const wx = camX + (x - W / 2) / (s * 0.35); g.lineTo(x, gY - (H * 0.07 + H * 0.03 * noise(wx)) * TM.dag); }
+      g.lineTo(W, gY); g.closePath(); g.clip();
+      const karY = gY - H * 0.086 * TM.dag;
+      const kgr = g.createLinearGradient(0, karY - H * 0.03 * TM.dag, 0, karY + 12 * u);
+      kgr.addColorStop(0, 'rgba(252,253,255,0.92)'); kgr.addColorStop(0.7, 'rgba(244,248,252,0.55)'); kgr.addColorStop(1, 'rgba(244,248,252,0)');
+      g.fillStyle = kgr; g.fillRect(0, karY - H * 0.04 * TM.dag, W, H * 0.06 * TM.dag + 14 * u);
+      g.restore();
     }
     g.fillStyle = TM.kum2; g.beginPath(); g.moveTo(0, gY);
     for (let x = 0; x <= W + 20; x += 20) { const wx = camX + (x - W / 2) / (s * 0.6); g.lineTo(x, gY - (H * 0.04 + H * 0.018 * noise(wx * 1.7 + 500)) * (TM.dag > 1 ? 1.5 : 1)); }
@@ -1488,8 +1518,8 @@ window.Sahne = (() => {
       return { a, x: W / 2 + wrap(a.x - camL, span), y: H * a.fy };
     }).sort((p, q) => p.y - q.y);
     for (const r of rds) drawAgent(r.a, r.x, r.y);
-    // ön plan palmiyeleri
-    tiles(2.3, 420 * u, 71, (i, x, r) => { if (r < 0.45) agac(x, H * 1.04, (150 + r * 80) * u, i + 300); });
+    // ön plan palmiyeleri (alt ortadaki yer şeridini kapatmaması için kenarlarda)
+    tiles(2.3, 420 * u, 71, (i, x, r) => { if (r < 0.45 && (x < W * 0.22 || x > W * 0.78)) agac(x, H * 1.04, (135 + r * 65) * u, i + 300); });
 
     // yer adları
     for (const site of P.sites) {

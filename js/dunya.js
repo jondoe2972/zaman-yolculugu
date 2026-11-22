@@ -743,7 +743,11 @@ window.Dunya = (() => {
       const misirVar = !window.BOLGE || window.BOLGE.id === 'misir' || DM;
       const geo = [...(misirVar ? EGEO : []), ...(window.BOLGE && window.BOLGE.id !== 'misir' ? ((window.MISIR || {}).kureAdlari || []) : [])].filter(function (q) { return !this.has(q[2]) && this.add(q[2]); }, new Set());
       for (const [la, lo, ad, tur, zmin] of geo) {
-        if (view.z < zmin) continue; const [x, y, z] = P(la, lo); if (z <= 0.05) continue;
+        if (view.z < zmin) continue;
+        // Doğa katmanları açıkken tekrarlanan taban nehir/dağ/bölge etiketlerini sustur (çift yazı ve çakışmayı önle)
+        if (tur === 'nehir' && (layers.nehir || layers.cografya)) continue;
+        if ((tur === 'bolge' || tur === 'kucuk' || tur === 'misir') && layers.cografya && !layers.sinir) continue;
+        const [x, y, z] = P(la, lo); if (z <= 0.05) continue;
         const pr = { deniz: 80, misir: 70, nehir: 55, bolge: 50, kucuk: 32 }[tur];
         if (tur === 'deniz') lab(pr, x, y, ad, { col: '#4d7392', it: true, serif: true, size: 13, w: 600, ls: 3, halo: 2.5, haloCol: 'rgba(225,240,248,0.75)' });
         else if (tur === 'misir') lab(pr, x, y, ad, { col: '#fffaf0', serif: true, size: 12.5, w: 600, ls: 2.5, haloCol: 'rgba(90,45,15,0.6)' });
@@ -977,7 +981,12 @@ window.Dunya = (() => {
         const [ik, bg] = CG_STIL[cg.tur] || ['📍', '#5a4a3a'];
         const hov = hover && hover.kind === 'cografya' && hover.cg === cg, s0 = hov ? 12.5 : (uzak ? 8.5 : 10);
         g.fillStyle = bg; g.strokeStyle = hov ? '#ffd666' : (cg.tur === 'harika' ? '#ffe08a' : '#fff6dc'); g.lineWidth = hov ? 2.2 : 1.5;
-        g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
+        if (cg.tur === 'harika') {
+          const r1 = s0 * 1.15;
+          g.beginPath(); g.moveTo(x, y - r1); g.lineTo(x + r1, y); g.lineTo(x, y + r1); g.lineTo(x - r1, y); g.closePath(); g.fill(); g.stroke();
+        } else {
+          g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
+        }
         g.font = `${hov ? 13 : (uzak ? 9.5 : 11)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(ik, x, y + 0.5); g.textBaseline = 'alphabetic';
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         const kisaYuk = cg.yukseklik ? cg.yukseklik.split(' (')[0].split(' ·')[0] : '';

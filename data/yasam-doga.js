@@ -988,6 +988,246 @@ window.YASAM_DOGA = {
       ],
       w: 'Sphagnum'
     }
+  ],
+  mikroplar: [
+    {
+      id: 'yd-siyanobakteri', ad: 'Siyanobakteri (Oksijenin Mimarı)', ik: '🦠', tur: 'mikrop', ll: [-25.9, 114.2],
+      omur: 'Saatler içinde bölünür · Soyu 3,5 MİLYAR yıldır yaşıyor!',
+      beslenme: 'Fotosentez — güneş ışığı, su ve karbondioksitten besin üretip oksijen salar.',
+      zincir: 'Dünya\'nın ilk birincil üreticisi — gezegenin atmosferini oksijenle doldurup tüm hayvanların evrimini başlattı.',
+      goc: 'Okyanus akıntılarıyla tüm dünya denizlerinde, göllerde ve nemli kayalarda yaşar.',
+      alan: 'Tüm okyanuslar, tatlı sular ve Avustralya\'daki antik stromatolit kıyıları',
+      superguc: 'Yaklaşık 2,4 milyar yıl önce "Büyük Oksijenlenme Olayı" ile zehirli atmosferi nefes alınabilir hâle getirdi!',
+      sasirtici: 'Bugün tüm bitkilerin yapraklarında fotosentez yapan kloroplastlar, milyarlarca yıl önce başka hücrelerin içine yerleşmiş SİYANOBakterilerin torunlarıdır!',
+      tehdit: 'Aşırı çoğaldığında (alg patlaması) sudaki oksijeni tüketebilir; virüsler (siyanofajlar) baş düşmanıdır.',
+      dongu: [
+        ['☀️ Güneşle Enerji', 'Mikroskobik gövdenle güneş ışığını yakalayıp suyu parçalarsın ve atmosfere taze oksijen bırakırsın.'],
+        ['🧬 İkiye Bölünme', 'Yeterince büyüyünce kendini kusursuzca kopyalayıp birkaç saat içinde iki yeni hücreye bölünürsün.'],
+        ['🪨 Taşlaşan Koloniler', 'Milyarlarca kardeşinle üst üste birikip Avustralya kıyılarında hâlâ görülebilen stromatolit kayalarını kurarsın.']
+      ],
+      w: 'Cyanobacteria'
+    },
+    {
+      id: 'yd-bakteriyofaj', ad: 'Bakteriyofaj (Uzay Aracı Virüsü)', ik: '🧬', tur: 'mikrop', ll: [48.8, 2.3],
+      omur: 'Konak bakteri bulana kadar yıllarca bekleyebilir · Çoğalma döngüsü 20 – 40 dakika',
+      beslenme: 'Beslenmez; yalnızca belirli bakterilerin içine DNA\'sını enjekte ederek kendini kopyalatır.',
+      zincir: 'Mikro dünyanın süper avcısı — okyanuslardaki bakterilerin her gün %20–40\'ını yok ederek doğal dengeyi korur.',
+      goc: 'Su damlacıkları, toprak, okyanuslar ve insan bağırsağı dahil bakterilerin olduğu her yerdedir.',
+      alan: 'Dünya\'daki her okyanus damlası, toprak ve canlı bedeni',
+      superguc: 'İnsan hücrelerine hiç zarar vermez, yalnızca hedef bakteriyi lazer hassasiyetiyle bulup yok eder (antibiyotiğe dirençli enfeksiyonlarda "faj tedavisi" olarak kullanılır!).',
+      sasirtici: 'Görünüşü tıpkı Ay\'a inen uzay modülü gibidir ve Dünya\'daki toplam sayısı 10³¹\'dir — yani gezegendeki tüm diğer canlıların (bakteriler dahil!) toplamından fazladır!',
+      tehdit: 'Bakterilerin geliştirdiği CRISPR savunma sistemi (insanların gen düzenleme teknolojisine ilham veren sistem!).',
+      dongu: [
+        ['🛸 Bakteriye İniş', 'Örümcek gibi 6 ince bacağınla hedef bakterinin yüzeyine konup kilitlenirsin.'],
+        ['💉 DNA Enjeksiyonu', 'Kuyruğunu bir şırınga gibi sıkıştırıp kendi genetik kodunu bakterinin içine zerk edersin.'],
+        ['💥 100 Yeni Kopya', '30 dakika içinde bakteri hücresini bir fabrikaya çevirip 100 yeni bakteriyofaj üreterek dışarı çıkarsın.']
+      ],
+      w: 'Bacteriophage'
+    },
+    {
+      id: 'yd-lactobacillus', ad: 'Lactobacillus (Yoğurt & Bağırsak Dostu)', ik: '🥛', tur: 'mikrop', ll: [40.0, 33.0],
+      omur: 'Hücre bölünmesi 1 – 2 saat · Kolonisi ömür boyu bizimle yaşar',
+      beslenme: 'Süt şekeri (laktoz) ve bitkisel lifleri fermente ederek laktik asit üretir.',
+      zincir: 'Faydalı simbiyotik bakteri — insan bağırsağını zararlı mikroplardan korur, sindirime ve bağışıklığa yardım eder.',
+      goc: 'İnsanların yoğurt, kefir, turşu ve ekşi maya kültürüyle binlerce yıldır tüm dünyaya yayıldı.',
+      alan: 'İnsan bağırsağı, yoğurt, kefir ve fermente gıdalar',
+      superguc: 'Ürettiği doğal laktik asit sayesinde ortamı asidik tutup zararlı bakterilerin üremesini engeller.',
+      sasirtici: 'İnsan vücudunda kendi insan hücrelerimizden daha fazla bakteri yaşar; yalnızca 1 kaşık ev yoğurdunda milyarlarca canlı Lactobacillus dostumuz vardır!',
+      tehdit: 'Gereksiz kullanılan geniş spektrumlu antibiyotikler ve aşırı işlenmiş gıdalar.',
+      dongu: [
+        ['🥛 Süt Şöleni', 'Ilık sütün içinde uyanıp laktozu parçalayarak laktik asit üretmeye başlarsın.'],
+        ['🥣 Yoğurdun Doğuşu', 'Ürettiğin asit süt proteinlerini birleştirip sütü kıvamlı, besleyici yoğurda dönüştürür.'],
+        ['🛡️ Bağırsak Kalkanı', 'İnsan bağırsağına ulaşınca duvarlara tutunup zararlı mikroplara yer bırakmazsın.']
+      ],
+      w: 'Lactobacillus'
+    },
+    {
+      id: 'yd-penicillium', ad: 'Penicillium Küfü (Antibiyotiğin Mucidi)', ik: '🧫', tur: 'mikrop', ll: [51.5, -0.17],
+      omur: 'Haftalar – aylar · Sporları yıllarca canlı kalabilir',
+      beslenme: 'Ayrıştırıcı mikro-mantar — meyve kabuğu, ekmek ve topraktaki organik maddeleri sindirir.',
+      zincir: 'Doğal ayrıştırıcı ve kimyasal savaşçı — kendi alanına giren bakterileri yok etmek için penisilin salgılar.',
+      goc: 'Mikroskobik mavi-yeşil sporları hava akımlarıyla tüm dünyaya dağılır.',
+      alan: 'Toprak, nemli organik yüzeyler ve laboratuvarlar',
+      superguc: 'Rakip bakterilerin hücre duvarını parçalayan "penisilin" molekülünü doğal olarak üretir.',
+      sasirtici: '1928\'de Alexander Fleming tatilden dönünce unuttuğu bir deney kabında bu küfün etrafındaki tüm bakterileri temizlediğini fark etti — o tesadüf bugüne kadar 200 MİLYONDAN fazla insanın hayatını kurtardı!',
+      tehdit: 'Aşırı sıcaklık, kuraklık ve kimyasal dezenfektanlar.',
+      dongu: [
+        ['🌬️ Rüzgârla Gelen Spor', 'Havada süzülen tek bir mikroskobik sporun nemli bir yüzeye konup ince iplikçikler (hif) salar.'],
+        ['⚔️ Penisilin Kalkanı', 'Etrafına bakteriler yaklaşınca kimyasal savunmanı açıp onları eriten penisilin salgılarsın.'],
+        ['🫧 Yeni Sporlar', 'Fırça biçimli uçlarından (Latince "penicillus" = fırça!) binlerce yeni spor savurursun.']
+      ],
+      w: 'Penicillium'
+    },
+    {
+      id: 'yd-maya', ad: 'Ekmek Mayası (Saccharomyces)', ik: '🍞', tur: 'mikrop', ll: [30.0, 31.2],
+      omur: 'Her 90 dakikada tomurcuklanarak çoğalır · Kurutulunca yıllarca uyur',
+      beslenme: 'Şeker ve nişastayı sindirip karbondioksit gazı üretir.',
+      zincir: 'Tek hücreli mantar ayrıştırıcı — meyve kabuklarında doğal yaşar, 10.000 yıldır insanlığın en eski ortağıdır.',
+      goc: 'Antik Mısır ve Mezopotamya fırınlarından başlayarak tüm insan mutfaklarına yayıldı.',
+      alan: 'Meyve kabukları, çiçek nektarı ve dünyanın tüm fırınları',
+      superguc: 'Oksijen olmasa bile şekeri parçalayıp enerji üretebilir (fermantasyon) ve hamuru pamuk gibi kabartır!',
+      sasirtici: 'Tek bir gram kuru ekmek mayasında yaklaşık 20 MİLYAR canlı maya hücresi uyur hâlde bekler; ılık su ve şeker değdiği an dakikalar içinde uyanıp ekmeği kabartır!',
+      tehdit: '60 °C üzeri fırın sıcaklığı (ekmek pişerken görevini tamamlayıp ölür).',
+      dongu: [
+        ['💧 Ilık Suyla Uyanış', 'Un ve ılık suyla buluştuğunda kuru uykundan uyanıp nişastadaki şekeri yemeye başlarsın.'],
+        ['🫧 Baloncuk Fabrikası', 'Ürettiğin milyonlarca minik karbondioksit balonu hamurun içinde hapsolup ekmeği kabartır.'],
+        ['🌱 Tomurcuklanma', 'Gövdenin yanından minik bir yavru hücre tomurcuklanıp 90 dakikada yeni bir mayaya dönüşür.']
+      ],
+      w: 'Saccharomyces cerevisiae'
+    },
+    {
+      id: 'yd-deinococcus', ad: 'Süpermen Bakteri (Deinococcus)', ik: '☢️', tur: 'mikrop', ll: [44.5, -123.2],
+      omur: 'Saatler içinde bölünür · Kurak/dondurucu ortamda yıllarca dayanır',
+      beslenme: 'Hepçil bakteri — organik kalıntılarla beslenir.',
+      zincir: 'Ekstrem ortam ayrıştırıcısı — hiçbir canlının yaşayamadığı radyasyonlu ve kurak alanlarda hayatta kalır.',
+      goc: 'Toz zerreleriyle stratosfere kadar çıkıp gezegenin dört bir yanına taşınır.',
+      alan: 'Çöller, kayalar, nükleer tesis atıkları ve hatta uzay deneyi plakaları',
+      superguc: 'İnsanı anında öldüren radyasyon dozunun 1.000 katına, aşırı soğuğa, vakuma ve asite dayanır!',
+      sasirtici: 'Guinness Rekorlar Kitabı\'na "Dünya\'nın En Dayanıklı Bakterisi" olarak girdi: radyasyon DNA\'sını yüzlerce parçaya bölse bile 24 saat içinde tüm parçaları yapboz gibi hatasızca yeniden birleştirir!',
+      tehdit: 'Neredeyse hiçbir doğal ekstrem koşul onu durduramaz; yalnızca yoğun ısı (otoklav) yok edebilir.',
+      dongu: [
+        ['☢️ Yedek Kopya Stratejisi', 'Hücrenin içinde DNA\'nın 4 ila 10 adet yedek kopyasını aynı anda saklarsın.'],
+        ['🔧 Hızlı DNA Tamiri', 'Şiddetli radyasyon veya kuraklık DNA\'nı parçaladığında yedek kopyalara bakıp saatler içinde onarırsın.'],
+        ['🚀 Uzay Testi', 'Uluslararası Uzay İstasyonu\'nun dış yüzeyinde 3 yıl boyunca doğrudan uzay boşluğunda hayatta kalabildin!']
+      ],
+      w: 'Deinococcus radiodurans'
+    },
+    {
+      id: 'yd-diatom', ad: 'Diyatom (Cam Evli Mikro Alg)', ik: '💎', tur: 'mikrop', ll: [60.0, -25.0],
+      omur: 'Günde 1 – 2 kez bölünür (hızlı yaşam döngüsü)',
+      beslenme: 'Fotosentez — sudaki çözünmüş silisyumu alıp kendine camdan ev örer.',
+      zincir: 'Okyanus besin zincirinin temel taşı — kril ve balıkları besler; atmosferdeki oksijenin %20\'sini üretir!',
+      goc: 'Okyanus akıntılarıyla tüm dünya denizlerinde, göllerde ve buzulların altında sürüklenir.',
+      alan: 'Tüm okyanusların güneş gören üst katmanı ve tatlı sular',
+      superguc: 'Sudan topladığı silisyumla mikroskop altında dantel gibi işlenmiş, iki kapaklı gerçek CAM kabuk (früstül) inşa eder!',
+      sasirtici: 'Aldığın her 5 nefesten 1\'inin oksijenini bu mikroskobik cam algler üretir — Dünya\'daki tüm yağmur ormanlarının toplamı kadar oksijen sağlarlar!',
+      tehdit: 'Okyanus asitlenmesi ve besin minerali eksikliği.',
+      dongu: [
+        ['💎 Cam Sanatçısı', 'Deniz suyundaki silisyumla iki parçalı, simetrik mikroskobik bir cam kutunun içinde yaşarsın.'],
+        ['🌬️ Oksijen Üretimi', 'Güneş ışığını cam kabuğundan geçirip fotosentez yaparak gezegene nefes olursun.'],
+        ['🌊 Derinlere Yolculuk', 'Öldüğünde cam kabuğun okyanus dibine çöküp atmosferdeki karbonu milyonlarca yıl tabana hapseder.']
+      ],
+      w: 'Diatom'
+    },
+    {
+      id: 'yd-biyolumin', ad: 'Parlayan Deniz Bakterisi (Vibrio)', ik: '🌌', tur: 'mikrop', ll: [21.3, -157.8],
+      omur: 'Saatler içinde çoğalır',
+      beslenme: 'Mürekkep balığının kendisine sunduğu şeker ve amino asitlerle beslenir.',
+      zincir: 'Simbiyotik ortak — mürekkep balığına gece kamuflajı sağlar, karşılığında güvenli ev ve yemek alır.',
+      goc: 'Tropikal ve ılıman denizlerde yaşar; geceleri kıyı dalgalarında mavi parıltılar yaratır.',
+      alan: 'Hawaii ve tropikal okyanuslar (özellikle cüce mürekkep balığının ışık organı)',
+      superguc: 'Yalnızken ışık yakmaz; ancak kardeşleriyle kimyasal mesajlaşıp kalabalık olduklarını anlayınca ("çoğunluk algılama") hep birlikte mavi ışık saçarlar!',
+      sasirtici: 'Hawaii cüce mürekkep balığı gece avlanırken altından ay ışığı kadar mavi ışık yayması için bu bakterileri karnında besler — böylece gölgesi kaybolur ve alttaki avcılara görünmez olur!',
+      tehdit: 'Her sabah şafakta mürekkep balığı bakterilerin %95\'ini denize salar, kalan %5 akşama kadar tekrar çoğalır!',
+      dongu: [
+        ['📡 Kimyasal Yoklama', 'Çevrene özel sinyal molekülleri bırakarak kaç kardeşinin yanında olduğunu sayarsın.'],
+        ['💡 Toplu Mavi Parıltı', 'Yeterli sayıya ulaşınca milyarlarca bakteri aynı saniyede elektrik mavisi ışık yakarsınız.'],
+        ['🌅 Şafak Yenilenmesi', 'Gün doğarken çoğu kardeşin okyanusa açılır, içeride kalanlar geceye kadar yeniden koloni kurar.']
+      ],
+      w: 'Aliivibrio fischeri'
+    },
+    {
+      id: 'yd-amip', ad: 'Amip (Şekil Değiştiren Tek Hücreli)', ik: '🫧', tur: 'mikrop', ll: [41.0, 29.0],
+      omur: 'Birkaç gün içinde ikiye bölünerek yenilenir',
+      beslenme: 'Bakteri, mikro alg ve diğer tek hücrelileri sarıp yutar (fagositoz).',
+      zincir: 'Tatlı su ve toprak avcısı — bakteri nüfusunu dengeler, topraktaki besinleri bitkilere kazandırır.',
+      goc: 'Su damlacıkları, göletler ve nemli topraklarda yalancı ayaklarıyla ağır ağır sürünür.',
+      alan: 'Dünyadaki tüm göletler, dereler ve nemli topraklar',
+      superguc: 'Sabit bir şekli, ağzı veya bacağı yoktur — istediği yöne "yalancı ayak" (psödopod) uzatıp yürür ve avını gövdesiyle kucaklayıp yutar!',
+      sasirtici: 'Bazı dev amip türlerinin (Amoeba dubia) DNA\'sı insan DNA\'sından 200 KAT daha uzundur — tek bir hücrede dev bir genetik kütüphane taşır!',
+      tehdit: 'Göletin kuruması (kuruyunca koruyucu sert kist kabuğuna girip yağmuru bekler).',
+      dongu: [
+        ['🦶 Yalancı Ayakla Yürüyüş', 'Hücre sıvını öne akıtarak geçici kollar uzatıp su dibinde ağır çekimde ilerlersin.'],
+        ['🫧 Kucaklayarak Yutma', 'Bir bakteri bulunca iki kolunla etrafını sarıp hücrenin içine çekerek sindirirsin.'],
+        ['✂️ İkiye Bölünme', 'Yeterince beslenince çekirdeğini kopyalayıp ortadan ikiye ayrılır, iki genç amip olursun.']
+      ],
+      w: 'Amoeba'
+    },
+    {
+      id: 'yd-civikmantar', ad: 'Cıvık Mantar (Beyinsiz Labirent Çözücü)', ik: '🟡', tur: 'mikrop', ll: [35.7, 139.7],
+      omur: 'Uygun nemde yıllarca yaşayıp büyüyebilir',
+      beslenme: 'Çürüyen yapraklar üzerindeki bakteri, mantar sporları ve yulaf taneleri.',
+      zincir: 'Orman tabanı ayrıştırıcısı — besinleri geri dönüştürür.',
+      goc: 'Saatte yaklaşık 1–4 santimetre hızla sarı ağlar örerek orman tabanında yürür!',
+      alan: 'Serin, gölgeli ve nemli orman tabanları',
+      superguc: 'Tek bir dev hücre içinde milyonlarca çekirdek barındırır; beyni olmadığı hâlde en kısa yolu hesaplayıp labirentleri çözer!',
+      sasirtici: 'Japon bilim insanları Tokyo\'nun şehir haritasına göre yulaf taneleri dizdiğinde, bu beyinsiz sarı tek hücreli 26 saat içinde neredeyse TOKYO METRO AĞININ AYNISINI verimli biçimde ördü!',
+      tehdit: 'Doğrudan güneş ışığı ve kuraklık.',
+      dongu: [
+        ['🕸️ Ağ Örerek Keşif', 'Karanlık orman tabanında parlak sarı damarlarını her yöne uzatarak besin ararsın.'],
+        ['🧠 En Kısa Yol Hesabı', 'Yiyecek bulunca gereksiz kolları geri çekip en verimli otoyol hattını kalınlaştırırsın.'],
+        ['🍄 Spor Kuleleri', 'Besin bitip ortam kuruyunca minik mantar benzeri kuleler çıkarıp rüzgâra spor salarsın.']
+      ],
+      w: 'Physarum polycephalum'
+    },
+    {
+      id: 'yd-arkea', ad: 'Termofil Arkea (Kaynar Su Canlısı)', ik: '🔥', tur: 'mikrop', ll: [44.52, -110.83],
+      omur: 'Saatler içinde bölünür · Soyu 3,8 milyar yıllık',
+      beslenme: 'Güneş ışığı olmadan kükürt, hidrojen ve demir kimyasallarından enerji üretir (kemosentez)!',
+      zincir: 'Derin okyanus bacalarının ve kaynar kaplıcaların birincil üreticisi.',
+      goc: 'Volkanik kaplıcalar, Yellowstone gayzerleri ve okyanus tabanı hidrotermal bacalarında yaşar.',
+      alan: 'Yellowstone (ABD), İzlanda kaplıcaları ve 4.000 m derinlikteki okyanus bacaları',
+      superguc: '80 – 122 °C kaynar suda ve akü asidi kadar asidik havuzlarda proteinleri bozulmadan yaşar!',
+      sasirtici: 'Yellowstone\'daki Grand Prismatic gölünün büyüleyici turuncu ve sarı halkalarını bu canlılar oluşturur; ayrıca modern PCR DNA testlerinin çalışmasını sağlayan ısıya dayanıklı enzimler bu canlılardan keşfedildi!',
+      tehdit: 'Aksine, oda sıcaklığı (25 °C) onun için donmak demektir — serin sularda yaşayamaz!',
+      dongu: [
+        ['🌋 Kaynar Havuzda Yaşam', 'Diğer tüm canlıların saniyeler içinde haşlanacağı 95 °C suda huzurla yüzersin.'],
+        ['⚗️ Kaya ve Kükürtle Beslenme', 'Güneşsiz okyanus dibinde volkanik bacadan çıkan kükürt gazını enerjiye çevirirsin.'],
+        ['🧬 Yaşamın İlk Mirası', 'Dünya\'nın ilk lav ve okyanus çağlarındaki atalarınla neredeyse aynı kimyayla çoğalırsın.']
+      ],
+      w: 'Thermophile'
+    },
+    {
+      id: 'yd-yersinia', ad: 'Veba Bakterisi (Yersinia pestis)', ik: '⚕️', tur: 'mikrop', ll: [43.0, 75.0],
+      omur: 'Kısa bölünme süresi · Doğada kemirgen pirelerinde nesillerce sürer',
+      beslenme: 'Konak memeli ve pire dokularındaki besinler.',
+      zincir: 'Tarihi değiştiren patojen — doğada vahşi kemirgen ve pireler arasında dolaşır.',
+      goc: '14. yüzyılda Orta Asya bozkırlarından İpek Yolu kervanları ve Ceneviz gemileriyle Avrupa\'ya yayıldı ("Kara Ölüm").',
+      alan: 'Tarih boyunca Avrasya ticaret yolları; bugün modern antibiyotiklerle kolayca tedavi edilir',
+      superguc: 'Pirenin midesini tıkayarak pirenin sürekli yeni konak ısırmasını sağlar — böylece tarihin en hızlı yayılan salgınlarından birini başlattı.',
+      sasirtici: '1347–1353 arasındaki Kara Ölüm salgını Avrupa nüfusunun üçte birini yok edince işçi kıtlığı doğdu; bu da feodalizmin zayıflamasına, ücretlerin artmasına ve Rönesans\'a giden ekonomik dönüşüme yol açtı!',
+      tehdit: 'Modern hijyen ve sıradan antibiyotikler (streptomisin/doksisiklin) bugün onu hızla durdurur.',
+      dongu: [
+        ['🐀 Bozkır Kemirgenleri', 'Doğal yaşam alanın olan Orta Asya kemirgenleri ve pireleri arasında sessizce yaşarsın.'],
+        ['⛵ İpek Yolu Yolculuğu', '1347\'de ticaret kervanları ve gemi sıçanlarıyla Kırım\'dan Akdeniz limanlarına ulaşırsın.'],
+        ['📜 Tarihin Dönüm Noktası', 'Salgın sonrası "karantina" (İtalyanca 40 gün: quaranta) kavramı ilk kez Venedik\'te icat edilir.']
+      ],
+      w: 'Yersinia pestis'
+    },
+    {
+      id: 'yd-grip', ad: 'İnfluenza Virüsü (Kılık Değiştiren)', ik: '🤧', tur: 'mikrop', ll: [39.9, 116.4],
+      omur: 'Hücre dışında saatler · Hücre içinde birkaç saatte binlerce kopya',
+      beslenme: 'Beslenmez ve kendi metabolizması yoktur; konak hücrenin mekanizmasını ödünç alır.',
+      zincir: 'Zorunlu hücre içi parazit — su kuşları, memeliler ve insanlar arasında dolaşır.',
+      goc: 'Yaban ördekleri ve göçmen kuşlarla kıtalar aşar; kış aylarında insan toplumlarında mevsimlik dalgalar oluşturur.',
+      alan: 'Tüm dünya (kış mevsiminde kapalı alanlarda hızla yayılır)',
+      superguc: '8 ayrı RNA parçasından oluştuğu için iki farklı grip türü aynı hücrede buluşursa parçalarını karıştırıp yepyeni bir kılığa bürünebilir!',
+      sasirtici: 'Bilim insanları virüslerin "canlı mı yoksa cansız kimyasal paket mi" olduğunu hâlâ tartışır; dış yüzeyindeki kılıfı her yıl hafifçe değiştirdiği için grip aşısı her sonbahar güncellenir!',
+      tehdit: 'İnsan bağışıklık sisteminin antikorları, sabun (yağ zarını anında eritir!) ve aşılar.',
+      dongu: [
+        ['🔑 Hücre Kapısını Açma', 'Dış yüzeyindeki anahtar proteinlerle solunum yolu hücresine tutunup içeri girersin.'],
+        ['🖨️ Hızlı Kopyalama', 'Hücrenin kendi üretim hattını kullanarak birkaç saat içinde binlerce yeni virüs paketi üretirsin.'],
+        ['🛡️ Bağışıklıkla Kovalamaca', 'Bağışıklık sistemi seni tanıyınca sonraki kış için dış kılıfında küçük mutasyonlar biriktirirsin.']
+      ],
+      w: 'Influenza'
+    },
+    {
+      id: 'yd-plazmodyum', ad: 'Sıtma Paraziti (Plasmodium)', ik: '🦟', tur: 'mikrop', ll: [-3.0, 25.0],
+      omur: 'Sivrisinek ve insan arasında haftalar süren karmaşık yaşam döngüsü',
+      beslenme: 'Kırmızı kan hücrelerindeki hemoglobini tüketir.',
+      zincir: 'Karmaşık parazit — yaşam döngüsünü tamamlamak için hem Anofel sivrisineğine hem insana ihtiyaç duyar.',
+      goc: 'Tropikal ve subtropikal sulak alanlarda sivrisineklerle taşınır; tarih boyunca Roma ve Akdeniz bataklıklarında da yaygındı.',
+      alan: 'Sahra Altı Afrika, Güney Asya ve Amazon\'un sıcak sulak bölgeleri',
+      superguc: 'İnsan vücuduna girdikten sonra karaciğerde saklanıp şekil değiştirir, ardından kırmızı kan hücrelerine girerek bağışıklık sisteminden gizlenir.',
+      sasirtici: 'Büyük İskender\'in ölümünden Roma\'nın düşüşüne kadar tarihi etkilediği düşünülür; insan evriminde orak hücre geninin Afrika\'da yaygınlaşması bile vücudun bu parazite karşı geliştirdiği doğal bir kalkanıdır!',
+      tehdit: 'Kınakına ağacından elde edilen kinin, artemisinin ilaçları, cibinlikler ve yeni sıtma aşıları.',
+      dongu: [
+        ['🦟 Sivrisinek Yolculuğu', 'Dişi Anofel sivrisineğinin tükürük bezinde bekleyip ısırıkla kana karışırsın.'],
+        ['🩸 Kan Hücrelerinde Saklanma', 'Önce karaciğerde çoğalıp sonra kırmızı kan hücrelerinin içine girerek 48 saatte bir ateş nöbetine yol açarsın.'],
+        ['🌿 Doğanın Cevabı', 'Peru\'daki kınakına kabuğu ve Çin\'deki pelin otu (artemisinin) insanlığa sana karşı en güçlü ilaçları verir.']
+      ],
+      w: 'Plasmodium'
+    }
   ]
 };
 
@@ -1175,7 +1415,7 @@ window.YASAM_DOGA = {
       sasirtici: 'Yeşil, siyah, beyaz ve oolong çayların TAMAMI aynı bitkiden gelir ve Çin\'de 2.000 yaşını aşmış hâlâ yaprak veren dev yabani çay ağaçları vardır!'
     }
   };
-  for (const lst of [window.YASAM_DOGA.hayvanlar, window.YASAM_DOGA.bitkiler]) {
+  for (const lst of [window.YASAM_DOGA.hayvanlar, window.YASAM_DOGA.bitkiler, window.YASAM_DOGA.mikroplar || []]) {
     for (const o of lst) if (EK[o.id]) Object.assign(o, EK[o.id]);
   }
 })();
