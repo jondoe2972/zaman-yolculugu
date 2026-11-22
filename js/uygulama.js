@@ -409,8 +409,9 @@
         <small>Sonraki seviyeye ${60 - sevIc} XP kaldı. Haritada keşif yaptıkça ve oyunları oynadıkça XP kazanır, yeni gizli sürpriz ipuçlarının kilidini açarsın!</small></div>
       <div class="kf-list">${satirlar}</div>
       <div class="gos">
-        <button class="phbtn icbtn" data-kf="doga">🌿 Doğa Atlası'nı Aç</button>
-        <button class="phbtn" data-kf="paylas">📋 Keşif Karnemi Paylaş</button>
+        <button class="phbtn icbtn" data-kf="story">📸 Instagram Hikâye Kartı İndir (PNG)</button>
+        <button class="phbtn" data-kf="paylas">📋 X / WhatsApp'ta Paylaş</button>
+        <button class="phbtn" data-kf="doga">🌿 Doğa Atlası'nı Aç</button>
       </div>`;
     const spList = (window.ATLAS_SURPRIZLER || []).map(sp => {
       const bul = surprizBulunduMu(sp.id), acik = bul || xp >= sp.xpKilit;
@@ -1919,6 +1920,36 @@
     const kf0 = e.target.closest('[data-kf]'); if (kf0) {
       if (kf0.dataset.kf === 'doga') { closeModal(); if (view !== 'dunya') setView('dunya'); atlasModUygula('doga'); }
       else if (kf0.dataset.kf === 'surpriz') { openKesif('surpriz'); }
+      else if (kf0.dataset.kf === 'story') {
+        if (window.KartPaylas) {
+          const { g, t, d, xp } = kesifSayi();
+          const pct = t ? Math.round(100 * g / t) : 0;
+          const sev = Math.floor(xp / 60) + 1;
+          const rutbe = xp >= 400 ? '🏆 Büyük Atlas Ustası' : xp >= 200 ? '🥇 Doğa & Tarih Bilgini' : xp >= 80 ? '🥈 Denizler ve Kıtalar Kâşifi' : xp >= 10 ? '🥉 Meraklı Gezgin' : '🧭 Yeni Yolcu';
+          const barlar = KESIF_KAT.map(([k, ad, tot]) => {
+            const n = (d[k] || []).length, mx = tot();
+            return { ad: ad.slice(0, 28), n, mx, pct: mx ? Math.round(100 * n / mx) : 0, yazi: `${n}/${mx}` };
+          }).sort((a, b) => b.n - a.n || b.pct - a.pct).slice(0, 4);
+          const spBul = (d.surpriz || []).length, spTot = (window.ATLAS_SURPRIZLER || []).length;
+          window.KartPaylas.indirStory({
+            tema: 'altin',
+            etiket: `KEŞİF KARNESİ · SEVİYE ${sev}`,
+            ikon: '🧭',
+            baslik: rutbe,
+            alt: `Dünya Atlası Keşif İlerlemesi (%${pct})`,
+            vurgular: [
+              { etiket: 'Toplam XP', deger: `${xp}` },
+              { etiket: 'Dünya Keşfi', deger: `${g} / ${t}` },
+              { etiket: 'Gizli Sürpriz', deger: `${spBul} / ${spTot}` }
+            ],
+            barlar,
+            cta: 'Sen benim keşif seviyemi geçebilir misin? 👇',
+            dosya: 'kesif-karnem',
+            paylasMetin: `🧭 Zaman Yolculuğu Keşif Karnem: ${rutbe} (Seviye ${sev} · ${xp} XP · ${g}/${t} keşif)!`
+          });
+          toast('📸 <b>Keşif Karnesi Hikâye Kartın hazırlandı!</b> Instagram, X veya WhatsApp\'ta paylaşabilirsin.');
+        }
+      }
       else if (kf0.dataset.kf === 'paylas') {
         const { g, t, xp } = kesifSayi(), met = `🧭 Zaman Yolculuğu · Keşif Defterim\n⭐ ${xp} XP · 🌍 ${g} / ${t} dünya keşfi tamamlandı!\n${location.origin}${location.pathname}`;
         (navigator.clipboard ? navigator.clipboard.writeText(met) : Promise.reject()).then(() => { kf0.textContent = '✓ Kopyalandı'; }, () => { kf0.textContent = 'Kopyalanamadı'; });
@@ -2591,7 +2622,7 @@
   window.ZY = {
     get Y() { return Y; }, setYear: y => setYear(y, true), setView, showInScene: t => showInScene(t),
     showOnMap: (la, lo, z, ad) => { setView('dunya'); DN.goTo(la, lo, z || 60); if (DN.pin) DN.pin(la, lo, ad); },
-    showMonument: id => showMonument(id), openInfo: id => openInfo(id), openGod: id => openGod(id), openDevlet: k => openDevlet(k), showModal: o => showModal(o), photoTab: (title, n, harita) => photoTab(title, n, harita), kapakYukle,
+    showMonument: id => showMonument(id), openInfo: id => openInfo(id), openGod: id => openGod(id), openDevlet: k => openDevlet(k), showModal: o => showModal(o), photoTab: (title, n, harita) => photoTab(title, n, harita), kapakYukle, toast, xpEkle, setView,
     openCity: ad => { const c = (MIS.sehirler || []).find(x => x.ad === ad); if (c) openCity(c); },
     openEvent: id => { const e = (window.OLAYLAR || []).find(x => x.id === id); if (e) { setView('dunya'); DN.goTo(e.ll[0], e.ll[1], 7); openEvent(e); } },
     monuments: () => P.monuments || SP.monuments, cities: () => MIS.sehirler || [], coords: id => MIS.coords[id], hasInfo: id => !!bilgiOf(id),

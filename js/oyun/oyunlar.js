@@ -33,6 +33,13 @@
       'data/atlas/derin-zaman.js?v=2',
       'js/oyun/derin-zaman.js?v=3'
     ],
+    hayattakal: [
+      'data/oyun/hayatta-kal.js?v=1',
+      'js/oyun/hayatta-kal.js?v=1'
+    ],
+    duello: [
+      'js/oyun/duello.js?v=1'
+    ],
     katmanlar: [
       'data/atlas/katmanlar.js?v=1',
       'js/oyun/katmanlar.js?v=1'
@@ -83,7 +90,7 @@
     try { return JSON.parse(localStorage['zy-hayvan-ist'] || 'null')?.seriRekor || 0; } catch (e) { return 0; }
   }
 
-  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun', 'foto-oyun', 'derin-zaman', 'katman-ekran'];
+  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun', 'foto-oyun', 'derin-zaman', 'katman-ekran', 'hayatta-kal', 'duello-kutu'];
   function digerleriniKapat(haricId) {
     for (const id of OYUN_KUTULARI) {
       if (id === haricId) continue;
@@ -98,6 +105,22 @@
   const btn = document.querySelector('[data-mod="oyun"]');
   const DUNYA = !!(window.BOLGE && window.BOLGE.dunya);
   const OYUNLAR = [
+    {
+      id: 'hayattakal', kutu: 'hayatta-kal', ikon: '🔥', ad: 'Tarihte Hayatta Kalabilir misin?', yeni: true,
+      alt: 'Pompeii, Titanik, 66 My Asteroit… 3 karar ver, Instagram/X kartını paylaş!',
+      ac: async () => {
+        await paketYukle('hayattakal');
+        if (window.HayattaKal) window.HayattaKal.ac();
+      }
+    },
+    {
+      id: 'duello', kutu: 'duello-kutu', ikon: '🎯', ad: 'Arkadaşına Hazine Düellosu Kur', yeni: true,
+      alt: '3 gizli yer seç, linki arkadaşına gönder — kürede en hızlı kim bulacak?',
+      ac: async () => {
+        await paketYukle('duello');
+        if (window.HazineDuello) window.HazineDuello.ac();
+      }
+    },
     {
       id: 'dog', kutu: 'hayat', ikon: '🎭', ad: 'Ben kimim?',
       alt: () => kimBugunBitti() ? '✓ Günün Kişisi çözüldü · serbest oyna' : '📅 Günün Kişisi + 3 zorluk · ipuçlarıyla ünlüyü bil',
@@ -242,8 +265,13 @@
   }
 
   const qs = new URLSearchParams(location.search);
+  const duelloQ = qs.get('duello');
   const oyunQ = qs.get('oyun');
-  if (oyunQ === 'sinir') {
+  if (duelloQ) {
+    setTimeout(() => paketYukle('duello').then(() => window.HazineDuello && window.HazineDuello.ac(duelloQ)).catch(() => {}), 500);
+  } else if (oyunQ === 'hayattakal') {
+    setTimeout(() => paketYukle('hayattakal').then(() => window.HayattaKal && window.HayattaKal.ac()).catch(() => {}), 500);
+  } else if (oyunQ === 'sinir') {
     setTimeout(() => paketYukle('sinir').then(() => window.SinirBil && window.SinirBil.ac()).catch(() => {}), 500);
   } else if (oyunQ === 'kim' && DUNYA) {
     setTimeout(() => paketYukle('kim').then(() => window.BenKimim && window.BenKimim.gunluk()).catch(() => {}), 500);
