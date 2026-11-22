@@ -38,7 +38,7 @@
     <canvas id="scene" aria-label="Canlı tarih sahnesi"></canvas>
     <canvas id="map" aria-label="Bölge haritası"></canvas>
     <canvas id="globe" aria-label="Dünya küresi"></canvas>
-    <div class="globectl"><button id="gzin" title="Yakınlaştır">＋</button><button id="gzout" title="Uzaklaştır">－</button><button id="tamekran" class="tamekran" title="Tam ekran: yıl kartını ve zaman çizelgesini gizle">⛶</button></div>
+    <div class="globectl"><button id="gzin" title="Yakınlaştır">＋</button><button id="gzout" title="Uzaklaştır">－</button><button id="gecebtn" title="Canlı gece / gündüz ve şehir ışıkları">🌓</button><button id="tamekran" class="tamekran" title="Tam ekran: yıl kartını ve zaman çizelgesini gizle">⛶</button></div>
     <div class="mapctl">
       <button id="mzin" title="Yakınlaştır">＋</button><button id="mzout" title="Uzaklaştır">－</button>
       <button data-mapgo="tum">Tüm Mısır</button><button data-mapgo="delta">Delta</button><button data-mapgo="memfis">Memfis · Gize</button><button data-mapgo="teb">Teb</button><button data-mapgo="nubya">Nubya</button>
@@ -82,6 +82,7 @@
           <label><input type="checkbox" data-kat="ticaret" checked><span>🐪 Ticaret yolları</span><i></i></label>
           <label><input type="checkbox" data-kat="liman"><span>⚓ Dünya çapındaki önemli limanlar</span><i></i></label>
           <label><input type="checkbox" data-kat="yolculuk"><span>🧭 Ünlü yolculuklar ve seferler</span><i></i></label>
+          <label><input type="checkbox" data-kat="yayilis"><span>🍵 Yemek ve icatların yolculuğu</span><i></i></label>
           <label><input type="checkbox" data-kat="goc" checked><span>🧬 İnsanlığın yayılışı (MÖ 3000 öncesi)</span></label>
           <label><input type="checkbox" data-kat="magara" checked><span>🪨 Tarihöncesi mağaralar (MÖ 3000 öncesi)</span><i></i></label>
           <label><input type="checkbox" data-kat="kaynak"><span>⛏️ Yeraltı kaynakları</span><i></i></label>
@@ -91,9 +92,10 @@
           <label><input type="checkbox" data-kat="hayvan"><span>🐾 Bölge hayvanları (yıla göre)</span><i></i></label>
           <label><input type="checkbox" data-kat="bitki"><span>🌿 Yöreye özgü bitkiler ve ağaçlar</span><i></i></label>
           <label><input type="checkbox" data-kat="hayvangoc"><span>🐋 Hayvanların yıllık göç döngüsü</span><i></i></label>
-          <label><input type="checkbox" data-kat="cografya"><span>🏔️ Dağlar, çöller ve tarihî havzalar</span><i></i></label>
+          <label><input type="checkbox" data-kat="cografya"><span>🏔️ Dağlar (rakım), doğa harikaları ve çöller</span><i></i></label>
           <label><input type="checkbox" data-kat="nehir"><span>🏞️ Dünya nehirleri (büyüklüğe göre)</span><i></i></label>
           <label><input type="checkbox" data-kat="volkan"><span>🌋 Yanardağlar ve Ateş Çemberi</span><i></i></label>
+          <label><input type="checkbox" data-kat="gece"><span>🌓 Canlı gece / gündüz ve şehir ışıkları</span></label>
         </div>
         <div class="kp-grup" data-kpgrup="olaylar" hidden>
           <label><input type="checkbox" data-kat="savas"><span>⚔️ Savaşlar</span><i></i></label>
@@ -205,7 +207,7 @@
 <script src="data/atlas/hayvanlar.js?v=3"></script>
 <script src="data/atlas/bitkiler.js?v=1"></script>
 <script src="data/atlas/doga-bolgeler.js?v=1"></script>
-<script src="data/atlas/cografya-bolge.js?v=1"></script>
+<script src="data/atlas/cografya-bolge.js?v=2"></script>
 <script src="data/atlas/kultur.js?v=1"></script>
 <script src="data/atlas/ekonomi.js?v=1"></script>
 <script src="data/atlas/magaralar.js?v=1"></script>
@@ -215,20 +217,21 @@
 <script src="data/atlas/hayvan-goc.js?v=3"></script>
 <script src="data/atlas/volkanlar.js?v=2"></script>
 <script src="data/atlas/tarihte-bugun.js?v=1"></script>
+<script src="data/atlas/yolculuk-hikaye.js?v=1"></script>
 <script src="data/yasam-doga.js?v=2"></script>
 <script src="data/atlas/donum-noktalari.js?v=2"></script>
-<script src="js/dunya.js?v=83"></script>
+<script src="js/dunya.js?v=85"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
 <script src="data/yapilar/avrupa.js?v=1"></script>
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="js/sahne-harita.js?v=6"></script>
-<script src="js/uygulama.js?v=76"></script>
+<script src="js/uygulama.js?v=78"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=6"></script>
-<script src="js/oyun/oyunlar.js?v=13"></script>
-<script src="js/ara.js?v=15"></script>
+<script src="js/oyun/oyunlar.js?v=14"></script>
+<script src="js/ara.js?v=17"></script>
 </body>
 </html>

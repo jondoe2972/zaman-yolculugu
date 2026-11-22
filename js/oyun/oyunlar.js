@@ -137,6 +137,11 @@
       ac: () => window.ZY && window.ZY.openTarihteBugun && window.ZY.openTarihteBugun()
     },
     {
+      id: 'yayilis', kutu: 'modal', ikon: '🍵', ad: 'Yemek ve İcatların Yolculuğu', yeni: true,
+      alt: 'Çay neden "Çay/Tea" oldu? Yemek, kelime ve icatların dünyaya yayılışı',
+      ac: () => window.ZY && window.ZY.openYayilisGaleri && window.ZY.openYayilisGaleri()
+    },
+    {
       id: 'toprak', kutu: 'topraklar', ikon: '📍', ad: 'Bu Toprakların Tarihi',
       alt: 'Bir şehir ya da küreden nokta seç: 5.000 yıllık devlet şeridi',
       ac: async () => {

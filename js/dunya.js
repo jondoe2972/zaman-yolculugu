@@ -12,7 +12,61 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, akinti: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false };
+  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, akinti: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false, gece: false, yayilis: false };
+  let yayilisAktif = null;
+  // 🌓 Canlı gece/gündüz gölgesi ve büyük şehir ışıkları (gerçek UTC saate göre)
+  const GECE_SEHIR = [
+    [41.0,29.0,1.3],[39.9,32.8,0.9],[38.4,27.1,0.8],[51.5,-0.1,1.3],[48.8,2.3,1.3],[40.4,-3.7,1.0],[41.9,12.5,1.0],[52.5,13.4,1.0],[38.0,23.7,0.8],
+    [55.7,37.6,1.2],[59.9,30.3,0.9],[30.0,31.2,1.2],[24.7,46.7,1.0],[25.2,55.3,1.1],[35.7,51.4,1.1],[19.1,72.9,1.3],[28.6,77.2,1.3],[22.6,88.4,1.1],
+    [13.7,100.5,1.1],[1.3,103.8,1.1],[-6.2,106.8,1.1],[14.6,121.0,1.0],[22.3,114.2,1.2],[31.2,121.5,1.4],[39.9,116.4,1.4],[37.5,127.0,1.3],[35.7,139.7,1.4],
+    [-33.9,151.2,1.0],[-37.8,145.0,0.9],[-36.8,174.8,0.8],[40.7,-74.0,1.4],[38.9,-77.0,1.0],[41.9,-87.6,1.1],[25.8,-80.2,1.0],[43.6,-79.4,1.0],
+    [34.0,-118.2,1.3],[37.8,-122.4,1.0],[19.4,-99.1,1.3],[4.7,-74.1,0.9],[-12.0,-77.0,0.9],[-33.4,-70.6,0.9],[-23.5,-46.6,1.3],[-22.9,-43.2,1.1],
+    [-34.6,-58.4,1.1],[6.5,3.4,1.1],[-26.2,28.0,1.0],[-1.3,36.8,0.8],[33.6,-7.6,0.9]
+  ].map(([la, lo, w]) => [Math.cos(la * D), Math.sin(la * D), lo * D, w]);
+  let geceCv = null, geceKey = '';
+  function gunesVektor() {
+    const now = new Date();
+    const yilBas = Date.UTC(now.getUTCFullYear(), 0, 0);
+    const doy = (Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - yilBas) / 864e5;
+    const decl = -23.44 * Math.cos((2 * Math.PI / 365) * (doy + 10));
+    const utcH = now.getUTCHours() + now.getUTCMinutes() / 60;
+    const sunLo = 180 - utcH * 15;
+    return pj(Math.cos(decl * D), Math.sin(decl * D), sunLo * D);
+  }
+  function geceMaske(sx, sy, sz) {
+    const N = 96;
+    if (!geceCv) { geceCv = document.createElement('canvas'); geceCv.width = geceCv.height = N; }
+    const k = `${sx.toFixed(2)}|${sy.toFixed(2)}|${sz.toFixed(2)}`;
+    if (k === geceKey) return geceCv;
+    geceKey = k;
+    const c = geceCv.getContext('2d'), img = c.createImageData(N, N), d = img.data;
+    const half = N / 2;
+    for (let py = 0; py < N; py++) {
+      const y = (half - (py + 0.5)) / half;
+      for (let px = 0; px < N; px++) {
+        const x = ((px + 0.5) - half) / half;
+        const r2 = x * x + y * y;
+        if (r2 > 1) continue;
+        const z = Math.sqrt(1 - r2);
+        const dot = x * sx + y * sy + z * sz;
+        if (dot >= 0.14) continue;
+        const idx = (py * N + px) * 4;
+        if (dot <= -0.16) {
+          d[idx] = 6; d[idx + 1] = 14; d[idx + 2] = 42; d[idx + 3] = 158;
+        } else {
+          // Yumuşak gün batımı / alacakaranlık kuşağı
+          const t = (0.14 - dot) / 0.30;
+          const tw = Math.sin(t * Math.PI);
+          d[idx] = Math.round(6 + tw * 55);
+          d[idx + 1] = Math.round(14 + tw * 22);
+          d[idx + 2] = Math.round(42 - tw * 10);
+          d[idx + 3] = Math.round(t * t * 158);
+        }
+      }
+    }
+    c.putImageData(img, 0, 0);
+    return geceCv;
+  }
 
   // ---------- veri ----------
   const VERI = window.DUNYA_VERI || { kara: [], nehir: [] };
@@ -655,6 +709,28 @@ window.Dunya = (() => {
     // önbellekteki küre tabanını tek seferde bas
     g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(tb, 0, 0); g.restore();
     g.save(); g.beginPath(); g.arc(cx, cy, r, 0, 7); g.clip();
+    // 🌓 Canlı Gece / Gündüz gölgesi ve gece tarafındaki altın şehir ışıkları
+    if (layers.gece) {
+      const [sx, sy, sz] = gunesVektor();
+      g.drawImage(geceMaske(sx, sy, sz), cx - r, cy - r, r * 2, r * 2);
+      g.save();
+      for (const [cl, sl, lo, wt] of GECE_SEHIR) {
+        const [x, y, z] = pj(cl, sl, lo);
+        if (z <= 0.04) continue;
+        const dot = x * sx + y * sy + z * sz;
+        if (dot >= -0.02) continue;
+        const na = clamp((-dot - 0.02) / 0.16, 0, 1);
+        const px = cx + x * r, py = cy - y * r, rad = (2.6 + wt * 2.2) * clamp(view.z * 0.45, 0.85, 2.2);
+        const gl = g.createRadialGradient(px, py, 0, px, py, rad * 2.1);
+        gl.addColorStop(0, `rgba(255,232,145,${(0.95 * na).toFixed(2)})`);
+        gl.addColorStop(0.45, `rgba(255,180,60,${(0.45 * na).toFixed(2)})`);
+        gl.addColorStop(1, 'rgba(255,150,40,0)');
+        g.fillStyle = gl; g.beginPath(); g.arc(px, py, rad * 2.1, 0, 7); g.fill();
+        g.fillStyle = `rgba(255,250,210,${(0.92 * na).toFixed(2)})`;
+        g.beginPath(); g.arc(px, py, Math.max(1.1, rad * 0.34), 0, 7); g.fill();
+      }
+      g.restore();
+    }
     // bulutlar (uzaktan)
     if (view.z < 3.5) { const ca = 1 - clamp((view.z - 2) / 1.5, 0, 1); for (const b of BULUT) { b.lo += dt * 1.5; const [x, y, z] = P(b.la, b.lo); if (z <= 0.1) continue; g.fillStyle = `rgba(255,255,255,${b.a * ca * z})`; g.beginPath(); g.ellipse(x, y, b.r * r / 100 * 3, b.r * r / 100 * 1.2 * z, 0, 0, 7); g.fill(); } }
     // ---- Mısır katmanı ----
@@ -883,22 +959,25 @@ window.Dunya = (() => {
         hits.push({ kind: 'denizolay', o, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
       }
     }
-    // 🏔️ Doğa ve tarihî coğrafya bölgeleri (dağlar, çöller, havzalar, nehirler — data/atlas/cografya-bolge.js)
+    // 🏔️ Doğa ve tarihî coğrafya bölgeleri (dağlar, doğa harikaları, çöller, havzalar — data/atlas/cografya-bolge.js)
     if (layers.cografya && window.ATLAS_COGRAFYA) {
-      const CG_STIL = { dag: ['🏔️', '#546270'], col: ['🏜️', '#b88230'], havza: ['🌿', '#367d4a'], nehir: ['🌊', '#2a75ab'] };
+      const CG_STIL = { harika: ['✨', '#b35c24'], dag: ['🏔️', '#546270'], col: ['🏜️', '#b88230'], havza: ['🌿', '#367d4a'], nehir: ['🌊', '#2a75ab'] };
+      const minSep = view.z >= 4 ? 12 : view.z >= 2.2 ? 18 : 24;
       const shownCg = [];
       for (const cg of window.ATLAS_COGRAFYA) {
         const [x, y, z] = P(...cg.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
-        if (shownCg.some(q => Math.abs(q[0] - x) < 30 && Math.abs(q[1] - y) < 30)) continue;
+        if (shownCg.some(q => Math.abs(q[0] - x) < minSep && Math.abs(q[1] - y) < minSep)) continue;
         shownCg.push([x, y]);
         const [ik, bg] = CG_STIL[cg.tur] || ['📍', '#5a4a3a'];
-        const hov = hover && hover.kind === 'cografya' && hover.cg === cg, s0 = hov ? 12 : 9.5;
-        g.fillStyle = bg; g.strokeStyle = hov ? '#ffd666' : '#fff6dc'; g.lineWidth = hov ? 2.2 : 1.5;
+        const hov = hover && hover.kind === 'cografya' && hover.cg === cg, s0 = hov ? 12.5 : 10;
+        g.fillStyle = bg; g.strokeStyle = hov ? '#ffd666' : (cg.tur === 'harika' ? '#ffe08a' : '#fff6dc'); g.lineWidth = hov ? 2.2 : 1.5;
         g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
         g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(ik, x, y + 0.5); g.textBaseline = 'alphabetic';
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
-        if (view.z >= 1.5 || hov) lab(hov ? 95 : 54, x, y + s0 + 10, cg.ad.split(' (')[0], { size: 10.5, w: 700, col: '#fff7e0', halo: 3, haloCol: 'rgba(32,20,10,0.85)', serif: true, kay: true });
-        hits.push({ kind: 'cografya', cg, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
+        const kisaYuk = cg.yukseklik ? cg.yukseklik.split(' (')[0].split(' ·')[0] : '';
+        const lbl = cg.tur === 'dag' && kisaYuk && (view.z >= 2.1 || hov) ? `${cg.ad.split(' (')[0]} · ${kisaYuk}` : cg.ad.split(' (')[0];
+        if (view.z >= 1.45 || hov) lab(hov ? 95 : (cg.tur === 'harika' ? 60 : 55), x, y + s0 + 10, lbl, { size: 10.5, w: 700, col: cg.tur === 'harika' ? '#ffe8a8' : '#fff7e0', halo: 3, haloCol: 'rgba(32,20,10,0.85)', serif: true, kay: true });
+        hits.push({ kind: 'cografya', cg, x0: x - s0 - 5, x1: x + s0 + 5, y0: y - s0 - 5, y1: y + s0 + 5 });
       }
     }
     // 🏞️ Dünya Nehir İsimleri (büyüklüğüne oranla yaklaştıkça/uzaklaştıkça belirir — data/atlas/nehirler.js)
@@ -958,6 +1037,45 @@ window.Dunya = (() => {
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         if (view.z >= 1.65 || hov) lab(hov ? 97 : 60, x, y + s0 + 10, lm.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e8f4ff', halo: 2.8, haloCol: 'rgba(12,24,44,0.9)', kay: true });
         hits.push({ kind: 'liman', lm, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
+      }
+    }
+    // 🍵🧭 Yemeklerin, Kelimelerin ve İcatların Dünya Yolculuğu (data/atlas/yolculuk-hikaye.js)
+    if ((layers.yayilis || yayilisAktif) && window.ATLAS_YAYILIS) {
+      const rotaItem = window.ATLAS_YAYILIS.find(x => x.id === yayilisAktif) || (hover && hover.kind === 'yayilis' ? hover.yy : null);
+      if (rotaItem && rotaItem.pts && rotaItem.pts.length >= 2) {
+        const d = yolHazirla(rotaItem);
+        g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+        g.beginPath(); linePath(d.p);
+        g.strokeStyle = 'rgba(255,214,102,0.42)'; g.lineWidth = 7.5; g.stroke();
+        g.strokeStyle = '#fbbf24'; g.lineWidth = 2.4; g.setLineDash([6, 4]); g.stroke(); g.setLineDash([]);
+        yolUclari(d, '#ffd666', true);
+        const k = (T / 6) % 1, [px, py, pz] = P(...yolNokta(d, d.L * k));
+        if (pz > 0.08) {
+          g.fillStyle = 'rgba(42,24,10,0.92)'; g.strokeStyle = '#ffd666'; g.lineWidth = 1.8;
+          g.beginPath(); g.arc(px, py, 11, 0, 7); g.fill(); g.stroke();
+          g.font = '13px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(rotaItem.ik, px, py + 0.5);
+        }
+        g.restore();
+      }
+      if (layers.yayilis) {
+        const shownY = [];
+        for (const yy of window.ATLAS_YAYILIS) {
+          const [x, y, z] = P(...yy.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          if (shownY.some(q => Math.abs(q[0] - x) < 22 && Math.abs(q[1] - y) < 22)) continue;
+          shownY.push([x, y]);
+          const hov = hover && hover.kind === 'yayilis' && hover.yy === yy, akt = yayilisAktif === yy.id;
+          const s0 = hov || akt ? 12.5 : 10;
+          g.save();
+          g.fillStyle = akt ? '#ffd666' : '#fff6dc'; g.strokeStyle = hov || akt ? '#b45309' : '#92400e'; g.lineWidth = hov || akt ? 2.4 : 1.6;
+          g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov || akt ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(yy.ik, x, y + 0.5);
+          g.restore();
+          obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
+          if (view.z >= 1.5 || hov || akt) lab(hov || akt ? 98 : 56, x, y + s0 + 10, yy.ad.split(' (')[0], { size: 10.2, w: 700, col: '#fef3c7', halo: 2.8, haloCol: 'rgba(42,20,8,0.9)', kay: true });
+          hits.push({ kind: 'yayilis', yy, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
+        }
       }
     }
     // 🌋 Tektonik Fay Kuşakları (Ateş Çemberi) ve Ünlü Yanardağlar (data/atlas/volkanlar.js)
@@ -1335,10 +1453,11 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'denizolay') tip(hover.x1 + 6, hover.y0, hover.o.ad, `${hover.o.tip === 'girdap' ? '🌀 Girdap / Döngü' : '🌪️ Fırtına alanı'} · ${hover.o.yer} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'hayvan') tip(hover.x1 + 6, hover.y0, `${hover.h.ik} ${hover.h.ad}`, `${hover.h.bolge} · ${hover.h.durum} · tıkla: bilgi ve fotoğraf`);
     else if (hover && hover.kind === 'bitki') tip(hover.x1 + 6, hover.y0, `${hover.bt.ik} ${hover.bt.ad}`, `${hover.bt.bolge} · tıkla: meyvesi ve kullanım alanları`);
-    else if (hover && hover.kind === 'cografya') tip(hover.x1 + 6, hover.y0, hover.cg.ad, `${hover.cg.konum} · tıkla: tarihî önemi ve fotoğraf`);
+    else if (hover && hover.kind === 'cografya') tip(hover.x1 + 6, hover.y0, hover.cg.ad, `${hover.cg.yukseklik ? hover.cg.yukseklik + ' · ' : ''}${hover.cg.konum} · tıkla: ayrıntı ve fotoğraf`);
     else if (hover && hover.kind === 'nehir') tip(hover.x1 + 6, hover.y0, `🏞️ ${hover.nr.ad}`, `${hover.nr.uzunluk} · ${hover.nr.havza} · tıkla: doğa ve tarih`);
     else if (hover && hover.kind === 'hayvangoc') tip(hover.x1 + 6, hover.y0, `${hover.hg.ik} ${hover.hg.ad}`, `${hover.hg.mesafe} · tıkla: yıllık göç döngüsü`);
     else if (hover && hover.kind === 'liman') tip(hover.x1 + 6, hover.y0, `⚓ ${hover.lm.ad}`, `${hover.lm.ulke} · ${hover.lm.rol} · tıkla: liman bilgisi`);
+    else if (hover && hover.kind === 'yayilis') tip(hover.x1 + 6, hover.y0, `${hover.yy.ik} ${hover.yy.ad}`, `${hover.yy.koken} · tıkla: dünyaya yayılış hikâyesi`);
     else if (hover && hover.kind === 'volkan') tip(hover.x1 + 6, hover.y0, `🌋 ${hover.v.ad}`, `${hover.v.ulke} · ${hover.v.yukseklik} (${hover.v.durum}) · tıkla: patlama tarihi`);
     else if (hover && hover.kind === 'fay') tip(hover.x1 + 6, hover.y0, `🔥 ${hover.f.ad}`, 'Tektonik fay ve deprem kuşağı · tıkla: ayrıntılar');
     else if (hover && hover.kind === 'hatyapi') tip(hover.x1 + 6, hover.y0, hover.hy.ad, `${hover.hy.yer} · ${hover.hy.uzunluk} · tıkla: ayrıntılar`);
@@ -1424,5 +1543,5 @@ window.Dunya = (() => {
     }
     return null;
   }
-  return { devletler, kayit, nerede, llAt, icerir, karaMi, sinirAd, get sinirAcik() { return layers.sinir; }, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
+  return { devletler, kayit, nerede, llAt, icerir, karaMi, sinirAd, get sinirAcik() { return layers.sinir; }, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setYayilis: id => { yayilisAktif = id || null; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
 })();
