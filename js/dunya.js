@@ -709,8 +709,8 @@ window.Dunya = (() => {
     // önbellekteki küre tabanını tek seferde bas
     g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(tb, 0, 0); g.restore();
     g.save(); g.beginPath(); g.arc(cx, cy, r, 0, 7); g.clip();
-    // 🌓 Canlı Gece / Gündüz gölgesi ve gece tarafındaki altın şehir ışıkları
-    if (layers.gece) {
+    // 🌓 Canlı Gece / Gündüz gölgesi ve (yalnızca Tarih Atlası'nda) gece tarafındaki altın şehir ışıkları
+    if (layers.gece && (layers.sehir || layers.yapi)) {
       const [sx, sy, sz] = gunesVektor();
       g.drawImage(geceMaske(sx, sy, sz), cx - r, cy - r, r * 2, r * 2);
       g.save();
@@ -806,22 +806,25 @@ window.Dunya = (() => {
       flushLabels();
       g.globalAlpha = 1;
     }
-    // yeraltı kaynakları: seçili yılda işletilenler, element simgeli küçük rozetler
-    if (layers.kaynak) {
-      const KT = window.KAYNAK_TUR || {}, s = clamp(5 + view.z * 0.5, 6, 11);
+    // yeraltı kaynakları ve dünya madenleri: seçili yılda işletilenler, element simgeli küçük rozetler
+    if (layers.kaynak && view.z >= 1.45) {
+      const KT = window.KAYNAK_TUR || {}, s = clamp(5.5 + view.z * 0.45, 6.5, 11);
+      const fa = clamp((view.z - 1.45) / 0.5, 0.2, 1), minSep = view.z >= 3.5 ? 16 : 24, shownK = [];
       for (const k of window.KAYNAKLAR || []) {
         if (!(Y <= k.from && Y >= k.to)) continue;
-        const [x, y, z] = P(...k.ll); if (z <= 0.05) continue;
+        const [x, y, z] = P(...k.ll); if (z <= 0.08 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+        if (shownK.some(q => Math.abs(q[0] - x) < minSep && Math.abs(q[1] - y) < minSep)) continue;
+        shownK.push([x, y]);
         const t = KT[k.tur] || {}, hov = hover && hover.kind === 'kaynak' && hover.k === k;
-        g.globalAlpha = clamp(z * 3, 0, 1);
+        g.globalAlpha = clamp(z * 3, 0, 1) * fa;
         g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.roundRect(x - s + 1, y - s + 2, s * 2, s * 2, 3); g.fill();
         g.fillStyle = t.renk; g.strokeStyle = hov ? '#ffd666' : '#fff6dc'; g.lineWidth = hov ? 2.4 : 1.4;
         g.beginPath(); g.roundRect(x - s, y - s, s * 2, s * 2, 3); g.fill(); g.stroke();
         const sem = t.sem || '?'; g.fillStyle = t.yazi; g.textAlign = 'center'; g.textBaseline = 'middle';
         g.font = `800 ${Math.round(s * (sem.length > 2 ? 0.62 : 0.95))}px system-ui`; g.fillText(sem, x, y + 0.5);
-        if (view.z > 14) text(x, y + s + 9, k.ad.replace(/ \(.*\)$/, ''), { size: 10, w: 600, col: '#ffe7a3', halo: 2.5 });
+        if (view.z >= 3.2 || hov) lab(hov ? 97 : 52, x, y + s + 10, k.ad.replace(/ \(.*\)$/, ''), { size: 10, w: 600, col: '#ffe7a3', halo: 2.6, haloCol: 'rgba(24,16,8,0.88)', kay: true });
         g.globalAlpha = 1;
-        hits.push({ kind: 'kaynak', k, x0: x - s - 2, x1: x + s + 2, y0: y - s - 2, y1: y + s + 2 });
+        hits.push({ kind: 'kaynak', k, x0: x - s - 3, x1: x + s + 3, y0: y - s - 3, y1: y + s + 3 });
       }
     }
     // ticaret yolları: yalnızca kullanıldığı yıllarda; ince çizgi, malın aktığı yöne giden noktalar
@@ -962,21 +965,24 @@ window.Dunya = (() => {
     // 🏔️ Doğa ve tarihî coğrafya bölgeleri (dağlar, doğa harikaları, çöller, havzalar — data/atlas/cografya-bolge.js)
     if (layers.cografya && window.ATLAS_COGRAFYA) {
       const CG_STIL = { harika: ['✨', '#b35c24'], dag: ['🏔️', '#546270'], col: ['🏜️', '#b88230'], havza: ['🌿', '#367d4a'], nehir: ['🌊', '#2a75ab'] };
-      const minSep = view.z >= 4 ? 12 : view.z >= 2.2 ? 18 : 24;
+      const ANA_CG = { kapadokya: 1, agri: 1, everest: 1, kilimanjaro: 1, alpler: 1, andlar: 1, sahra: 1, buyukkanyon: 1, uyuni: 1, setresifi: 1 };
+      const uzak = view.z < 1.45;
+      const minSep = uzak ? 54 : view.z >= 4 ? 12 : view.z >= 2.2 ? 18 : 24;
       const shownCg = [];
       for (const cg of window.ATLAS_COGRAFYA) {
+        if (uzak && !ANA_CG[cg.id]) continue;
         const [x, y, z] = P(...cg.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
         if (shownCg.some(q => Math.abs(q[0] - x) < minSep && Math.abs(q[1] - y) < minSep)) continue;
         shownCg.push([x, y]);
         const [ik, bg] = CG_STIL[cg.tur] || ['📍', '#5a4a3a'];
-        const hov = hover && hover.kind === 'cografya' && hover.cg === cg, s0 = hov ? 12.5 : 10;
+        const hov = hover && hover.kind === 'cografya' && hover.cg === cg, s0 = hov ? 12.5 : (uzak ? 8.5 : 10);
         g.fillStyle = bg; g.strokeStyle = hov ? '#ffd666' : (cg.tur === 'harika' ? '#ffe08a' : '#fff6dc'); g.lineWidth = hov ? 2.2 : 1.5;
         g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
-        g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+        g.font = `${hov ? 13 : (uzak ? 9.5 : 11)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(ik, x, y + 0.5); g.textBaseline = 'alphabetic';
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         const kisaYuk = cg.yukseklik ? cg.yukseklik.split(' (')[0].split(' ·')[0] : '';
         const lbl = cg.tur === 'dag' && kisaYuk && (view.z >= 2.1 || hov) ? `${cg.ad.split(' (')[0]} · ${kisaYuk}` : cg.ad.split(' (')[0];
-        if (view.z >= 1.45 || hov) lab(hov ? 95 : (cg.tur === 'harika' ? 60 : 55), x, y + s0 + 10, lbl, { size: 10.5, w: 700, col: cg.tur === 'harika' ? '#ffe8a8' : '#fff7e0', halo: 3, haloCol: 'rgba(32,20,10,0.85)', serif: true, kay: true });
+        if (view.z >= 1.55 || hov) lab(hov ? 95 : (cg.tur === 'harika' ? 60 : 55), x, y + s0 + 10, lbl, { size: 10.5, w: 700, col: cg.tur === 'harika' ? '#ffe8a8' : '#fff7e0', halo: 3, haloCol: 'rgba(32,20,10,0.85)', serif: true, kay: true });
         hits.push({ kind: 'cografya', cg, x0: x - s0 - 5, x1: x + s0 + 5, y0: y - s0 - 5, y1: y + s0 + 5 });
       }
     }
@@ -1020,8 +1026,9 @@ window.Dunya = (() => {
       }
     }
     // ⚓ Dünya Çapındaki Önemli Limanlar (data/atlas/limanlar.js)
-    if (layers.liman && window.ATLAS_LIMANLAR) {
-      const shownL = [];
+    if (layers.liman && window.ATLAS_LIMANLAR && view.z >= 1.45) {
+      const shownL = [], faL = clamp((view.z - 1.45) / 0.45, 0.25, 1);
+      g.globalAlpha = faL;
       for (const lm of window.ATLAS_LIMANLAR) {
         const [x, y, z] = P(...lm.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
         if (shownL.some(q => Math.abs(q[0] - x) < 24 && Math.abs(q[1] - y) < 24)) continue;
@@ -1035,9 +1042,10 @@ window.Dunya = (() => {
         g.fillText('⚓', x, y + 0.5);
         g.restore();
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
-        if (view.z >= 1.65 || hov) lab(hov ? 97 : 60, x, y + s0 + 10, lm.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e8f4ff', halo: 2.8, haloCol: 'rgba(12,24,44,0.9)', kay: true });
+        if (view.z >= 1.75 || hov) lab(hov ? 97 : 60, x, y + s0 + 10, lm.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e8f4ff', halo: 2.8, haloCol: 'rgba(12,24,44,0.9)', kay: true });
         hits.push({ kind: 'liman', lm, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
       }
+      g.globalAlpha = 1;
     }
     // 🍵🧭 Yemeklerin, Kelimelerin ve İcatların Dünya Yolculuğu (data/atlas/yolculuk-hikaye.js)
     if ((layers.yayilis || yayilisAktif) && window.ATLAS_YAYILIS) {
@@ -1058,9 +1066,10 @@ window.Dunya = (() => {
         }
         g.restore();
       }
-      if (layers.yayilis) {
+      if (layers.yayilis && (view.z >= 1.35 || yayilisAktif)) {
         const shownY = [];
         for (const yy of window.ATLAS_YAYILIS) {
+          if (view.z < 1.35 && yayilisAktif !== yy.id) continue;
           const [x, y, z] = P(...yy.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
           if (shownY.some(q => Math.abs(q[0] - x) < 22 && Math.abs(q[1] - y) < 22)) continue;
           shownY.push([x, y]);
@@ -1090,7 +1099,7 @@ window.Dunya = (() => {
         for (let i = 0; i < d.pts.length; i += 2) { const [x, y, z] = P(...d.pts[i]); if (z > 0.06) hits.unshift({ kind: 'fay', f, x0: x - 7, x1: x + 7, y0: y - 7, y1: y + 7 }); }
       }
       const shownV = [];
-      for (const v of window.ATLAS_VOLKANLAR.volkanlar || []) {
+      if (view.z >= 1.45) for (const v of window.ATLAS_VOLKANLAR.volkanlar || []) {
         const [x, y, z] = P(...v.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
         if (shownV.some(q => Math.abs(q[0] - x) < 22 && Math.abs(q[1] - y) < 22)) continue;
         shownV.push([x, y]);
@@ -1183,10 +1192,10 @@ window.Dunya = (() => {
       }
     }
     // 🐾 Bölge hayvanları ve okyanus canlıları (nesli tükenenler yıla göre görünür — data/atlas/hayvanlar.js)
-    if (layers.hayvan && window.ATLAS_HAYVANLAR && view.z >= 1.35) {
-      const minD = clamp(40 - view.z * 2.5, 24, 38);
+    if (layers.hayvan && window.ATLAS_HAYVANLAR && view.z >= 1.55) {
+      const minD = clamp(42 - view.z * 2.5, 22, 38);
       const shownH = [];
-      const fa = clamp((view.z - 1.35) / 0.5, 0.25, 1);
+      const fa = clamp((view.z - 1.55) / 0.5, 0.2, 1);
       g.globalAlpha = fa;
       for (const h of window.ATLAS_HAYVANLAR) {
         if ((h.from != null && Y > h.from) || (h.to != null && Y < h.to)) continue;
@@ -1195,6 +1204,11 @@ window.Dunya = (() => {
         shownH.push([x, y]);
         const hov = hover && hover.kind === 'hayvan' && hover.h === h;
         const s0 = hov ? 13 : 10.5, tuk = h.durum === 'Nesli Tükendi', den = h.kita === 'Okyanus';
+        const sonYillar = tuk && h.to != null && Y >= h.to && (Y - h.to) <= 250;
+        if (sonYillar) {
+          g.strokeStyle = `rgba(245,158,11,${0.35 + 0.3 * Math.sin(T * 4)})`; g.lineWidth = 2;
+          g.beginPath(); g.arc(x, y, s0 + 4, 0, 7); g.stroke();
+        }
         g.fillStyle = tuk ? '#fff0cc' : den ? '#e4f5ff' : '#fbf6e8';
         g.strokeStyle = hov ? '#ffd666' : tuk ? '#c87018' : den ? '#2b88c4' : '#3d8a4e';
         g.lineWidth = hov ? 2.4 : 1.7;
@@ -1207,9 +1221,9 @@ window.Dunya = (() => {
       g.globalAlpha = 1;
     }
     // 🌿 Yöreye özgü bitkiler ve ağaçlar (data/atlas/bitkiler.js)
-    if (layers.bitki && window.ATLAS_BITKILER && view.z >= 1.35) {
-      const minD = clamp(36 - view.z * 2.2, 22, 34), shownB = [];
-      const fa = clamp((view.z - 1.35) / 0.5, 0.25, 1);
+    if (layers.bitki && window.ATLAS_BITKILER && view.z >= 1.55) {
+      const minD = clamp(38 - view.z * 2.2, 20, 34), shownB = [];
+      const fa = clamp((view.z - 1.55) / 0.5, 0.2, 1);
       g.globalAlpha = fa;
       for (const bt of window.ATLAS_BITKILER) {
         const [x, y, z] = P(...bt.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;

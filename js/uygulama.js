@@ -307,6 +307,7 @@
     ['donum', '⚡ Dünyayı Değiştiren Büyük Olaylar', () => (window.DONUM_NOKTALARI || []).length],
     ['kultur', '👘 Uygarlık ve Ülke Kültürleri', () => (window.DEVLET_KULTUR || []).length],
     ['ekonomi', '💰 Dönemsel Ülke Ekonomileri', () => (window.ATLAS_EKONOMI || []).length],
+    ['kaynak', '⛏️ Dünya Madenleri ve Kaynaklar', () => (window.KAYNAKLAR || []).length],
     ['yayilis', '🍵 Yemek ve İcatların Yolculuğu', () => (window.ATLAS_YAYILIS || []).length],
     ['surpriz', '🎁 Gizli Sürprizler (Easter Eggs)', () => (window.ATLAS_SURPRIZLER || []).length]
   ];
@@ -735,8 +736,10 @@
     DN.setLayer('goc', !doga);
     DN.setLayer('magara', !doga);
     if (doga) {
-      for (const k of ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'yolculuk', 'donum', 'liman']) DN.setLayer(k, false);
+      for (const k of ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'yolculuk', 'donum', 'liman', 'yayilis', 'gece']) DN.setLayer(k, false);
+      if (DN.setYayilis) DN.setYayilis(null);
     }
+    const gb = $('#gecebtn'); if (gb) gb.hidden = doga;
     DN.setLayer('akinti', doga);
     DN.setLayer('hayvan', doga);
     DN.setLayer('bitki', doga);
@@ -1449,9 +1452,13 @@
       ...(e.wiki ? [photoTab(e.wiki, 8)] : [])] });
   }
   function openKaynak(k) {
+    if (!k) return;
+    kesifKaydet('kaynak', k.id);
     const t = (window.KAYNAK_TUR || {})[k.tur] || {};
-    const rows = [['Kaynak', `${t.ad} (${t.sem})`], ['İşletildiği yıllar', `${YIL.fmt(k.from)} – ${k.to <= -2026 ? 'bugün' : YIL.fmt(k.to)} (yaklaşık)`]];
-    showModal({ ikon: '⛏️', title: k.ad, sub: t.ad, tabs: [{ ad: 'Genel', html: `${rowsHTML(rows)}<p>${k.not}</p>` }] });
+    const rows = [['Maden / Kaynak', `${t.ad || k.tur} (${t.sem || '⛏️'})`], ['İşletildiği yıllar', `${YIL.fmt(k.from)} – ${k.to <= -2026 ? 'bugün' : YIL.fmt(k.to)} (yaklaşık)`]];
+    const html = `${rowsHTML(rows)}<p>${esc(k.not)}</p>
+      <div class="gos"><button class="phbtn icbtn" data-atlaskure="kaynak|${k.ll[0]}|${k.ll[1]}|${esc('⛏️ ' + k.ad)}">🌍 Kürede göster</button></div>`;
+    showModal({ ikon: '⛏️', title: k.ad, sub: t.ad || 'Dünya Madeni', tabs: [{ ad: '⛏️ Maden Bilgisi', html }] });
   }
   const kaynakAktif = () => (window.KAYNAKLAR || []).filter(k => Y <= k.from && Y >= k.to);
   function olayListesi() {

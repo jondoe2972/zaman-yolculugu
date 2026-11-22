@@ -15,7 +15,11 @@ window.KAYNAK_TUR = {
   gaz:     { ad: 'Doğalgaz',         sem: 'CH₄', renk: '#3c8fcf', yazi: '#fff' },
   tuz:     { ad: 'Tuz',              sem: 'NaCl', renk: '#f4f1ea', yazi: '#4a3a2a' },
   tas:     { ad: 'Taş ocağı',        sem: '▦',  renk: '#d8c8a8', yazi: '#4a3a2a' },
-  mucevher:{ ad: 'Değerli taş',      sem: '◆',  renk: '#2fb3ad', yazi: '#fff' }
+  mucevher:{ ad: 'Değerli taş',      sem: '◆',  renk: '#2fb3ad', yazi: '#fff' },
+  elmas:   { ad: 'Elmas',            sem: '💎', renk: '#2563eb', yazi: '#fff' },
+  lityum:  { ad: 'Lityum',           sem: 'Li', renk: '#0ea5e9', yazi: '#fff' },
+  nadir:   { ad: 'Nadir Toprak',     sem: '⚡', renk: '#7c3aed', yazi: '#fff' },
+  kehribar:{ ad: 'Kehribar',         sem: '🟠', renk: '#d97706', yazi: '#fff' }
 };
 window.KAYNAKLAR = [
   // ---- Mısır ve çevresi ----
@@ -73,5 +77,41 @@ window.KAYNAKLAR = [
   { id: 'kerkuk', ad: 'Kerkük petrolü (Baba Gurgur)', tur: 'petrol', ll: [35.53, 44.35], from: -1927, to: -2026, not: 'Yerden sızan gazın yaktığı "ebedi ateş" binlerce yıldır yanıyor. 1927\'de büyük bir fışkırmayla petrol bulundu.' },
   { id: 'mescid-suleyman', ad: 'Mescid-i Süleyman petrolü', tur: 'petrol', ll: [31.93, 49.3], from: -1908, to: -2026, not: 'Orta Doğu\'da bulunan ilk büyük petrol sahası (1908). Bugünkü BP şirketinin kökeni buradadır.' },
   { id: 'dammam', ad: 'Dammam petrolü', tur: 'petrol', ll: [26.3, 50.1], from: -1938, to: -2026, not: 'Suudi Arabistan\'da 1938\'de ilk ticari petrol bu kuyudan çıktı ve çöl krallığını dünyanın en zengin ülkelerinden biri yaptı.' },
-  { id: 'sar-i-sang', ad: 'Sar-i Sang lapis lazuli madeni', tur: 'mucevher', ll: [36.2, 70.8], from: 6000, to: -2026, not: 'Tutankamon\'un maskesindeki lacivert taş, binlerce kilometre öteden, Afganistan\'daki bu dağ madeninden geldi. 6000 yıldır işletiliyor.' }
+  { id: 'sar-i-sang', ad: 'Sar-i Sang lapis lazuli madeni', tur: 'mucevher', ll: [36.2, 70.8], from: 6000, to: -2026, not: 'Tutankamon\'un maskesindeki lacivert taş, binlerce kilometre öteden, Afganistan\'daki bu dağ madeninden geldi. 6000 yıldır işletiliyor.' },
+
+  // ---- Türkiye Ek Madenler ----
+  { id: 'luletasi', ad: 'Eskişehir lületaşı yatakları', tur: 'mucevher', ll: [39.78, 30.52], from: -1700, to: -2026, not: 'Yerin 100 metre altından ıslak ve yumuşak çıkarılıp havayla temas edince sertleşen "Beyaz Altın". Dünyada işlenebilir kalitede lületaşının neredeyse tamamı Eskişehir\'dedir.' },
+  { id: 'murgul', ad: 'Murgul bakır madeni (Artvin)', tur: 'bakir', ll: [41.27, 41.56], from: -1890, to: -2026, not: 'Doğu Karadeniz\'in sarp dağlarında yer alan Türkiye\'nin en büyük bakır yataklarından biri.' },
+
+  // ---- Afrika (Dünya Madenleri) ----
+  { id: 'kimberley', ad: 'Kimberley Elmas Madeni ("Büyük Çukur")', tur: 'elmas', ll: [-28.74, 24.76], from: -1871, to: -2026, not: '1871\'de 50.000 madencinin kazma kürekle açtığı dev elmas çukuru modern küresel elmas ticaretini (De Beers) başlattı; buradan çıkan elmaslar Güney Afrika tarihini değiştirdi.' },
+  { id: 'witwatersrand', ad: 'Witwatersrand Altın Havzası (Johannesburg)', tur: 'altin', ll: [-26.20, 28.04], from: -1886, to: -2026, not: 'İnsanlık tarihi boyunca çıkarılan tüm altının yaklaşık %40\'ı tek başına bu Güney Afrika havzasından geldi! Johannesburg şehri bu altına hücumla sıfırdan kuruldu.' },
+  { id: 'mali-altin', ad: 'Bambuk ve Bouré Altın Madenleri (Mali)', tur: 'altin', ll: [12.5, -9.5], from: -700, to: -2026, not: 'Gana ve Mali imparatorluklarının, özellikle tarihin en zengin hükümdarı sayılan Mansa Musa\'nın servetinin kaynağı. Altın Sahra kervanlarıyla Akdeniz\'e ve Avrupa\'ya akardı.' },
+  { id: 'taoudenni', ad: 'Taoudenni Sahra Tuz Madeni', tur: 'tuz', ll: [22.68, -3.98], from: -1585, to: -2026, not: 'Sahra Çölü\'nün ortasında kurumuş antik bir göl tabanından kesilen dev tuz levhaları hâlâ deve kervanlarıyla 750 km ötedeki Timbuktu\'ya taşınır; Orta Çağ\'da tuz altınla eş değerdi.' },
+  { id: 'katanga', ad: 'Katanga Bakır ve Kobalt Kuşağı (Kongo)', tur: 'nadir', ll: [-10.7, 26.2], from: -1900, to: -2026, not: 'Bugün akıllı telefonların ve elektrikli araç pillerinin vazgeçilmezi olan dünya kobalt üretiminin ~%70\'i Demokratik Kongo Cumhuriyeti\'nin bu kuşağından çıkar.' },
+
+  // ---- Amerika (Dünya Madenleri) ----
+  { id: 'potosi', ad: 'Potosí Gümüş Dağı (Cerro Rico, Bolivya)', tur: 'gumus', ll: [-19.62, -65.75], from: -1545, to: -2026, not: '16. yüzyılda "Gümüş Dağ" olarak ünlendi; buradan çıkarılan tonlarca gümüş İspanya üzerinden Avrupa ve Çin ekonomilerini altüst edip ilk küresel para akışını başlattı.' },
+  { id: 'lityum-ucgeni', ad: 'Lityum Üçgeni (Atacama & Uyuni)', tur: 'lityum', ll: [-23.5, -68.2], from: -1984, to: -2026, not: 'Şili, Bolivya ve Arjantin arasındaki yüksek tuz gölleri dünya lityum rezervlerinin yarısından fazlasını barındırır; elektrikli araç ve batarya çağının "beyaz petrolüdür".' },
+  { id: 'chuquicamata', ad: 'Chuquicamata Dev Bakır Madeni (Şili)', tur: 'bakir', ll: [-22.29, -68.90], from: -1915, to: -2026, not: 'Atakama Çölü\'nde 4,3 km uzunluğunda ve 850 m derinliğinde, uzaydan görülebilen dünyanın en büyük açık ocak bakır madenlerinden biridir.' },
+  { id: 'muzo', ad: 'Muzo Zümrüt Madenleri (Kolombiya)', tur: 'mucevher', ll: [5.53, -74.11], from: -1000, to: -2026, not: 'Dünyanın en derin yeşil, en saf zümrütleri buradan çıkar; Kolomb öncesi Muisca yerlileri zümrütü kutsal törenlerde kullanırdı.' },
+  { id: 'kaliforniya-altin', ad: 'Kaliforniya Altına Hücum (Sierra Nevada)', tur: 'altin', ll: [38.80, -120.89], from: -1848, to: -1900, not: '1848\'de Sutter\'s Mill\'de altın bulunmasıyla dünyanın dört bir yanından 300.000 kişi akın etti; San Francisco birkaç yılda küçük bir köyden dev bir limana dönüştü.' },
+  { id: 'klondike', ad: 'Klondike Altın Sahaları (Yukon, Kanada)', tur: 'altin', ll: [64.06, -139.43], from: -1896, to: -2026, not: '1896\'da dondurucu kuzey nehirlerinde altın bulununca 100.000 maceracı karlı geçitleri aşmaya çalıştı; Jack London\'ın romanlarına ilham verdi.' },
+  { id: 'mesabi', ad: 'Mesabi Demir Kuşağı (Minnesota, ABD)', tur: 'demir', ll: [47.45, -92.95], from: -1892, to: -2026, not: 'ABD\'nin 20. yüzyılda dünyanın en büyük çelik, gökdelen ve otomobil üreticisi olmasını sağlayan dev demir cevheri havzası.' },
+  { id: 'spindletop', ad: 'Teksas Spindletop Petrolü (ABD)', tur: 'petrol', ll: [30.02, -94.07], from: -1901, to: -2026, not: '1901\'de günde 100.000 varil fışkıran bu kuyu modern petrol ve otomobil çağının kapısını sonuna kadar açtı.' },
+  { id: 'zacatecas', ad: 'Zacatecas Gümüş Madenleri (Meksika)', tur: 'gumus', ll: [22.77, -102.57], from: -1546, to: -2026, not: 'Meksika\'yı yüzyıllarca dünyanın en büyük gümüş üreticisi yapan madenler; İspanyol "Sekiz Real" gümüş sikkeleri ABD dolarının atası oldu.' },
+
+  // ---- Asya, Sibirya ve Avrupa Ek Madenler ----
+  { id: 'bayan-obo', ad: 'Bayan Obo Nadir Toprak Madeni (Çin)', tur: 'nadir', ll: [41.80, 109.97], from: -1957, to: -2026, not: 'İç Moğolistan\'daki bu dev yatak, rüzgâr türbinleri, telefonlar, lazerler ve çiplerde kullanılan dünya nadir toprak elementlerinin neredeyse yarısını tek başına üretir.' },
+  { id: 'golconda', ad: 'Golconda Elmas Madenleri (Hindistan)', tur: 'elmas', ll: [17.38, 78.40], from: 400, to: -1850, not: 'Brezilya ve Güney Afrika bulunmadan önce 2.000 yıl boyunca dünyanın neredeyse tek elmas kaynağıydı! Ünlü Koh-i-Noor ve mavi Hope elmasları buradan çıktı.' },
+  { id: 'mirny', ad: 'Mirny Elmas Çukuru (Yakutistan, Sibirya)', tur: 'elmas', ll: [62.53, 113.99], from: -1957, to: -2026, not: 'Sibirya\'nın dondurucu toprağında 525 metre derinliğinde, 1,2 km genişliğinde dev spiral elmas krateri; hava akımı yüzünden helikopterlerin üzerinden uçması yasaktır.' },
+  { id: 'kinta-kalay', ad: 'Kinta Vadisi Kalay Madenleri (Malezya)', tur: 'kalay', ll: [4.60, 101.07], from: -1850, to: -2026, not: '19. ve 20. yüzyılda dünya kalay üretiminin büyük bölümünü sağlayarak konserve kutusu ve lehim sanayisini besledi.' },
+  { id: 'iwami', ad: 'Iwami Ginzan Gümüş Madeni (Japonya)', tur: 'gumus', ll: [35.11, 132.44], from: -1526, to: -1923, not: '16. ve 17. yüzyıllarda dünya gümüşünün yaklaşık üçte birini üreterek Japonya ile Avrupa–Çin ticaretini canlandırdı.' },
+  { id: 'bati-sibirya', ad: 'Batı Sibirya Petrol ve Doğalgaz Havzası', tur: 'gaz', ll: [61.25, 73.40], from: -1965, to: -2026, not: 'Dünyanın en büyük petrol ve doğalgaz havzalarından biri; Avrasya\'nın enerji haritasını şekillendirdi.' },
+  { id: 'baltik-kehribar', ad: 'Baltık Kehribar Kıyıları (Gdansk / Kaliningrad)', tur: 'kehribar', ll: [54.85, 20.0], from: 3000, to: -2026, not: '40 milyon yıllık fosilleşmiş çam reçinesi. Antik çağda "Kuzeyin Altını" olarak Kehribar Yolu\'yla Roma\'ya ve Mısır\'a kadar taşındı; bazen içinde milyonlarca yıllık böcek fosilleri bulunur.' },
+
+  // ---- Avustralya (Dünya Madenleri) ----
+  { id: 'pilbara', ad: 'Pilbara Demir Cevheri Havzası (Avustralya)', tur: 'demir', ll: [-22.3, 118.5], from: -1966, to: -2026, not: '2,5 milyar yıllık kızıl bantlı demir kayaları; bugün dünyanın en büyük demir cevheri ihracat merkezidir ve küresel çelik üretiminin kalbidir.' },
+  { id: 'kalgoorlie', ad: 'Kalgoorlie "Süper Çukur" Altın Madeni', tur: 'altin', ll: [-30.78, 121.50], from: -1893, to: -2026, not: 'Avustralya\'nın ortasındaki kızıl çölde 3,5 km uzunluğunda devasa açık altın ocağı; 1893\'ten beri kesintisiz altın veriyor.' },
+  { id: 'coober-pedy', ad: 'Coober Pedy Opal Madenleri (Avustralya)', tur: 'mucevher', ll: [-29.01, 134.76], from: -1915, to: -2026, not: 'Dünyanın en parlak gökkuşağı opallerinin %70\'i buradan çıkar. Çöl sıcağı 50 °C\'ye ulaştığı için kasaba halkı evlerini, otellerini ve kiliselerini yerin altına oymuştur!' }
 ];
