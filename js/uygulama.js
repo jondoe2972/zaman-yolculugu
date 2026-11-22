@@ -736,7 +736,7 @@
     DN.setLayer('goc', !doga);
     DN.setLayer('magara', !doga);
     if (doga) {
-      for (const k of ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'yolculuk', 'donum', 'liman', 'yayilis', 'gece']) DN.setLayer(k, false);
+      for (const k of ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'yolculuk', 'donum', 'liman', 'yayilis', 'gece']) DN.setLayer(k, false);
       if (DN.setYayilis) DN.setYayilis(null);
     }
     const gb = $('#gecebtn'); if (gb) gb.hidden = doga;
