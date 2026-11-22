@@ -209,13 +209,15 @@
   ];
 
   const KESIF_ID = new Set(['yayilis', 'derin', 'katmanlar', 'toprak', 'aa', 'kesif', 'rehber']);
-  let pop = null;
+  let pop = null, aktifSek = 'oyun';
   function ciz() {
     if (!pop) return;
     const kart = o => `<button data-oyun="${o.id}" role="menuitem"><span class="op-ik">${o.ikon}</span><span><b>${o.ad}${o.yeni ? ' <i>yeni</i>' : ''}</b><small>${typeof o.alt === 'function' ? o.alt() : o.alt}</small></span></button>`;
-    const oyunlar = OYUNLAR.filter(o => !KESIF_ID.has(o.id));
-    const kesifler = OYUNLAR.filter(o => KESIF_ID.has(o.id));
-    pop.innerHTML = `<b class="op-bas">🎮 Oyunlar ve Meydan Okumalar</b><div class="op-grid">${oyunlar.map(kart).join('')}</div><b class="op-bas op-bas2">🧭 Özel Keşif Modları ve Araçlar</b><div class="op-grid">${kesifler.map(kart).join('')}</div>`;
+    const liste = OYUNLAR.filter(o => aktifSek === 'kesif' ? KESIF_ID.has(o.id) : !KESIF_ID.has(o.id));
+    pop.innerHTML = `<div class="op-sekmeler" role="tablist">
+      <button type="button" class="${aktifSek === 'oyun' ? 'on' : ''}" data-opsek="oyun" role="tab">🎮 Oyunlar</button>
+      <button type="button" class="${aktifSek === 'kesif' ? 'on' : ''}" data-opsek="kesif" role="tab">🧭 Özel Keşif</button>
+    </div><div class="op-grid">${liste.map(kart).join('')}</div>`;
   }
   function konum() {
     if (!pop || !btn) return;
@@ -252,6 +254,8 @@
 
     btn.addEventListener('click', ev => { ev.stopPropagation(); goster(pop.hidden); });
     pop.addEventListener('click', async ev => {
+      const sk = ev.target.closest('[data-opsek]');
+      if (sk) { ev.stopPropagation(); aktifSek = sk.dataset.opsek; ciz(); konum(); return; }
       const b = ev.target.closest('[data-oyun]'); if (!b) return;
       const o = OYUNLAR.find(x => x.id === b.dataset.oyun); if (!o) return;
       goster(false);

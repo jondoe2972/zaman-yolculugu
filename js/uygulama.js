@@ -2663,49 +2663,52 @@
   else if (QS.get('yapi')) { const id = QS.get('yapi'); syncScenePart(); setTimeout(() => showMonument(id), 50); }
   modGuncelle();
   if (QS.get('yasa')) { syncScenePart(); setTimeout(yasaAc, 80); }
-  // ---------- ilk ziyaret: 6 sahnelik animasyonlu interaktif intro / rehber ----------
+  // ---------- ilk ziyaret: 6 sahnelik yenilenmiş interaktif rehber ----------
   const hg = $('#hosgeldin'), hgIc = $('#hg-icerik'), hgNk = $('#hg-noktalar');
   const HG_SAHNELER = [
     {
-      rozet: '1 / 7 · Dünya Atlası',
-      baslik: 'Dünyayı ve Okyanusları Keşfet',
-      metin: 'Küreyi sürükleyip döndür, yakınlaş. <b>Devletlere</b> tıklayınca kültürünü, ekonomisini ve tarihini; <b>okyanuslara</b> dokununca canlılarını ve akıntılarını okuyabilirsin.',
+      rozet: '1 / 6 · Dünya Küresi & Zaman Makinesi',
+      baslik: '11.000 Yılı ve Tüm Dünyayı Keşfet',
+      metin: '3B küreyi döndür, alttaki zaman çizelgesiyle çağlar arasında gez! <b>Ülkelere</b>, <b>45 deniz ve okyanusa</b>, <b>kıta alt-bölgelerine</b> ve <b>ikonik yapıtlara</b> tıkla; üstten <b>🔊</b> ile 7 rahatlatıcı müzik ve gerçek doğa/hayvan seslerini ayarla.',
       sahne: '<div class="hgs-kure"><i class="hgs-orb"></i><span class="hgs-pin p1">🏛️</span><span class="hgs-pin p2">🌊</span><span class="hgs-pin p3">🏔️</span></div>'
     },
     {
-      rozet: '2 / 7 · Zaman Makinesi',
-      baslik: 'Alttaki Çizelgeyle 11.000 Yıl Gez',
-      metin: 'Alt çubuğu kaydır, <b>▶ Oynat</b> ile sınırların yayılışını canlı izle, sol taraftaki kıta adlarına tıklayarak her kıtada bıraktığın yıla anında geri dön.',
-      sahne: '<div class="hgs-zaman"><div class="hgs-bar"><span>MÖ 3000</span><span>MS 1</span><span>1453</span><span>Bugün</span></div><i class="hgs-imlec"></i><div class="hgs-etiket">⏳ Tarih akıyor…</div></div>'
+      rozet: '2 / 6 · 🗂️ Katmanlar (Tarih & Doğa Atlası)',
+      baslik: 'Tek Tıkla İki Ayrı Dünya: Tarih ve Doğa Atlası',
+      metin: 'Sağ üstteki <b>🗂️ Katmanlar</b> menüsünden <b>Tarih Atlası</b> ile <b>Doğa Atlası</b> arasında tek tıkla geçiş yapıp dilediğin katmanları açıp kapatabilirsin:',
+      sahne: `<div class="hgs-ikili">
+        <div class="hgs-kol"><b>🏛️ Tarih Atlası</b><span>🗺️ Dönem sınırları</span><span>🗼 579 ikonik yapıt</span><span>🏺 Tarihî kazılar</span><span>🐪 Ticaret &amp; limanlar</span><span>🍵 Yemek &amp; icatlar</span><span>🌓 Gece / gündüz</span></div>
+        <div class="hgs-kol"><b>🌿 Doğa Atlası</b><span>💨 Yıllık rüzgâr dalgaları</span><span>🌊 Akıntı &amp; girdaplar</span><span>🐾 Hayvan &amp; bitkiler</span><span>🐋 Göç döngüleri</span><span>🦴 Fosil &amp; kehribar</span><span>🌋 Dağ, nehir, maden</span></div>
+      </div>`
     },
     {
-      rozet: '3 / 7 · Katmanlar (Dosyalar)',
-      baslik: 'Tarih Atlası ve Doğa Atlası Tek Tıkla',
-      metin: 'Sağ üstteki <b>🗂️ Katmanlar</b> menüsünden <b>🌊 akıntıları ve göç yollarını</b>, <b>🐾 bölge hayvanlarını</b>, <b>🌋 yanardağları</b> ve <b>⚓ dünya limanlarını</b> açabilirsin.',
-      sahne: '<div class="hgs-katlar"><span>🌊 Akıntılar</span><span>🐋 Göçler</span><span>🐾 Hayvanlar</span><span>🌋 Yanardağlar</span><span>⚓ Limanlar</span></div>'
+      rozet: '3 / 6 · 🧑‍🌾🐾🌿 Yaşa Modu',
+      baslik: 'İnsan, Hayvan, Dinozor, Bitki veya Mikro Canlı Ol!',
+      metin: 'Üstteki <b>🧑‍🌾 Yaşa</b> sekmesinde ister şansına güvenip <b>rastgele</b>, ister listeden merak ettiğini <b>kendin seçerek</b> bambaşka bir hayatı deneyimle!',
+      sahne: `<div class="hgs-ikili">
+        <div class="hgs-kol"><b>🧑‍🌾 İnsan &amp; Tarih</b><span>🌍 Kıta ve çağ seç</span><span>🌅 Şafaktan geceye 1 gün</span><span>🏛️ Antik Mısır'dan Bugüne</span></div>
+        <div class="hgs-kol"><b>🐾🌿🦠 Doğa &amp; Dinozor</b><span>🦖 T-Rex, Balina, Aslan</span><span>🌱 İlk kara bitkisi &amp; ağaçlar</span><span>🔬 Su ayısı &amp; mikro dünya</span></div>
+      </div>`
     },
     {
-      rozet: '4 / 7 · Canlı Sahne & Yaşa',
-      baslik: 'O Dönemde Bir Gününü Yaşa',
-      metin: '<b>🎬 Sahne</b> modunda yapıların yılına göre yükselişini izle; <b>🧑‍🌾 Yaşa</b> modunda seçtiğin çağdan bir insan olup şafaktan geceye bir gününü deneyimle.',
-      sahne: '<div class="hgs-yasa"><span>🏺 MÖ 2560</span><i>→</i><span>⚔️ MS 1453</span><i>→</i><span>🧑‍🌾 Farklı Hayatlar</span></div>'
+      rozet: '4 / 6 · 🎮 Oyunlar & 🧭 Özel Keşif',
+      baslik: 'Oyunlarda Kapış, Özel Keşif Modlarına Dal!',
+      metin: 'Üstteki <b>🎮 Oyunlar</b> menüsünde iki ayrı sekme seni bekliyor — üstelik sonuçlarını <b>Instagram Hikâye Kartı (PNG)</b> veya <b>X / WhatsApp</b> olarak arkadaşlarınla paylaşabilirsin!',
+      sahne: `<div class="hgs-ikili">
+        <div class="hgs-kol"><b>🎮 Oyunlar &amp; Düello</b><span>🔥 Tarihte Hayatta Kal</span><span>🎯 Arkadaşına Düello Kur</span><span>🎭 Ben Kimim? · 🗺️ Sınırdan Bil</span><span>⚖️ Hangisi Eski? · 📸 Fotoğraf</span></div>
+        <div class="hgs-kol"><b>🧭 Özel Keşif</b><span>🦖 Derin Zaman &amp; Pangea</span><span>🌐 Dünya &amp; Uzay Katmanları</span><span>🍵 Yemek &amp; İcat Yolculuğu</span><span>📍 Bu Toprakların Tarihi</span></div>
+      </div>`
     },
     {
-      rozet: '5 / 7 · Oyunlar & Yarışmalar',
-      baslik: 'Tarih ve Doğa Oyunlarıyla Kendini Dene',
-      metin: '<b>🎭 Ben Kimim?</b>, <b>📸 Burası Neresi & Hangi Çağ?</b>, <b>⚖️ Hangisi Daha Eski?</b>, <b>🗺️ Sınırdan Bil</b>, <b>🐾 Hayvanlar Alemi</b> ve <b>📅 Tarihte Bugün</b> seni bekliyor.',
-      sahne: '<div class="hgs-oyunlar"><span>🎭</span><span>📸</span><span>⚖️</span><span>🗺️</span><span>🐾</span><span>📅</span></div>'
+      rozet: '5 / 6 · 🎁 20 Gizli Sürpriz & Keşif Karnesi',
+      baslik: 'Gizli Sürprizleri Bul, Karneni Paylaş!',
+      metin: 'Dünyanın ve uzay boşluğunun gizli köşelerine <b>20 gizli sürpriz</b> (5\'i 🔴 çok zor efsanevi!) saklandı. Keşif yaptıkça <b>XP</b> kazanıp <b>🧭 Keşif Defterim</b>\'de ipuçlarını aç ve kendi <b>Instagram Hikâye Karneni</b> indir!',
+      sahne: '<div class="hgs-katlar"><span>🛰️ Uzayda</span><span>🚀 Point Nemo</span><span>🕯️ Yeraltı Şehri</span><span>🌳 80 Bin Yıllık Orman</span><span>📸 Hikâye Kartı</span></div>'
     },
     {
-      rozet: '6 / 7 · 🎁 Gizli Sürprizler',
-      baslik: 'Sürpriz Yumurtaları Bulabilecek misin?',
-      metin: 'Dünyanın ve uzay boşluğunun gizli köşelerine <b>sürpriz yumurtalar (Easter Eggs)</b> sakladık! Yalnızca doğru yere <b>iyice yaklaşınca</b> beliren minik altın parıltıyı yakala; keşif yaptıkça ve oyun oynadıkça kazandığın <b>XP</b> ile <b>🧭 Keşif Defterim</b>\'de yeni ipuçlarının kilidi açılır.',
-      sahne: '<div class="hgs-katlar"><span>🛰️ Uzayda</span><span>🏛️ Kayıp Kıta</span><span>⚙️ Antik Sır</span><span>🤿 Derinlikler</span><span>✨ +Daha Fazlası</span></div>'
-    },
-    {
-      rozet: '7 / 7 · Hazırsın!',
+      rozet: '6 / 6 · Hazırsın!',
       baslik: 'Yolculuğa Nereden Başlayalım?',
-      metin: 'İstediğin zaman sağ üstteki <b>?</b> düğmesinden bu rehberi tekrar açabilirsin.',
+      metin: 'Dilediğin zaman sağ üstteki <b>?</b> düğmesinden veya <b>🎮 Oyunlar → 🧭 Özel Keşif → ❓ Hızlı Rehber</b> üzerinden bu kılavuza geri dönebilirsin.',
       son: true
     }
   ];
@@ -2740,7 +2743,7 @@
   function hgKapat() {
     if (!hg) return;
     hg.hidden = true;
-    try { localStorage.setItem('zy-hosgeldin', '2'); } catch (e) { /* gizli mod */ }
+    try { localStorage.setItem('zy-hosgeldin', '3'); } catch (e) { /* gizli mod */ }
   }
   const rehberBtn = $('#rehber-ac');
   if (rehberBtn) rehberBtn.addEventListener('click', () => { kartlariKapat(); hgAc(0); });
@@ -2766,7 +2769,7 @@
       else if (ev.key === 'ArrowRight') { if (hgIdx < HG_SAHNELER.length - 1) { hgIdx++; hgCiz(); } }
       else if (ev.key === 'ArrowLeft') { if (hgIdx > 0) { hgIdx--; hgCiz(); } }
     });
-    let ilk = false; try { ilk = localStorage.getItem('zy-hosgeldin') !== '2'; } catch (e) { /* gizli mod */ }
+    let ilk = false; try { ilk = localStorage.getItem('zy-hosgeldin') !== '3'; } catch (e) { /* gizli mod */ }
     if (ilk && !QS.get('yasa') && !QS.get('dog') && !QS.get('oyun') && !QS.get('yapi')) {
       hgAc(0);
     }
