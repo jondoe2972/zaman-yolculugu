@@ -331,6 +331,8 @@
     ['volkan', '🌋 Yanardağlar ve Ateş Çemberi', () => (window.ATLAS_VOLKANLAR?.volkanlar || []).length],
     ['yasamdoga', '🐾🌿🦠 Hayvan, Bitki ve Mikro Yaşamlar', () => ((window.YASAM_DOGA?.hayvanlar || []).length + (window.YASAM_DOGA?.bitkiler || []).length + (window.YASAM_DOGA?.mikroplar || []).length)],
     ['magara', '🪨 Tarihöncesi Mağaralar ve Kazılar', () => (window.ATLAS_MAGARALAR || []).length],
+    ['tarihkazi', '🏺 Tarihî Kazılar ve Arkeolojik Buluntular', () => (window.ATLAS_KAZILAR?.tarih || []).length],
+    ['fosilkazi', '🦴 Fosil Kazıları ve Doğa Buluntuları', () => (window.ATLAS_KAZILAR?.doga || []).length],
     ['donum', '⚡ Dünyayı Değiştiren Büyük Olaylar', () => (window.DONUM_NOKTALARI || []).length],
     ['kultur', '👘 Uygarlık ve Ülke Kültürleri', () => (window.DEVLET_KULTUR || []).length],
     ['ekonomi', '💰 Dönemsel Ülke Ekonomileri', () => (window.ATLAS_EKONOMI || []).length],
@@ -736,6 +738,24 @@
       ]
     });
   }
+  function openKazi(kz, tip) {
+    if (!kz) return;
+    const fosil = tip === 'doga' || tip === 'fosilkazi';
+    const kat = fosil ? 'fosilkazi' : 'tarihkazi';
+    kesifKaydet(kat, kz.id);
+    if (window.Ses) window.Ses.playMaden();
+    const genel = `<div class="kapak" data-kapak="${esc(kz.w)}"></div>
+      <span class="pill">${fosil ? '🦴 Doğa & Fosil Buluntusu' : '🏺 Tarihî Arkeolojik Kazı'} · ${esc(kz.yas)}</span>
+      ${rowsHTML([['📍 Kazı Yeri', kz.yer], ['⏳ Kaç Senelik / Dönemi', kz.yas], ['📅 Kazı / Keşif Yılı', kz.yil]])}
+      <h4>🔎 Burada Ne Bulundu?</h4><p><b>${esc(kz.buluntu)}</b></p>
+      <h4>${fosil ? '🌿 Bilimsel ve Doğa Önemi' : '📜 Tarihî Önemi'}</h4><p>${esc(kz.onem)}</p>
+      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(kz.ilginc)}</p></div>
+      <div class="gos"><button class="phbtn icbtn" data-atlaskure="${kat}|${kz.ll[0]}|${kz.ll[1]}|${esc((kz.ik || '⛏️') + ' ' + kz.ad)}">🌍 Kürede kazı yerini göster</button></div>`;
+    showModal({ ikon: kz.ik || (fosil ? '🦴' : '🏺'), title: kz.ad, sub: `${kz.yer} · ${kz.yas}`, tabs: [
+      { ad: fosil ? '🦴 Fosil & Kazı' : '🏺 Kazı & Buluntular', html: genel, onShow: b => kapakYukle(b.querySelector('.kapak')) },
+      ...(kz.w ? [photoTab(kz.w, 8, false)] : [])
+    ] });
+  }
   function openVolkan(v) {
     if (!v) return;
     kesifKaydet('volkan', v.id);
@@ -787,7 +807,7 @@
     DN.setLayer('goc', !doga);
     DN.setLayer('magara', !doga);
     if (doga) {
-      for (const k of ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'yolculuk', 'donum', 'liman', 'yayilis', 'gece']) DN.setLayer(k, false);
+      for (const k of ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'yolculuk', 'donum', 'liman', 'yayilis', 'gece', 'tarihkazi']) DN.setLayer(k, false);
       if (DN.setYayilis) DN.setYayilis(null);
     }
     const gb = $('#gecebtn'); if (gb) gb.hidden = doga;
@@ -1436,7 +1456,7 @@
   const endG = ev => {
     if (dragG && !dragG.moved && gpts.size <= 1) {
       if (typeof window.__kureSec === 'function') { const cb = window.__kureSec; window.__kureSec = null; cb(DN.llAt(...cvPos(gcv, ev))); }
-      else { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'donum') openDonum(h.d); else if (h && h.kind === 'hatyapi') openHatYapi(h.hy); else if (h && h.kind === 'magara') openMagara(h.m); else if (h && h.kind === 'surpriz') openSurpriz(h.sp); else if (h && h.kind === 'liman') openLiman(h.lm); else if (h && h.kind === 'nehir') openNehir(h.nr); else if (h && h.kind === 'hayvangoc') openHayvanGoc(h.hg); else if (h && h.kind === 'volkan') openVolkan(h.v); else if (h && h.kind === 'fay') openFay(h.f); else if (h && h.kind === 'akinti') openAkinti(h.a); else if (h && h.kind === 'ruzgar') openRuzgar(h.rz); else if (h && h.kind === 'denizolay') openDenizOlay(h.o); else if (h && h.kind === 'hayvan') openHayvan(h.h); else if (h && h.kind === 'bitki') openBitki(h.bt); else if (h && h.kind === 'yayilis') { DN.setYayilis(h.yy.id); openYayilis(h.yy); } else if (h && h.kind === 'cografya') openCografya(h.cg); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); else if (!h) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) { if (DN.karaMi && !DN.karaMi(ll[0], ll[1])) { const ok = okyanusBul(ll[0], ll[1]); if (ok) openOkyanus(ok); } else { let yakinCg = null; if ((DN.layers.cografya || !DN.sinirAcik) && window.ATLAS_COGRAFYA) { const tol = Math.max(0.65, 2.4 / Math.max(1, (DN.view && DN.view.z) || 1)); let enYakin = tol * tol; for (const cg of window.ATLAS_COGRAFYA) { if (cg.tur !== 'harika' && cg.tur !== 'dag') continue; const d2 = (cg.ll[0] - ll[0]) ** 2 + (cg.ll[1] - ll[1]) ** 2; if (d2 < enYakin) { enYakin = d2; yakinCg = cg; } } } if (yakinCg) openCografya(yakinCg); else if (DN.sinirAcik) { DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else { const db = window.dogaBolgeBul && window.dogaBolgeBul(ll[0], ll[1]); if (db) openDogaBolge(db); } } } } }
+      else { const h = DN.hitTest(...cvPos(gcv, ev)); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'donum') openDonum(h.d); else if (h && h.kind === 'hatyapi') openHatYapi(h.hy); else if (h && h.kind === 'magara') openMagara(h.m); else if (h && h.kind === 'tarihkazi') openKazi(h.kz, 'tarih'); else if (h && h.kind === 'fosilkazi') openKazi(h.kz, 'doga'); else if (h && h.kind === 'surpriz') openSurpriz(h.sp); else if (h && h.kind === 'liman') openLiman(h.lm); else if (h && h.kind === 'nehir') openNehir(h.nr); else if (h && h.kind === 'hayvangoc') openHayvanGoc(h.hg); else if (h && h.kind === 'volkan') openVolkan(h.v); else if (h && h.kind === 'fay') openFay(h.f); else if (h && h.kind === 'akinti') openAkinti(h.a); else if (h && h.kind === 'ruzgar') openRuzgar(h.rz); else if (h && h.kind === 'denizolay') openDenizOlay(h.o); else if (h && h.kind === 'hayvan') openHayvan(h.h); else if (h && h.kind === 'bitki') openBitki(h.bt); else if (h && h.kind === 'yayilis') { DN.setYayilis(h.yy.id); openYayilis(h.yy); } else if (h && h.kind === 'cografya') openCografya(h.cg); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); else if (!h) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) { if (DN.karaMi && !DN.karaMi(ll[0], ll[1])) { const ok = okyanusBul(ll[0], ll[1]); if (ok) openOkyanus(ok); } else { let yakinCg = null; if ((DN.layers.cografya || !DN.sinirAcik) && window.ATLAS_COGRAFYA) { const tol = Math.max(0.65, 2.4 / Math.max(1, (DN.view && DN.view.z) || 1)); let enYakin = tol * tol; for (const cg of window.ATLAS_COGRAFYA) { if (cg.tur !== 'harika' && cg.tur !== 'dag') continue; const d2 = (cg.ll[0] - ll[0]) ** 2 + (cg.ll[1] - ll[1]) ** 2; if (d2 < enYakin) { enYakin = d2; yakinCg = cg; } } } if (yakinCg) openCografya(yakinCg); else if (DN.sinirAcik) { DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else { const db = window.dogaBolgeBul && window.dogaBolgeBul(ll[0], ll[1]); if (db) openDogaBolge(db); } } } } }
     }
     gpts.delete(ev.pointerId);
     if (!gpts.size) dragG = null;
@@ -1529,11 +1549,13 @@
     DN.goTo(e.ll[0], e.ll[1], 7); openEvent(e);
   });
   // ---------- katman menüsü (sağ üstte 🗂️) ----------
-  const KATLAR = ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'ticaret', 'yolculuk', 'akinti', 'ruzgar', 'hayvan', 'bitki', 'cografya', 'nehir', 'hayvangoc', 'liman', 'volkan', 'donum', 'magara', 'yayilis', 'gece'];
+  const KATLAR = ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'ticaret', 'yolculuk', 'akinti', 'ruzgar', 'hayvan', 'bitki', 'cografya', 'nehir', 'hayvangoc', 'liman', 'volkan', 'donum', 'magara', 'tarihkazi', 'fosilkazi', 'yayilis', 'gece'];
   const katSay = k => k === 'yapi' ? (window.YAPILAR || []).filter(y => Y <= y.y).length : k === 'kaynak' ? kaynakAktif().length : k === 'ticaret' ? (window.TICARET_YOLLARI || []).filter(t => Y <= t.from && Y >= t.to).length
     : k === 'yolculuk' ? (window.YOLCULUKLAR || []).filter(j => Math.abs(Y - j.y) <= DN.aralik).length
     : k === 'akinti' ? ((window.ATLAS_OKYANUS?.akintilar || []).length + (window.ATLAS_OKYANUS?.olaylar || []).length)
     : k === 'ruzgar' ? (window.ATLAS_RUZGARLAR || []).length
+    : k === 'tarihkazi' ? (window.ATLAS_KAZILAR?.tarih || []).length
+    : k === 'fosilkazi' ? (window.ATLAS_KAZILAR?.doga || []).length
     : k === 'hayvan' ? (window.ATLAS_HAYVANLAR || []).filter(h => (h.from == null || Y <= h.from) && (h.to == null || Y >= h.to)).length
     : k === 'bitki' ? (window.ATLAS_BITKILER || []).length
     : k === 'cografya' ? (window.ATLAS_COGRAFYA || []).length
@@ -2519,7 +2541,7 @@
   document.querySelectorAll('[data-season]').forEach(b => b.addEventListener('click', () => {
     S.setSeason(b.dataset.season); document.querySelectorAll('[data-season]').forEach(x => x.classList.toggle('on', x === b));
   }));
-  const KUTU_IDS = ['modal', 'hosgeldin', 'arama', 'wiki', 'tarihpop', 'skbuyuk', 'ic', 'hayat', 'sinirbil', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun', 'foto-oyun', 'derin-zaman'];
+  const KUTU_IDS = ['modal', 'hosgeldin', 'arama', 'wiki', 'tarihpop', 'skbuyuk', 'ic', 'hayat', 'sinirbil', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun', 'foto-oyun', 'derin-zaman', 'katman-ekran'];
   const kutuAcikMi = () => KUTU_IDS.some(id => { const e = document.getElementById(id); return e && !e.hidden; });
   window.addEventListener('keydown', e => {
     const t = e.target;
@@ -2585,6 +2607,7 @@
     openCografya: id => { const cg = (window.ATLAS_COGRAFYA || []).find(x => x.id === id); if (cg) openCografya(cg); },
     openDonum: id => { const d = (window.DONUM_NOKTALARI || []).find(x => x.id === id); if (d) openDonum(d); },
     openMagara: id => { const m = (window.ATLAS_MAGARALAR || []).find(x => x.id === id); if (m) openMagara(m); },
+    openKazi: (id, tip) => { const KZ = window.ATLAS_KAZILAR || {}; const kz = (tip === 'doga' ? KZ.doga : tip === 'tarih' ? KZ.tarih : [...(KZ.tarih || []), ...(KZ.doga || [])]).find(x => x.id === id); if (kz) openKazi(kz, tip || ((KZ.doga || []).includes(kz) ? 'doga' : 'tarih')); },
     openLiman: id => { const l = (window.ATLAS_LIMANLAR || []).find(x => x.id === id); if (l) openLiman(l); },
     openNehir: id => { const n = (window.ATLAS_NEHIRLER || []).find(x => x.id === id); if (n) openNehir(n); },
     openHayvanGoc: id => { const h = (window.ATLAS_HAYVAN_GOC || []).find(x => x.id === id); if (h) openHayvanGoc(h); },

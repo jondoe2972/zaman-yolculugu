@@ -233,7 +233,24 @@
 
   function bagla() {
     const pop = document.getElementById('sespop');
+    const btn = document.getElementById('sesbtn');
     if (!pop) return;
+    if (btn) {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const acilacak = pop.hidden;
+        pop.hidden = !acilacak;
+        btn.setAttribute('aria-expanded', String(acilacak));
+        if (acilacak) uiGuncelle();
+      });
+    }
+    pop.addEventListener('click', e => e.stopPropagation());
+    document.addEventListener('click', e => {
+      if (!pop.hidden && !e.target.closest('#sespop') && !e.target.closest('#sesbtn')) {
+        pop.hidden = true;
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      }
+    });
     pop.querySelector('#ses-sessiz')?.addEventListener('click', () => {
       cfg.sessiz = !cfg.sessiz;
       kaydet();

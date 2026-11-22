@@ -32,6 +32,10 @@
     derin: [
       'data/atlas/derin-zaman.js?v=2',
       'js/oyun/derin-zaman.js?v=3'
+    ],
+    katmanlar: [
+      'data/atlas/katmanlar.js?v=1',
+      'js/oyun/katmanlar.js?v=1'
     ]
   };
   const dosyaSoz = new Map();
@@ -79,7 +83,7 @@
     try { return JSON.parse(localStorage['zy-hayvan-ist'] || 'null')?.seriRekor || 0; } catch (e) { return 0; }
   }
 
-  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun', 'foto-oyun', 'derin-zaman'];
+  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun', 'foto-oyun', 'derin-zaman', 'katman-ekran'];
   function digerleriniKapat(haricId) {
     for (const id of OYUN_KUTULARI) {
       if (id === haricId) continue;
@@ -146,6 +150,14 @@
       ac: async () => {
         await paketYukle('derin');
         if (window.DerinZaman) window.DerinZaman.ac();
+      }
+    },
+    {
+      id: 'katmanlar', kutu: 'katman-ekran', ikon: '🌐', ad: 'Dünya ve Uzay Katmanları', yeni: true,
+      alt: 'Yarım elma Dünya kesiti ve 5 atmosfer katmanı: yakınlaş, tıkla ve keşfet',
+      ac: async () => {
+        await paketYukle('katmanlar');
+        if (window.KatmanEkran) window.KatmanEkran.ac();
       }
     },
     {
