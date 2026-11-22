@@ -1,197 +1,407 @@
-// 🦖🌍 Derin Zaman: Dinozorlar & Pangea Modu — Hafif 2D Canvas Paleo-Küre & Asteroit Simülasyonu
+// 🦖🌍 Derin Zaman: 4,5 Milyar Yıllık Paleocoğrafya Küresi, Dinozorlar & Gerçek Fosil Kazı Alanları
 'use strict';
 (() => {
+  const D = Math.PI / 180;
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  let box = null, cv = null, g = null, raf = 0;
-  let cagIdx = 3; // Başlangıç: 🌍 Pangea!
-  let rotLo = 15, rotLa = 12, drag = null;
-  let hits = [], hover = null, secili = null;
-  let oynuyor = false, oynTimer = 0;
-  let astAnim = -1; // >=0 iken 66 My Chicxulub asteroit çarpma animasyonu
+  const rnd = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
 
-  const RAD = Math.PI / 180;
-  function pj(la, lo, cx, cy, r) {
-    const phi = la * RAD, lam = (lo - rotLo) * RAD, phi0 = rotLa * RAD;
-    const x = Math.cos(phi) * Math.sin(lam);
-    const y = Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(lam);
-    const z = Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(lam);
-    return [cx + x * r, cy - y * r, z];
+  let box = null, cv = null, g = null, raf = 0;
+  let cagIdx = 3; // Pangea'dan başla
+  let rotLo = 10, rotLa = 10, drag = null;
+  let oynuyor = false, oynTimer = 0, lastT = 0, astAnim = -1;
+  let secili = null, seciliKazi = null, hits = [], hover = null;
+
+  // Organik kıyı şeridi alt-bölümleyici (yapay düz kenarları doğal koy/burunlara dönüştürür)
+  function organikKiyi(pts, seed, iter = 2) {
+    let cur = pts.slice();
+    for (let it = 0; it < iter; it++) {
+      const next = [];
+      const amp = it === 0 ? 0.16 : 0.085;
+      for (let i = 0; i < cur.length; i++) {
+        const a = cur[i], b = cur[(i + 1) % cur.length];
+        next.push(a);
+        const dla = b[0] - a[0];
+        let dlo = b[1] - a[1];
+        if (dlo > 180) dlo -= 360;
+        if (dlo < -180) dlo += 360;
+        const len = Math.hypot(dla, dlo);
+        if (len < 2.2) continue;
+        const h = (rnd(seed * 97 + it * 53 + i * 19.3) - 0.5) * 2;
+        const nx = -dlo / len, ny = dla / len;
+        const off = Math.min(4.2, len * amp) * h;
+        const mla = Math.max(-86, Math.min(86, (a[0] + b[0]) * 0.5 + nx * off));
+        let mlo = a[1] + dlo * 0.5 + ny * off;
+        if (mlo > 180) mlo -= 360;
+        if (mlo < -180) mlo += 360;
+        next.push([mla, mlo]);
+      }
+      cur = next;
+    }
+    return cur;
   }
 
-  function polyDraw(pts, cx, cy, r) {
-    // Küre ön yarımküresine sade kırpma ile pürüzsüz çizim
-    const out = [];
-    const n = pts.length;
+  function prep(pts) {
+    const n = pts.length, cl = new Float32Array(n), sl = new Float32Array(n), lo = new Float32Array(n);
     for (let i = 0; i < n; i++) {
-      const a = pts[i], b = pts[(i + 1) % n];
-      const steps = 6;
-      for (let s = 0; s < steps; s++) {
-        const t = s / steps;
-        const la = a[0] + (b[0] - a[0]) * t, lo = a[1] + (b[1] - a[1]) * t;
-        const p = pj(la, lo, cx, cy, r);
-        if (p[2] >= -0.02) out.push(p);
+      const la = pts[i][0] * D;
+      cl[i] = Math.cos(la); sl[i] = Math.sin(la); lo[i] = pts[i][1] * D;
+    }
+    return { n, cl, sl, lo };
+  }
+
+  // Her çağın organik kıta/çöl/buz çokgenlerini bir kez hazırla
+  const cagCache = new Map();
+  function cagHazirla(cag) {
+    if (cagCache.has(cag.id)) return cagCache.get(cag.id);
+    const sBase = cag.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    const kitalar = (cag.kitalar || []).map((p, i) => prep(organikKiyi(p, sBase + i * 17, 2)));
+    const coller = (cag.coller || []).map((p, i) => prep(organikKiyi(p, sBase + 200 + i * 13, 1)));
+    const buz = (cag.buz || []).map((p, i) => prep(organikKiyi(p, sBase + 400 + i * 11, 1)));
+    const out = { kitalar, coller, buz };
+    cagCache.set(cag.id, out);
+    return out;
+  }
+
+  // Keşfet küresindeki gibi hafif organik arazi boya dokusu
+  let desen = null, lavDesen = null;
+  function dokuDesen(lav) {
+    if (!lav && desen) return desen;
+    if (lav && lavDesen) return lavDesen;
+    const c = document.createElement('canvas'); c.width = c.height = 160;
+    const x = c.getContext('2d');
+    for (let i = 0; i < 850; i++) {
+      const a = rnd(i), b = rnd(i + 999), k = rnd(i + 77);
+      x.fillStyle = lav
+        ? (k < 0.45 ? `rgba(255,130,30,${0.08 + k * 0.22})` : `rgba(25,8,4,${0.08 + (k - 0.45) * 0.22})`)
+        : (k < 0.5 ? `rgba(45,65,28,${0.05 + k * 0.13})` : `rgba(255,252,232,${0.04 + (k - 0.5) * 0.14})`);
+      x.beginPath();
+      x.ellipse(a * 160, b * 160, 1 + rnd(i + 5) * 3.2, 0.6 + rnd(i + 6) * 1.7, rnd(i + 7) * 3, 0, 7);
+      x.fill();
+    }
+    const pat = g.createPattern(c, 'repeat');
+    if (lav) lavDesen = pat; else desen = pat;
+    return pat;
+  }
+
+  function pj(cl, sl, lo, cl0, sl0, l0) {
+    const dl = lo - l0;
+    const x = cl * Math.sin(dl);
+    const y = cl0 * sl - sl0 * cl * Math.cos(dl);
+    const z = sl0 * sl + cl0 * cl * Math.cos(dl);
+    return [x, y, z];
+  }
+
+  function P(lat, lon, cx, cy, R) {
+    const la = lat * D, lo = lon * D, cl0 = Math.cos(rotLa * D), sl0 = Math.sin(rotLa * D), l0 = rotLo * D;
+    const [x, y, z] = pj(Math.cos(la), Math.sin(la), lo, cl0, sl0, l0);
+    return [cx + x * R, cy - y * R, z];
+  }
+
+  // Keşfet küresiyle aynı tam ufuk kesimli (z >= 0) çokgen yolu — arka yüz katlanması asla olmaz!
+  function polyPath(p, cx, cy, R) {
+    const n = p.n;
+    if (n < 3) return false;
+    const cl0 = Math.cos(rotLa * D), sl0 = Math.sin(rotLa * D), l0 = rotLo * D;
+    let any = false, allVis = true, backIdx = -1;
+    const xs = new Float32Array(n), ys = new Float32Array(n), zs = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      const [x, y, z] = pj(p.cl[i], p.sl[i], p.lo[i], cl0, sl0, l0);
+      xs[i] = x; ys[i] = y; zs[i] = z;
+      if (z > 0) any = true;
+      else { allVis = false; if (backIdx < 0) backIdx = i; }
+    }
+    if (!any) return false;
+    if (allVis) {
+      g.moveTo(cx + xs[0] * R, cy - ys[0] * R);
+      for (let i = 1; i < n; i++) g.lineTo(cx + xs[i] * R, cy - ys[i] * R);
+      g.closePath();
+      return true;
+    }
+    const ufukA = (i, j) => {
+      const t = zs[i] / (zs[i] - zs[j]);
+      const hx = xs[i] + t * (xs[j] - xs[i]), hy = ys[i] + t * (ys[j] - ys[i]);
+      return Math.atan2(-hy, hx);
+    };
+    let drew = false, open = false, aStart = 0;
+    for (let k = 0; k < n; k++) {
+      const i = (backIdx + k) % n, j = (i + 1) % n;
+      const zi = zs[i] > 0, zj = zs[j] > 0;
+      if (!zi && zj) {
+        aStart = ufukA(i, j);
+        g.moveTo(cx + Math.cos(aStart) * R, cy + Math.sin(aStart) * R);
+        g.lineTo(cx + xs[j] * R, cy - ys[j] * R);
+        open = true; drew = true;
+      } else if (zi && zj && open) {
+        g.lineTo(cx + xs[j] * R, cy - ys[j] * R);
+      } else if (zi && !zj && open) {
+        const aEnd = ufukA(i, j);
+        g.lineTo(cx + Math.cos(aEnd) * R, cy + Math.sin(aEnd) * R);
+        let d = aStart - aEnd;
+        while (d > Math.PI) d -= 2 * Math.PI;
+        while (d < -Math.PI) d += 2 * Math.PI;
+        const steps = Math.max(1, Math.ceil(Math.abs(d) / 0.1));
+        for (let s = 1; s <= steps; s++) {
+          const aa = aEnd + d * s / steps;
+          g.lineTo(cx + Math.cos(aa) * R, cy + Math.sin(aa) * R);
+        }
+        g.closePath();
+        open = false;
       }
     }
-    if (out.length < 3) return;
-    g.beginPath();
-    out.forEach((p, i) => i === 0 ? g.moveTo(p[0], p[1]) : g.lineTo(p[0], p[1]));
-    g.closePath();
-    g.fill();
-    g.stroke();
+    return drew;
   }
 
-  let lastT = performance.now();
   function draw(now) {
     if (!box || box.hidden) { raf = 0; return; }
-    const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
-    if (!drag) rotLo = ((rotLo + dt * 7) + 180) % 360 - 180;
+    const dt = Math.min(0.05, (now - lastT) / 1000 || 0.016);
+    lastT = now;
+    const DZ = window.DERIN_ZAMAN;
+    if (!DZ) return;
+    const cag = DZ.caglar[cagIdx];
+    const geo = cagHazirla(cag);
+
+    if (!drag) rotLo = ((rotLo + dt * 7.5) + 180) % 360 - 180;
     if (oynuyor) {
       oynTimer += dt;
-      if (oynTimer >= 3.2) {
+      if (oynTimer > 4.2) {
         oynTimer = 0;
-        const DZ = window.DERIN_ZAMAN;
-        cagSec((cagIdx + 1) % DZ.caglar.length);
+        cagIdx = (cagIdx + 1) % DZ.caglar.length;
+        renderPanel();
       }
     }
-    if (astAnim >= 0) {
-      astAnim += dt * 0.45;
-      if (astAnim > 1.8) astAnim = -1;
-    }
+    if (astAnim >= 0) { astAnim += dt; if (astAnim > 4.5) astAnim = -1; }
 
-    const rect = cv.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const W = Math.max(240, Math.round(rect.width)), H = Math.max(240, Math.round(rect.height));
+    const rc = cv.getBoundingClientRect();
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    const W = Math.max(260, Math.round(rc.width)), H = Math.max(260, Math.round(rc.height));
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
     }
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.clearRect(0, 0, W, H);
 
-    // Yıldızlı kozmik arka plan
-    g.fillStyle = '#090d1a';
+    const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.43;
+
+    // Yıldızlı uzay arka planı
+    g.fillStyle = '#070c18';
     g.fillRect(0, 0, W, H);
-    g.fillStyle = 'rgba(255,245,215,0.45)';
-    for (let i = 0; i < 42; i++) {
-      const sx = ((i * 197 + 31) % 997) / 997 * W, sy = ((i * 353 + 73) % 991) / 991 * H;
-      g.fillRect(sx, sy, (i % 3 === 0 ? 1.8 : 1.1), (i % 3 === 0 ? 1.8 : 1.1));
+    for (let i = 0; i < 95; i++) {
+      const sx = (i * 197.3 % W), sy = (i * 113.7 % H), sr = 0.55 + (i % 3) * 0.42;
+      g.fillStyle = `rgba(235,244,255,${0.22 + 0.42 * Math.abs(Math.sin(now * 0.001 + i))})`;
+      g.beginPath(); g.arc(sx, sy, sr, 0, 7); g.fill();
     }
 
-    const DZ = window.DERIN_ZAMAN;
-    const cag = DZ.caglar[cagIdx];
-    const cx = W / 2, cy = H / 2, r = Math.min(W, H) * 0.41;
-
-    // Atmosfer parıltısı
-    const atm = g.createRadialGradient(cx, cy, r * 0.9, cx, cy, r * 1.18);
-    atm.addColorStop(0, cag.atmosfer);
+    // Atmosfer dış ışıltısı
+    const atm = g.createRadialGradient(cx, cy, R * 0.88, cx, cy, R * 1.18);
+    atm.addColorStop(0, cag.atmosfer || 'rgba(130,210,245,0.4)');
     atm.addColorStop(1, 'rgba(0,0,0,0)');
-    g.fillStyle = atm; g.beginPath(); g.arc(cx, cy, r * 1.18, 0, 7); g.fill();
+    g.fillStyle = atm;
+    g.beginPath(); g.arc(cx, cy, R * 1.18, 0, 7); g.fill();
 
-    // Okyanus / Lav küresi
-    const oc = g.createRadialGradient(cx - r * 0.32, cy - r * 0.35, r * 0.08, cx, cy, r);
-    oc.addColorStop(0, cag.id === 'hadean' ? '#9e3819' : '#2d84b0');
-    oc.addColorStop(1, cag.okyanus);
-    g.fillStyle = oc; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill();
-
+    // Küre gövdesi (zengin derin okyanus gradyanı)
     g.save();
-    g.beginPath(); g.arc(cx, cy, r, 0, 7); g.clip();
+    g.beginPath(); g.arc(cx, cy, R, 0, 7); g.clip();
+    const oky = g.createRadialGradient(cx - R * 0.32, cy - R * 0.28, R * 0.08, cx, cy, R * 1.12);
+    oky.addColorStop(0, cag.okyanus);
+    oky.addColorStop(1, cag.okyanus2 || '#071c30');
+    g.fillStyle = oky;
+    g.fillRect(cx - R, cy - R, R * 2, R * 2);
 
-    // Hafif enlem çizgileri
-    g.strokeStyle = 'rgba(255,255,255,0.08)'; g.lineWidth = 1;
-    for (const la of [-60, -30, 0, 30, 60]) {
-      g.beginPath(); let bas = false;
-      for (let lo = -180; lo <= 180; lo += 12) {
-        const [x, y, z] = pj(la, lo, cx, cy, r);
-        if (z > 0) { if (!bas) { g.moveTo(x, y); bas = true; } else g.lineTo(x, y); } else bas = false;
+    // İnce enlem/boylam ızgarası (Keşfet küresi gibi)
+    g.strokeStyle = 'rgba(255,255,255,0.06)';
+    g.lineWidth = 0.7;
+    for (let la = -60; la <= 60; la += 30) {
+      g.beginPath(); let pen = false;
+      for (let lo = -180; lo <= 180; lo += 6) {
+        const [x, y, z] = P(la, lo, cx, cy, R);
+        if (z > 0) { pen ? g.lineTo(x, y) : g.moveTo(x, y); pen = true; } else pen = false;
+      }
+      g.stroke();
+    }
+    for (let lo = -180; lo < 180; lo += 30) {
+      g.beginPath(); let pen = false;
+      for (let la = -85; la <= 85; la += 5) {
+        const [x, y, z] = P(la, lo, cx, cy, R);
+        if (z > 0) { pen ? g.lineTo(x, y) : g.moveTo(x, y); pen = true; } else pen = false;
       }
       g.stroke();
     }
 
-    // Dönemin kıtaları (Pangea → Lavrasya/Gondvana → Modern)
-    g.fillStyle = cag.kara;
-    g.strokeStyle = cag.id === 'hadean' ? 'rgba(255,140,40,0.65)' : 'rgba(255,248,225,0.28)';
-    g.lineWidth = 1.4;
-    for (const poly of cag.kitalar || []) polyDraw(poly, cx, cy, r);
+    // --- KEŞFET TEKNİĞİYLE KARA ÇİZİMİ ---
+    // 1. Sığ deniz kıyı şelfi ışıldaması (çift katmanlı yumuşak kıyı halesi)
+    g.beginPath();
+    let karaVar = false;
+    for (const kp of geo.kitalar) if (polyPath(kp, cx, cy, R)) karaVar = true;
+    if (karaVar) {
+      g.save();
+      g.lineJoin = 'round'; g.lineCap = 'round';
+      g.strokeStyle = cag.kiyi || 'rgba(165,235,248,0.25)';
+      g.lineWidth = 14; g.stroke();
+      g.strokeStyle = cag.lav ? 'rgba(255,155,70,0.45)' : 'rgba(215,246,255,0.28)';
+      g.lineWidth = 5; g.stroke();
 
-    // Buzul Çağı kutup buzları
-    if (cag.buzul) {
-      g.fillStyle = 'rgba(240,248,255,0.78)'; g.strokeStyle = 'rgba(255,255,255,0.5)';
-      polyDraw([[89,-180],[58,-160],[54,-90],[58,-10],[60,60],[62,150],[89,180]], cx, cy, r);
-      polyDraw([[-89,-180],[-64,-120],[-64,0],[-64,120],[-89,180]], cx, cy, r);
+      // 2. Çapraz kara gradyanı
+      const kg = g.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+      kg.addColorStop(0, cag.kara);
+      kg.addColorStop(1, cag.kara2 || cag.kara);
+      g.fillStyle = kg;
+      g.fill('nonzero');
+
+      // 3. Kırpılmış organik arazi boya dokusu + çöl + buzul katmanları
+      g.clip('nonzero');
+      g.fillStyle = dokuDesen(!!cag.lav);
+      g.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+      // İç kesim kurak çöl tonlaması (Pangea / Jura / Senozoyik)
+      if (geo.coller.length) {
+        g.beginPath();
+        for (const cp of geo.coller) polyPath(cp, cx, cy, R);
+        g.fillStyle = 'rgba(214,174,104,0.45)';
+        g.fill('nonzero');
+      }
+
+      // Kutup ve buzul çağları buz tabakaları
+      if (geo.buz.length) {
+        g.beginPath();
+        for (const bp of geo.buz) polyPath(bp, cx, cy, R);
+        g.fillStyle = 'rgba(238,248,255,0.84)';
+        g.fill('nonzero');
+        g.strokeStyle = 'rgba(180,222,245,0.6)';
+        g.lineWidth = 1.6;
+        g.stroke();
+      }
+      g.restore();
+
+      // 4. Net doğal kıyı şeridi çizgisi
+      g.beginPath();
+      for (const kp of geo.kitalar) polyPath(kp, cx, cy, R);
+      g.strokeStyle = cag.lav ? 'rgba(255,145,55,0.75)' : 'rgba(42,68,46,0.58)';
+      g.lineWidth = 1.25;
+      g.stroke();
     }
 
-    // Hadean lav çatlak parıltıları
-    if (cag.id === 'hadean') {
-      g.strokeStyle = `rgba(255,165,40,${0.35 + 0.25 * Math.sin(now * 0.004)})`;
-      g.lineWidth = 2;
-      for (const [la, lo] of [[10,-20],[-10,15],[25,80],[-45,100]]) {
-        const [x, y, z] = pj(la, lo, cx, cy, r);
-        if (z > 0.1) { g.beginPath(); g.arc(x, y, 10 + 4 * Math.sin(now * 0.005 + la), 0, 7); g.stroke(); }
+    // Lav Dünyası magma parıltısı
+    if (cag.lav) {
+      for (let i = 0; i < 7; i++) {
+        const [vx, vy, vz] = P(-35 + i * 14, -120 + i * 42, cx, cy, R);
+        if (vz <= 0.1) continue;
+        const p = 0.65 + 0.35 * Math.sin(now * 0.004 + i * 1.9);
+        const vg = g.createRadialGradient(vx, vy, 1, vx, vy, 18 * p);
+        vg.addColorStop(0, 'rgba(255,210,80,0.85)');
+        vg.addColorStop(0.5, 'rgba(255,95,20,0.45)');
+        vg.addColorStop(1, 'rgba(255,60,10,0)');
+        g.fillStyle = vg;
+        g.beginPath(); g.arc(vx, vy, 18 * p, 0, 7); g.fill();
       }
     }
 
-    // ☄️ 66 Milyon Yıl Önce Chicxulub Asteroit Çarpması
+    // 3B küresel gölgeleme ve ışık parlaklığı
+    const sh = g.createRadialGradient(cx - R * 0.34, cy - R * 0.34, R * 0.12, cx, cy, R);
+    sh.addColorStop(0, 'rgba(255,255,255,0.14)');
+    sh.addColorStop(0.55, 'rgba(0,0,0,0)');
+    sh.addColorStop(1, 'rgba(0,0,0,0.48)');
+    g.fillStyle = sh;
+    g.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+    // 66 My Asteroit Çarpma Efekti
     if (cag.asteroit) {
-      const [ax, ay, az] = pj(cag.asteroit[0], cag.asteroit[1], cx, cy, r);
+      const [ax, ay, az] = P(cag.asteroit[0], cag.asteroit[1], cx, cy, R);
       if (az > 0.05) {
-        const pulse = 0.5 + 0.5 * Math.sin(now * 0.006);
-        g.strokeStyle = `rgba(255,95,40,${0.55 + pulse * 0.4})`; g.lineWidth = 2.2;
-        g.beginPath(); g.arc(ax, ay, 10 + pulse * 8, 0, 7); g.stroke();
-        g.fillStyle = '#ff6b2b'; g.beginPath(); g.arc(ax, ay, 5, 0, 7); g.fill();
-        g.font = '700 10.5px system-ui'; g.fillStyle = '#ffd666'; g.textAlign = 'center';
-        g.fillText('☄️ Chicxulub (66 My)', ax, ay - 15);
-      }
-      if (astAnim >= 0) {
-        if (astAnim < 0.55) {
-          const t = astAnim / 0.55;
-          const sx = cx + r * 1.15, sy = cy - r * 1.05;
-          const px = sx + (ax - sx) * t, py = sy + (ay - sy) * t;
-          const tr = g.createLinearGradient(sx, sy, px, py);
-          tr.addColorStop(0, 'rgba(255,120,20,0)'); tr.addColorStop(1, '#fff3b0');
-          g.strokeStyle = tr; g.lineWidth = 5; g.beginPath(); g.moveTo(sx, sy); g.lineTo(px, py); g.stroke();
-          g.fillStyle = '#fff'; g.beginPath(); g.arc(px, py, 6.5, 0, 7); g.fill();
-        } else {
-          const t = (astAnim - 0.55) / 1.25;
-          const rad = t * r * 1.6;
-          g.fillStyle = `rgba(255,140,30,${Math.max(0, 0.55 * (1 - t))})`;
-          g.beginPath(); g.arc(ax, ay, rad, 0, 7); g.fill();
-          g.strokeStyle = `rgba(255,230,140,${Math.max(0, 0.9 * (1 - t))})`; g.lineWidth = 3;
-          g.beginPath(); g.arc(ax, ay, rad * 0.85, 0, 7); g.stroke();
+        const pulse = (now * 0.002) % 1;
+        g.strokeStyle = `rgba(255,140,40,${0.9 - pulse * 0.8})`;
+        g.lineWidth = 2.6;
+        g.beginPath(); g.arc(ax, ay, 8 + pulse * 30, 0, 7); g.stroke();
+        g.fillStyle = '#ff6b2b';
+        g.beginPath(); g.arc(ax, ay, 5.5, 0, 7); g.fill();
+        if (astAnim >= 0) {
+          const p = Math.min(1, astAnim / 1.1);
+          if (p < 1) {
+            const sx = ax + (1 - p) * R * 1.05, sy = ay - (1 - p) * R * 0.85;
+            const gr = g.createLinearGradient(sx, sy, sx + 48, sy - 38);
+            gr.addColorStop(0, '#fff7c2'); gr.addColorStop(0.45, '#ff7722'); gr.addColorStop(1, 'rgba(255,60,10,0)');
+            g.strokeStyle = gr; g.lineWidth = 6.5; g.lineCap = 'round';
+            g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + 48, sy - 38); g.stroke();
+            g.fillStyle = '#fff'; g.beginPath(); g.arc(sx, sy, 5.5, 0, 7); g.fill();
+          } else {
+            const ep = (astAnim - 1.1) / 3.4;
+            const rg = g.createRadialGradient(ax, ay, 2, ax, ay, R * (0.25 + ep * 1.2));
+            rg.addColorStop(0, `rgba(255,245,180,${Math.max(0, 1 - ep * 1.4)})`);
+            rg.addColorStop(0.35, `rgba(255,95,20,${Math.max(0, 0.85 - ep)})`);
+            rg.addColorStop(1, 'rgba(40,18,12,0)');
+            g.fillStyle = rg;
+            g.beginPath(); g.arc(ax, ay, R * (0.25 + ep * 1.2), 0, 7); g.fill();
+          }
         }
       }
     }
 
-    // Küre gölge derinliği
-    const shd = g.createRadialGradient(cx - r * 0.4, cy - r * 0.4, r * 0.15, cx, cy, r * 1.03);
-    shd.addColorStop(0, 'rgba(255,255,240,0.12)');
-    shd.addColorStop(0.7, 'rgba(0,0,0,0)');
-    shd.addColorStop(1, 'rgba(0,0,16,0.55)');
-    g.fillStyle = shd; g.fillRect(cx - r, cy - r, r * 2, r * 2);
-
-    // Dönemin canlı & fosil rozetleri
+    // Dönemin canlıları ve gerçek fosil kazı alanları pinleri
     hits = [];
-    const liste = DZ.canlilar.filter(c => c.cag === cag.id);
-    for (const c of liste) {
-      const [x, y, z] = pj(c.ll[0], c.ll[1], cx, cy, r);
-      if (z <= 0.12) continue;
-      const hov = hover === c || secili === c;
-      const s0 = hov ? 14 : 11.5;
-      g.fillStyle = hov ? '#ffd666' : 'rgba(26,18,12,0.9)';
-      g.strokeStyle = hov ? '#fff' : '#ffd666'; g.lineWidth = hov ? 2.4 : 1.6;
-      g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
-      g.font = `${hov ? 15 : 13}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText(c.ik, x, y + 1);
-      g.textBaseline = 'alphabetic';
-      g.font = '700 10.5px system-ui'; g.fillStyle = '#fff5d6';
-      g.fillText(c.ad.split(' (')[0], x, y + s0 + 11);
-      hits.push({ c, x, y, r: s0 + 4 });
+    const kazilar = (DZ.kazilar || []).filter(k => k.cag === cag.id);
+    for (const k of kazilar) {
+      const [kx, ky, kz] = P(k.ll[0], k.ll[1], cx, cy, R);
+      if (kz <= 0.08) continue;
+      const on = (seciliKazi && seciliKazi.id === k.id) || (hover && hover.tip === 'kazi' && hover.o.id === k.id);
+      const r0 = on ? 14.5 : 11.5;
+      // Elmas/kare kazı rozeti (altın-kehribar)
+      g.save();
+      g.translate(kx, ky);
+      g.fillStyle = on ? '#b45309' : 'rgba(146,64,14,0.92)';
+      g.strokeStyle = on ? '#fff7c2' : '#fde68a';
+      g.lineWidth = on ? 2.4 : 1.7;
+      g.beginPath();
+      g.roundRect(-r0, -r0, r0 * 2, r0 * 2, 6);
+      g.fill(); g.stroke();
+      g.font = `${on ? 15 : 12.5}px system-ui`;
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText('⛏️', 0, 0.5);
+      g.restore();
+      hits.push({ tip: 'kazi', o: k, x: kx, y: ky, r: r0 + 5 });
     }
+
+    const canlilar = DZ.canlilar.filter(c => c.cag === cag.id);
+    for (const c of canlilar) {
+      const [x0, y0, z] = P(c.ll[0], c.ll[1], cx, cy, R);
+      if (z <= 0.08) continue;
+      // Aynı koordinatta kazı pini varsa hafif kaydır ki ikisi de tıklanabilsin
+      const cakisti = kazilar.some(k => Math.abs(k.ll[0] - c.ll[0]) < 1.2 && Math.abs(k.ll[1] - c.ll[1]) < 1.2);
+      const x = cakisti ? x0 + 18 : x0, y = cakisti ? y0 - 12 : y0;
+      const on = (secili && secili.id === c.id) || (hover && hover.tip === 'canli' && hover.o.id === c.id);
+      const r0 = on ? 15 : 12;
+      g.fillStyle = on ? '#d97706' : 'rgba(14,24,42,0.88)';
+      g.strokeStyle = on ? '#fff7dc' : '#fbbf24';
+      g.lineWidth = on ? 2.5 : 1.6;
+      g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+      g.font = `${on ? 16 : 13.5}px system-ui`;
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(c.ik, x, y + 0.5);
+      hits.push({ tip: 'canli', o: c, x, y, r: r0 + 5 });
+    }
+
     g.restore();
 
-    // Üst bilgi rozeti
-    g.font = '700 12px system-ui'; g.fillStyle = 'rgba(255,232,165,0.85)'; g.textAlign = 'left';
-    g.fillText(`${cag.ik} ${cag.ad} · ${cag.zaman}`, 12, 22);
-    g.font = '500 11px system-ui'; g.fillStyle = 'rgba(210,220,235,0.65)';
-    g.fillText('Küreyi sürükleyerek döndür · simgelere tıkla', 12, H - 12);
+    // Hover etiketi
+    if (hover) {
+      const lbl = hover.tip === 'kazi' ? `⛏️ ${hover.o.ad} (${hover.o.ulke})` : `${hover.o.ik} ${hover.o.ad} · ${hover.o.boy}`;
+      g.font = '700 12px system-ui';
+      const tw = g.measureText(lbl).width + 18;
+      const tx = Math.max(8, Math.min(W - tw - 8, hover.x - tw / 2));
+      const ty = Math.max(8, hover.y - 34);
+      g.fillStyle = 'rgba(15,23,42,0.94)';
+      g.strokeStyle = hover.tip === 'kazi' ? '#fde68a' : '#fbbf24';
+      g.lineWidth = 1.2;
+      g.beginPath(); g.roundRect(tx, ty, tw, 24, 8); g.fill(); g.stroke();
+      g.fillStyle = '#fff7dc'; g.textAlign = 'left'; g.textBaseline = 'middle';
+      g.fillText(lbl, tx + 9, ty + 12.5);
+    }
+
+    // Küre çerçevesi ve dönem damgası
+    g.strokeStyle = 'rgba(255,255,255,0.2)'; g.lineWidth = 1.2;
+    g.beginPath(); g.arc(cx, cy, R, 0, 7); g.stroke();
+
+    g.fillStyle = 'rgba(255,255,255,0.84)';
+    g.font = '600 11.5px system-ui'; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+    g.fillText('🌍 Küreyi sürükleyip döndür · 🦕 canlıya veya ⛏️ fosil kazı alanına tıkla', cx, H - 10);
 
     raf = requestAnimationFrame(draw);
   }
@@ -200,6 +410,7 @@
     const DZ = window.DERIN_ZAMAN;
     const cag = DZ.caglar[cagIdx];
     const canlilar = DZ.canlilar.filter(c => c.cag === cag.id);
+    const kazilar = (DZ.kazilar || []).filter(k => k.cag === cag.id);
     box.querySelectorAll('[data-dz-cag]').forEach((b, i) => b.classList.toggle('on', i === cagIdx));
     const p = box.querySelector('#dz-panel');
     p.innerHTML = `
@@ -216,23 +427,26 @@
       <div class="dz-olay"><b>⚡ Dönemin Büyük Olayı</b><p>${esc(cag.olay)}</p>
         ${cag.asteroit ? `<button type="button" class="phbtn icbtn" data-dz-ast="1" style="margin-top:6px">☄️ 66 My Asteroit Çarpmasını İzle!</button>` : ''}
       </div>
+      ${kazilar.length ? `<h4>⛏️ Gerçek Fosil Kazı Alanları (Hangi Kemik Nereden Çıktı?)</h4>
+        <div class="dz-canlilar">${kazilar.map(k => `<button type="button" class="dz-ckart${seciliKazi && seciliKazi.id === k.id ? ' on' : ''}" data-dz-kazi="${esc(k.id)}"><span>⛏️</span><div><b>${esc(k.ad)}</b><small>${esc(k.ulke)} · ${esc(k.kemikler.split(',')[0])}</small></div></button>`).join('')}</div>` : ''}
       ${canlilar.length ? `<h4>🦕 Dönemin Canlıları ve Fosilleri</h4>
         <div class="dz-canlilar">${canlilar.map(c => `<button type="button" class="dz-ckart${secili && secili.id === c.id ? ' on' : ''}" data-dz-canli="${esc(c.id)}"><span>${c.ik}</span><div><b>${esc(c.ad)}</b><small>${esc(c.boy)}</small></div></button>`).join('')}</div>` : '<p class="dz-not">Bu çağda Dünya\'da henüz çok hücreli canlı yoktu — gezegen soğuyup ilk okyanusları hazırlıyordu.</p>'}
     `;
   }
 
   function canliAc(c) {
-    secili = c;
+    secili = c; seciliKazi = null;
     rotLo = c.ll[1]; rotLa = Math.max(-45, Math.min(45, c.ll[0]));
     renderPanel();
     if (!window.ZY || !window.ZY.showModal) return;
+    const cag = (window.DERIN_ZAMAN.caglar.find(x => x.id === c.cag) || {});
     const html = `<div class="kapak" data-kapak="${esc(c.w)}"></div>
-      <span class="pill">${c.ik} Derin Zaman · ${esc((window.DERIN_ZAMAN.caglar.find(x => x.id === c.cag) || {}).zaman || '')}</span>
+      <span class="pill">${c.ik} Derin Zaman · ${esc(cag.zaman || '')}</span>
       <div class="did"><b>🤯 En Şaşırtıcı Bilgi</b><p>${esc(c.sasirtici)}</p></div>
       <table class="itbl">
         <tr><th>📏 Boyut / Ağırlık</th><td>${esc(c.boy)}</td></tr>
         <tr><th>🍽️ Beslenme</th><td>${esc(c.beslenme)}</td></tr>
-        <tr><th>🦴 Fosil Buluntu Yeri</th><td>${esc(c.fosil)}</td></tr>
+        <tr><th>🦴 Kemik / Fosil Buluntu Yeri</th><td>${esc(c.fosil)}</td></tr>
         <tr><th>⚡ Süper Güç</th><td>${esc(c.superguc)}</td></tr>
       </table>
       <h4>🦖 ${esc(c.ad)} Olarak Bir Gün (Yaşa)</h4>
@@ -249,8 +463,37 @@
     });
   }
 
+  function kaziAc(k) {
+    seciliKazi = k; secili = null;
+    rotLo = k.ll[1]; rotLa = Math.max(-45, Math.min(45, k.ll[0]));
+    renderPanel();
+    if (!window.ZY || !window.ZY.showModal) return;
+    const cag = (window.DERIN_ZAMAN.caglar.find(x => x.id === k.cag) || {});
+    const html = `<div class="kapak" data-kapak="${esc(k.w)}"></div>
+      <span class="pill">⛏️ Paleontolojik Kazı Alanı · ${esc(cag.zaman || '')}</span>
+      <table class="itbl">
+        <tr><th>📍 Konum</th><td>${esc(k.ulke)}</td></tr>
+        <tr><th>📅 İlk Keşif</th><td>${esc(k.yil)}</td></tr>
+        <tr><th>🪨 Jeolojik Katman</th><td>${esc(k.katman)}</td></tr>
+        <tr><th>🦴 Çıkarılan Kemikler & Fosiller</th><td><b>${esc(k.kemikler)}</b></td></tr>
+      </table>
+      <h4>🔎 Kazının Hikâyesi</h4>
+      <p>${esc(k.hikaye)}</p>
+      <div class="did"><b>💡 Biliyor muydun?</b><p>${esc(k.ilginc)}</p></div>
+      <div class="gos">
+        <button class="phbtn icbtn" data-dz-fosil="${k.ll[0]}|${k.ll[1]}|${esc('⛏️ ' + k.ad)}">🌍 Kazı Alanını Modern Dünya Küresinde Gör</button>
+      </div>`;
+    window.ZY.showModal({
+      ikon: '⛏️', title: k.ad, sub: `${k.ulke} · ${k.yil}`,
+      tabs: [
+        { ad: '⛏️ Kazı & Buluntular', html, onShow: b => { const kp = b.querySelector('.kapak'); if (kp && window.ZY.kapakYukle) window.ZY.kapakYukle(kp); } },
+        ...(k.w && window.ZY.photoTab ? [window.ZY.photoTab(k.w, 8, false)] : [])
+      ]
+    });
+  }
+
   function cagSec(i) {
-    cagIdx = i; secili = null; astAnim = -1;
+    cagIdx = i; secili = null; seciliKazi = null; astAnim = -1;
     const cag = window.DERIN_ZAMAN.caglar[cagIdx];
     if (cag.asteroit) { rotLo = -82; rotLa = 20; }
     else if (cag.id === 'pangea') { rotLo = 15; rotLa = 8; }
@@ -269,7 +512,7 @@
     box.innerHTML = `
       <div class="dz-kutu">
         <header class="dz-ust">
-          <div><h2>🦖 Derin Zaman: 4,5 Milyar Yıl &amp; Pangea</h2><small>Kıtaların ayrılışını, dinozorları, Megalodon\'u ve 66 My asteroit çarpmasını keşfet</small></div>
+          <div><h2>🦖 Derin Zaman: 4,5 Milyar Yıl, Pangea &amp; Fosil Kazıları</h2><small>Gerçek paleocoğrafya kıtaları, dönem hayvanları ve dünyadaki fosil kazı alanları</small></div>
           <div class="dz-ust-sag">
             <button type="button" id="dz-oyna" class="dz-btn">▶ Çağları Oynat</button>
             <button type="button" id="dz-kapat" class="dz-x" title="Kapat">✕</button>
@@ -292,6 +535,7 @@
       if (ev.target === box) { kapat(); return; }
       const cb = ev.target.closest('[data-dz-cag]'); if (cb) { oynuyor = false; box.querySelector('#dz-oyna').textContent = '▶ Çağları Oynat'; cagSec(+cb.dataset.dzCag); return; }
       const ck = ev.target.closest('[data-dz-canli]'); if (ck) { const c = DZ.canlilar.find(x => x.id === ck.dataset.dzCanli); if (c) canliAc(c); return; }
+      const kz = ev.target.closest('[data-dz-kazi]'); if (kz) { const k = (DZ.kazilar || []).find(x => x.id === kz.dataset.dzKazi); if (k) kaziAc(k); return; }
       if (ev.target.closest('[data-dz-ast]')) { rotLo = -86; rotLa = 21; astAnim = 0; return; }
     });
     box.querySelector('#dz-oyna').addEventListener('click', e => {
@@ -310,7 +554,7 @@
         rotLa = Math.max(-70, Math.min(70, rotLa + dy * 0.4));
         drag.x = x; drag.y = y;
       } else {
-        hover = (hits.find(h => Math.hypot(h.x - x, h.y - y) <= h.r) || {}).c || null;
+        hover = hits.find(h => Math.hypot(h.x - x, h.y - y) <= h.r) || null;
         cv.style.cursor = hover ? 'pointer' : 'grab';
       }
     });
@@ -318,7 +562,7 @@
       if (drag && !drag.moved) {
         const [x, y] = cvPos(ev);
         const h = hits.find(o => Math.hypot(o.x - x, o.y - y) <= o.r);
-        if (h) canliAc(h.c);
+        if (h) { if (h.tip === 'kazi') kaziAc(h.o); else canliAc(h.o); }
       }
       drag = null;
     });

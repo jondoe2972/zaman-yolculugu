@@ -1,9 +1,11 @@
-// 🎧 Zaman Yolculuğu Ses & Doğa Ambiyansı Motoru (100% Web Audio API — sıfır harici ses dosyası, tam kalıcı ayarlar)
-// Ayrı ayrı kontrol: Ana Sessiz, Ana Ses Seviyesi, Rahatlatıcı Arka Plan Müziği, Okyanus/Nehir Doğa Sesleri, Hayvan Sesleri Eklentisi.
+// 🎧 Zaman Yolculuğu Gerçek Ses & Ambiyans Motoru
+// Gerçek doğa kayıtları (okyanus dalgaları, nehir akışı, volkan, rüzgâr, kılıç, maden kazısı),
+// 5 seçilebilir arka plan müziği (Tarih/Doğa otomatik geçişli) ve 26+ GERÇEK hayvan sesi kaydı.
+// Gerçek kaydı olmayan hayvanlarda sahte sentetik ses çalmaz — sessiz geçer.
 'use strict';
 (() => {
   const KEY = 'zy-ses-ayar';
-  const DEF = { sessiz: false, vol: 0.45, muzik: true, doga: true, hayvan: true };
+  const DEF = { sessiz: false, vol: 0.45, muzik: true, parca: 'oto', doga: true, hayvan: true };
   let cfg = { ...DEF };
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -11,344 +13,282 @@
   } catch (e) {}
   const kaydet = () => { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) {} };
 
-  let ctx = null, master = null, muzikGain = null, sfxGain = null;
-  let noiseBuf = null, muzikTimer = null, muzikCalisiyor = false;
-  let aktifDoga = null; // son okyanus/nehir sesi (üst üste binmesin)
+  const GA = 'https://actions.google.com/sounds/v1/';
+  const WC = 'https://upload.wikimedia.org/wikipedia/commons/';
 
-  function ac() {
-    if (ctx) {
-      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-      return ctx;
-    }
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return null;
-    ctx = new AC();
-    master = ctx.createGain();
-    muzikGain = ctx.createGain();
-    sfxGain = ctx.createGain();
-    muzikGain.connect(master);
-    sfxGain.connect(master);
-    master.connect(ctx.destination);
-    sesGuncelle();
-    // 3 saniyelik yumuşak pembe/kahverengi gürültü tamponu (okyanus & nehir için)
-    const len = ctx.sampleRate * 3;
-    noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
-    const data = noiseBuf.getChannelData(0);
-    let last = 0;
-    for (let i = 0; i < len; i++) {
-      const w = Math.random() * 2 - 1;
-      last = (last + 0.04 * w) / 1.04;
-      data[i] = last * 3.2;
-    }
-    return ctx;
+  // ---------- 🎵 5 Seçilebilir Arka Plan Müziği / Ambiyansı ----------
+  const MUZIKLER = [
+    { id: 'tarih', ad: '🏛️ Tarihî Lavta (Rönesans)', url: WC + '7/7f/Ludwig_Senfl_--_Ach_Elslein.opus', baz: 0.36 },
+    { id: 'doga', ad: '🌿 Bahar Ormanı & Kuşlar (Doğa)', url: GA + 'ambiences/spring_day_forest.ogg', baz: 0.34 },
+    { id: 'okyanus', ad: '🌊 Sakin Okyanus Dalgaları', url: GA + 'water/waves_crashing_on_rock_beach.ogg', baz: 0.28 },
+    { id: 'orman', ad: '🌴 Tropik Yağmur Ormanı', url: GA + 'ambiences/jungle_atmosphere_afternoon.ogg', baz: 0.32 },
+    { id: 'kozmik', ad: '🌌 Kozmik Zaman Yolculuğu', url: GA + 'science_fiction/outer_space.ogg', baz: 0.30 }
+  ];
+
+  // ---------- 🌊🏞️⚔️⛏️🌋💨 Gerçek Doğa & Olay Ses Efektleri ----------
+  const SFX = {
+    okyanus: { url: GA + 'water/waves_crashing_on_rock_beach.ogg', sure: 6500, baz: 0.62 },
+    nehir:   { url: GA + 'water/small_stream_flowing.ogg', sure: 5800, baz: 0.65 },
+    savas:   { url: GA + 'impacts/crash_metal_sweetener_distant.ogg', sure: 2600, baz: 0.72 },
+    savas2:  { url: GA + 'impacts/metal_crash.ogg', sure: 2400, baz: 0.68 },
+    maden:   { url: GA + 'tools/digging_with_trowel.ogg', sure: 3800, baz: 0.70 },
+    volkan:  { url: WC + '2/2b/385098_morganpurkis_volcano.ogg', sure: 5200, baz: 0.75 },
+    ruzgar:  { url: GA + 'weather/wind.ogg', sure: 4800, baz: 0.55 }
+  };
+
+  // ---------- 🐾 Gerçek Hayvan Sesi Kayıtları (yalnızca gerçek kayıt bulunan türler!) ----------
+  // Eşleşmeyen hayvanlar sessiz geçer — yapay/benzer bip sesi asla çalınmaz.
+  const HAYVAN_SES = [
+    // Büyük kediler
+    [/aslan|lion/i, WC + 'd/d3/Lionroar.wav', 4800, 0.78],
+    [/kaplan|tiger|smilodon|kılıç diş|kilic dis/i, WC + '2/29/439280_schots_angry-tiger.wav', 4500, 0.72],
+    [/çita|cita|cheetah/i, WC + 'c/ca/Acoustic-Structure-and-Contextual-Use-of-Calls-by-Captive-Male-and-Female-Cheetahs-%28Acinonyx-pone.0158546.s001.oga', 4500, 0.72],
+    [/puma|cougar|jaguar|pars|leopar|kar leoparı|kar leopari/i, WC + '2/2a/Cougar1.ogg', 4200, 0.72],
+    [/van kedisi|kedi|vaşak|vasak|karakulak/i, GA + 'animals/cat_purr.ogg', 4200, 0.75],
+    // Balinalar & Yunuslar
+    [/orka|katil balina|orca/i, WC + '7/79/Killer_whale.ogg', 5500, 0.72],
+    [/mavi balina|blue whale/i, WC + '3/3b/Blue_Whale_NE_Pacific.ogg', 5200, 0.78],
+    [/ispermeçet|ispermecet|kaşalot|kasalot/i, WC + '3/3c/Sperm_Whale_Creak_2.ogg', 4800, 0.72],
+    [/balina|whale/i, WC + '1/13/Humpbackwhale2.ogg', 5800, 0.75],
+    [/yunus|dolphin|narval|beluga|beyaz balina/i, WC + '9/9f/Beluga_vocalizations.ogg', 5200, 0.75],
+    // Filler & Mamutlar
+    [/\bfil\b|afrika fili|asya fili|mamut|mastodon|elephant/i, WC + '4/40/Elephant_voice_-_trumpeting.ogg', 4200, 0.75],
+    // Kurtlar, Tilkiler, Köpekler
+    [/kurt|wolf|dire wolf|korkunç kurt|korkunc kurt/i, WC + '8/87/Wolf_howls.ogg', 5500, 0.75],
+    [/tilki|çakal|cakal|coyote|çöl tilkisi|col tilkisi|kutup tilkisi|sırtlan|sirtlan/i, WC + '6/67/Pack_of_coyotes_howling.ogg', 4800, 0.70],
+    [/köpek|kopek|dingo|kangal|akbaş|akbas/i, GA + 'animals/dog_barking.ogg', 3800, 0.68],
+    // Primatlar
+    [/şempanze|sempanze|goril|orangutan|bonobo|gigantopithecus/i, WC + '5/56/Pant-hoot_call_made_by_a_male_chimpanzee.ogg', 4800, 0.72],
+    [/maymun|gibon|lemur|makak|babun|marmoset/i, WC + 'b/b8/Howler_monkey.ogg', 4800, 0.72],
+    // Kuşlar
+    [/kartal|şahin|sahin|doğan|dogan|atmaca|akbaba|kondor/i, WC + '5/59/Bald_Eagle_Yellowstone_National_Park.ogg', 4600, 0.72],
+    [/baykuş|baykus|puhu|owl/i, WC + 'a/a7/BuboBuboMariankaSlovakia2012.ogg', 4800, 0.75],
+    [/kuzgun|karga|raven|crow/i, GA + 'animals/crow_call.ogg', 3800, 0.70],
+    [/martı|marti|albatros|sumru|pelikan|fırkateyn/i, WC + '4/4b/Yellow-legged_Gull_-_Larus_michahellis_michahellis.ogg', 4500, 0.68],
+    [/bülbül|bulbul|kızılgerdan|kizilgerdan|saka|serçe|serce|kırlangıç|kirlangic|sinekkusu|sinek kuşu|cennet kuşu|cennet kusu|tukan|papağan|papagan|kakapo/i, WC + '7/7c/Turdus_merula_2.ogg', 5000, 0.70],
+    // Sürüngenler & Amfibiler
+    [/timsah|aligatör|aligator|kayman|gaviyal|spinosaurus/i, WC + 'b/bf/27alligator2bellow.ogg', 4800, 0.75],
+    [/kurbağa|kurbaga|semender|aksolotl|frog/i, WC + '5/51/Frogs_croak_calling_chorus_at_night.ogg', 5000, 0.70],
+    // Çiftlik / Bozkır Memelileri
+    [/\bat\b|yılkı|yilki|przewalski|zebra|eşek|esek|mustang/i, WC + 'd/db/Wiehern.ogg', 3800, 0.72],
+    [/geyik|ren geyiği|ren geyigi|karibu|sığın|sigin|irlanda geyiği|irlanda geyigi|elk/i, WC + '3/30/DM550106_CervusElaphus_Slovakia_hill_Volovec.ogg', 5000, 0.72],
+    [/bizon|manda|inek|öküz|okuz|yaban sığırı|yaban sigiri|yak\b|gnu|bufalo/i, WC + '4/48/Mudchute_cow_1.ogg', 3800, 0.72],
+    [/yarasa|bat\b|vampir yarasa/i, WC + '9/94/Pipistrellus.ogg', 4200, 0.70],
+    // Böcekler
+    [/arı\b|ari\b|bal arısı|bal arisi|yaban arısı|yaban arisi/i, WC + '6/62/Bee_Buzzing_Sound_-_Animal_Sounds.opus', 4500, 0.68],
+    [/cırcır|circir|çekirge|cekirge|ağustos böceği|agustos bocegi|peygamber devesi/i, WC + '8/80/Field_cricket_Gryllus_pennsylvanicus.ogg', 4500, 0.68]
+  ];
+
+  let atlasMod = 'tarih';
+  let muzikEl = null, muzikParcaId = null;
+  let aktifSfx = null, sfxTimer = null, fadeRaf = null;
+  let kilicSira = 0;
+
+  const etkinVol = (baz = 1) => cfg.sessiz ? 0 : Math.max(0, Math.min(1, (+cfg.vol || 0) * baz));
+
+  function aktifParcaBul() {
+    const hedefId = cfg.parca === 'oto' ? (atlasMod === 'doga' ? 'doga' : 'tarih') : cfg.parca;
+    return MUZIKLER.find(m => m.id === hedefId) || MUZIKLER[0];
   }
 
   function sesGuncelle() {
-    if (!ctx || !master) return;
-    const t = ctx.currentTime;
-    const v = cfg.sessiz ? 0 : Math.max(0, Math.min(1, +cfg.vol || 0));
-    master.gain.setTargetAtTime(v, t, 0.08);
-    muzikGain.gain.setTargetAtTime(cfg.muzik ? 0.28 : 0, t, 0.18);
-    sfxGain.gain.setTargetAtTime(0.75, t, 0.06);
-  }
-
-  // ---------- 🎵 Rahatlatıcı Arka Plan Müziği (sıcak pentatonik ambient pad + nazik arp notaları) ----------
-  // Do majör / La minör pentatonik (C3..E5) — sakin, meditatif, huzurlu
-  const AKORLAR = [
-    [130.81, 196.00, 246.94, 293.66], // Cmaj9
-    [110.00, 164.81, 220.00, 261.63], // Am7
-    [174.61, 220.00, 261.63, 329.63], // Fmaj7
-    [146.83, 220.00, 261.63, 329.63]  // Dm9
-  ];
-  const NOTALAR = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
-  let akorIdx = 0;
-
-  function padCal(frekler, sure) {
-    if (!ctx || cfg.sessiz || !cfg.muzik) return;
-    const t = ctx.currentTime;
-    const flt = ctx.createBiquadFilter();
-    flt.type = 'lowpass'; flt.frequency.value = 620;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(0.11, t + 2.2);
-    g.gain.linearRampToValueAtTime(0.08, t + sure - 2.0);
-    g.gain.linearRampToValueAtTime(0.0001, t + sure);
-    flt.connect(g); g.connect(muzikGain);
-    for (const f of frekler) {
-      const o = ctx.createOscillator();
-      o.type = 'sine';
-      o.frequency.value = f;
-      o.connect(flt);
-      o.start(t); o.stop(t + sure + 0.1);
+    if (muzikEl) {
+      const p = MUZIKLER.find(m => m.id === muzikParcaId) || MUZIKLER[0];
+      const v = cfg.muzik ? etkinVol(p.baz) : 0;
+      muzikEl.volume = v;
+      if (v <= 0 && !muzikEl.paused) muzikEl.pause();
+    }
+    if (aktifSfx && cfg.sessiz) {
+      sfxDurdur();
     }
   }
 
-  function arpNota(gecikme) {
-    if (!ctx || cfg.sessiz || !cfg.muzik) return;
-    const t = ctx.currentTime + gecikme;
-    const f = NOTALAR[Math.floor(Math.random() * NOTALAR.length)];
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'triangle'; o.frequency.value = f;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(0.08, t + 0.04);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
-    o.connect(g); g.connect(muzikGain);
-    o.start(t); o.stop(t + 2.8);
-  }
-
-  function muzikBaslat() {
-    if (muzikCalisiyor || cfg.sessiz || !cfg.muzik) return;
-    if (!ac()) return;
-    muzikCalisiyor = true;
-    const adim = () => {
-      if (!muzikCalisiyor || cfg.sessiz || !cfg.muzik) { muzikDurdur(); return; }
-      padCal(AKORLAR[akorIdx % AKORLAR.length], 7.4);
-      akorIdx++;
-      arpNota(0.8);
-      if (Math.random() < 0.75) arpNota(2.8 + Math.random() * 0.8);
-      if (Math.random() < 0.55) arpNota(4.8 + Math.random() * 0.9);
-      muzikTimer = setTimeout(adim, 6400);
-    };
-    adim();
+  function muzikBaslat(zorlaYenile) {
+    if (cfg.sessiz || !cfg.muzik) { muzikDurdur(); return; }
+    const p = aktifParcaBul();
+    if (muzikEl && muzikParcaId === p.id && !zorlaYenile) {
+      muzikEl.volume = etkinVol(p.baz);
+      if (muzikEl.paused) muzikEl.play().catch(() => {});
+      return;
+    }
+    if (muzikEl) {
+      try { muzikEl.pause(); muzikEl.src = ''; } catch (e) {}
+    }
+    muzikParcaId = p.id;
+    muzikEl = new Audio(p.url);
+    muzikEl.loop = true;
+    muzikEl.preload = 'auto';
+    muzikEl.volume = etkinVol(p.baz);
+    muzikEl.play().catch(() => {});
   }
 
   function muzikDurdur() {
-    muzikCalisiyor = false;
-    if (muzikTimer) { clearTimeout(muzikTimer); muzikTimer = null; }
-  }
-
-  function dogaDurdur() {
-    if (aktifDoga) {
-      try { aktifDoga.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.12); } catch (e) {}
-      aktifDoga = null;
+    if (muzikEl) {
+      try { muzikEl.pause(); } catch (e) {}
     }
   }
 
-  // ---------- 🌊 Okyanus / Deniz Dalga Sesi (yumuşak, rahatsız etmeyen 2 dalga yükselişi) ----------
-  function playOkyanus() {
-    if (cfg.sessiz || !cfg.doga) return;
-    if (!ac() || !noiseBuf) return;
-    dogaDurdur();
-    const t = ctx.currentTime;
-    const src = ctx.createBufferSource();
-    src.buffer = noiseBuf; src.loop = true;
-    const flt = ctx.createBiquadFilter();
-    flt.type = 'lowpass';
-    flt.frequency.setValueAtTime(220, t);
-    flt.frequency.linearRampToValueAtTime(580, t + 1.4);
-    flt.frequency.linearRampToValueAtTime(200, t + 3.0);
-    flt.frequency.linearRampToValueAtTime(520, t + 4.3);
-    flt.frequency.linearRampToValueAtTime(160, t + 5.8);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(0.32, t + 1.3);
-    g.gain.linearRampToValueAtTime(0.11, t + 2.9);
-    g.gain.linearRampToValueAtTime(0.26, t + 4.2);
-    g.gain.linearRampToValueAtTime(0.0001, t + 5.9);
-    src.connect(flt); flt.connect(g); g.connect(sfxGain);
-    src.start(t); src.stop(t + 6.0);
-    aktifDoga = g;
+  function sfxDurdur() {
+    if (sfxTimer) { clearTimeout(sfxTimer); sfxTimer = null; }
+    if (fadeRaf) { cancelAnimationFrame(fadeRaf); fadeRaf = null; }
+    if (aktifSfx) {
+      try { aktifSfx.pause(); aktifSfx.src = ''; } catch (e) {}
+      aktifSfx = null;
+    }
   }
 
-  // ---------- 🏞️ Nehir Akışı / Dere Şırıltısı Sesi (hafif ve huzurlu) ----------
-  function playNehir() {
-    if (cfg.sessiz || !cfg.doga) return;
-    if (!ac() || !noiseBuf) return;
-    dogaDurdur();
-    const t = ctx.currentTime;
-    const src = ctx.createBufferSource();
-    src.buffer = noiseBuf; src.loop = true;
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass'; bp.frequency.value = 950; bp.Q.value = 1.4;
-    const lfo = ctx.createOscillator(), lfoG = ctx.createGain();
-    lfo.frequency.value = 2.6; lfoG.gain.value = 280;
-    lfo.connect(lfoG); lfoG.connect(bp.frequency);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(0.24, t + 0.6);
-    g.gain.linearRampToValueAtTime(0.20, t + 3.4);
-    g.gain.linearRampToValueAtTime(0.0001, t + 4.8);
-    src.connect(bp); bp.connect(g); g.connect(sfxGain);
-    lfo.start(t); src.start(t); lfo.stop(t + 4.9); src.stop(t + 4.9);
-    aktifDoga = g;
+  function playUrl(url, sure = 4800, baz = 0.72) {
+    if (cfg.sessiz || !url) return false;
+    sfxDurdur();
+    const el = new Audio(url);
+    el.preload = 'auto';
+    const hedefVol = etkinVol(baz);
+    el.volume = hedefVol;
+    aktifSfx = el;
+    el.play().catch(() => {});
+    // Belirli süre sonunda yumuşakça kısılıp dursun (rahatsız etmesin)
+    const fadeBas = Math.max(900, sure - 900);
+    sfxTimer = setTimeout(() => {
+      if (aktifSfx !== el) return;
+      const t0 = performance.now(), v0 = el.volume;
+      const step = now => {
+        if (aktifSfx !== el) return;
+        const p = Math.min(1, (now - t0) / 850);
+        el.volume = Math.max(0, v0 * (1 - p));
+        if (p < 1 && !el.paused) fadeRaf = requestAnimationFrame(step);
+        else { try { el.pause(); } catch (e) {} if (aktifSfx === el) aktifSfx = null; }
+      };
+      fadeRaf = requestAnimationFrame(step);
+    }, fadeBas);
+    return true;
   }
 
-  // ---------- 🐾 Hayvan Sesleri Eklentisi (türe özel sentezlenmiş doğal ses profilleri) ----------
-  function sesProfilBul(o) {
-    const met = ((o && o.id) || '') + ' ' + ((o && o.ad) || '') + ' ' + ((o && o.ik) || '');
-    if (/balina|orka|narval|🐋/i.test(met)) return 'balina';
-    if (/yunus|🐬/i.test(met)) return 'yunus';
-    if (/baykuş|baykus|🦉/i.test(met)) return 'baykus';
-    if (/kurt|tilki|köpek|kopek|sırtlan|sirtlan|tilasin|🐺|🦊/i.test(met)) return 'kurt';
-    if (/aslan|kaplan|pars|jaguar|leopar|smilodon|ayı|ayi|porsuk|🦁|🐅|🐆|🐻/i.test(met)) return 'kukreme';
-    if (/kedi|çita|cita|vaşak|vasak|🐱/i.test(met)) return 'kedi';
-    if (/fil|mamut|mastodon|🐘|🦣/i.test(met)) return 'fil';
-    if (/kurbağa|kurbaga|🐸/i.test(met)) return 'kurbaga';
-    if (/arı|ari|çekirge|cekirge|böcek|bocek|karınca|karinca|kelebek|yusufçuk|yusufcuk|termit|🐝|🦋|🦗|🐜/i.test(met)) return 'bocek';
-    if (/yılan|yilan|kobra|anakonda|kertenkele|bukalemun|komodo|iguana|🐍|🦎/i.test(met)) return 'yilan';
-    if (/ahtapot|mürekkep|murekkep|balık|balik|köpekbalığı|kopekbaligi|vatoz|kaplumbağa|kaplumbaga|denizatı|denizati|fok|mors|samur|manati|denizanası|denizanasi|🐙|🦈|🐟|🐢|🦭/i.test(met)) return 'su';
-    if (/kuş|kus|kartal|şahin|sahin|doğan|dogan|papağan|papagan|leylek|flamingo|pelikan|tavus|kuzgun|akbaba|sumru|albatros|kivi|penguen|dodo|moa|puffin|tukan|🦅|🐦|🦢|🦩|🦜|🐧/i.test(met)) return 'kus';
-    return 'memeli';
+  // ---------- Doğa & Etkinlik SFX Fonksiyonları ----------
+  function playOkyanus() { if (cfg.doga) playUrl(SFX.okyanus.url, SFX.okyanus.sure, SFX.okyanus.baz); }
+  function playNehir()   { if (cfg.doga) playUrl(SFX.nehir.url, SFX.nehir.sure, SFX.nehir.baz); }
+  function playVolkan()  { if (cfg.doga) playUrl(SFX.volkan.url, SFX.volkan.sure, SFX.volkan.baz); }
+  function playRuzgar()  { if (cfg.doga) playUrl(SFX.ruzgar.url, SFX.ruzgar.sure, SFX.ruzgar.baz); }
+  function playMaden()   { if (cfg.doga) playUrl(SFX.maden.url, SFX.maden.sure, SFX.maden.baz); }
+  function playSavas() {
+    if (!cfg.doga) return;
+    const s = (kilicSira++ % 2 === 0) ? SFX.savas : SFX.savas2;
+    playUrl(s.url, s.sure, s.baz);
+  }
+
+  // ---------- 🐾 Gerçek Hayvan Sesi Eşleyici ----------
+  function hayvanKaydiBul(o) {
+    if (!o) return null;
+    const met = ((o.id || '') + ' ' + (o.ad || '') + ' ' + (o.w || '')).toLocaleLowerCase('tr');
+    for (const row of HAYVAN_SES) {
+      if (row[0].test(met)) return row;
+    }
+    return null;
+  }
+
+  function hayvanSesiVarMi(o) {
+    return !!hayvanKaydiBul(o);
   }
 
   function playHayvan(o, zorla) {
-    if (cfg.sessiz || (!cfg.hayvan && !zorla)) return;
-    if (!ac()) return;
-    const p = sesProfilBul(o), t = ctx.currentTime;
-    const ton = (tip, f0, f1, d0, sure, amp = 0.22) => {
-      const osc = ctx.createOscillator(), g = ctx.createGain();
-      osc.type = tip;
-      osc.frequency.setValueAtTime(f0, t + d0);
-      osc.frequency.exponentialRampToValueAtTime(Math.max(25, f1), t + d0 + sure);
-      g.gain.setValueAtTime(0.0001, t + d0);
-      g.gain.linearRampToValueAtTime(amp, t + d0 + Math.min(0.08, sure * 0.25));
-      g.gain.exponentialRampToValueAtTime(0.0001, t + d0 + sure);
-      osc.connect(g); g.connect(sfxGain);
-      osc.start(t + d0); osc.stop(t + d0 + sure + 0.05);
-    };
-    if (p === 'balina') {
-      ton('sine', 190, 105, 0, 1.3, 0.24);
-      ton('sine', 110, 165, 1.0, 1.1, 0.18);
-    } else if (p === 'yunus') {
-      ton('sine', 1600, 2900, 0, 0.16, 0.16);
-      ton('sine', 2400, 1700, 0.18, 0.14, 0.15);
-      ton('sine', 1900, 3100, 0.36, 0.22, 0.16);
-    } else if (p === 'baykus') {
-      ton('sine', 410, 385, 0, 0.35, 0.22);
-      ton('sine', 395, 340, 0.5, 0.65, 0.22);
-    } else if (p === 'kurt') {
-      ton('triangle', 290, 510, 0, 0.6, 0.18);
-      ton('triangle', 510, 340, 0.55, 0.9, 0.16);
-    } else if (p === 'kukreme') {
-      ton('sawtooth', 120, 62, 0, 0.95, 0.14);
-      ton('triangle', 95, 52, 0.05, 1.05, 0.22);
-    } else if (p === 'kedi') {
-      ton('triangle', 560, 790, 0, 0.24, 0.16);
-      ton('triangle', 790, 480, 0.22, 0.36, 0.14);
-    } else if (p === 'fil') {
-      ton('sawtooth', 260, 590, 0, 0.42, 0.14);
-      ton('triangle', 590, 370, 0.4, 0.52, 0.18);
-    } else if (p === 'kurbaga') {
-      ton('sawtooth', 180, 360, 0, 0.14, 0.14);
-      ton('sawtooth', 190, 380, 0.26, 0.16, 0.14);
-    } else if (p === 'bocek') {
-      for (let i = 0; i < 4; i++) ton('sine', 2800 + (i % 2) * 350, 2600, i * 0.11, 0.07, 0.10);
-    } else if (p === 'yilan') {
-      if (noiseBuf) {
-        const src = ctx.createBufferSource(); src.buffer = noiseBuf;
-        const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3200;
-        const g = ctx.createGain();
-        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.22, t + 0.12); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.95);
-        src.connect(hp); hp.connect(g); g.connect(sfxGain); src.start(t); src.stop(t + 1.0);
-      }
-    } else if (p === 'su') {
-      ton('sine', 340, 620, 0, 0.12, 0.15);
-      ton('sine', 420, 780, 0.16, 0.14, 0.14);
-      ton('sine', 290, 510, 0.34, 0.18, 0.13);
-    } else if (p === 'kus') {
-      ton('sine', 1400, 2200, 0, 0.14, 0.15);
-      ton('sine', 2100, 1500, 0.16, 0.13, 0.14);
-      ton('sine', 1650, 2450, 0.34, 0.18, 0.15);
-    } else {
-      ton('triangle', 240, 170, 0, 0.38, 0.18);
-      ton('triangle', 210, 155, 0.42, 0.34, 0.15);
-    }
+    if (cfg.sessiz || (!cfg.hayvan && !zorla)) return false;
+    const kayit = hayvanKaydiBul(o);
+    if (!kayit) return false; // Gerçek kayıt yoksa sessiz geç!
+    return playUrl(kayit[1], kayit[2], kayit[3]);
   }
 
-  // ---------- 🎛️ Arayüz Bağlantısı (#sesbtn + #sespop) ----------
-  function uiSenkron() {
+  function setAtlasMod(mod) {
+    const yeni = mod === 'doga' ? 'doga' : 'tarih';
+    if (atlasMod === yeni) return;
+    atlasMod = yeni;
+    if (cfg.parca === 'oto' && !cfg.sessiz && cfg.muzik) {
+      muzikBaslat(true);
+    }
+    uiGuncelle();
+  }
+
+  // ---------- UI Bağlantısı (#sesbtn + #sespop) ----------
+  function uiGuncelle() {
     const btn = document.getElementById('sesbtn');
     if (btn) {
-      btn.textContent = cfg.sessiz ? '🔇' : (cfg.vol < 0.35 ? '🔉' : '🔊');
-      btn.classList.toggle('sessiz', !!cfg.sessiz);
-      btn.title = cfg.sessiz ? 'Ses kapalı (tıkla: ses ayarları)' : 'Ses ve ambiyans ayarları';
+      const kapali = cfg.sessiz || cfg.vol <= 0 || (!cfg.muzik && !cfg.doga && !cfg.hayvan);
+      btn.textContent = kapali ? '🔇' : (cfg.vol < 0.35 ? '🔉' : '🔊');
+      btn.classList.toggle('sessiz', kapali);
+      btn.title = kapali ? 'Ses kapalı — açmak için tıkla' : `Ses ve müzik ayarları (%${Math.round(cfg.vol * 100)})`;
     }
     const pop = document.getElementById('sespop');
     if (!pop) return;
-    const ms = pop.querySelector('#ses-sessiz');
-    if (ms) {
-      ms.textContent = cfg.sessiz ? '🔊 Sesi Aç' : '🔇 Tümünü Sessize Al';
-      ms.classList.toggle('on', !!cfg.sessiz);
+    const sustur = pop.querySelector('#ses-sessiz');
+    if (sustur) {
+      sustur.classList.toggle('on', cfg.sessiz);
+      sustur.textContent = cfg.sessiz ? '🔊 Sesi Tekrar Aç' : '🔇 Tümünü Sessize Al';
     }
-    const sl = pop.querySelector('#ses-vol');
-    if (sl) sl.value = String(Math.round(cfg.vol * 100));
-    const sv = pop.querySelector('#ses-vol-yazi');
-    if (sv) sv.textContent = `%${Math.round(cfg.vol * 100)}`;
-    const cm = pop.querySelector('#ses-muzik'); if (cm) cm.checked = !!cfg.muzik;
-    const cd = pop.querySelector('#ses-doga'); if (cd) cd.checked = !!cfg.doga;
-    const ch = pop.querySelector('#ses-hayvan'); if (ch) ch.checked = !!cfg.hayvan;
+    const vol = pop.querySelector('#ses-vol'), volY = pop.querySelector('#ses-vol-yazi');
+    if (vol) vol.value = Math.round(cfg.vol * 100);
+    if (volY) volY.textContent = `%${Math.round(cfg.vol * 100)}`;
+    const mz = pop.querySelector('#ses-muzik'); if (mz) mz.checked = !!cfg.muzik;
+    const dg = pop.querySelector('#ses-doga'); if (dg) dg.checked = !!cfg.doga;
+    const hy = pop.querySelector('#ses-hayvan'); if (hy) hy.checked = !!cfg.hayvan;
+    const pr = pop.querySelector('#ses-parca'); if (pr) pr.value = cfg.parca || 'oto';
   }
 
-  function uygula() {
-    kaydet();
-    sesGuncelle();
-    if (cfg.sessiz || !cfg.muzik) muzikDurdur();
-    else if (ctx) muzikBaslat();
-    if (cfg.sessiz || !cfg.doga) dogaDurdur();
-    uiSenkron();
-  }
-
-  function baslatUI() {
-    const btn = document.getElementById('sesbtn'), pop = document.getElementById('sespop');
-    if (!btn || !pop) return;
-    uiSenkron();
-    btn.addEventListener('click', ev => {
-      ev.stopPropagation();
-      const acik = !pop.hidden;
-      pop.hidden = acik;
-      btn.classList.toggle('on', !acik);
-      if (!cfg.sessiz && cfg.muzik) { ac(); muzikBaslat(); }
-    });
-    pop.addEventListener('click', ev => ev.stopPropagation());
-    document.addEventListener('click', ev => {
-      if (!pop.hidden && !ev.target.closest('#sespop, #sesbtn')) { pop.hidden = true; btn.classList.remove('on'); }
-    });
+  function bagla() {
+    const pop = document.getElementById('sespop');
+    if (!pop) return;
     pop.querySelector('#ses-sessiz')?.addEventListener('click', () => {
       cfg.sessiz = !cfg.sessiz;
-      if (!cfg.sessiz) ac();
-      uygula();
+      kaydet();
+      if (cfg.sessiz) { muzikDurdur(); sfxDurdur(); }
+      else { sesGuncelle(); if (cfg.muzik) muzikBaslat(); }
+      uiGuncelle();
     });
-    pop.querySelector('#ses-vol')?.addEventListener('input', ev => {
-      cfg.vol = Math.max(0, Math.min(1, +ev.target.value / 100));
+    pop.querySelector('#ses-vol')?.addEventListener('input', e => {
+      cfg.vol = Math.max(0, Math.min(1, +e.target.value / 100));
       if (cfg.vol > 0 && cfg.sessiz) cfg.sessiz = false;
-      ac();
-      uygula();
+      kaydet();
+      sesGuncelle();
+      if (!cfg.sessiz && cfg.muzik) muzikBaslat();
+      uiGuncelle();
     });
-    pop.querySelector('#ses-muzik')?.addEventListener('change', ev => {
-      cfg.muzik = ev.target.checked;
-      if (cfg.muzik && !cfg.sessiz) ac();
-      uygula();
+    pop.querySelector('#ses-muzik')?.addEventListener('change', e => {
+      cfg.muzik = e.target.checked;
+      kaydet();
+      if (cfg.muzik && !cfg.sessiz) muzikBaslat();
+      else muzikDurdur();
+      uiGuncelle();
     });
-    pop.querySelector('#ses-doga')?.addEventListener('change', ev => {
-      cfg.doga = ev.target.checked;
-      uygula();
+    pop.querySelector('#ses-parca')?.addEventListener('change', e => {
+      cfg.parca = e.target.value || 'oto';
+      kaydet();
+      if (cfg.muzik && !cfg.sessiz) muzikBaslat(true);
+      uiGuncelle();
     });
-    pop.querySelector('#ses-hayvan')?.addEventListener('change', ev => {
-      cfg.hayvan = ev.target.checked;
-      uygula();
+    pop.querySelector('#ses-doga')?.addEventListener('change', e => {
+      cfg.doga = e.target.checked;
+      if (!cfg.doga) sfxDurdur();
+      kaydet(); uiGuncelle();
     });
-    // İlk kullanıcı etkileşiminde (sessiz değilse ve müzik açıksa) rahatlatıcı arka plan müziğini başlat
-    const ilkDokunus = () => {
-      if (!cfg.sessiz && cfg.muzik && !muzikCalisiyor) {
-        ac();
-        muzikBaslat();
-      }
-      window.removeEventListener('pointerdown', ilkDokunus);
-      window.removeEventListener('keydown', ilkDokunus);
-    };
-    window.addEventListener('pointerdown', ilkDokunus, { passive: true });
-    window.addEventListener('keydown', ilkDokunus, { passive: true });
+    pop.querySelector('#ses-hayvan')?.addEventListener('change', e => {
+      cfg.hayvan = e.target.checked;
+      kaydet(); uiGuncelle();
+    });
+    uiGuncelle();
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', baslatUI);
-  else baslatUI();
+  // Tarayıcı kuralı: ilk kullanıcı dokunuşunda müzik açıksa otomatik başlasın
+  const ilkDokunus = () => {
+    if (!cfg.sessiz && cfg.muzik) muzikBaslat();
+    window.removeEventListener('pointerdown', ilkDokunus);
+    window.removeEventListener('keydown', ilkDokunus);
+  };
+  window.addEventListener('pointerdown', ilkDokunus, { passive: true });
+  window.addEventListener('keydown', ilkDokunus, { passive: true });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bagla);
+  else bagla();
 
   window.Ses = {
-    get ayar() { return { ...cfg }; },
-    playOkyanus,
-    playNehir,
-    playHayvan,
-    dogaDurdur,
-    sustur: () => { cfg.sessiz = true; uygula(); }
+    playOkyanus, playNehir, playSavas, playMaden, playVolkan, playRuzgar,
+    playHayvan, hayvanSesiVarMi, setAtlasMod, uiGuncelle,
+    get ayar() { return { ...cfg }; }
   };
 })();

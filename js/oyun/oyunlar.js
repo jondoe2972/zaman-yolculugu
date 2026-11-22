@@ -30,8 +30,8 @@
       'js/oyun/foto-tahmin.js?v=1'
     ],
     derin: [
-      'data/atlas/derin-zaman.js?v=1',
-      'js/oyun/derin-zaman.js?v=2'
+      'data/atlas/derin-zaman.js?v=2',
+      'js/oyun/derin-zaman.js?v=3'
     ]
   };
   const dosyaSoz = new Map();

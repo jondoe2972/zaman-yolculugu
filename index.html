@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Dünya tarihini interaktif kürede keşfet, o dönemde bir gününü yaşa ve tarih oyunlarını oyna.">
 <meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23241b14'/%3E%3Cpath d='M18 12h28v6c0 7-6 11-11 14 5 3 11 7 11 14v6H18v-6c0-7 6-11 11-14-5-3-11-7-11-14v-6z' fill='none' stroke='%23ffd666' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 18h18c0 4-4 7-9 10-5-3-9-6-9-10zm9 18c5 3 9 6 9 10H23c0-4 4-7 9-10z' fill='%23ffd666'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/stil.css?v=68">
+<link rel="stylesheet" href="css/stil.css?v=69">
 </head>
 <body>
 <header class="top">
@@ -69,9 +69,20 @@
       <b>🎧 Ses ve Ambiyans</b>
       <button type="button" id="ses-sessiz" class="ses-sustur">🔇 Tümünü Sessize Al</button>
       <div class="ses-vol-sat"><span>🎚️ Ses</span><input type="range" id="ses-vol" min="0" max="100" value="45"><em id="ses-vol-yazi">%45</em></div>
-      <label><input type="checkbox" id="ses-muzik" checked><span>🎵 Rahatlatıcı arka plan müziği</span></label>
-      <label><input type="checkbox" id="ses-doga" checked><span>🌊 Okyanus & nehir doğa sesleri</span></label>
-      <label><input type="checkbox" id="ses-hayvan" checked><span>🐾 Hayvan sesleri eklentisi</span></label>
+      <label><input type="checkbox" id="ses-muzik" checked><span>🎵 Arka plan müziği</span></label>
+      <div class="ses-parca-sat">
+        <span>🎼 Müzik</span>
+        <select id="ses-parca" aria-label="Arka plan müziği seç">
+          <option value="oto">✨ Otomatik (Tarih / Doğa'ya göre)</option>
+          <option value="tarih">🏛️ 1. Tarihî Lavta (Rönesans)</option>
+          <option value="doga">🌿 2. Bahar Ormanı &amp; Kuşlar (Doğa)</option>
+          <option value="okyanus">🌊 3. Sakin Okyanus Dalgaları</option>
+          <option value="orman">🌴 4. Tropik Yağmur Ormanı</option>
+          <option value="kozmik">🌌 5. Kozmik Zaman Yolculuğu</option>
+        </select>
+      </div>
+      <label><input type="checkbox" id="ses-doga" checked><span>🌊 Doğa &amp; olay sesleri (dalga, nehir, kılıç, maden, volkan)</span></label>
+      <label><input type="checkbox" id="ses-hayvan" checked><span>🐾 Gerçek hayvan sesleri (aslan, balina, yunus, kurt…)</span></label>
       <small>Ayarların otomatik kaydedilir; tekrar açana kadar aynı kalır.</small>
     </div>
     <div id="tbbtn" class="tbbtn" title="Tarihte Bugün: takvimde bugüne damga vuran olaylar"><button type="button" id="tbbtn-ac" class="tbbtn-ac">📅<span> Bugün</span></button><button type="button" id="tbbtn-x" class="tbbtn-x" title="Gizle" aria-label="Tarihte Bugün düğmesini gizle">✕</button></div>
@@ -89,6 +100,7 @@
         </div>
         <div class="kp-grup" data-kpgrup="tarih">
           <label><input type="checkbox" data-kat="sinir" checked><span>🗺️ Dönemin sınırları</span></label>
+          <label><input type="checkbox" data-kat="yapi" checked><span>🏛️ Dünyaca ünlü yapıtlar ve anıtlar</span><i></i></label>
           <label><input type="checkbox" data-kat="donum"><span>⚡ Dünyayı değiştiren büyük olaylar</span><i></i></label>
           <label><input type="checkbox" data-kat="ticaret" checked><span>🐪 Ticaret yolları</span><i></i></label>
           <label><input type="checkbox" data-kat="liman"><span>⚓ Dünya çapındaki önemli limanlar</span><i></i></label>
@@ -100,6 +112,7 @@
         </div>
         <div class="kp-grup" data-kpgrup="doga" hidden>
           <label><input type="checkbox" data-kat="akinti"><span>🌊 Akıntılar, girdaplar ve fırtınalar</span><i></i></label>
+          <label><input type="checkbox" data-kat="ruzgar"><span>💨 Dünyayı değiştiren yıllık rüzgâr dalgaları</span><i></i></label>
           <label><input type="checkbox" data-kat="hayvan"><span>🐾 Bölge hayvanları (yıla göre)</span><i></i></label>
           <label><input type="checkbox" data-kat="bitki"><span>🌿 Yöreye özgü bitkiler ve ağaçlar</span><i></i></label>
           <label><input type="checkbox" data-kat="hayvangoc"><span>🐋 Hayvanların yıllık göç döngüsü</span><i></i></label>
@@ -217,14 +230,16 @@
 <script src="data/sinir/sinir-dizin.js?v=1"></script>
 <script src="data/atlas/okyanus.js?v=2"></script>
 <script src="data/atlas/denizler-ek.js?v=1"></script>
+<script src="data/atlas/ruzgarlar.js?v=1"></script>
 <script src="data/atlas/hayvanlar.js?v=4"></script>
 <script src="data/atlas/bitkiler.js?v=1"></script>
 <script src="data/atlas/doga-bolgeler.js?v=1"></script>
+<script src="data/atlas/doga-altbolge.js?v=1"></script>
 <script src="data/atlas/cografya-bolge.js?v=2"></script>
 <script src="data/atlas/kultur.js?v=1"></script>
 <script src="data/atlas/ekonomi.js?v=1"></script>
 <script src="data/atlas/magaralar.js?v=1"></script>
-<script src="data/atlas/surprizler.js?v=4"></script>
+<script src="data/atlas/surprizler.js?v=5"></script>
 <script src="data/atlas/limanlar.js?v=1"></script>
 <script src="data/atlas/nehirler.js?v=1"></script>
 <script src="data/atlas/hayvan-goc.js?v=3"></script>
@@ -235,20 +250,22 @@
 <script src="data/yasam-doga.js?v=4"></script>
 <script src="data/yasam-doga-ek.js?v=2"></script>
 <script src="data/yasam-doga-ek2.js?v=1"></script>
+<script src="data/yasam-doga-antik.js?v=1"></script>
 <script src="data/atlas/donum-noktalari.js?v=2"></script>
-<script src="js/dunya.js?v=89"></script>
+<script src="js/dunya.js?v=92"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
 <script src="data/yapilar/avrupa.js?v=1"></script>
 <script src="data/yapilar/amerika.js?v=1"></script>
+<script src="data/yapilar/simgeler.js?v=1"></script>
 <script src="js/sahne-harita.js?v=6"></script>
-<script src="js/uygulama.js?v=89"></script>
-<script src="js/ses.js?v=1"></script>
+<script src="js/uygulama.js?v=94"></script>
+<script src="js/ses.js?v=2"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=6"></script>
-<script src="js/oyun/oyunlar.js?v=17"></script>
-<script src="js/ara.js?v=18"></script>
+<script src="js/oyun/oyunlar.js?v=18"></script>
+<script src="js/ara.js?v=20"></script>
 </body>
 </html>
