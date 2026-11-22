@@ -1720,7 +1720,7 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'bitki') tip(hover.x1 + 6, hover.y0, `${hover.bt.ik} ${hover.bt.ad}`, `${hover.bt.bolge} · tıkla: meyvesi ve kullanım alanları`);
     else if (hover && hover.kind === 'cografya') tip(hover.x1 + 6, hover.y0, hover.cg.ad, `${hover.cg.yukseklik ? hover.cg.yukseklik + ' · ' : ''}${hover.cg.konum} · tıkla: ayrıntı ve fotoğraf`);
     else if (hover && hover.kind === 'nehir') tip(hover.x1 + 6, hover.y0, `🏞️ ${hover.nr.ad}`, `${hover.nr.uzunluk} · ${hover.nr.havza} · tıkla: doğa ve tarih`);
-    else if (hover && hover.kind === 'hayvangoc') tip(hover.x1 + 6, hover.y0, `${hover.hg.ik} ${hover.hg.ad}`, `${hover.hg.mesafe} · tıkla: yıllık göç döngüsü`);
+    else if (hover && hover.kind === 'hayvangoc') tip(hover.x1 + 6, hover.y0, `${hover.hg.ik} ${hover.hg.ad}`, `${hover.hg.mesafe}${hover.hg.sure ? ' · ⏱️ ' + hover.hg.sure : ''} · tıkla: göç döngüsü`);
     else if (hover && hover.kind === 'liman') tip(hover.x1 + 6, hover.y0, `⚓ ${hover.lm.ad}`, `${hover.lm.ulke} · ${hover.lm.rol} · tıkla: liman bilgisi`);
     else if (hover && hover.kind === 'yayilis') tip(hover.x1 + 6, hover.y0, `${hover.yy.ik} ${hover.yy.ad}`, `${hover.yy.koken} · tıkla: dünyaya yayılış hikâyesi`);
     else if (hover && hover.kind === 'volkan') tip(hover.x1 + 6, hover.y0, `🌋 ${hover.v.ad}`, `${hover.v.ulke} · ${hover.v.yukseklik} (${hover.v.durum}) · tıkla: patlama tarihi`);

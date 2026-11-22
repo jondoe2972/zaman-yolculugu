@@ -4,6 +4,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'kambur-balina', ad: 'Kambur Balina Göçü', ik: '🐋', renk: '#38bdf8',
     mesafe: '~16.000 km (gidiş-dönüş)',
+    sure: 'Tek yön 2 – 3 ay · Tam döngü 1 yıl',
     dongu: 'Yaz (Aralık–Mart): Antarktika\'nın buzlu sularında günde 1,5 ton kril yiyip yağ depolar. Kış (Haziran–Ekim): Sıcak tropikal sulara (Avustralya/Kolombiya/Brezilya kıyıları) yüzerek yavrularını doğurur.',
     neden: 'Kutup suları besin (kril) açısından çok zengindir ama yeni doğan yağsız yavrular için fazla soğuktur; sıcak tropikal sular ise yavruların büyümesi için güvenlidir.',
     pusula: 'Dünya\'nın manyetik alanını, okyanus akıntılarını, deniz tabanı şekillerini ve güneşin açısını kullanarak aynı koya şaşmadan dönerler.',
@@ -14,6 +15,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'gri-balina', ad: 'Gri Balina Pasifik Göçü', ik: '🐋', renk: '#60a5fa',
     mesafe: '~20.000 km (memeliler arasında en uzunlarından)',
+    sure: 'Tek yön 2 – 3 ay · Tam döngü 1 yıl',
     dongu: 'Yaz: Alaska ve Bering Denizi\'nin sığ sularında beslenir. Sonbahar–Kış: Kuzey Amerika kıyısı boyunca güneye inip Meksika\'daki sakin Baja California lagünlerinde doğum yapar.',
     neden: 'Baja lagünlerinin tuzlu ve sığ suları yavruların kolayca yüzmesini sağlar ve onları katil balinalardan (orka) korur.',
     pusula: 'Kıyı şeridini, su sıcaklığını ve kıta sahanlığının derinliğini takip ederek neredeyse sahilden kopmadan yol alırlar.',
@@ -24,6 +26,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'kuzey-sumrusu', ad: 'Kuzey Sumrusu (Kutuplar Arası Göç)', ik: '🕊️', renk: '#facc15',
     mesafe: '~70.000 – 90.000 km / yıl (Dünya rekoru!)',
+    sure: 'Güneye ~3 ay · Kuzeye ~40 gün · Tam döngü 1 yıl',
     dongu: 'Haziran–Ağustos: Kuzey Kutbu (Grönland/İzlanda) yazında ürer. Eylül–Kasım: Atlas Okyanusu\'nu zikzak çizerek geçip Antarktika\'ya iner. Mart–Mayıs: Güney yazı bitince tekrar Kuzey Kutbu\'na uçar.',
     neden: 'Her yıl hem Kuzey hem Güney yarımkürenin yaz mevsimini yakalayarak 24 saat gün ışığında bol balık ve krille beslenir.',
     pusula: 'Okyanus rüzgâr sistemlerini (alize ve batı rüzgârları) arkasına alıp düz çizgi yerine S harfi çizerek enerji tasarrufu yapar.',
@@ -34,6 +37,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'beyaz-leylek', ad: 'Beyaz Leylek Göçü (Boğazlar Rotası)', ik: '🦩', renk: '#f97316',
     mesafe: '~10.000 – 12.000 km',
+    sure: 'Tek yön 6 – 8 hafta (günde ~200 km) · Tam döngü 1 yıl',
     dongu: 'İlkbahar–Yaz: Avrupa ve Anadolu\'da yuva kurup yavrularını büyütür. Ağustos–Eylül: İstanbul Boğazı, Hatay Belen Geçidi ve Nil Vadisi üzerinden Doğu ve Güney Afrika\'ya uçar.',
     neden: 'Kışın Avrupa\'da böcek ve kurbağa bulamadıkları için sıcak Afrika savanlarına göçerler; açık deniz üzerinde sıcak hava (termal) akımı olmadığı için kara köprülerini (İstanbul Boğazı ve Cebelitarık) seçerler.',
     pusula: 'Güneş pusulası, manyetik alan ve yaşlı leyleklerin hafızasındaki termal hava koridorlarını kullanırlar.',
@@ -44,6 +48,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'kral-kelebek', ad: 'Kral (Monark) Kelebeği Göçü', ik: '🦋', renk: '#fb923c',
     mesafe: '~4.500 km (tek yön)',
+    sure: 'Güneye ~2 ay (tek nesil) · Kuzeye ~4 ay (3–4 nesilde!) · Tam döngü 1 yıl',
     dongu: 'Sonbahar: Kanada ve ABD\'den milyonlarca kelebek Meksika\'nın yüksek oyamel çam ormanlarına uçar ve ağaç dallarında kışı geçirir. İlkbahar: Kuzeye doğru yumurta bırakarak 3-4 nesilde Kanada\'ya geri dönerler.',
     neden: 'Kuzey Amerika\'nın dondurucu kışından kaçıp Meksika dağlarındaki serin ama donmayan mikro-iklimde enerji tasarrufu yapmak için.',
     pusula: 'Antenlerindeki biyolojik güneş saati ve Dünya\'nın manyetik alanını algılayan özel proteinlerle yol bulurlar.',
@@ -54,6 +59,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'serengeti-gnu', ad: 'Serengeti Büyük Antilop (Gnu) Göçü', ik: '🐃', renk: '#eab308',
     mesafe: '~1.600 km (sürekli yıllık çember)',
+    sure: '12 ay kesintisiz döngü (tüm yıl boyunca hareket hâlinde!)',
     dongu: 'Ocak–Mart: Güney Serengeti\'de 500.000 yavru doğar. Temmuz–Ekim: 1,5 milyon gnu ve 200.000 zebra timsahlı Mara Nehri\'ni aşarak Kenya\'daki Masai Mara\'ya geçer. Kasım: Yağmurlarla güneye dönerler.',
     neden: 'Doğu Afrika\'daki mevsimsel yağmurların yeşerttiği taze otlakların peşinden durmaksızın hareket ederler.',
     pusula: 'Uzak fırtınaların ve yağmur bulutlarının kokusunu ve sesini 50 kilometreden fazla mesafeden algılayabilirler.',
@@ -64,6 +70,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'deniz-kaplumbaga', ad: 'Deri Sırtlı Kaplumbağa Pasifik Göçü', ik: '🐢', renk: '#34d399',
     mesafe: '~20.000 km (gidiş-dönüş)',
+    sure: 'Tek yön 10 – 12 ay · Tam üreme döngüsü 2 – 3 yıl',
     dongu: 'Yaz–Sonbahar: Endonezya\'nın Papua kumsallarında yumurtladıktan sonra Pasifik\'i boydan boya geçip Kaliforniya açıklarındaki denizanası sürüleriyle beslenir; sonra aynı kumsala geri döner.',
     neden: 'Sıcak tropikal kumsallar yumurtaların kuluçkası için şarttır; soğuk Kaliforniya akıntısı ise en sevdikleri yiyecek olan denizanalarıyla doludur.',
     pusula: 'Yavruyken yumurtadan çıktığı kumsalın kendine özgü manyetik "parmak izini" beynine kazır ve 20 yıl sonra aynı sahile döner.',
@@ -74,6 +81,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'pasifik-somonu', ad: 'Pasifik Somonu Okyanus–Nehir Döngüsü', ik: '🐟', renk: '#f472b6',
     mesafe: '~3.000 – 5.000 km',
+    sure: 'Okyanusta 2 – 5 yıl · Nehre dönüş yolculuğu 1 – 3 ay (ömür boyu tek döngü!)',
     dongu: 'Gençlik: Tatlı su nehirlerinde doğup Kuzey Pasifik Okyanusu\'na açılır ve 2-5 yıl orada büyür. Yetişkinlik: Akıntıya ve şelalelere karşı yüzerek tam doğduğu dereye dönüp yumurta bırakır.',
     neden: 'Okyanus hızla büyümek için bol besin sunar; sığ ve serin dağ dereleri ise yumurtaların yırtıcılardan korunması için idealdir.',
     pusula: 'Okyanusta manyetik alanla kıyıya ulaşır, nehir ağzına gelince ise inanılmaz koku alma duyusuyla doğduğu derenin kokusunu tanır!',
@@ -84,6 +92,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'ren-geyigi', ad: 'Ren Geyiği (Karibu) Arktik Göçü', ik: '🦌', renk: '#a78bfa',
     mesafe: '~4.800 km / yıl (karada en uzun göçlerden)',
+    sure: 'Tek yön 6 – 10 hafta (günde ~40 km) · Tam döngü 1 yıl',
     dongu: 'İlkbahar: Sürüler yüz binlerce bireyle kuzeydeki Arktik tundraya yürüyüp yavrular. Sonbahar: Kutup fırtınaları başlamadan güneydeki korunaklı tayga ormanlarına dönerler.',
     neden: 'Yazın tundrada bol ot ve daha az yırtıcı vardır; kışın ise orman örtüsü rüzgârı keser ve kar altındaki likenlere ulaşmayı kolaylaştırır.',
     pusula: 'Sürünün yaşlı dişileri nesilden nesile aktarılan göç geçitlerini ve nehir geçiş noktalarını hatırlar.',
@@ -94,6 +103,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'sarkici-kus', ad: 'Avrasya Yırtıcı Kuş Göçü (Kızıldeniz–Anadolu)', ik: '🦅', renk: '#fbbf24',
     mesafe: '~8.000 – 10.000 km',
+    sure: 'Tek yön 5 – 8 hafta · Tam döngü 1 yıl',
     dongu: 'İlkbahar: Doğu Afrika\'dan kalkıp Babülmendep Boğazı, Ürdün Vadisi ve Anadolu üzerinden Orta Asya bozkırlarına ulaşırlar. Sonbahar: Aynı dar boğazlardan Afrika\'ya dönerler.',
     neden: 'Büyük kanatlı kartal, şahin ve akbabalar deniz üstünde kanat çırpmak yerine kara üzerindeki sıcak hava sütunlarıyla süzülerek binlerce kilometre uçar.',
     pusula: 'Dağ sıralarını, vadileri ve boğazları görsel harita gibi kullanarak her yıl aynı dar gökyüzü otoyollarından geçerler.',
@@ -104,6 +114,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'avrupa-yilanbaligi', ad: 'Avrupa Yılan Balığı (Sargasso Göçü)', ik: '🐍', renk: '#2dd4bf',
     mesafe: '~6.000 km (tek yön, ömürde bir kez!)',
+    sure: 'Avrupa\'ya geliş 2–3 yıl · Geri dönüş 5–7 ay · Tüm yaşam döngüsü 10 – 20 yıl',
     dongu: 'Gençlik: Sargasso Denizi\'nde doğan şeffaf larvalar Gulf Stream ile 2-3 yılda Avrupa nehirlerine sürüklenir ve orada 10–20 yıl büyür. Yetişkinlik: Hiç yemek yemeden 6.000 km yüzüp Sargasso\'ya dönerek yumurtlar.',
     neden: 'Sargasso Denizi\'nin sıcak, sakin ve yosunlu suları larvaların hayatta kalması için idealdir; Avrupa nehirleri ise hızla büyümek için bol besin sunar.',
     pusula: 'Okyanus akıntılarını, Dünya\'nın manyetik alanını ve derin deniz sıcaklık katmanlarını kullanarak 5.000 km ötedeki üreme alanını şaşmadan bulur.',
@@ -114,6 +125,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'kiyi-cullugu', ad: 'Çizgili Kıyı Çulluğu (Kesintisiz Uçuş Rekoru)', ik: '🐦', renk: '#fde047',
     mesafe: '~13.500 km (hiç durmadan 11 gün!)',
+    sure: 'Güneye 9 – 11 gün KESİNTİSİZ! · Kuzeye mola vererek ~6 hafta · Tam döngü 1 yıl',
     dongu: 'Yaz: Alaska tundrasında ürer. Sonbahar: Pasifik Okyanusu\'nu tek seferde, hiç konmadan, yemeden ve içmeden 11 günde aşıp Yeni Zelanda\'ya iner. İlkbahar: Sarı Deniz üzerinden Alaska\'ya döner.',
     neden: 'Kuzey kışından kaçıp Güney yarımkürenin ılıman Yeni Zelanda kıyılarında beslenmek için doğrudan okyanus kestirmesini kullanır.',
     pusula: 'Kalkıştan önce vücut ağırlığının yarısını yağa çevirir, hatta uçuşta yer açmak için sindirim organlarını geçici olarak küçültür!',
@@ -124,6 +136,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'hint-kazi', ad: 'Hint Kazı (Himalaya Zirve Göçü)', ik: '🦢', renk: '#e2e8f0',
     mesafe: '~4.500 km (8.000 metre yükseklikten!)',
+    sure: 'Himalaya geçişi sadece 7 – 8 saat! · Tek yön 4 – 6 hafta · Tam döngü 1 yıl',
     dongu: 'Yaz: Moğolistan ve Tibet\'in yüksek göllerinde yavrular. Sonbahar: Everest ve Himalayalar\'ın karlı zirvelerinin üzerinden geçip Hindistan\'ın sıcak ovalarına iner.',
     neden: 'Tibet platosu kışın -30 °C\'de tamamen donar; Hindistan\'ın verimli sulak alanları ise kışın bol yiyecek sunar.',
     pusula: 'Kanındaki özel hemoglobin oksijeni insanlardan çok daha verimli bağlar; jet uçaklarının uçtuğu irtifada oksijensiz havada kanat çırpabilir!',
@@ -134,6 +147,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'gezgin-yusufcuk', ad: 'Gezgin Yusufçuk (Hint Okyanusu Göçü)', ik: '🪰', renk: '#fb7185',
     mesafe: '~18.000 km (4 nesilde — böcekler arası dünya rekoru!)',
+    sure: 'Okyanus geçişi birkaç hafta · 4 nesilde tam döngü ~1 yıl',
     dongu: 'Muson yağmurlarının peşinden Hindistan\'dan kalkıp Maldivler üzerinden Hint Okyanusu\'nu aşarak Doğu Afrika\'ya uçar; orada yeni nesil doğar ve rüzgârla Hindistan\'a döner.',
     neden: 'Yumurtalarını bırakmak için muson yağmurlarının oluşturduğu geçici tatlı su göletlerine ihtiyaç duyar.',
     pusula: '1.000 metre yüksekliğe çıkıp mevsimlik muson rüzgârlarına binerek açık okyanusu neredeyse hiç enerji harcamadan geçer.',
@@ -144,6 +158,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'buyuk-beyaz', ad: 'Büyük Beyaz Köpekbalığı (Pasifik Kafesi)', ik: '🦈', renk: '#94a3b8',
     mesafe: '~8.000 km (gidiş-dönüş)',
+    sure: 'Tek yön ~35 – 45 gün · Açık denizde 4–6 ay kalış · Tam döngü 1 yıl',
     dongu: 'Sonbahar: Kaliforniya kıyılarında foklarla beslenir. Kış–İlkbahar: Meksika ile Hawaii arasındaki ıssız açık okyanusa ("White Shark Café") yüzüp aylarca orada toplanır.',
     neden: 'Bilim insanları bu ıssız açık deniz noktasının hem derin deniz kalamarı ziyafeti hem de çiftleşme buluşma yeri olduğunu keşfetti.',
     pusula: 'Kafasındaki elektro-algılayıcılar (Lorenzini ampulleri) ile Dünya\'nın manyetik alanını hassas bir pusula gibi okur.',
@@ -154,6 +169,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'sardalya-gocu', ad: 'Güney Afrika Büyük Sardalya Göçü', ik: '🐟', renk: '#38bdf8',
     mesafe: '~1.200 km (milyarlarca balık!)',
+    sure: '6 – 10 hafta (Mayıs – Temmuz arası) · Her yıl tekrarlanır',
     dongu: 'Mayıs–Temmuz: Kış soğuk su koridoru açılınca milyarlarca sardalya Agulhas Burnu\'ndan doğu kıyısı boyunca kuzeye, Durban açıklarına doğru dev şeritler hâlinde yüzer.',
     neden: 'Sıcak Agulhas Akıntısı kıyıdan geçici olarak uzaklaşıp soğuk su yolu açtığında sardalyalar bu koridoru takip ederek kuzeye yayılır.',
     pusula: 'Su sıcaklığının 21 °C\'nin altına düşmesi göçün başlama sinyalidir; yunuslar, köpekbalıkları ve dalıcı kuşlar da hemen peşlerine takılır.',
@@ -164,6 +180,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'meyve-yarasasi', ad: 'Kasanka Meyve Yarasası Göçü', ik: '🦇', renk: '#c084fc',
     mesafe: '~2.000 km (sayıca dünyanın en büyük memeli göçü!)',
+    sure: 'Göç uçuşu 2 – 3 hafta · Kasanka\'da kalış ~90 gün · Tam döngü 1 yıl',
     dongu: 'Ekim–Aralık: Kongo yağmur ormanlarından kalkan 10 milyona yakın meyve yarasası Zambiya\'daki yalnızca birkaç hektarlık Kasanka bataklık ormanına akın eder.',
     neden: 'Bu iki ayda Kasanka ormanında musuku ve mufinsa meyveleri aynı anda olgunlaşarak dev bir meyve şöleni sunar.',
     pusula: 'Yarasalar gece gökyüzünü karartarak uçar ve yedikleri meyvelerin çekirdeklerini tüm Orta Afrika\'ya dağıtarak milyonlarca yeni ağaç eker.',
@@ -174,6 +191,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'deniz-fili', ad: 'Kuzey Deniz Fili Derin Deniz Göçü', ik: '🦭', renk: '#60a5fa',
     mesafe: '~20.000 km / yıl (yılda iki kez gidiş-dönüş!)',
+    sure: '1. sefer ~2,5 ay · 2. sefer ~7–8 ay (yılda 2 tam gidiş-dönüş!)',
     dongu: 'Kış: Kaliforniya ve Meksika kumsallarında yavrular. İlkbahar & Yaz: Alaska ve Aleut Adaları açıklarına yüzüp 8 ay boyunca karaya hiç çıkmadan açık denizde yaşar.',
     neden: 'Kuzey Pasifik\'in 500–1.500 metre derinliklerindeki kalamar ve derin deniz balıklarıyla beslenip yağ depolar.',
     pusula: 'Yüzlerce metre derine dalıp su altında 20 dakikalık "uyku dalışları" yaparak köpekbalıklarından korunur.',
@@ -184,6 +202,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'kalahari-zebra', ad: 'Kalahari–Okavango Zebra Göçü', ik: '🦓', renk: '#f8fafc',
     mesafe: '~1.000 km (gidiş-dönüş — Afrika\'nın en uzun kara göçü)',
+    sure: 'Tek yön 2 – 3 hafta · Tam mevsimsel döngü 1 yıl',
     dongu: 'Yağmur mevsimi: Namibya Chobe Nehri\'nden güneye, Botsvana\'daki Makgadikgadi tuz tavalarının taze otlaklarına yürür. Kurak mevsim: Su kaynaklarına geri döner.',
     neden: 'Tuzlu çayırların mineralli taze otları yavruların büyümesi için eşsiz besin sağlar.',
     pusula: 'Binlerce zebra çitler kaldırıldığı anda nesiller öncesinden kalma genetik ve kültürel hafızayla eski göç yolunu yeniden buldu!',
@@ -194,6 +213,7 @@ window.ATLAS_HAYVAN_GOC = [
   {
     id: 'kir-kirlangici', ad: 'Kır Kırlangıcı (Avrupa–Güney Afrika Göçü)', ik: '🐦', renk: '#fb923c',
     mesafe: '~10.000 km (tek yön)',
+    sure: 'Tek yön 5 – 6 hafta (günde ~300 km!) · Tam döngü 1 yıl',
     dongu: 'İlkbahar–Yaz: Avrupa ve Anadolu\'da çamurdan yaptığı yuvalarda yavrularını büyütür. Sonbahar: Cebelitarık ve Sahra Çölü\'nü aşarak Güney Afrika\'ya uçar.',
     neden: 'Kışın Avrupa\'da uçan sinek ve böcek kalmadığı için yaz mevsimini yaşayan Güney Afrika\'ya göçer.',
     pusula: 'Günde 300 km hızla uçup güneş, yıldızlar ve Dünya\'nın manyetik alanını kullanarak ertesi bahar tam aynı evin saçak altındaki eski yuvasına döner!',

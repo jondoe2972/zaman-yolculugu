@@ -667,7 +667,7 @@
     const mid = hg.pts[Math.floor(hg.pts.length / 2)];
     const genel = `<div class="kapak" data-kapak="${esc(hg.w)}"></div>
       <span class="pill">${hg.ik} Yıllık Hayvan Göç Döngüsü</span>
-      ${rowsHTML([['Yıllık Mesafe', hg.mesafe]])}
+      ${rowsHTML([['📏 Yıllık Mesafe', hg.mesafe], ...(hg.sure ? [['⏱️ Tamamlama Süresi', hg.sure]] : [])])}
       <h4>🔄 Mevsimsel Göç Döngüsü</h4><p>${esc(hg.dongu)}</p>
       <h4>🌍 Neden Göç Ederler?</h4><p>${esc(hg.neden)}</p>
       <h4>🧭 Yönlerini Nasıl Bulurlar?</h4><p>${esc(hg.pusula)}</p>
@@ -743,7 +743,6 @@
     const fosil = tip === 'doga' || tip === 'fosilkazi';
     const kat = fosil ? 'fosilkazi' : 'tarihkazi';
     kesifKaydet(kat, kz.id);
-    if (window.Ses) window.Ses.playMaden();
     const genel = `<div class="kapak" data-kapak="${esc(kz.w)}"></div>
       <span class="pill">${fosil ? '🦴 Doğa & Fosil Buluntusu' : '🏺 Tarihî Arkeolojik Kazı'} · ${esc(kz.yas)}</span>
       ${rowsHTML([['📍 Kazı Yeri', kz.yer], ['⏳ Kaç Senelik / Dönemi', kz.yas], ['📅 Kazı / Keşif Yılı', kz.yil]])}

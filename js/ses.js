@@ -16,14 +16,17 @@
   const GA = 'https://actions.google.com/sounds/v1/';
   const WC = 'https://upload.wikimedia.org/wikipedia/commons/';
 
-  // ---------- 🎵 5 Seçilebilir Arka Plan Müziği / Ambiyansı ----------
+  // ---------- 🎵 7 Seçilebilir Arka Plan Müziği / Ambiyansı (enstrümantal + doğa, hepsi kesintisiz loop!) ----------
   const MUZIKLER = [
-    { id: 'tarih', ad: '🏛️ Tarihî Lavta (Rönesans)', url: WC + '7/7f/Ludwig_Senfl_--_Ach_Elslein.opus', baz: 0.36 },
-    { id: 'doga', ad: '🌿 Bahar Ormanı & Kuşlar (Doğa)', url: GA + 'ambiences/spring_day_forest.ogg', baz: 0.34 },
-    { id: 'okyanus', ad: '🌊 Sakin Okyanus Dalgaları', url: GA + 'water/waves_crashing_on_rock_beach.ogg', baz: 0.28 },
-    { id: 'orman', ad: '🌴 Tropik Yağmur Ormanı', url: GA + 'ambiences/jungle_atmosphere_afternoon.ogg', baz: 0.32 },
-    { id: 'kozmik', ad: '🌌 Kozmik Zaman Yolculuğu', url: GA + 'science_fiction/outer_space.ogg', baz: 0.30 }
+    { id: 'tarih', ad: '🏛️ Tarihî Lavta (Rönesans)', url: WC + '7/7f/Ludwig_Senfl_--_Ach_Elslein.opus', baz: 0.38, basla: 0.5 },
+    { id: 'arp', ad: '🪕 Sakin Arp & Kelt Ezgisi', url: WC + '2/20/Greensleeves.ogg', baz: 0.36, basla: 0.5 },
+    { id: 'keman', ad: '🎻 Barok Keman Sonatı (Telemann)', url: WC + 'a/a8/Telemann_-_2violin_Sonata_1-1.ogg', baz: 0.34, basla: 0.5 },
+    { id: 'flut', ad: '🪈 Solo Flüt (Bach — Sarabande)', url: WC + 'd/df/Bach_-_Partita_For_Solo_Flute_-_Modern_Flute_-_3._Sarabande.ogg', baz: 0.36, basla: 0.5 },
+    { id: 'doga', ad: '🌿 Bahar Ormanı & Kuşlar (Doğa)', url: GA + 'ambiences/spring_day_forest.ogg', baz: 0.34, basla: 0 },
+    { id: 'orman', ad: '🌧️ Yağmurlu Orman & Hafif Rüzgâr', url: GA + 'weather/light_rain.ogg', url2: GA + 'ambiences/jungle_atmosphere_afternoon.ogg', baz: 0.28, baz2: 0.22, basla: 0 },
+    { id: 'okyanus', ad: '🌊 Sakin Okyanus Dalgaları', url: GA + 'water/waves_crashing_on_rock_beach.ogg', baz: 0.28, basla: 0 }
   ];
+  if (cfg.parca === 'kozmik') { cfg.parca = 'oto'; kaydet(); }
 
   // ---------- 🌊🏞️⚔️⛏️🌋💨 Gerçek Doğa & Olay Ses Efektleri ----------
   const SFX = {
@@ -80,7 +83,7 @@
   ];
 
   let atlasMod = 'tarih';
-  let muzikEl = null, muzikParcaId = null;
+  let muzikEl = null, muzikEl2 = null, muzikParcaId = null;
   let aktifSfx = null, sfxTimer = null, fadeRaf = null;
   let kilicSira = 0;
 
@@ -92,15 +95,38 @@
   }
 
   function sesGuncelle() {
+    const p = MUZIKLER.find(m => m.id === muzikParcaId) || MUZIKLER[0];
     if (muzikEl) {
-      const p = MUZIKLER.find(m => m.id === muzikParcaId) || MUZIKLER[0];
       const v = cfg.muzik ? etkinVol(p.baz) : 0;
       muzikEl.volume = v;
       if (v <= 0 && !muzikEl.paused) muzikEl.pause();
     }
+    if (muzikEl2) {
+      const v2 = cfg.muzik ? etkinVol(p.baz2 || p.baz) : 0;
+      muzikEl2.volume = v2;
+      if (v2 <= 0 && !muzikEl2.paused) muzikEl2.pause();
+    }
     if (aktifSfx && cfg.sessiz) {
       sfxDurdur();
     }
+  }
+
+  function audioKur(url, vol, basla) {
+    const el = new Audio(url);
+    el.loop = true;
+    el.preload = 'auto';
+    el.volume = vol;
+    if (basla > 0) {
+      const atla = () => { try { if (el.currentTime < basla) el.currentTime = basla; } catch (e) {} };
+      el.addEventListener('loadedmetadata', atla, { once: true });
+    }
+    // Bazı tarayıcılarda loop kesilirse diye garanti tekrar dinleyicisi
+    el.addEventListener('ended', () => {
+      if (cfg.sessiz || !cfg.muzik) return;
+      try { el.currentTime = basla || 0; el.play().catch(() => {}); } catch (e) {}
+    });
+    el.play().catch(() => {});
+    return el;
   }
 
   function muzikBaslat(zorlaYenile) {
@@ -109,23 +135,22 @@
     if (muzikEl && muzikParcaId === p.id && !zorlaYenile) {
       muzikEl.volume = etkinVol(p.baz);
       if (muzikEl.paused) muzikEl.play().catch(() => {});
+      if (muzikEl2) {
+        muzikEl2.volume = etkinVol(p.baz2 || p.baz);
+        if (muzikEl2.paused) muzikEl2.play().catch(() => {});
+      }
       return;
     }
-    if (muzikEl) {
-      try { muzikEl.pause(); muzikEl.src = ''; } catch (e) {}
-    }
+    if (muzikEl) { try { muzikEl.pause(); muzikEl.src = ''; } catch (e) {} muzikEl = null; }
+    if (muzikEl2) { try { muzikEl2.pause(); muzikEl2.src = ''; } catch (e) {} muzikEl2 = null; }
     muzikParcaId = p.id;
-    muzikEl = new Audio(p.url);
-    muzikEl.loop = true;
-    muzikEl.preload = 'auto';
-    muzikEl.volume = etkinVol(p.baz);
-    muzikEl.play().catch(() => {});
+    muzikEl = audioKur(p.url, etkinVol(p.baz), p.basla || 0);
+    if (p.url2) muzikEl2 = audioKur(p.url2, etkinVol(p.baz2 || p.baz), 0);
   }
 
   function muzikDurdur() {
-    if (muzikEl) {
-      try { muzikEl.pause(); } catch (e) {}
-    }
+    if (muzikEl) { try { muzikEl.pause(); } catch (e) {} }
+    if (muzikEl2) { try { muzikEl2.pause(); } catch (e) {} }
   }
 
   function sfxDurdur() {
@@ -275,8 +300,10 @@
     });
     pop.querySelector('#ses-parca')?.addEventListener('change', e => {
       cfg.parca = e.target.value || 'oto';
+      if (cfg.sessiz) cfg.sessiz = false;
+      if (!cfg.muzik) cfg.muzik = true;
       kaydet();
-      if (cfg.muzik && !cfg.sessiz) muzikBaslat(true);
+      muzikBaslat(true);
       uiGuncelle();
     });
     pop.querySelector('#ses-doga')?.addEventListener('change', e => {
