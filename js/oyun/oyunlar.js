@@ -208,10 +208,14 @@
     }
   ];
 
+  const KESIF_ID = new Set(['yayilis', 'derin', 'katmanlar', 'toprak', 'aa', 'kesif', 'rehber']);
   let pop = null;
   function ciz() {
     if (!pop) return;
-    pop.innerHTML = '<b class="op-bas">🎮 Oyunlar ve Keşif</b>' + OYUNLAR.map(o => `<button data-oyun="${o.id}" role="menuitem"><span class="op-ik">${o.ikon}</span><span><b>${o.ad}${o.yeni ? ' <i>yeni</i>' : ''}</b><small>${typeof o.alt === 'function' ? o.alt() : o.alt}</small></span></button>`).join('');
+    const kart = o => `<button data-oyun="${o.id}" role="menuitem"><span class="op-ik">${o.ikon}</span><span><b>${o.ad}${o.yeni ? ' <i>yeni</i>' : ''}</b><small>${typeof o.alt === 'function' ? o.alt() : o.alt}</small></span></button>`;
+    const oyunlar = OYUNLAR.filter(o => !KESIF_ID.has(o.id));
+    const kesifler = OYUNLAR.filter(o => KESIF_ID.has(o.id));
+    pop.innerHTML = `<b class="op-bas">🎮 Oyunlar ve Meydan Okumalar</b><div class="op-grid">${oyunlar.map(kart).join('')}</div><b class="op-bas op-bas2">🧭 Özel Keşif Modları ve Araçlar</b><div class="op-grid">${kesifler.map(kart).join('')}</div>`;
   }
   function konum() {
     if (!pop || !btn) return;
