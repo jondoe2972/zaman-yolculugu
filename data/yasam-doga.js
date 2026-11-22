@@ -283,6 +283,279 @@ window.YASAM_DOGA = {
         ['🌙 Kese İçinde Yavrular', '3-4 minik yavrunu arkaya doğru açılan karın kesende taşıyarak çalılıklardan güvenle geçirirsin.']
       ],
       w: 'Thylacine'
+    },
+    // ---- +16 Yeni Hayvan Çeşitliliği ----
+    {
+      id: 'yd-kralkelebek', ad: 'Kral Kelebeği', ik: '🦋', tur: 'hayvan', ll: [19.6, -100.2],
+      omur: '2 – 6 hafta (göçmen nesil 8 – 9 ay yaşar!)',
+      beslenme: 'Tırtılken yalnızca zehirli ipekotu yaprağı; kelebekken çiçek nektarı.',
+      zincir: 'Birincil tüketici & tozlayıcı — yediği ipekotu zehrini vücudunda biriktirdiği için kuşlar tarafından yenmez.',
+      goc: 'Kanada\'dan Meksika\'daki aynı dağ ormanına 4.800 km göç eder — yolculuk 4 kuşak sürer; torununun torunu hiç görmediği aynı ağaçlara konar!',
+      alan: 'Kuzey Amerika çayırları ve Meksika\'nın Oyamel köknar ormanları',
+      superguc: 'Güneş pusulası ve Dünya\'nın manyetik alanını hisseden antenleriyle 4.800 km\'lik rotayı şaşmadan bulur.',
+      sasirtici: 'Göç eden "süper nesil" diğer nesillerden 10 kat daha uzun yaşar; ağırlığı bir ataşın yarısı kadar (0,5 g) olmasına rağmen kıtayı aşar!',
+      tehdit: 'İpekotu tarlalarının yok olması, tarım ilaçları ve Meksika\'daki kışlık ormanların azalması.',
+      dongu: [
+        ['🥚 Yumurta ve Zehirli Ziyafet', 'İpekotu yaprağına bırakılan yumurtadan 4 günde çıkıp 2 hafta içinde ağırlığını 2.000 kat artırırsın!'],
+        ['🟢 Altın Noktalı Koza', 'Zümrüt yeşili, altın benekli krizalisin içinde bedenin tamamen eriyip 10 günde kanatlı bir kelebeğe dönüşür.'],
+        ['🧭 Kıtalararası Yolculuk', 'Sonbaharda milyonlarca türdeşinle rüzgârı arkana alıp günde 80 km uçarak Meksika dağlarına ulaşırsın.']
+      ],
+      w: 'Monarch butterfly'
+    },
+    {
+      id: 'yd-sumru', ad: 'Arktik Sumru (Göç Rekortmeni)', ik: '🕊️', tur: 'hayvan', ll: [65.0, -18.0],
+      omur: '25 – 34 yıl',
+      beslenme: 'Etçil — küçük deniz balıkları, kril ve kabuklular.',
+      zincir: 'İkincil deniz avcısı — okyanus yüzeyindeki küçük balıkları avlar, kutup tilkisi ve yırtıcı martılardan kaçınır.',
+      goc: 'Dünya rekoru: Her yıl Kuzey Kutbu\'ndan Güney Kutbu\'na (Antarktika) gidip döner — yılda 70.000 ila 90.000 km!',
+      alan: 'Yazın Arktik (İzlanda, Grönland), kışın Antarktika deniz buzları',
+      superguc: 'Her yıl iki kutbun yazını birden yaşadığı için Dünya\'da en fazla gün ışığı gören canlıdır.',
+      sasirtici: '30 yıllık ömrü boyunca yaklaşık 2,4 milyon kilometre uçar — bu, Ay\'a 3 kez gidip gelmeye eşittir!',
+      tehdit: 'Okyanus ısınmasıyla değişen balık sürüleri ve kutup kıyılarındaki yırtıcılar.',
+      dongu: [
+        ['☀️ Kutup Yazında Yuva', 'Kuzey Kutbu\'nda güneşin hiç batmadığı yaz günlerinde kıyıda yumurtlar, yuvaya yaklaşan herkese (ayı dahil!) dalışla saldırırsın.'],
+        ['🌊 Atlantik Boyunca Süzülüş', 'Ağustos\'ta rüzgâr koridorlarını kullanıp güneye iner, uçarken bile kısa saniyelik mikro-uykular alırsın.'],
+        ['❄️ İkinci Yaz: Antarktika', 'Kuzey kışa girerken sen Antarktika\'da yaz güneşi altında kril avlayıp baharda tekrar kuzeye dönersin.']
+      ],
+      w: 'Arctic tern'
+    },
+    {
+      id: 'yd-denizanasi', ad: 'Ölümsüz Denizanası (Turritopsis)', ik: '🪼', tur: 'hayvan', ll: [38.0, 15.0],
+      omur: 'Biyolojik olarak sınırsız! (Avlanmazsa yaşlanıp ölmez)',
+      beslenme: 'Etçil — plankton, balık yumurtaları ve minik deniz larvaları.',
+      zincir: 'Alt-orta deniz tüketicisi — plankton yer; deniz kaplumbağaları, ton balıkları ve büyük denizanalarına av olur.',
+      goc: 'Kendi gücüyle uzun göç etmez; ancak gemilerin balast sularıyla Akdeniz\'den tüm dünya okyanuslarına yayılmıştır.',
+      alan: 'Akdeniz ve ılıman/tropikal dünya denizleri',
+      superguc: 'Yaralandığında, aç kaldığında veya yaşlandığında yetişkin hücrelerini sıfırlayıp tekrar "bebek polip" aşamasına geri döner!',
+      sasirtici: 'Yalnızca 4,5 milimetre (tırnağının ucu kadar) boyundadır ve tıpkı bir kelebeğin tekrar tırtıla dönmesi gibi yaşam döngüsünü sonsuz kez başa sarabilir!',
+      tehdit: 'Biyolojik olarak ölümsüz olsa da çoğu birey balıklar, kaplumbağalar veya hastalıklar yüzünden ölür.',
+      dongu: [
+        ['🌱 Deniz Tabanında Polip', 'Kayaya tutunan minik bir polip kolonisi olarak doğar, tomurcuklanarak suya minik denizanaları bırakırsın.'],
+        ['🌊 Özgür Yüzücü', 'Sadece birkaç hafta içinde erginleşip 80\'den fazla ince dokunaçla plankton avlayan şeffaf bir çana dönüşürsün.'],
+        ['⏪ Zamanı Geri Sarma', 'Ağır stres veya yaşlanma başlayınca dibe çöküp dokunaçlarını eritir, hücrelerini yeniden programlayarak tekrar genç bir polipe dönüşürsün!']
+      ],
+      w: 'Turritopsis dohrnii'
+    },
+    {
+      id: 'yd-tardigrad', ad: 'Su Ayısı (Tardigrad)', ik: '🦠', tur: 'hayvan', ll: [47.0, 10.0],
+      omur: '3 – 30 ay aktif yaşam (uyku hâlinde 30+ yıl!)',
+      beslenme: 'Yosun hücrelerinin sıvısı, bakteri ve mikroskobik canlılar.',
+      zincir: 'Mikroskobik tüketici — yosun ve liken ekosistemlerinin minik temizlikçisi; nematod ve akarlara av olur.',
+      goc: 'Kuru uyku (kriptobiyoz) hâlindeyken rüzgârla toz zerresi gibi kıtalar ve okyanuslar aşarak her yere dağılır.',
+      alan: 'Himalaya zirvelerinden Mariana Çukuru\'na, Antarktika\'dan evinin bahçesindeki yosunlara kadar HER YERDE!',
+      superguc: 'Vücudundaki suyun %99\'unu atıp cam gibi kuruyarak -272 °C soğuğa, +150 °C sıcağa, dev radyasyona ve uzay boşluğuna dayanır.',
+      sasirtici: '2007\'de bir uzay aracının dışına bağlanıp 10 gün boyunca doğrudan uzay boşluğunda bırakılan su ayıları Dünya\'ya dönünce su değdiği an uyanıp yavruladı!',
+      tehdit: 'Aktif hâldeyken yırtıcı mikroskobik kurtçuklar ve ani kimyasal kirlilik.',
+      dongu: [
+        ['💧 Yosun Ormanında Yürüyüş', '8 tombul bacağının ucundaki minik pençelerle yarım milimetrelik boyunla bir su damlasının içinde ağır ağır yürürsün.'],
+        ['🏜️ Tun (Uyku) Modu', 'Yosun kuruyunca fıçı gibi kıvrılıp metabolizmanı %0,01\'e düşürür, onlarca yıl tek damla su olmadan beklersin.'],
+        ['🌧️ Yeniden Doğuş', 'İlk yağmur damlası düştüğünde dakikalar içinde şişip uyanır, sanki hiç zaman geçmemiş gibi yaşamına devam edersin.']
+      ],
+      w: 'Tardigrade'
+    },
+    {
+      id: 'yd-cita', ad: 'Çita (Kara Hız Rekortmeni)', ik: '🐆', tur: 'hayvan', ll: [-2.5, 35.0],
+      omur: '10 – 12 yıl (doğada)',
+      beslenme: 'Etçil — ceylan, impala ve tavşan gibi hızlı savan otçulları.',
+      zincir: 'Hızlı gündüz avcısı — aslan ve sırtlanlarla karşılaşmamak için gündüz avlanır; avını sık sık daha iri avcılara kaptırır.',
+      goc: 'Kıtalararası göç etmez ancak ceylan sürülerinin yağmur mevsimi hareketlerini takip ederek geniş savanlarda dolaşır.',
+      alan: 'Doğu ve Güney Afrika savanları (az sayıda İran\'da)',
+      superguc: '0\'dan 100 km/saat hıza sadece 3 saniyede çıkar — birçok süper spor otomobilden hızlıdır!',
+      sasirtici: 'Diğer büyük kediler gibi kükreyemez; bunun yerine ev kedisi gibi mırlar ve kuş cıvıltısına benzeyen ince bir ses çıkarır! Koşarken zamanının yarısında dört ayağı birden havadadır.',
+      tehdit: 'Yaşam alanı parçalanması, düşük genetik çeşitlilik ve aslan/sırtlan rekabeti.',
+      dongu: [
+        ['🌅 Gözetleme Tepesi', 'Sabah termit tepeciğinin üstüne çıkıp gözlerinin altındaki siyah "gözyaşı çizgileri" sayesinde güneş parlamadan av ararsın.'],
+        ['⚡ 20 Saniyelik Şimşek Takibi', 'Saatte 110 km hızla 7 metrelik sıçramalar yaparsın; vücudun aşırı ısındığı için koşu 20–30 saniyeden uzun süremez.'],
+        ['💨 Hızlı Ziyafet', 'Avını yakaladıktan sonra soluklanıp sırtlanlar kokuyu almadan hemen beslenirsin.']
+      ],
+      w: 'Cheetah'
+    },
+    {
+      id: 'yd-kunduz', ad: 'Kunduz (Doğanın Baraj Mühendisi)', ik: '🦫', tur: 'hayvan', ll: [55.0, -112.0],
+      omur: '10 – 15 yıl',
+      beslenme: 'Otçul — ağaç kabuğu (söğüt, kavak), sürgünler ve su bitkileri.',
+      zincir: 'Kilit taşı otçul — kurduğu göletlerle kurbağa, balık, kuş ve böceklere yeni yaşam alanı yaratır; kurt ve ayılara av olabilir.',
+      goc: 'Göç etmez; kışın buzun altında suyun dibine depoladığı taze ağaç dallarından yiyerek yuvasında kalır.',
+      alan: 'Kuzey Amerika ve Avrasya\'nın ormanlık akarsuları',
+      superguc: 'Demir içerikli turuncu ön dişleri hiç aşınmaz ve ömür boyu uzar; 15 dakikada bir ağacı devirebilir!',
+      sasirtici: 'Kanada\'da kunduz nesillerinin birlikte ördüğü en büyük baraj 850 metre uzunluğundadır ve uzaydan (uydu görüntülerinden) açıkça görülebilir!',
+      tehdit: 'Geçmişte kürk ticareti yüzünden neredeyse tükendi; bugün nehir ıslahları ve kuraklık.',
+      dongu: [
+        ['🪓 Ağaç Kesimi', 'Akşam alacasında güçlü ön dişlerinle kavak ağaçlarını kemirip suya devirirsin.'],
+        ['🏗️ Baraj ve Su Altı Girişli Ev', 'Dal ve çamurla dereyi kesip gölet oluşturur, tam ortasına yalnızca su altından girilebilen güvenli ahşap bir kubbe ev kurarsın.'],
+        ['❄️ Kış Kileri', 'Sonbaharda suyun dibine yüzlerce taze dal gömer, göl donunca buzun altından yüzüp taze yemeğini alırsın.']
+      ],
+      w: 'Beaver'
+    },
+    {
+      id: 'yd-denizati', ad: 'Denizatı', ik: '🐴', tur: 'hayvan', ll: [36.0, 14.0],
+      omur: '1 – 5 yıl',
+      beslenme: 'Etçil — minik karidesler, plankton ve balık larvalarını pipet ağzıyla emer.',
+      zincir: 'Küçük kıyı avcısı — midesi olmadığı için gün boyu sürekli minik kabuklu yer; yengeçler ve büyük balıklara av olur.',
+      goc: 'Göç etmez; kuyruğunu deniz çayırına dolayıp aynı küçük resifte yaşar.',
+      alan: 'Ilıman ve tropikal deniz çayırları, mercan resifleri ve mangrovlar',
+      superguc: 'Hayvanlar aleminde erkeğin hamile kalıp yüzlerce yavruyu doğurduğu tek canlı grubudur!',
+      sasirtici: 'Midesi ve dişi yoktur — yiyecek sindirim sisteminden o kadar hızlı geçer ki günde 3.000\'den fazla minik karides emmek zorundadır!',
+      tehdit: 'Deniz çayırlarının tahribi, dip trolü avcılığı ve geleneksel ilaç ticareti.',
+      dongu: [
+        ['💃 Sabah Dansı', 'Tek eşli partnerinle her sabah kuyruklarınızı birbirine dolayıp renk değiştirerek 10 dakikalık selamlama dansı yaparsın.'],
+        ['🤰 Babanın Kuluçka Kesesi', 'Anne yumurtalarını babanın karın kesesine bırakır; baba 2–4 hafta boyunca yavrulara oksijen ve besin verip büyütür.'],
+        ['🌊 Yüzlerce Minik Yavru', 'Doğum günü geldiğinde baba kesesinden 100 ila 1.000 arası pirinç tanesi kadar minik denizatını akıntıya bırakır.']
+      ],
+      w: 'Seahorse'
+    },
+    {
+      id: 'yd-atesbocegi', ad: 'Ateş Böceği', ik: '✨', tur: 'hayvan', ll: [35.6, -83.5],
+      omur: '1 – 2 yıl larva, yalnızca 2 – 4 hafta uçan yetişkin!',
+      beslenme: 'Larvaken etçil (salyangoz, sümüklü böcek avcısı); yetişkinken nektar, polen ya da hiç yemez.',
+      zincir: 'Bahçe ve orman temizlikçisi — larvaları zararlı salyangozları kontrol eder; vücutları zehirli olduğu için örümcekler dışında pek avlanmaz.',
+      goc: 'Göç etmez; doğduğu nemli orman kıyısı veya dere kenarında yaşar.',
+      alan: 'Ilıman ve tropikal nemli ormanlar, çayırlar ve dere kenarları',
+      superguc: 'Lüsiferin kimyasalıyla neredeyse %100 verimli "soğuk ışık" üretir — sıradan bir ampul enerjisinin %90\'ını ısıya harcarken ateş böceği hiç ısınmaz!',
+      sasirtici: 'Her ateş böceği türünün kendine özgü bir Mors alfabesi gibi ışık ritmi vardır; bazı türlerin dişileri başka türlerin sinyalini taklit edip erkeklerini tuzağa çekip yer!',
+      tehdit: 'Şehirlerin yapay ışık kirliliği (eş bulma sinyallerini bozar), tarım ilaçları ve sulak alan kaybı.',
+      dongu: [
+        ['🐛 Toprak Altında 1 Yıl', 'Hayatının neredeyse tamamını nemli toprakta parlayan minik bir larva olarak salyangoz avlayarak geçirirsin.'],
+        ['✨ Yaz Gecesi Işık Dansı', 'Yaz akşamı kanatlanıp karnındaki fenerle kendi türünün gizli ışık kodunu yakarak eş ararsın.'],
+        ['🌿 Yeni Nesil', 'Sadece birkaç haftalık büyülü uçuşun ardından nemli yosunlara yumurtalarını bırakıp ömrünü tamamlarsın.']
+      ],
+      w: 'Firefly'
+    },
+    {
+      id: 'yd-bukalemun', ad: 'Bukalemun', ik: '🦎', tur: 'hayvan', ll: [-18.9, 47.5],
+      omur: '3 – 7 yıl',
+      beslenme: 'Böcekçil — sinek, çekirge, örümcek; büyük türler küçük kertenkele de yer.',
+      zincir: 'Ağaç tepesi pusucusu — böcek popülasyonunu dengeler; yılanlar ve yırtıcı kuşlara av olabilir.',
+      goc: 'Göç etmez; ağaç dalları arasında son derece bölgeci bir yaşam sürer.',
+      alan: 'Madagaskar (türlerin yarısı burada!), Afrika, Akdeniz ve Güney Asya',
+      superguc: 'İki gözünü birbirinden tamamen bağımsız 360 derece döndürebilir; dili kendi vücut boyunun 2 katı uzunluğa saniyenin %2\'sinde fırlar!',
+      sasirtici: 'Renk değiştirmesinin ana sebebi sadece kamuflaj değil, DUYGU ve ISI İLETİŞİMİDİR — öfkelendiğinde parlak kırmızı/sarıya, üşüdüğünde güneşi emmek için koyu renge döner!',
+      tehdit: 'Ormansızlaşma (özellikle Madagaskar\'da) ve yasa dışı evcil hayvan ticareti.',
+      dongu: [
+        ['🌅 Güneşlenme', 'Sabah serinliğinde derini koyulaştırıp güneş ısısını emerek vücut sıcaklığını yükseltirsin.'],
+        ['🎯 Çift Gözle Kilitleme', 'Bir gözün arkadaki tehlikeyi kollarken diğeri bir çekirgeyi seçer; ikisi birden hedefe odaklanıp mesafeyi milimetrik ölçer.'],
+        ['👅 Yaylı Dil Atışı', 'Yapışkan uçlu dilini kurşun hızıyla fırlatıp 0,07 saniyede avını ağzına çekersin.']
+      ],
+      w: 'Chameleon'
+    },
+    {
+      id: 'yd-peygamberdevesi', ad: 'Peygamber Devesi', ik: '🦗', tur: 'hayvan', ll: [38.0, 27.5],
+      omur: '6 – 12 ay',
+      beslenme: 'Etçil — sinek, arı, çekirge, kelebek; büyük türler küçük kertenkele ve sinekkuşu bile avlar!',
+      zincir: 'Sabırlı pusu avcısı — tarım zararlılarını yer; kuşlar, yarasalar ve kertenkelelere av olur.',
+      goc: 'Göç etmez; çalı ve çiçek dallarında yaprak ya da orkide çiçeği taklidi yaparak bekler.',
+      alan: 'Tropikal ve ılıman bölgeler (Akdeniz ve Anadolu dahil)',
+      superguc: 'Başını 180 derece çevirebilen tek böcektir ve 3 boyutlu (stereoskopik) derinlik algısıyla gördüğü kanıtlanan ilk böcektir!',
+      sasirtici: 'Göğsünün ortasında yalnızca tek bir kulağı vardır — bu kulak yarasaların ultrasonik av seslerini duyup havada ani kaçış manevrası yapmasını sağlar!',
+      tehdit: 'Tarım ilaçları, kış donları ve yırtıcı kuşlar.',
+      dongu: [
+        ['🫧 Köpük Yumurta Kesesi', 'İlkbaharda sertleşmiş köpük kesesinden (ooteka) yüzlerce minik kopya yavru aynı anda çıkar.'],
+        ['🍃 Kusursuz Pusu', 'Yaprak gibi rüzgârda hafifçe sallanarak hareketsiz bekler, dikenli ön bacaklarını saniyenin 20\'de birinde kapatıp avını yakalarsın.'],
+        ['🍂 Sonbahar Mirası', 'Sonbaharda yeni neslin yumurta kesesini bir dala yapıştırıp soğuklar gelince ömrünü tamamlarsın.']
+      ],
+      w: 'Mantis'
+    },
+    {
+      id: 'yd-karinca', ad: 'Yaprak Kesici Karınca', ik: '🐜', tur: 'hayvan', ll: [9.0, -79.5],
+      omur: 'İşçiler 1 – 2 yıl · Kraliçe 15 – 20 yıl!',
+      beslenme: 'Kestikleri yaprakları YEMEZLER — yeraltında o yapraklarla özel bir mantar yetiştirip mantarı yerler!',
+      zincir: 'Ekosistem dönüştürücüsü — ormandaki yaprakların %15\'ini toprağa taşıyıp toprağı havalandırır; karıncayiyen ve kuşlara av olur.',
+      goc: 'Göç etmez; milyonlarca bireylik dev yeraltı şehirleri (bazen 8 metre derinliğinde!) kurarlar.',
+      alan: 'Orta ve Güney Amerika yağmur ormanları',
+      superguc: 'Kendi ağırlığının 50 katı yaprak parçasını taşıyabilir; insanlardan 50 MİLYON yıl önce tarımı ve antibiyotik kullanımını icat etmiştir!',
+      sasirtici: 'Vücutlarının üstünde özel bir bakteri tabakası taşırlar — bu bakteriler yeraltı mantar bahçelerini zararlı küflerden koruyan doğal antibiyotik üretir!',
+      tehdit: 'Ormansızlaşma, karıncayiyenler ve parazit sinekler.',
+      dongu: [
+        ['✂️ Yaprak Hasadı', 'Keskin çenelerinle ağaç yapraklarından yarım ay parçalar kesip şemsiye gibi başının üstünde otoyol gibi yuvaya taşırsın.'],
+        ['🍄 Yeraltı Mantar Çiftliği', 'Küçük bahçıvan karıncalar yaprakları çiğneyip hamur yapar ve koloninin tek besini olan beyaz mantarı besler.'],
+        ['🌬️ Klima Mühendisliği', 'Yuvanın havalandırma tünelleri sıcak havayı dışarı atıp taze oksijen çeker — 5 milyon karıncalık canlı bir metropol!']
+      ],
+      w: 'Leafcutter ant'
+    },
+    {
+      id: 'yd-yusufcuk', ad: 'Yusufçuk (Hava Avcısı)', ik: '🪰', tur: 'hayvan', ll: [40.0, 29.0],
+      omur: '1 – 5 yıl su altı larvası, 2 – 6 ay uçan yetişkin',
+      beslenme: 'Etçil — günde 100\'den fazla sivrisinek, tatarcık ve küçük böcek avlar!',
+      zincir: 'Hava süper avcısı — sivrisinekleri kontrol ederek insanları sıtma gibi hastalıklardan korur; kurbağa ve kuşlara av olur.',
+      goc: 'Bazı türler (ör. Gezgin Küre Kanatlısı) Hindistan\'dan Afrika\'ya Hint Okyanusu üzerinden 14.000 km göç eder — böcekler arası dünya rekoru!',
+      alan: 'Antarktika hariç tüm kıtalardaki göl, dere ve sulak alanlar',
+      superguc: '4 kanadını birbirinden bağımsız oynatarak helikopter gibi havada asılı kalır, geri geri uçar ve baş aşağı döner.',
+      sasirtici: 'Aslanların av başarısı %25 iken yusufçukların av başarısı %95\'tir — hayvanlar aleminin en isabetli avcısıdır ve 300 milyon yıldır (dinozorlardan bile önce!) Dünya\'dadır!',
+      tehdit: 'Sulak alanların kurutulması ve su kirliliği.',
+      dongu: [
+        ['🌊 Su Altında Gizli Avcı', 'Yıllarca göl dibinde uzayan alt çeneli bir su larvası (nimf) olarak sivrisinek larvası ve küçük balık avlayarak büyürsün.'],
+        ['🌅 Sazlıkta Dönüşüm', 'Bir bahar sabahı sudan çıkıp bir saza tırmanır, eski kabuğunu yarıp 30.000 mercekli dev gözlerinle göğe kanatlanırsın.'],
+        ['⚡ %95 İsabetli Av', 'Avının gideceği noktayı önceden hesaplayıp havada kesişme rotasına uçarak tek hamlede yakalarsın.']
+      ],
+      w: 'Dragonfly'
+    },
+    {
+      id: 'yd-ornitorenk', ad: 'Ornitorenk (Doğanın Bulmacası)', ik: '🦆', tur: 'hayvan', ll: [-37.0, 145.0],
+      omur: '12 – 17 yıl',
+      beslenme: 'Etçil — su altı böcek larvaları, solucanlar ve tatlı su karidesleri.',
+      zincir: 'Nehir tabanı avcısı — omurgasızları avlar; yılanlar, su sıçanları ve yırtıcı kuşlara karşı dikkatli olur.',
+      goc: 'Göç etmez; nehir kıyılarına kazdığı 10 metrelik toprak tünellerde yaşar.',
+      alan: 'Doğu Avustralya ve Tazmanya\'nın temiz tatlı su nehirleri',
+      superguc: 'Gözlerini ve kulaklarını kapatıp daldığında ördek gagasındaki elektrik algılayıcılarla avının kas hareketlerindeki minik elektrik sinyallerini hisseder!',
+      sasirtici: 'Yumurtlayan bir memelidir, meme ucu olmadığı için sütü derisinden ter gibi sızar, erkeklerinin arka ayağında zehirli mahmuz vardır ve UV ışığı altında kürkü neon yeşil-mavi parlar!',
+      tehdit: 'Kuraklık, nehir kirliliği, barajlar ve balık ağları.',
+      dongu: [
+        ['🌙 Gece Dalışı', 'Gözlerin kapalı hâlde nehir tabanında gaganı sağa sola sallayarak çamurdaki karideslerin elektrik alanını yakalarsın.'],
+        ['🥚 Toprak Tünelde Yumurta', 'Anne nehir kıyısındaki derin yuvada 1–3 küçük yumurtayı 10 gün kuluçkaya yatırır.'],
+        ['🥛 Deriden Beslenen Yavrular', 'Yumurtadan çıkan minik yavrular annenin karnındaki oluklara sızan sütü yalayarak 4 ayda büyür.']
+      ],
+      w: 'Platypus'
+    },
+    {
+      id: 'yd-akbaba', ad: 'Kızıl Akbaba (Doğanın Temizlik Ekibi)', ik: '🦅', tur: 'hayvan', ll: [39.0, 32.0],
+      omur: '25 – 40 yıl',
+      beslenme: 'Leşçil — yalnızca ölü hayvanları yer, canlı av peşinde koşmaz.',
+      zincir: 'Kritik ayrıştırıcı/temizlikçi — leşleri hızla tüketerek salgın hastalıkların yayılmasını önler.',
+      goc: 'Genç bireyler Anadolu ve Avrupa\'dan Afrika\'ya binlerce km göç eder; yetişkinler termal akımlarla günde 300 km süzülebilir.',
+      alan: 'Akdeniz, Anadolu, Orta Doğu, Orta Asya ve Afrika\'nın sarp kayalıkları',
+      superguc: 'Mide asidi akü asidi kadar güçlüdür (pH ~1); şarbon, kolera ve kuduz mikroplarını bile tamamen yok eder!',
+      sasirtici: 'Akbabaların azaldığı bölgelerde kuduz ve salgın hastalıklar patlar — tek bir akbaba ömrü boyunca doğaya on binlerce dolarlık bedava sağlık/temizlik hizmeti sunar!',
+      tehdit: 'Tarım ve hayvancılıkta kullanılan zehirli ilaçlar, rüzgâr türbinleri ve yüksek gerilim hatları.',
+      dongu: [
+        ['☀️ Kanat Çırpmadan Uçuş', '3 metreyi bulan dev kanatlarınla sıcak hava akımlarına binip saatlerce neredeyse sıfır enerjiyle gökyüzünü tararsın.'],
+        ['🔍 Sosyal Haberleşme', 'Bir akbaba leş bulup alçaldığında kilometrelerce uzaktaki diğerleri bunu görüp dakikalar içinde toplanır.'],
+        ['🏔️ Uçurum Kolonisi', 'Yılda tek bir yumurta bırakır, anne ve baba 4 ay boyunca yavruyu nöbetleşe büyütürsünüz.']
+      ],
+      w: 'Griffon vulture'
+    },
+    {
+      id: 'yd-somon', ad: 'Pasifik Somonu', ik: '🐟', tur: 'hayvan', ll: [58.0, -135.0],
+      omur: '3 – 7 yıl',
+      beslenme: 'Etçil — gençken tatlı su böcekleri, okyanusta kril ve küçük balıklar.',
+      zincir: 'Okyanusla orman arasındaki köprü — boz ayılar, kartallar ve kurtları besler; ölen bedenleri çam ormanlarına okyanus gübresi taşır!',
+      goc: 'Okyanusta 3.000–5.000 km yüzdükten sonra tam olarak doğduğu nehrin ve derenin kokusunu takip ederek akıntıya karşı şelalelerden atlayıp eve döner!',
+      alan: 'Kuzey Pasifik Okyanusu ve Alaska, Kanada, Rusya, Japonya nehirleri',
+      superguc: 'Hem tatlı suda hem tuzlu okyanusta yaşayabilmek için böbreklerini ve solungaçlarını kimyasal olarak yeniden programlar.',
+      sasirtici: 'Kuzey Amerika kıyılarındaki dev çam ağaçlarının içindeki azotun %80\'e varan kısmı, somonların okyanustan taşıyıp ayıların ormana bıraktığı balıklardan gelir!',
+      tehdit: 'Nehir barajları, aşırı avlanma ve ısınan akarsular.',
+      dongu: [
+        ['🏞️ Nehirde Doğuş', 'Çakıl taşlarının arasında yumurtadan çıkıp doğduğun derenin eşsiz kimyasal kokusunu hafızana kazıyarak okyanusa açılırsın.'],
+        ['🌊 Okyanusta Büyüme', '3–4 yıl Pasifik\'te avlanıp gümüşi ve güçlü bir yetişkine dönüşürsün.'],
+        ['⬆️ Şelaleleri Aşan Son Yolculuk', 'Kırmızıya bürünüp tek lokma yemeden yüzlerce km akıntıya karşı yüzer, ayılardan sıyrılıp doğduğun çakıl yatağına yumurtalarını bırakırsın.']
+      ],
+      w: 'Pacific salmon'
+    },
+    {
+      id: 'yd-kurt', ad: 'Bozkurt (Ekosistemin Dengesi)', ik: '🐺', tur: 'hayvan', ll: [44.6, -110.5],
+      omur: '6 – 10 yıl (doğada)',
+      beslenme: 'Etçil — geyik, yaban domuzu, bizon ve küçük memeliler.',
+      zincir: 'Tepe avcısı (kilit taşı tür) — otçul sürülerini dengede tutarak ormanların ve nehir kıyılarının yenilenmesini sağlar.',
+      goc: 'Genç kurtlar yeni sürü kurmak için 800–1.000 km uzağa kadar yolculuk yapabilir; sürüler geniş bölgeleri devriye gezer.',
+      alan: 'Kuzey Amerika, Avrupa, Anadolu, Orta Asya ve Sibirya',
+      superguc: 'Uluması ormanda 10 km, açık tundrada 16 km öteden duyulur; günde 50 km durmadan koşabilir.',
+      sasirtici: '1995\'te Yellowstone Millî Parkı\'na kurtlar geri bırakılınca geyikler nehir kıyısındaki fidanları yemeyi kesti; ağaçlar büyüdü, kunduzlar döndü ve NEHİRLERİN AKIŞ YÖNÜ BİLE DÜZELDİ!',
+      tehdit: 'Yaşam alanı kaybı, yasa dışı avlanma ve hayvancılık çatışması.',
+      dongu: [
+        ['🌅 Aile Sürüsü', 'Anne, baba ve kardeşlerden oluşan sıkı bir aile sürüsünde yaşar, yavrulara tüm sürü birlikte bakar.'],
+        ['🐾 İşbirliğiyle Av', 'Sürü hâlinde zayıf veya yaşlı avları seçerek sürünün geri kalanının daha sağlıklı kalmasını sağlarsın.'],
+        ['🌙 Akşam Uluması', 'Karanlık çökünce sürüyü toplamak ve bölge sınırlarını duyurmak için hep bir ağızdan ulursunuz.']
+      ],
+      w: 'Wolf'
     }
   ],
   bitkiler: [
@@ -509,6 +782,400 @@ window.YASAM_DOGA = {
         ['🍵 Binlerce Yıllık Dostluk', '5.000 yıl önce Çin\'de başlayan yolculuğunla bugün sudan sonra insanlığın en çok içtiği içeceksin.']
       ],
       w: 'Camellia sinensis'
+    },
+    // ---- +12 Yeni Bitki Çeşitliliği ----
+    {
+      id: 'yd-kustum', ad: 'Küstüm Otu (Mimosa pudica)', ik: '🌱', tur: 'bitki', ll: [-10.0, -55.0],
+      omur: '2 – 5 yıl',
+      beslenme: 'Fotosentez + köklerindeki bakterilerle havadaki azotu toprağa bağlar.',
+      zincir: 'Birincil üretici — dokunulunca hızla kapanarak otçul böcekleri ve hayvanları şaşırtıp kaçırır.',
+      goc: 'Anavatanı Güney/Orta Amerika\'dır; tohumları hayvan tüylerine yapışarak tüm tropikal kuşağa yayılmıştır.',
+      alan: 'Tropikal Amerika, Asya ve Afrika\'nın güneşli açıklıkları',
+      superguc: 'Yapraklarına dokunulduğunda saniyeler içinde su basıncını boşaltıp yapraklarını sıkıca kapatır!',
+      sasirtici: 'Bilim insanları küstüm otuna zararsız su damlaları damlattığında bitkinin bunun tehlike olmadığını ÖĞRENDİĞİNİ, artık kapanmadığını ve bunu haftalarca HATIRLADIĞINI keşfetti — beyni olmadan hafızası var!',
+      tehdit: 'Aşırı soğuk ve gölge.',
+      dongu: [
+        ['🌅 Güneşle Açılış', 'Sabah gün doğarken ince tüy gibi yapraklarını güneşe doğru tek tek açarsın.'],
+        ['⚡ Dokunma Refleksi', 'Bir çekirge yaprağına konunca elektrik sinyaliyle 0,1 saniyede yapraklarını kapatıp kuru bir dal gibi görünürsün.'],
+        ['🌙 Gece Uykusu', 'Hava kararınca hiç dokunulmasa bile nem ve enerji korumak için yapraklarını kapatıp uyursun.']
+      ],
+      w: 'Mimosa pudica'
+    },
+    {
+      id: 'yd-aycicegi', ad: 'Ayçiçeği (Günebakan)', ik: '🌻', tur: 'bitki', ll: [39.0, -98.0],
+      omur: '1 yıl (tek yıllık)',
+      beslenme: 'Fotosentez — bol güneş ve derin kökleriyle toprağın altındaki mineralleri emer.',
+      zincir: 'Birincil üretici & arı/kuş deposu — poleni arıları, yağlı çekirdekleri kuşları ve insanları besler.',
+      goc: 'Kuzey Amerika\'da 5.000 yıl önce yerlilerce evcilleştirildi; 16. yüzyılda Avrupa\'ya ve Trakya ovalarına yayıldı.',
+      alan: 'Anavatanı Kuzey Amerika; bugün Trakya, Ukrayna, Rusya ve tüm ılıman ovalar',
+      superguc: 'Gençken biyolojik saatiyle güneşi doğudan batıya takip eder; gece doğuya dönüp yeni günü bekler!',
+      sasirtici: 'Tek bir çiçek sandığın ayçiçeğinin ortasında aslında 1.000 ila 2.000 adet minik ayrı çiçek Fibonacci spirali düzeninde dizilmiştir! Ayrıca topraktaki radyoaktif maddeleri bile temizleyebilir.',
+      tehdit: 'Aşırı kuraklık ve mantar hastalıkları.',
+      dongu: [
+        ['🌱 Güneşi Takip', 'Genç gövden sabah doğuya, öğlen tepeye, akşam batıya dönerek maksimum güneş enerjisi toplar.'],
+        ['🌻 Doğuya Sabitlenme', 'Çiçek açınca doğuya sabitlenirsin — sabah ilk güneşle ısınan çiçeklerin arıları 5 kat daha fazla çeker!'],
+        ['🐦 Tohum Şöleni', 'Yaz sonunda yüzlerce yağlı çekirdekle başını eğip hem kuşları hem gelecek baharı beslersin.']
+      ],
+      w: 'Common sunflower'
+    },
+    {
+      id: 'yd-karahindiba', ad: 'Karahindiba (Rüzgâr Gezgini)', ik: '🌼', tur: 'bitki', ll: [48.0, 11.0],
+      omur: 'Çok yıllık (kökü 10+ yıl yaşar)',
+      beslenme: 'Fotosentez — derin kazık köküyle beton çatlaklarından bile su ve mineral çeker.',
+      zincir: 'Erken bahar üreticisi — kıştan çıkan bal arılarının ilk polen ve nektar kaynağıdır.',
+      goc: 'Beyaz tüylü tohumları rüzgârda minik paraşüt gibi süzülerek 100 kilometreye kadar uçabilir!',
+      alan: 'Antarktika hariç neredeyse tüm dünya çayırları ve şehirleri',
+      superguc: 'Çiçeğinden köküne her parçası yenebilir; koparılsa bile derin kökünden günler içinde yeniden filizlenir.',
+      sasirtici: 'Uçan tohumlarının tepesindeki tüylerin üstünde özel bir "ayrılmış hava girdabı" (vortex) oluşur — bu fiziksel mucize tohumu rüzgârda kilometrelerce havada tutar!',
+      tehdit: 'Çim ilaçları (yabani ot sanılıp sökülmesi).',
+      dongu: [
+        ['🌼 Altın Çiçek', 'İlkbaharda parlak sarı çiçeğinle güneşle açılır, yağmurda ve gece kapanarak polenini korursun.'],
+        ['☁️ Beyaz Küreye Dönüş', 'Tozlaştıktan sonra 2 gün kapalı kalıp yüzlerce ipeksi paraşütlü tohumdan oluşan beyaz topa dönüşürsün.'],
+        ['🌬️ Rüzgârla Göç', 'Hafif bir esintiyle yüzlerce tohumun gökyüzüne dağılıp yeni kırlara yerleşir.']
+      ],
+      w: 'Taraxacum'
+    },
+    {
+      id: 'yd-mese', ad: 'Anıt Meşe Ağacı', ik: '🌳', tur: 'bitki', ll: [40.5, 29.5],
+      omur: '500 – 1.000+ yıl',
+      beslenme: 'Fotosentez + köklerindeki mantar ağıyla ormandaki komşu ağaçlarla besin paylaşır.',
+      zincir: 'Kilit taşı ekosistem mimarı — tek bir meşe ağacı böcek, kuş, sincap, liken ve mantar dahil 2.300\'den fazla türe ev sahipliği yapar!',
+      goc: 'Meşe palamutlarını kış için toprağa gömen alakargalar ve sincaplar unuttukları yerlerde yeni meşe ormanları "diker".',
+      alan: 'Avrupa, Anadolu, Kuzey Amerika ve Asya\'nın ılıman ormanları',
+      superguc: 'Kökleri toprağın 10 metre derinine inebilir; fırtınalara ve yüzyıllık kuraklıklara meydan okur.',
+      sasirtici: 'Bir meşe ağacı ilk palamutlarını vermeye 20–40 yaşında başlar ve ömrü boyunca yaklaşık 10 milyon palamut üretir — bunların sadece birkaç tanesi yeni bir dev meşeye dönüşür!',
+      tehdit: 'Orman kesimi, yangınlar ve iklim değişikliği.',
+      dongu: [
+        ['🌰 Sincabın Unuttuğu Palamut', 'Sonbaharda bir alakarganın toprağa saklayıp unuttuğu palamuttan baharda filizlenirsin.'],
+        ['🌳 Yüzyıllık Şehir', 'Yüzlerce yılda genişleyen dalların baykuşlara, yarasalara, yüzlerce kelebek türüne ve yosunlara dev bir apartman olur.'],
+        ['🍂 Sonbahar Altını', 'Her sonbahar yapraklarını döküp toprağı besler, kış uykusuna geçersin.']
+      ],
+      w: 'Oak'
+    },
+    {
+      id: 'yd-ejderhakani', ad: 'Ejderha Kanı Ağacı (Sokotra)', ik: '🌴', tur: 'bitki', ll: [12.5, 53.9],
+      omur: '500 – 650+ yıl',
+      beslenme: 'Fotosentez + şemsiye biçimli tepesiyle okyanus sisinden havadaki nemi yakalar.',
+      zincir: 'Endemik çöl üreticisi — gölgesi altındaki serin toprakta ada kuşlarına ve kertenkelelere sığınak olur.',
+      goc: 'Yalnızca Yemen\'e bağlı Sokotra Adası\'nda yaşar — Dünya\'da başka hiçbir yerde doğal olarak yoktur!',
+      alan: 'Sokotra Adası (Hint Okyanusu)',
+      superguc: 'Dev şemsiye şeklindeki tacı, kavurucu çöl güneşinde kendi köklerini gölgeler ve yapraklarından akan sis damlalarını doğrudan köküne yönlendirir.',
+      sasirtici: 'Gövdesi kesildiğinde koyu kan kırmızısı bir reçine akar; antik Roma\'da gladyatör yaraları için ilaç ve Stradivarius kemanlarının efsanevi kızıl cilası olarak kullanıldı!',
+      tehdit: 'İklim değişikliğiyle azalan muson sisi ve genç fidanları yiyen keçiler.',
+      dongu: [
+        ['🌫️ Sis Hasadı', 'Sabah denizden gelen sis bulutu sık yapraklı şemsiye tepende yoğunlaşıp köklerine su damlatır.'],
+        ['⏳ Sabırlı Büyüme', 'On yılda yalnızca birkaç santimetre büyüyerek yüzyıllar içinde ikonik mantar şekline kavuşursun.'],
+        ['🩸 Kırmızı Reçine Kalkanı', 'Gövden yaralandığında kırmızı reçinen yarayı anında kapatıp mikropları engeller.']
+      ],
+      w: 'Dracaena cinnabari'
+    },
+    {
+      id: 'yd-orkide', ad: 'Arı Orkidesi (Taklit Ustası)', ik: '🌺', tur: 'bitki', ll: [38.5, 27.2],
+      omur: 'Çok yıllık (yumrusu yıllarca yaşar)',
+      beslenme: 'Fotosentez + çimlenmek için toprağındaki özel mikoriza mantarına tamamen bağımlıdır.',
+      zincir: 'Uzman tozlaşma bitkisi — tozlaşmak için böceklerin duyularını taklit eder.',
+      goc: 'Toz zerresi kadar hafif milyonlarca tohumu rüzgârla yüzlerce kilometre uzağa taşınabilir.',
+      alan: 'Akdeniz havzası, Anadolu, Avrupa ve Orta Doğu çayırları',
+      superguc: 'Çiçeği tıpkı tüylü bir dişi yaban arısına benzer ve dişi arının eş çağırma kokusunu (feromon) salgılar!',
+      sasirtici: 'Erkek arı çiçeği gerçek bir dişi arı sanıp üzerine konduğunda sırtına polen keseleri yapışır; arı kandırıldığını anlayıp uçunca başka bir orkideyi tozlaştırmış olur!',
+      tehdit: 'Yumrularının salep için bilinçsizce sökülmesi ve çayırların betonlaşması.',
+      dongu: [
+        ['🍄 Mantarla Ortaklık', 'Toz kadar küçük tohumun besin deposu olmadığı için ancak doğru mantarla buluşunca çimlenebilir.'],
+        ['🐝 Kusursuz Kılık Değiştirme', 'Baharda açan çiçeğin kadifemsi dokusu ve kokusuyla erkek arıları mıknatıs gibi çeker.'],
+        ['🌬️ Rüzgâr Tohumları', 'Tozlaşma sonrası kapsül patlayıp binlerce mikroskobik tohumu rüzgâra savurur.']
+      ],
+      w: 'Ophrys apifera'
+    },
+    {
+      id: 'yd-palmiye', ad: 'Hindistan Cevizi Palmiyesi', ik: '🥥', tur: 'bitki', ll: [4.2, 73.5],
+      omur: '60 – 80 yıl',
+      beslenme: 'Fotosentez — tuzlu deniz spreyine ve kumsala dayanıklıdır.',
+      zincir: 'Tropikal kıyı üreticisi — meyvesiyle hindistan cevizi yengeçlerini, kuşları ve ada insanlarını besler.',
+      goc: 'Dünyanın en ünlü "deniz gezgini" bitkisidir: su geçirmez, hava dolu meyvesi okyanus akıntılarıyla 4.000 km yüzüp 3 ay sonra yeni bir mercan adasında filizlenebilir!',
+      alan: 'Tüm tropikal okyanus kıyıları ve mercan adaları',
+      superguc: 'Kasırga rüzgârlarında esnek gövdesi neredeyse yere kadar eğilir ama kırılmaz!',
+      sasirtici: 'Tek bir ağaç yılda 70\'e kadar hindistan cevizi verir; içindeki berrak su o kadar sterildir ki acil durumlarda tropik adalarda doğrudan sıvı takviyesi olarak bile kullanılmıştır.',
+      tehdit: 'Yükselen deniz seviyeleri ve palmiye hastalıkları.',
+      dongu: [
+        ['🌊 Okyanus Yolculuğu', 'Dalgaların taşıdığı sert kabuklu meyve ıssız bir kumsala vurur ve içindeki tatlı suyla ilk filizini büyütür.'],
+        ['🌴 Esnek Gövde', 'Güneşe doğru eğilerek büyür, tuzlu rüzgârlara göğüs gerersin.'],
+        ['🥥 Yeni Gezginler', 'Olgunlaşan meyvelerin suya düşüp yeni adalar keşfetmek üzere okyanusa açılır.']
+      ],
+      w: 'Coconut'
+    },
+    {
+      id: 'yd-safran', ad: 'Safran Çiçeği (Kırmızı Altın)', ik: '🪻', tur: 'bitki', ll: [41.25, 32.69],
+      omur: 'Soğanı çok yıllık (her sonbahar yeniden açar)',
+      beslenme: 'Fotosentez — kireçli, drenajı iyi kuru toprakları ve serin sonbaharı sever.',
+      zincir: 'Kültür bitkisi — arılarla tozlaşır; soğanları tarla farelerine karşı korunur.',
+      goc: '3.500 yıl önce Ege/Girit ve İran\'dan tüm dünyaya yayıldı; Safranbolu adını bu mor çiçekten alır.',
+      alan: 'İran, Safranbolu (Türkiye), Keşmir, İspanya ve Yunanistan',
+      superguc: 'Kendi ağırlığının 100.000 katı suyu parlak altın sarısına boyayabilir!',
+      sasirtici: 'Sadece 1 kilogram safran baharatı elde etmek için 150.000 ila 200.000 çiçeğin içindeki 3 ince kırmızı tepecik gün doğmadan tek tek elle toplanmalıdır — bu yüzden ağırlıkça altından pahalıdır!',
+      tehdit: 'İklim değişikliği ve aşırı sonbahar yağışları.',
+      dongu: [
+        ['☀️ Yaz Uykusu', 'Kavurucu yaz boyunca toprağın altında soğan hâlinde uyuyarak su saklarsın.'],
+        ['🍂 Sonbahar Mucizesi', 'Ekim ayında diğer tüm bitkiler solarken sen mor yaprakların ve 3 kırmızı tepeciğinle bir anda açarsın.'],
+        ['🌅 Şafak Hasadı', 'Çiçeklerin güneş vurmadan solduğu için sadece şafak vaktinde elle toplanırsın.']
+      ],
+      w: 'Saffron'
+    },
+    {
+      id: 'yd-pando', ad: 'Pando (Tek Kökten Dev Orman)', ik: '🍂', tur: 'bitki', ll: [38.52, -111.75],
+      omur: '14.000 – 80.000 yıl (Dünya\'nın en ağır ve en yaşlı canlılarından!)',
+      beslenme: 'Fotosentez — 47.000 ağaç gövdesi yeraltındaki TEK BİR dev kök sistemine bağlıdır!',
+      zincir: 'Dev orman üreticisi — geyikler, kuşlar ve kunduzlara dev bir yaşam alanı sunar.',
+      goc: 'Yeraltı kökleriyle yanlara doğru sürgün vererek 43 hektarlık (60 futbol sahası!) bir alana yayılmıştır.',
+      alan: 'Utah, ABD',
+      superguc: 'Üstteki ağaçlar yansa bile yeraltındaki dev kök hayatta kalır ve yangından sonra küllerden hızla yeni sürgünler fışkırtır!',
+      sasirtici: 'Dışarıdan 47.000 ayrı ağaçlık bir orman gibi görünür ama genetik olarak HEPSİ TEK BİR CANLIDIR; toplam ağırlığı 6.000 ton (30 mavi balina ağırlığında!) ile Dünya\'nın en ağır organizmasıdır!',
+      tehdit: 'Yeni çıkan genç sürgünleri yiyen aşırı geyik popülasyonu.',
+      dongu: [
+        ['🌱 Yeraltı Ağı', 'Tek bir tohumdan binlerce yıl önce doğup yeraltında kilometrelerce uzanan ortak bir kök sistemi kurdun.'],
+        ['🍂 Altın Sonbahar', 'Aynı DNA\'yı taşıdığınız için sonbaharda 47.000 gövdenin yaprakları aynı gün altın sarısına döner!'],
+        ['♻️ Sürekli Yenilenme', 'Yaşlanan bir gövde devrilince köklerin hemen yanından yepyeni genç bir gövde gönderir.']
+      ],
+      w: 'Pando (tree)'
+    },
+    {
+      id: 'yd-lotus', ad: 'Kutsal Lotus Çiçeği', ik: '🪷', tur: 'bitki', ll: [25.3, 83.0],
+      omur: 'Kökü onlarca yıl · Tohumu 1.300+ yıl canlı kalabilir!',
+      beslenme: 'Fotosentez — çamurlu gölet tabanından besin alıp berrak su üstünde çiçek açar.',
+      zincir: 'Sulak alan üreticisi — suyu temizler, yaprakları kurbağa ve böceklere sal olur.',
+      goc: 'Asya ve Avustralya sulak alanlarının yerlisidir; kutsal sembol olarak tapınak havuzlarıyla tüm Asya\'ya yayıldı.',
+      alan: 'Hindistan, Çin, Güneydoğu Asya ve Hazar kıyıları',
+      superguc: 'Mikroskobik mumlu çıkıntıları sayesinde yaprakları su ve çamuru iter — "Lotus Etkisi" ile kendi kendini temizleyen yüzey teknolojisine ilham verdi!',
+      sasirtici: 'Çin\'de kuru bir göl yatağından çıkarılan 1.300 yıllık bir lotus tohumu suyla buluşturulduğunda başarıyla çimlenip çiçek açmıştır! Ayrıca çiçeği kendi ısısını 30–35 °C\'de sabit tutabilir.',
+      tehdit: 'Sulak alanların kurutulması ve ağır su kirliliği.',
+      dongu: [
+        ['🌊 Çamurdan Yükseliş', 'Karanlık çamurlu göl tabanından sapını güneşe doğru uzatıp tertemiz su yüzeyine çıkarsın.'],
+        ['🔥 Sıcak Çiçek', 'Çiçeğin soğuk sabahlarda bile kendi metabolizmasıyla ısınıp böcekleri davet eder.'],
+        ['⏳ Zaman Kapsülü Tohum', 'Sert kabuklu tohumların gerekirse yüzlerce yıl çamurda uyuyup uygun günü bekleyebilir.']
+      ],
+      w: 'Nelumbo nucifera'
+    },
+    {
+      id: 'yd-lavanta', ad: 'Lavanta', ik: '🪻', tur: 'bitki', ll: [43.8, 5.8],
+      omur: '10 – 15 yıl',
+      beslenme: 'Fotosentez — taşlık, kireçli ve çok az sulu topraklarda bile gelişir.',
+      zincir: 'Tozlayıcı mıknatısı — bal arıları ve kelebekler için en zengin nektar kaynaklarındandır; güçlü uçucu yağı zararlı böcekleri uzak tutar.',
+      goc: 'Akdeniz\'in kayalık yamaçlarından çıkıp Provence (Fransa) ve Isparta\'nın (Türkiye) mor tarlalarına yayıldı.',
+      alan: 'Akdeniz, Güney Fransa ve Isparta (Kuyucak, Türkiye)',
+      superguc: 'Gümüşi ince tüylü yaprakları güneş ışığını yansıtarak yaz sıcağında su kaybını en aza indirir.',
+      sasirtici: 'Adı Latince "yıkamak" (lavare) sözcüğünden gelir — Antik Romalılar hamam sularını lavanta ile kokulandırır, askerler yaralarını temizlemek için lavanta yağı taşırdı!',
+      tehdit: 'Aşırı nem, kök çürüklüğü ve iklim aşırılıkları.',
+      dongu: [
+        ['☀️ Kurak Toprakta Direnç', 'Başka bitkilerin kuruduğu taşlık yamaçta ince gümüşi yapraklarınla yaz güneşine dayanırsın.'],
+        ['🐝 Mor Şölen', 'Haziran-Temmuz\'da açan mor başakların binlerce arı ve kelebeği kendine çeker.'],
+        ['💧 Esans Hazinesi', 'Güneş altında biriktirdiğin uçucu yağlar seni hem böceklerden korur hem parfüm ve tıpta kullanılır.']
+      ],
+      w: 'Lavandula'
+    },
+    {
+      id: 'yd-yosun', ad: 'Turba Yosunu (Sphagnum)', ik: '🌿', tur: 'bitki', ll: [62.0, 26.0],
+      omur: 'Yüzyıllarca büyümeye devam eder (alt katmanları binlerce yıllık turba olur)',
+      beslenme: 'Fotosentez — gerçek kökü yoktur; yağmur suyunu doğrudan yapraklarından emer.',
+      zincir: 'Süper karbon deposu — ölü katmanları çürümeden birikip Dünya\'nın en büyük karbon kilitlerinden birini oluşturur.',
+      goc: 'Mikroskobik sporları rüzgârla kuzey yarımkürenin tüm nemli bataklıklarına yayılır.',
+      alan: 'Kuzey Avrupa, Sibirya, Kanada ve İskoçya turbalıkları',
+      superguc: 'Kendi kuru ağırlığının 20 katından fazla su tutabilen doğal bir süngerdir ve suyu asitlendirerek bakterilerin üremesini durdurur!',
+      sasirtici: 'Antiseptik özelliği o kadar güçlüdür ki 1. Dünya Savaşı\'nda pamuk bitince askerlerin yaralarını sarmak için milyonlarca paket turba yosunu kullanılmıştır; ayrıca 2.000 yıllık "bataklık insanları" bu yosun sayesinde hiç çürümeden korunmuştur!',
+      tehdit: 'Turbalıkların yakıt veya bahçe toprağı için kazılıp kurutulması.',
+      dongu: [
+        ['💧 Yağmur Süngeri', 'Her yağmurda hücrelerin suyla dolup şişer, kurak günlerde bile nemini korursun.'],
+        ['🧪 Asit Kalkanı', 'Suyu asidik tutarak rakip bitkileri ve çürütücü bakterileri uzaklaştırırsın.'],
+        ['🌍 Karbon Kasası', 'Alt katmanların binlerce yıl çürümeden birikip atmosferdeki milyonlarca ton karbonu toprağa hapseder.']
+      ],
+      w: 'Sphagnum'
     }
   ]
 };
+
+// Mevcut 36 türe besin zinciri, göç ve en şaşırtıcı bilgi zenginleştirmesi (hiçbir tür eksik kalmasın)
+(() => {
+  const EK = {
+    'yd-mavibalina': {
+      zincir: 'Okyanusun en büyük süzücü tüketicisi — günde 4 ton kril yer; yetişkininin neredeyse hiç doğal avcısı yoktur (yalnızca orka sürüleri yavrulara saldırabilir).',
+      goc: 'Yazın kutuplarda kril yiyip kışın yavrulamak için 6.000–8.000 km yüzerek sıcak tropikal sulara göç eder.',
+      sasirtici: 'Dili tek başına bir Afrika fili ağırlığındadır, kalbi küçük bir otomobil kadardır ve atardamarlarının içinde küçük bir çocuk emekleyebilir!'
+    },
+    'yd-kartal': {
+      zincir: 'Gökyüzünün tepe yırtıcısı — kemirgen, tavşan ve tilki nüfusunu dengeler; yetişkininin doğal düşmanı yoktur.',
+      goc: 'Kuzeydeki popülasyonlar kışın 4.000 km güneye göç ederken Anadolu ve Akdeniz\'deki kartallar yıl boyu kendi dağlarında kalır.',
+      sasirtici: 'Avına dalarken saatte 320 km hıza ulaşır ve gözlerinin arkasındaki yüksek çözünürlüklü odak sayesinde 3 km ötedeki bir tavşanı görebilir!'
+    },
+    'yd-aslan': {
+      zincir: 'Savanın tepe avcısı — zebra, gnu ve manda sürülerini dengede tutar; sırtlanlarla sürekli rekabet hâlindedir.',
+      goc: 'Göç etmez; sürüsüyle birlikte 20 ila 400 km²\'lik kendi bölgesini savunur.',
+      sasirtici: 'Günün 18–20 saatini uyuyarak geçirir, avın %85–90\'ını dişiler yapar ve bir aslanın kükremesi sakin gecede 8 kilometre öteden duyulur!'
+    },
+    'yd-ahtapot': {
+      zincir: 'Zeki orta-üst deniz avcısı — yengeç ve midye yer; köpekbalığı, fok ve büyük balıklara av olur.',
+      goc: 'Uzun göç etmez; derin ve sığ kayalık kovuklar arasında mevsimlik hareket eder.',
+      sasirtici: '3 kalbi, bakır bazlı mavi kanı ve 9 beyni vardır (her bir kolunun kendi mini beyni bulunur); kavanoz kapağını içeriden bile açabilir!'
+    },
+    'yd-penguen': {
+      zincir: 'Antarktika deniz avcısı — balık ve kril yer; leopar foku ve orkalar başlıca avcılarıdır.',
+      goc: 'Her kış buz üzerinden 100–120 km yürüyerek üreme kolonisine gider, yazın okyanusa döner.',
+      sasirtici: 'Baba penguen -60 °C kutup kışında 65 gün boyunca tek lokma yemeden, yumurtayı ayaklarının üstünde taşıyarak vücut ağırlığının yarısını kaybeder!'
+    },
+    'yd-fil': {
+      zincir: 'Kilit taşı mega-otçul — ağaçları devirip savanı açık tutar, kuraklıkta kuyu kazar; yetişkininin doğal düşmanı yoktur.',
+      goc: 'Kurak ve yağışlı mevsimlerde su ve otlak peşinde yüzlerce kilometrelik geleneksel göç yollarını takip eder.',
+      sasirtici: 'Ölen sürü üyelerinin kemiklerine dokunup yas tutan, aynada kendini tanıyan ve ayak tabanlarıyla 30 km öteden yer titreşimiyle haberleşen nadir canlılardandır!'
+    },
+    'yd-kaplumbaga': {
+      zincir: 'Ada otçulu & tohum dağıtıcısı — kaktüs ve otları yiyip tohumlarını adaya yayar; yetişkininin doğal düşmanı yoktur.',
+      goc: 'Yağmur mevsiminde kıyıdan volkan yamaçlarındaki yeşil yaylalara doğru birkaç kilometrelik yavaş göç yapar.',
+      sasirtici: 'Metabolizması o kadar yavaştır ki tek damla su içmeden ve yemek yemeden 1 YIL boyunca hayatta kalabilir; 170 yılı aşan ömrüyle birkaç insan kuşağına tanıklık eder!'
+    },
+    'yd-ari': {
+      zincir: 'Dünyanın en kritik tozlayıcısı — çiçekli bitkilerin ve tarım ürünlerinin büyük bölümünü tozlaştırır; kuşlar, eşek arıları ve ayılara av olabilir.',
+      goc: 'Kovanından günde 5 km uzağa kadar uçar; koloniler çoğalınca yeni kovan kurmak için oğul vererek göç eder.',
+      sasirtici: 'Bir işçi bal arısı tüm ömrü boyunca yalnızca 1 çay kaşığının 12\'de 1\'i kadar bal üretebilir — tek bir kaşık bal için 12 arının bütün hayatı ve binlerce çiçek ziyareti gerekir!'
+    },
+    'yd-kutupayisi': {
+      zincir: 'Arktik\'in tepe süper avcısı — neredeyse yalnızca halkalı fok avlar; buz üzerinde doğal düşmanı yoktur.',
+      goc: 'Deniz buzlarının mevsimlik hareketini takip ederek yılda 3.000 km\'den fazla yol yürüyüp yüzebilir.',
+      sasirtici: 'Kürkü aslında beyaz değil ŞEFFAF içi boş tüylerdir, altındaki derisi ise güneş ısısını emmek için SİYAHTIR! Bir fokun kokusunu 1,5 km öteden ve 1 metre buzun altından alabilir.'
+    },
+    'yd-panda': {
+      zincir: 'Uzmanlaşmış otçul (etçil atalardan!) — besininin %99\'u bambudur; yetişkininin doğal düşmanı neredeyse yoktur.',
+      goc: 'Bambu sürgünlerini takip ederek dağ yamaçlarında aşağı-yukarı mevsimlik göç yapar.',
+      sasirtici: 'Sindirim sistemi hâlâ etçillere benzediği için bambunun çok azını sindirebilir — bu yüzden günde 12–14 saat boyunca 15–30 kg bambu yemek zorundadır!'
+    },
+    'yd-karleopari': {
+      zincir: 'Yüksek dağların tepe avcısı — dağ keçisi ve mavi koyun popülasyonunu dengeler.',
+      goc: 'Kışın kar bastırınca avlarını takip ederek daha alçak vadilere iner, yazın 5.000 m\'ye tırmanır.',
+      sasirtici: 'Kendi vücut boyu kadar uzun kuyruğu hem uçurumda denge çubuğu hem de -30 °C\'de uyurken burnuna sardığı sıcacık bir atkı görevi görür; tek sıçrayışta 15 metre atlayabilir!'
+    },
+    'yd-komodo': {
+      zincir: 'Adalarının tepe avcısı — geyik, yaban domuzu ve manda avlar; yetişkininin doğal düşmanı yoktur.',
+      goc: 'Göç etmez ama adalar arasında güçlü yüzücü olarak kilometrelerce yüzebilir.',
+      sasirtici: 'Dişi Komodo ejderleri hiç erkek olmadan da (partenogenez ile) kendi başına döllenmiş yumurta bırakıp yavru dünyaya getirebilir!'
+    },
+    'yd-albatros': {
+      zincir: 'Açık okyanus avcısı — kalamar ve balık yer; denizde yetişkininin pek düşmanı yoktur.',
+      goc: 'Ömrünün %90\'ını açık okyanuslarda geçirir; tek bir yolculukta 15.000 km\'yi kanatlarını neredeyse hiç çırpmadan süzülerek aşar!',
+      sasirtici: '3,5 metrelik kanat açıklığıyla yaşayan kuşlar arasında dünya rekorunun sahibidir; "Wisdom" adlı albatros 70 yaşını aşmış hâlde hâlâ yumurtlayıp yavru büyütmektedir!'
+    },
+    'yd-yunus': {
+      zincir: 'Zeki üst deniz avcısı — balık sürülerini işbirliğiyle avlar; büyük köpekbalıkları ve orkalara karşı sürüsüyle savunma yapar.',
+      goc: 'Kıyı sürüleri yerleşiktir; açık deniz sürüleri balık sürülerini izleyerek yüzlerce km göç eder.',
+      sasirtici: 'Her yunusun doğduğunda kendine özel bir "imza ıslığı" (yani bir İSMİ) vardır; birbirlerine isimleriyle seslenirler ve yarım beyinleri uyurken diğer yarısıyla nefes alırlar!'
+    },
+    'yd-denizkaplumbaga': {
+      zincir: 'Deniz çayırı ve denizanası dengeleyicisi — okyanus sağlığını korur; yavruyken kuş ve yengeçlere, yetişkinken köpekbalıklarına av olabilir.',
+      goc: 'Okyanuslar boyunca 10.000+ km yüzüp 20–30 yıl sonra tam olarak yumurtadan çıktığı AYNI KUMSALA geri döner!',
+      sasirtici: 'Yavruların cinsiyetini genler değil KUMUN SICAKLIĞI belirler: ılık kumda dişi, serin kumda erkek yavrular çıkar!'
+    },
+    'yd-mamut': {
+      zincir: 'Buzul Çağı\'nın mega-otçulu — bozkırları açık tutup toprağı gübrelerdi; kılıç dişli kaplanlar ve erken insanlar avcılarıydı.',
+      goc: 'Diş izotopları, tek bir mamutun ömrü boyunca 70.000 km (Dünya\'nın çevresinin neredeyse 2 katı!) göç ettiğini kanıtladı.',
+      sasirtici: 'Mısır\'daki Büyük Piramit inşa edilirken Sibirya açıklarındaki Wrangel Adası\'nda hâlâ yaşayan cüce mamutlar vardı!'
+    },
+    'yd-smilodon': {
+      zincir: 'Buzul Çağı\'nın tepe pusu avcısı — bizon, at ve genç mamutları avlardı.',
+      goc: 'Büyük otçul sürülerinin peşinde Amerika kıtasının geniş ovalarında dolaşırdı.',
+      sasirtici: '28 santimetrelik dev kılıç dişleri aslında oldukça kırılgandı; avını önce ağır kaslı ön kollarıyla yere bastırıp sonra hassas bir ısırıkla etkisiz hâle getirirdi!'
+    },
+    'yd-dodo': {
+      zincir: 'Ada meyve yiyicisi & tohum dağıtıcısı — doğal avcısı olmadığı için uçmayı bırakmıştı.',
+      goc: 'Uçamadığı için yalnızca Mauritius Adası\'nda yaşadı.',
+      sasirtici: 'İnsanlarla ilk kez 1598\'de karşılaştı; insanlardan hiç korkmadığı ve adaya getirilen domuz/sıçanlar yumurtalarını yediği için yalnızca 80 yıl içinde tamamen yok oldu!'
+    },
+    'yd-haast': {
+      zincir: 'Yeni Zelanda\'nın tepe yırtıcısı — 200 kg\'lık dev Moa kuşlarını avlayan tek avcıydı.',
+      goc: 'Yeni Zelanda Güney Adası\'nın orman ve dağlarında yerleşikti.',
+      sasirtici: '15 kilogram ağırlığıyla gelmiş geçmiş en büyük kartaldı; pençeleri bir kaplan pençesi kadar büyüktü ve avı olan Moa tükenince kendisi de yok oldu!'
+    },
+    'yd-tilasin': {
+      zincir: 'Tazmanya\'nın tepe keseli yırtıcısı — kanguru ve valabi popülasyonunu dengelerdi.',
+      goc: 'Tazmanya Adası\'nın orman ve bozkırlarında yerleşikti.',
+      sasirtici: 'Hem dişisinde hem erkeğinde karın kesesi bulunan tek keseli yırtıcıydı ve çenesini neredeyse düz bir çizgi gibi 80 derece açabiliyordu!'
+    },
+    'yd-sekoya': {
+      zincir: 'Dev orman üreticisi — gökyüzüne uzanan dallarında kendi mikro-ekosistemini barındırır.',
+      goc: 'Sadece Kaliforniya Sierra Nevada yamaçlarında yaşar; kozalakları orman yangınının ısısıyla açılıp tohum saçar!',
+      sasirtici: 'General Sherman adlı dev sekoya 2.200 yaşındadır ve tek bir gövdesinde 400\'den fazla küçük evi inşa etmeye yetecek kadar ahşap hacmi vardır!'
+    },
+    'yd-zeytin': {
+      zincir: 'Akdeniz\'in kadim üreticisi — meyvesiyle kuşları ve insanları besler, binlerce yıl toprak erozyonunu önler.',
+      goc: '6.000 yıl önce Doğu Akdeniz ve Anadolu\'dan tüm Akdeniz havzasına yayıldı.',
+      sasirtici: 'Gövdesi kuruyup kesilse bile kökünden yeniden sürgün verir; bu yüzden Girit, Lübnan ve Anadolu\'da 2.000–3.000 yaşını aşmış hâlâ zeytin veren "ölümsüz ağaçlar" vardır!'
+    },
+    'yd-baobab': {
+      zincir: 'Savanın yaşam kaynağı — gövdesi su deposu, çiçekleri yarasaları, meyveleri filler ve insanları besler.',
+      goc: 'Afrika, Madagaskar ve Avustralya savanlarında yaşar.',
+      sasirtici: 'Yağmur mevsiminde dev süngerimsi gövdesinde 120.000 LİTREYE kadar su depolar; kuraklıkta filler susuz kalınca gövdesini kemirip su içer!'
+    },
+    'yd-venus': {
+      zincir: 'Etçil üretici — fakir bataklık toprağında bulamadığı azotu sinek ve örümcek yakalayarak karşılar.',
+      goc: 'Doğada yalnızca ABD\'nin Kuzey ve Güney Karolina kıyılarındaki dar bir bataklık şeridinde yaşar.',
+      sasirtici: 'Kapanı SAYI SAYABİLİR! İçindeki tüylere 20 saniye içinde 2 kez dokunulmazsa (yağmur damlası sanıp) kapanmaz; 5 kez dokunulunca sindirim enzimini salgılar!'
+    },
+    'yd-kaktus': {
+      zincir: 'Çöl üreticisi — çiçekleri yarasaları, meyveleri çöl kuşlarını besler; gövdesi ağaçkakanlara serin yuva olur.',
+      goc: 'Yalnızca Sonora Çölü\'nde (Meksika/Arizona) doğal olarak yaşar.',
+      sasirtici: 'İlk kolunu çıkarması 50–75 yıl sürer! Akordeon gibi kıvrımlı gövdesi yağmur yağınca şişip tek seferde 750 litre suyu içine çeker.'
+    },
+    'yd-bambu': {
+      zincir: 'Hızlı orman üreticisi — dev pandaların ana besinidir, eşdeğer ağaçlara göre %35 daha fazla oksijen üretir.',
+      goc: 'Yeraltı rizomlarıyla hızla yayılır; Asya, Afrika ve Amerika\'nın tropikal/ılıman bölgelerinde yaşar.',
+      sasirtici: 'Ağaç değil dev bir OT türüdür! Bazı türleri günde 91 santimetre (saatte neredeyse 4 cm!) uzayarak gözle görülür hızda büyüyebilir ve aynı türün tüm bambuları 60–120 yılda bir dünyanın her yerinde AYNI ANDA çiçek açar!'
+    },
+    'yd-nilufer': {
+      zincir: 'Amazon su yüzeyi üreticisi — dev yaprakları kuşlara yüzen platform olur.',
+      goc: 'Amazon Havzası\'nın sakin nehir ve göllerinde yaşar.',
+      sasirtici: '3 metre çapındaki yaprağının altı katedral kubbesi gibi kaburgalıdır ve üzerinde küçük bir çocuğu (40 kg\'a kadar!) batmadan taşıyabilir; çiçeği 1. gece beyaz, 2. gece pembe açar!'
+    },
+    'yd-mikoriza': {
+      zincir: 'Ormanın ayrıştırıcı & besin taşıyıcı ağı — ölü yaprakları minerale çevirip ağaç köklerine iletir.',
+      goc: 'Yeraltında kilometrelerce uzanan iplikçikleriyle tüm ormanları birbirine bağlar.',
+      sasirtici: 'Bilim insanları buna "Orman İnterneti" (Wood Wide Web) diyor: yaşlı anne ağaçlar bu mantar ağı üzerinden karanlıkta kalan yavru fidanlara şeker ve böcek saldırısı uyarısı gönderir!'
+    },
+    'yd-ginkgo': {
+      zincir: 'Yaşayan fosil üretici — 270 milyon yıldır (dinozorlardan önce!) neredeyse hiç değişmeden hayatta.',
+      goc: 'Çin tapınak bahçelerinde korunup tüm dünya şehirlerine yayıldı.',
+      sasirtici: '1945\'te Hiroşima\'ya atılan atom bombasının merkezinden sadece 1–2 km uzaktaki 6 ginkgo ağacı kavrulmasına rağmen ertesi bahar yeniden filizlendi ve bugün hâlâ yaşıyor!'
+    },
+    'yd-mangrov': {
+      zincir: 'Kıyı koruyucu üretici — su altı kökleri yavru balık ve karideslerin kreşidir; kıyıyı tsunamiden korur.',
+      goc: 'Tohumları ağaçtayken filizlenip mızrak gibi suya düşer ve gelgitle başka kıyılara yüzüp toprağa saplanır!',
+      sasirtici: 'Tuzlu okyanus suyunu köklerinden süzer, sızan fazla tuzu ise yapraklarının üzerinde gerçek tuz kristalleri olarak dışarı atar!'
+    },
+    'yd-sakura': {
+      zincir: 'Bahar üreticisi — erken bahar çiçekleriyle arı ve böcekleri besler.',
+      goc: 'Japonya\'da çiçek açma dalgası ("Sakura Cephesi") her bahar güneyden kuzeye doğru takip edilir.',
+      sasirtici: 'Çiçekleri sadece 1–2 hafta açık kalıp rüzgârla kar gibi dökülür; bu kısa güzellik Japon kültüründe "anın kıymetini bilme" (Mono no aware) felsefesinin sembolü olmuştur.'
+    },
+    'yd-kahve': {
+      zincir: 'Tropikal orman altı üreticisi — gölgede büyür, çiçekleri arıları besler.',
+      goc: 'Etiyopya\'dan Yemen\'e, oradan Osmanlı kahvehaneleriyle Avrupa\'ya ve Brezilya\'ya yayıldı.',
+      sasirtici: 'Kahve çekirdeğinin içindeki kafein aslında bitkinin yapraklarını yiyen böcekleri felç etmek için ürettiği doğal bir kimyasal savunma silahıdır!'
+    },
+    'yd-kakao': {
+      zincir: 'Yağmur ormanı üreticisi — yalnızca minik tatarcık sinekleriyle tozlaşır; maymunlar meyvesini yer.',
+      goc: 'Amazon ve Mezoamerika\'dan 16. yüzyılda tüm tropikal kuşağa yayıldı.',
+      sasirtici: 'Çiçekleri ince dallarda değil doğrudan ağacın kalın GÖVDESİNDE açar; Aztekler kakao çekirdeklerini gerçek madeni para gibi harcardı — 100 çekirdek bir hindi ederdi!'
+    },
+    'yd-rafflesia': {
+      zincir: 'Parazit çiçek — kökü, gövdesi ve yaprağı yoktur; asma köklerinin içinde yaşar.',
+      goc: 'Yalnızca Sumatra ve Borneo yağmur ormanlarında yetişir.',
+      sasirtici: '1 metre çapı ve 11 kg ağırlığıyla Dünya\'nın en büyük tek çiçeğidir; leş sineklerini çekmek için çürük et gibi kokar ve çiçek açması 9 ay sürerken sadece 5 gün açık kalır!'
+    },
+    'yd-okaliptus': {
+      zincir: 'Avustralya orman üreticisi — koalaların neredeyse tek besinidir.',
+      goc: 'Avustralya\'dan bataklık kurutmak ve kereste için Akdeniz ve dünyaya yayıldı.',
+      sasirtici: 'Yapraklarındaki uçucu yağlar yangınları körükler ama kabuğu ateşe dayanıklıdır; rakiplerini yakan yangından hemen sonra küllerden ilk filizlenen ağaç kendisi olur!'
+    },
+    'yd-cay': {
+      zincir: 'Dağ yamacı üreticisi — yapraklarındaki kafein ve tanenler onu böceklerden korur.',
+      goc: 'Güneybatı Çin\'den İpek Yolu ve deniz ticaretiyle dünyaya yayıldı; kara yoluyla gidenler "Çay", denizle gidenler "Tea" dedi.',
+      sasirtici: 'Yeşil, siyah, beyaz ve oolong çayların TAMAMI aynı bitkiden gelir ve Çin\'de 2.000 yaşını aşmış hâlâ yaprak veren dev yabani çay ağaçları vardır!'
+    }
+  };
+  for (const lst of [window.YASAM_DOGA.hayvanlar, window.YASAM_DOGA.bitkiler]) {
+    for (const o of lst) if (EK[o.id]) Object.assign(o, EK[o.id]);
+  }
+})();

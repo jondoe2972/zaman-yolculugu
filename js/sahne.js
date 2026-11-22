@@ -51,9 +51,10 @@ window.Sahne = (() => {
     const d = o.dir || 1, ph = o.ph || 0, mv = o.move ? 1 : 0, kind = o.kind || 'man', act = o.act || 'walk';
     const sw = Math.sin(ph) * 0.5 * mv;
     // dönemin giyimi: antik (peştamal), cubbe (galabiye), modern (gömlek-pantolon), karma (ikisi karışık)
+    const sd = o.seed != null ? o.seed : 1;
     let gy = o.giyim || st.giyim;
-    if (gy === 'karma') gy = hash(Math.floor(ph * 10) + (kind === 'woman' ? 7 : 0)) < 0.55 ? 'modern' : 'cubbe';
-    if (gy !== 'antik') { g.save(); g.translate(x, y); g.scale(d * k, k); if (kind === 'child') g.scale(0.7, 0.7); if (o.lean) g.rotate(o.lean); personNew(gy, kind, act, sw, ph, o); g.restore(); return; }
+    if (gy === 'karma') gy = hash(Math.floor(sd * 10) + (kind === 'woman' ? 7 : 0)) < 0.55 ? 'modern' : 'cubbe';
+    if (gy !== 'antik') { g.save(); g.translate(x, y); g.scale(d * k, k); if (kind === 'child') g.scale(0.7, 0.7); if (o.lean) g.rotate(o.lean); personNew(gy, kind, act, sw, ph, o, sd); g.restore(); return; }
     g.save(); g.translate(x, y); g.scale(d * k, k);
     if (kind === 'child') g.scale(0.7, 0.7);
     if (o.lean) g.rotate(o.lean);
@@ -125,8 +126,8 @@ window.Sahne = (() => {
   // Orta Çağ ve modern giyim: galabiye/cübbe ya da gömlek-pantolon
   const ROBE = ['#f1ede2', '#7b8fa6', '#a8906a', '#e6dccb', '#5f6f5a', '#3d4a66', '#8a5a44'];
   const SHIRT = ['#e9e4d8', '#4f79b0', '#c94f3a', '#3e8a5a', '#d9b44a', '#efefef', '#6a4f8a'];
-  function personNew(gy, kind, act, sw, ph, o) {
-    const fem = kind === 'woman', hv = hash(Math.floor(ph * 13) + 3);
+  function personNew(gy, kind, act, sw, ph, o, sd) {
+    const fem = kind === 'woman', hv = hash(Math.floor((sd != null ? sd : 1) * 13) + 3);
     const arm = (a, col, len = 17) => L(0, -43, Math.sin(a) * len, -43 + Math.cos(a) * len, 3.4, col);
     const pants = gy === 'modern' ? (hv < 0.5 ? '#2f3e5a' : '#5a4a3a') : SKIND;
     const top = gy === 'modern' ? SHIRT[Math.floor(hv * SHIRT.length)] : ROBE[Math.floor(hv * ROBE.length)];
@@ -173,9 +174,9 @@ window.Sahne = (() => {
   }
 
   // ---------- modern taşıtlar ----------
-  function car(x, y, k, d, ph, kind) {
+  function car(x, y, k, d, sd, kind) {
     g.save(); g.translate(x, y); g.scale(d * k, k); g.lineJoin = 'round';
-    const col = kind === 'taksi' ? '#f2f2f2' : kind === 'otobus' ? '#e9e6dc' : ['#c94f3a', '#3e6a9a', '#d9d4c4', '#2f3a40', '#e3c36a'][Math.floor(hash(ph * 7) * 5)];
+    const col = kind === 'taksi' ? '#f2f2f2' : kind === 'otobus' ? '#e9e6dc' : ['#c94f3a', '#3e6a9a', '#d9d4c4', '#2f3a40', '#e3c36a'][Math.floor(hash((sd != null ? sd : 1) * 7) * 5)];
     if (kind === 'otobus') {
       shape([-46, -6, 46, -6, 46, -38, -42, -38, -46, -30], col, 1.6);
       g.fillStyle = '#2e6a9a'; g.fillRect(-46, -20, 92, 4);
@@ -371,6 +372,31 @@ window.Sahne = (() => {
   }
   function house(x, y, k, v) {
     g.save(); g.translate(x, y); g.scale(k, k); g.lineJoin = 'round';
+    if (st.Y <= -1940) {
+      // Modern çağ: çok katlı apartman / cam cepheli şehir binaları
+      const w = 18 + Math.round(v * 10), floors = 3 + Math.floor(v * 4), h = floors * 11 + 8;
+      const bodyC = v > 0.66 ? '#cbd5e1' : v > 0.33 ? '#d8d4c8' : '#b8c4d0';
+      shape([-w, -h, w, -h, w, 0, -w, 0], bodyC, 1.1);
+      g.fillStyle = '#475569'; g.fillRect(-w - 1, -h - 3, w * 2 + 2, 3);
+      g.fillStyle = '#608bb5';
+      for (let fl = 0; fl < floors; fl++) {
+        const wy = -h + 5 + fl * 11;
+        for (let wx = -w + 4; wx <= w - 8; wx += 7) g.fillRect(wx, wy, 4.5, 6);
+      }
+      g.fillStyle = '#334155'; g.fillRect(-4, -9, 8, 9);
+      g.restore(); return;
+    }
+    if (st.Y <= -1800) {
+      // 19. yüzyıl – erken 20. yüzyıl: kiremit çatılı kâgir şehir evleri
+      const h = v > 0.5 ? 32 : 24;
+      shape([-20, -h, 20, -h, 20, 0, -20, 0], v > 0.5 ? '#ded5c5' : '#cfc2ae', 1.2);
+      shape([-23, -h, 0, -h - 11, 23, -h], '#9c4e38', 1.2);
+      g.fillStyle = '#475569';
+      for (const wx of [-13, -3, 7]) g.fillRect(wx, -h + 6, 5, 7);
+      if (h > 26) for (const wx of [-13, 7]) g.fillRect(wx, -15, 5, 7);
+      g.fillStyle = '#5a3a22'; g.fillRect(-3, -11, 6, 11);
+      g.restore(); return;
+    }
     if (v > 0.6) { g.beginPath(); g.arc(30, 0, 11, Math.PI, 0); g.closePath(); g.fillStyle = '#c4985c'; g.fill(); g.strokeStyle = OUT; g.lineWidth = 1.4; g.stroke(); circ(30, -7, 1.6, '#5a3a22', 0); }
     if (v > 0.3) shape([-8, -34, 12, -34, 12, -24, -8, -24], '#d3ab74');
     shape([-20, -24, 20, -24, 20, 0, -20, 0], '#caa06a');
@@ -833,7 +859,7 @@ window.Sahne = (() => {
         shape([hx - w, top + hh * 0.18, hx + w, top + hh * 0.18, hx + w, top, hx - w, top], i % 2 ? '#d8b989' : '#cfae7c', 1);
         if (i % 2 === 0) L(hx, top, hx + w * 0.4, top - hh * 0.16, Math.max(1, 0.6 * k), '#6b4a2a'); }
     } else { g.strokeStyle = 'rgba(60,80,30,0.3)'; g.lineWidth = 1; for (let i = 1; i < 5; i++) { g.beginPath(); g.arc(x, y + hh * 0.4, bw * 0.12 * i, Math.PI * 1.15, Math.PI * 1.85); g.stroke(); } }
-    if (p < 1 && !m.evler) for (let i = 0; i < 3; i++) person(x - bw * 0.3 + i * bw * 0.25, y - hh * (0.2 + i * 0.1), k * 0.25, { kind: 'man', act: 'hoe', dir: 1, ph: T * 3 + i });
+    if (p < 1 && !m.evler) for (let i = 0; i < 3; i++) person(x - bw * 0.3 + i * bw * 0.25, y - hh * (0.2 + i * 0.1), k * 0.25, { kind: 'man', act: 'hoe', dir: 1, ph: T * 3 + i, seed: i * 17 + 5 });
   }
   function drawGreek(m, p, x, y, k) { // sütunlu tapınak: basamak, sütunlar, alınlık (duz: Anıtkabir gibi düz çatı)
     const bw = m.b * k, hh = m.h * k, lw = Math.max(1.2, 1.4 * u), col = m.renk || '#f1ead8', n = m.sutun || 8;
@@ -1136,7 +1162,7 @@ window.Sahne = (() => {
   const agents = [];
   function initAgents() {
     agents.length = 0;
-    const add = (o) => agents.push(Object.assign({ x: (Math.random() - 0.5) * 3000, ph: Math.random() * 6.28 }, o));
+    const add = (o) => agents.push(Object.assign({ x: (Math.random() - 0.5) * 3000, ph: Math.random() * 6.28, seed: Math.random() * 1000 }, o));
     const kinds = [['man', 'walk'], ['woman', 'jar'], ['man', 'hoe'], ['child', 'walk'], ['woman', 'walk'], ['man', 'walk'], ['woman', 'jar']];
     for (let i = 0; i < 16; i++) {
       const [kind, act] = kinds[i % kinds.length], dir = Math.random() < 0.5 ? -1 : 1;
@@ -1173,33 +1199,62 @@ window.Sahne = (() => {
   const LAYERF = { road: 1.7, field: 1.55, river: 1.3 };
 
   function agentVisible(a) {
+    const Y = st.Y;
     if (a.season && a.season !== st.season) return false;
-    if (a.need) { const f = P.sahne && P.sahne[a.need]; if (!f || (typeof f === 'number' && st.Y > f) || (Array.isArray(f) && (st.Y > f[0] || st.Y < f[1]))) return false; }
-    if (a.not) { const f = P.sahne && P.sahne[a.not]; if (f && (f === true || (typeof f === 'number' && st.Y <= f))) return false; }
-    if (a.t === 'sledge') return !(P.sahne && P.sahne.kizak === false) && a.slot < Math.round(st.act * 6);
-    if (a.type === 'cargo') return a.slot < Math.round(st.act * 4.4);
+    // Evrensel çağ kuralları: modern şehirlerde inek, eşek, karasaban, antik kızak ve antik kayık çıkmaz
+    if (a.t === 'sledge') return Y > -500 && !(P.sahne && P.sahne.kizak === false) && a.slot < Math.round(st.act * 6);
+    if (a.t === 'scribe') return Y > -500 && !(P.sahne && P.sahne.katipYok);
+    if (a.t === 'cattle') return Y > -1910;
+    if (a.t === 'donkey') return Y > -1935;
+    if (a.t === 'plough') return Y > -1925;
+    if (a.layer === 'field') return Y > -1935;
+    if (a.t === 'boat') {
+      if (a.type === 'cargo') return Y > -1900 && a.slot < Math.round(st.act * 4.4);
+      if (a.type === 'sail') return Y > -1950;
+      return Y > -1900;
+    }
+    if (a.t === 'car') {
+      const otoY = (P.sahne && typeof P.sahne.oto === 'number') ? P.sahne.oto : -1920;
+      return Y <= otoY;
+    }
+    if (a.t === 'tourists') {
+      const turY = (P.sahne && typeof P.sahne.turist === 'number') ? P.sahne.turist : -1960;
+      return Y <= turY;
+    }
+    if (a.t === 'steamer') {
+      if (a.kind === 'buhar') { const by = (P.sahne && typeof P.sahne.buhar === 'number') ? P.sahne.buhar : -1850; return Y <= by && Y >= -1965; }
+      const ky = (P.sahne && typeof P.sahne.kruvaziyer === 'number') ? P.sahne.kruvaziyer : -1955;
+      return Y <= ky;
+    }
+    if (a.t === 'camel' && Y <= -1920) return false;
+    if (a.t === 'shaduf' && Y <= -1920) return false;
+    if (a.need) { const f = P.sahne && P.sahne[a.need]; if (!f || (typeof f === 'number' && Y > f) || (Array.isArray(f) && (Y > f[0] || Y < f[1]))) return false; }
+    if (a.not) { const f = P.sahne && P.sahne[a.not]; if (f && (f === true || (typeof f === 'number' && Y <= f))) return false; }
     return true;
   }
 
   function drawAgent(a, x, y) {
     if (a.t === 'steamer') return steamer(x, y, kRiver(y) * 0.9, a.dir, a.kind);
-    if (a.t === 'car') return car(x, y, kOf(y) * 1.05, a.dir, a.ph, a.kind);
-    if (a.t === 'tourists') { const k = kOf(y); for (let i = 0; i < 4; i++) person(x + i * 22 * k * a.dir, y + (i % 2) * 2 * k, k, { kind: i % 2 ? 'woman' : 'man', act: i === 1 ? 'photo' : 'walk', dir: a.dir, ph: a.ph + i * 1.7, move: true, giyim: 'modern', sapka: i % 2 ? null : ['#f2e6c8', '#2e6a9a'][i / 2 | 0] }); person(x - 30 * k * a.dir, y, k, { kind: 'man', act: 'staff', dir: a.dir, ph: a.ph, move: true, giyim: 'cubbe' }); return; }
+    if (a.t === 'car') return car(x, y, kOf(y) * 1.05, a.dir, a.seed, a.kind);
+    if (a.t === 'tourists') { const k = kOf(y); for (let i = 0; i < 4; i++) person(x + i * 22 * k * a.dir, y + (i % 2) * 2 * k, k, { kind: i % 2 ? 'woman' : 'man', act: i === 1 ? 'photo' : 'walk', dir: a.dir, ph: a.ph + i * 1.7, seed: a.seed + i * 19, move: true, giyim: 'modern', sapka: i % 2 ? null : ['#f2e6c8', '#2e6a9a'][i / 2 | 0] }); person(x - 30 * k * a.dir, y, k, { kind: 'man', act: st.Y <= -1940 ? 'walk' : 'staff', dir: a.dir, ph: a.ph, seed: a.seed + 91, move: true, giyim: st.Y <= -1940 ? 'modern' : 'cubbe' }); return; }
     if (a.layer === 'river' || a.t === 'boat') return boat(x, y, a.k || (a.layer === 'river' ? kRiver(y) : kOf(y) * 0.8), { dir: a.dir, type: a.type, ph: a.ph });
     const k = a.k || kOf(y);
-    if (a.t === 'person') return person(x, y, k, { kind: a.kind, act: a.act, dir: a.dir, ph: a.ph, move: a.v !== 0 && a.act !== 'sickle', lean: a.lean });
-    if (a.t === 'donkey') { donkey(x, y, k * 1.1, a.dir, a.ph, 1, a.load); person(x - a.dir * 30 * k, y + 2 * k, k, { kind: 'man', act: 'staff', dir: a.dir, ph: a.ph + 1, move: true }); return; }
+    if (a.t === 'person') {
+      const act = st.Y <= -1920 && (a.act === 'jar' || a.act === 'hoe') ? 'walk' : a.act;
+      return person(x, y, k, { kind: a.kind, act, dir: a.dir, ph: a.ph, seed: a.seed, move: a.v !== 0 && act !== 'sickle', lean: a.lean });
+    }
+    if (a.t === 'donkey') { donkey(x, y, k * 1.1, a.dir, a.ph, 1, a.load); person(x - a.dir * 30 * k, y + 2 * k, k, { kind: 'man', act: 'staff', dir: a.dir, ph: a.ph + 1, seed: a.seed, move: true }); return; }
     if (a.t === 'cattle') {
       cow(x, y, k * 1.1, a.dir, a.ph, 1); cow(x + 44 * k, y - 3 * k, k * 1.05, a.dir, a.ph + 1.5, 1, '#e8dccb', '#5a3a22');
-      person(x + 84 * k, y + 2 * k, k, { kind: 'child', act: 'walk', dir: a.dir, ph: a.ph, move: true }); return;
+      person(x + 84 * k, y + 2 * k, k, { kind: 'child', act: 'walk', dir: a.dir, ph: a.ph, seed: a.seed, move: true }); return;
     }
     if (a.t === 'plough') {
       cow(x, y - 2 * k, k * 0.95, 1, a.ph, 1, '#b07a48', '#6d4524'); cow(x - 4 * k, y + 1 * k, k, 1, a.ph + 1, 1, '#c99061', '#7a4a26');
       g.strokeStyle = '#7a5230'; g.lineWidth = 2 * k; g.beginPath(); g.moveTo(x - 10 * k, y - 16 * k); g.lineTo(x - 32 * k, y - 2 * k); g.lineTo(x - 40 * k, y - 22 * k); g.stroke();
-      person(x - 46 * k, y, k, { kind: 'man', act: 'plough', dir: 1, ph: a.ph, move: true, lean: 0.2 }); return;
+      person(x - 46 * k, y, k, { kind: 'man', act: 'plough', dir: 1, ph: a.ph, seed: a.seed, move: true, lean: 0.2 }); return;
     }
     if (a.t === 'chariot') return chariot(x, y, k, a.dir, a.ph);
-    if (a.t === 'camel') { camel(x, y, k, a.dir, a.ph); camel(x - a.dir * 52 * k, y + 2 * k, k, a.dir, a.ph + 1.3); person(x + a.dir * 40 * k, y + 2 * k, k, { kind: 'man', act: 'staff', longKilt: true, dir: a.dir, ph: a.ph, move: true }); return; }
+    if (a.t === 'camel') { camel(x, y, k, a.dir, a.ph); camel(x - a.dir * 52 * k, y + 2 * k, k, a.dir, a.ph + 1.3); person(x + a.dir * 40 * k, y + 2 * k, k, { kind: 'man', act: 'staff', longKilt: true, dir: a.dir, ph: a.ph, seed: a.seed, move: true }); return; }
     if (a.t === 'shaduf') return shaduf(x, y, k, a.ph);
     if (a.t === 'scribe') {
       g.save(); g.translate(x, y); g.scale(k, k);
@@ -1216,9 +1271,9 @@ window.Sahne = (() => {
       g.strokeStyle = 'rgba(120,90,50,0.3)'; g.lineWidth = 1; g.beginPath(); g.moveTo(-10, -34); g.lineTo(-12, -8); g.stroke();
       g.strokeStyle = '#a07a46'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(30, -11); g.lineTo(160, -39); g.stroke();
       g.restore();
-      person(x + 14 * k, y - 34 * k, k * 0.9, { kind: 'man', act: 'pour', dir: 1 });
-      for (let i = 0; i < 5; i++) person(x + (54 + i * 25) * k, y, k, { kind: 'man', act: 'pull', dir: 1, ph: a.ph + i * 0.9, move: true, lean: 0.42 });
-      person(x - 44 * k, y + 3 * k, k, { kind: 'man', act: 'staff', longKilt: true, collar: true, dir: 1, ph: a.ph, move: true });
+      person(x + 14 * k, y - 34 * k, k * 0.9, { kind: 'man', act: 'pour', dir: 1, seed: a.seed + 3 });
+      for (let i = 0; i < 5; i++) person(x + (54 + i * 25) * k, y, k, { kind: 'man', act: 'pull', dir: 1, ph: a.ph + i * 0.9, seed: a.seed + i * 13 + 7, move: true, lean: 0.42 });
+      person(x - 44 * k, y + 3 * k, k, { kind: 'man', act: 'staff', longKilt: true, collar: true, dir: 1, ph: a.ph, seed: a.seed + 71, move: true });
       return;
     }
   }
@@ -1233,7 +1288,7 @@ window.Sahne = (() => {
 
   function draw(ctx, w, h, dpr, Y, dt, cam) {
     g = ctx; W = w; H = h; u = H / 720; s = 0.38 * H / 146.6; gY = H * 0.6; T += dt; camX = cam; st.Y = Y;
-    { const gv = P.sahne && P.sahne.giyim; st.giyim = !gv ? 'antik' : typeof gv === 'string' ? gv : (gv.filter(([y0]) => Y <= y0).pop() || gv[0])[1]; }
+    { const gv = P.sahne && P.sahne.giyim; let gy = !gv ? (Y <= -1920 ? 'modern' : Y <= -1800 ? 'karma' : Y <= -500 ? 'cubbe' : 'antik') : typeof gv === 'string' ? gv : (gv.filter(([y0]) => Y <= y0).pop() || gv[0])[1]; if (Y <= -1950 && gy === 'antik') gy = 'modern'; st.giyim = gy; }
     // mevsim geçişi
     const tg = SEASON[st.season], e = 1 - Math.exp(-dt * 2.5);
     st.flood = lerp(st.flood, tg.flood, e); st.field = st.field.map((v, i) => lerp(v, tg.field[i], e));
@@ -1241,7 +1296,9 @@ window.Sahne = (() => {
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.lineCap = 'round'; g.lineJoin = 'round';
 
-    // gökyüzü
+    // gökyüzü (güneş/ay tanrısı rozetleri yalnızca o yöre ve dönemde böyle bir inanç varsa çıkar)
+    const hasGunesTanri = !!(((window.BOLGE && window.BOLGE.kultur) || (window.MISIR && window.MISIR.gokyuzu && window.MISIR.gokyuzu.gunes)) && Y > -400);
+    const hasAyTanri = !!(((window.BOLGE && window.BOLGE.kultur) || (window.MISIR && window.MISIR.gokyuzu && window.MISIR.gokyuzu.ay)) && Y > -400);
     let gr = g.createLinearGradient(0, 0, 0, gY);
     gr.addColorStop(0, '#78b2db'); gr.addColorStop(0.7, '#cfe0e0'); gr.addColorStop(1, '#f5dfb2');
     g.fillStyle = gr; g.fillRect(0, 0, W, gY + 2);
@@ -1249,12 +1306,15 @@ window.Sahne = (() => {
     gr = g.createRadialGradient(sx, sy, 0, sx, sy, 110 * u); gr.addColorStop(0, 'rgba(255,246,200,0.9)'); gr.addColorStop(1, 'rgba(255,246,200,0)');
     g.fillStyle = gr; g.fillRect(sx - 120 * u, sy - 120 * u, 240 * u, 240 * u);
     circ(sx, sy, 26 * u, '#fff3c4', 0);
-    // ay (gündüz soluk hilal)
+    // ay (yalnızca ay tanrısı inancı olan antik bölgelerde gündüz hilali ve rozeti)
     const mxx = W * 0.6, myy = H * 0.085, mr = 13 * u;
-    g.fillStyle = 'rgba(245,245,235,0.85)'; g.beginPath(); g.arc(mxx, myy, mr, 0, 7); g.fill();
-    g.fillStyle = 'rgba(150,190,220,0.9)'; g.beginPath(); g.arc(mxx + mr * 0.45, myy - mr * 0.2, mr * 0.92, 0, 7); g.fill();
+    if (hasAyTanri) {
+      g.fillStyle = 'rgba(245,245,235,0.85)'; g.beginPath(); g.arc(mxx, myy, mr, 0, 7); g.fill();
+      g.fillStyle = 'rgba(150,190,220,0.9)'; g.beginPath(); g.arc(mxx + mr * 0.45, myy - mr * 0.2, mr * 0.92, 0, 7); g.fill();
+    }
     skyHits.sun = [sx, sy, 34 * u]; skyHits.moon = [mxx, myy, 22 * u];
-    badge(sx + 30 * u, sy + 24 * u, 'gunes'); badge(mxx + 18 * u, myy + 16 * u, 'ay');
+    if (hasGunesTanri) badge(sx + 30 * u, sy + 24 * u, 'gunes');
+    if (hasAyTanri) badge(mxx + 18 * u, myy + 16 * u, 'ay');
     // bulutlar
     g.fillStyle = 'rgba(255,255,255,0.55)';
     for (let i = 0; i < 3; i++) {
@@ -1267,8 +1327,8 @@ window.Sahne = (() => {
       b.x += b.v * u * dt; const bx = (b.x % (W + 100)) - 50, by = H * b.y + Math.sin(T + b.ph) * 4 * u, f = Math.sin(T * 8 + b.ph) * 3 * u;
       g.beginPath(); g.moveTo(bx - 6 * u, by - f); g.quadraticCurveTo(bx - 3 * u, by - 3 * u, bx, by); g.quadraticCurveTo(bx + 3 * u, by - 3 * u, bx + 6 * u, by - f); g.stroke();
     }
-    // uçaklar (20. yüzyıldan itibaren)
-    if (P.sahne && P.sahne.ucak && Y <= P.sahne.ucak) for (const a of agents) if (a.layer === 'plane') { a.x += a.v * u * dt; const px = (a.x % (W + 400)) - 200; plane(px, H * a.y, 0.9 * u); }
+    // uçaklar (20. yüzyıldan itibaren tüm dünyada)
+    { const ucakY = (P.sahne && typeof P.sahne.ucak === 'number') ? P.sahne.ucak : -1935; if (Y <= ucakY) for (const a of agents) if (a.layer === 'plane') { a.x += a.v * u * dt; const px = (a.x % (W + 400)) - 200; plane(px, H * a.y, 0.9 * u); } }
     // uzak kumullar
     g.fillStyle = TM.kum1; g.beginPath(); g.moveTo(0, gY);
     for (let x = 0; x <= W + 20; x += 20) { const wx = camX + (x - W / 2) / (s * 0.35); g.lineTo(x, gY - (H * 0.07 + H * 0.03 * noise(wx)) * TM.dag); }
@@ -1286,8 +1346,8 @@ window.Sahne = (() => {
 
     // anıtlar
     hits.length = 0;
-    { const [a, b, r] = skyHits.sun; hits.push({ id: 'gunes', ad: 'Güneş · güneş tanrısı', x0: a - r, x1: a + r, y0: b - r + 24 * u, y1: b + r }); }
-    { const [a, b, r] = skyHits.moon; hits.push({ id: 'ay', ad: 'Ay · ay tanrıları', x0: a - r, x1: a + r, y0: b - r + 24 * u, y1: b + r }); }
+    if (hasGunesTanri) { const [a, b, r] = skyHits.sun; hits.push({ id: 'gunes', ad: 'Güneş · güneş tanrısı', x0: a - r, x1: a + r, y0: b - r + 24 * u, y1: b + r }); }
+    if (hasAyTanri) { const [a, b, r] = skyHits.moon; hits.push({ id: 'ay', ad: 'Ay · ay tanrıları', x0: a - r, x1: a + r, y0: b - r + 24 * u, y1: b + r }); }
     drawCliffs();
     const badges = [];
     for (const m of MONS) {
@@ -1407,8 +1467,21 @@ window.Sahne = (() => {
       else if (r < 0.62) house(x, y, kOf(y) * 1.55, hash(i + 8));
     });
     for (const o of nearVis) { const kk = nk * (o.m.nk || 1); const top = drawMon(o.m, o.p, o.x, nearY - (o.m.lift || 0) * kk, kk); if (!o.m.minor) badge(o.x, top - 14 * u, o.m.id); }
-    // yol
-    g.fillStyle = TM.yol; g.fillRect(0, H * 0.855, W, H * 0.1);
+    // yol (1930 sonrasında modern asfalt cadde + kaldırım + sokak lambaları)
+    if (Y <= -1930) {
+      g.fillStyle = '#c8c5bc'; g.fillRect(0, H * 0.85, W, H * 0.015);
+      g.fillStyle = '#52565e'; g.fillRect(0, H * 0.865, W, H * 0.095);
+      g.strokeStyle = 'rgba(245,235,190,0.65)'; g.lineWidth = 2 * u; g.setLineDash([18 * u, 16 * u]);
+      g.beginPath(); g.moveTo(0, H * 0.912); g.lineTo(W, H * 0.912); g.stroke(); g.setLineDash([]);
+      tiles(1.7, 210 * u, 83, (i, x) => {
+        if (nearBusy(x)) return;
+        const ly = H * 0.858;
+        g.strokeStyle = '#3b424c'; g.lineWidth = 2.2 * u; g.beginPath(); g.moveTo(x, ly); g.lineTo(x, ly - 42 * u); g.lineTo(x + 9 * u, ly - 44 * u); g.stroke();
+        g.fillStyle = '#fff5cc'; g.beginPath(); g.arc(x + 9 * u, ly - 43 * u, 3 * u, 0, 7); g.fill();
+      });
+    } else {
+      g.fillStyle = TM.yol; g.fillRect(0, H * 0.855, W, H * 0.1);
+    }
     // yol ajanları
     const rds = agents.filter(a => a.layer === 'road' && agentVisible(a)).map(a => {
       const span = W + 700 * u, camL = camX * s * LAYERF.road; a.x += a.v * u * dt; if (a.v) a.ph += dt * (a.t === 'sledge' ? 3.5 : 6);
