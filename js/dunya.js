@@ -74,34 +74,70 @@ window.Dunya = (() => {
     return [x, y, z];
   }
   function P(lat, lon) { const [x, y, z] = pj(Math.cos(lat * D), Math.sin(lat * D), lon * D); const r = R(); return [W / 2 + x * r, H / 2 - y * r, z]; }
-  // çokgen yolu: ufkun arkasındaki kısımlar ufuk çemberi boyunca yay ile kapatılır (Canvas2D ve Path2D uyumlu)
+  // çokgen yolu: kürenin görünür yarımküresine (z >= 0) tam kesim; arka yüz/antipod sarması asla olmaz
   function polyPathOn(dst, p) {
-    const r = R(), cx = W / 2, cy = H / 2;
-    let any = false, prevA = null, minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
-    const pts = [];
-    for (let i = 0; i < p.n; i++) {
+    const r = R(), cx = W / 2, cy = H / 2, n = p.n;
+    if (n < 3) return false;
+    let any = false, allVis = true, backIdx = -1;
+    let minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
+    const xs = new Float32Array(n), ys = new Float32Array(n), zs = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
       const [x, y, z] = pj(p.cl[i], p.sl[i], p.lo[i]);
-      if (z > 0) { any = true; const sx = cx + x * r, sy = cy - y * r; pts.push([sx, sy, null]); if (sx < minx) minx = sx; if (sx > maxx) maxx = sx; if (sy < miny) miny = sy; if (sy > maxy) maxy = sy; }
-      else pts.push([0, 0, Math.atan2(-y, x)]);
-    }
-    if (!any || maxx < -20 || minx > W + 20 || maxy < -20 || miny > H + 20) return false;
-    dst.moveTo(...edgeOrPt(pts[0], cx, cy, r));
-    prevA = pts[0][2];
-    for (let i = 1; i <= pts.length; i++) {
-      const q = pts[i === pts.length ? 0 : i];
-      if (q[2] === null) { dst.lineTo(q[0], q[1]); prevA = null; }
-      else {
-        const a = q[2];
-        if (prevA !== null) { let d = a - prevA; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; const n = Math.ceil(Math.abs(d) / 0.15); for (let j = 1; j <= n; j++) { const aa = prevA + d * j / n; dst.lineTo(cx + Math.cos(aa) * r, cy + Math.sin(aa) * r); } }
-        else dst.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-        prevA = a;
+      xs[i] = x; ys[i] = y; zs[i] = z;
+      if (z > 0) {
+        any = true;
+        const sx = cx + x * r, sy = cy - y * r;
+        if (sx < minx) minx = sx; if (sx > maxx) maxx = sx;
+        if (sy < miny) miny = sy; if (sy > maxy) maxy = sy;
+      } else {
+        allVis = false;
+        if (backIdx < 0) backIdx = i;
       }
     }
-    dst.closePath();
-    return true;
+    if (!any) return false;
+    if (allVis) {
+      if (maxx < -20 || minx > W + 20 || maxy < -20 || miny > H + 20) return false;
+      dst.moveTo(cx + xs[0] * r, cy - ys[0] * r);
+      for (let i = 1; i < n; i++) dst.lineTo(cx + xs[i] * r, cy - ys[i] * r);
+      dst.closePath();
+      return true;
+    }
+    // Ufku (z = 0) kesen çokgen: her görünür kıyı parçasını tam ufuk kesim noktasında başlatıp bitir,
+    // ardından yalnızca ufuk çemberi üzerindeki en kısa yayla (|Δθ| <= π) kapat.
+    const ufukA = (i, j) => {
+      const t = zs[i] / (zs[i] - zs[j]);
+      const hx = xs[i] + t * (xs[j] - xs[i]), hy = ys[i] + t * (ys[j] - ys[i]);
+      return Math.atan2(-hy, hx);
+    };
+    let drew = false, open = false, aStart = 0;
+    for (let k = 0; k < n; k++) {
+      const i = (backIdx + k) % n, j = (i + 1) % n;
+      const zi = zs[i] > 0, zj = zs[j] > 0;
+      if (!zi && zj) {
+        aStart = ufukA(i, j);
+        dst.moveTo(cx + Math.cos(aStart) * r, cy + Math.sin(aStart) * r);
+        dst.lineTo(cx + xs[j] * r, cy - ys[j] * r);
+        open = true; drew = true;
+      } else if (zi && zj && open) {
+        dst.lineTo(cx + xs[j] * r, cy - ys[j] * r);
+      } else if (zi && !zj && open) {
+        const aEnd = ufukA(i, j);
+        dst.lineTo(cx + Math.cos(aEnd) * r, cy + Math.sin(aEnd) * r);
+        let d = aStart - aEnd;
+        while (d > Math.PI) d -= 2 * Math.PI;
+        while (d < -Math.PI) d += 2 * Math.PI;
+        const steps = Math.max(1, Math.ceil(Math.abs(d) / 0.12));
+        for (let s = 1; s <= steps; s++) {
+          const aa = aEnd + d * s / steps;
+          dst.lineTo(cx + Math.cos(aa) * r, cy + Math.sin(aa) * r);
+        }
+        dst.closePath();
+        open = false;
+      }
+    }
+    return drew;
   }
   const polyPath = p => polyPathOn(g, p);
-  const edgeOrPt = (q, cx, cy, r) => q[2] === null ? [q[0], q[1]] : [cx + Math.cos(q[2]) * r, cy + Math.sin(q[2]) * r];
   function linePath(p) { const r = R(); let pen = false; for (let i = 0; i < p.n; i++) { const [x, y, z] = pj(p.cl[i], p.sl[i], p.lo[i]); if (z > 0.02) { const sx = W / 2 + x * r, sy = H / 2 - y * r; pen ? g.lineTo(sx, sy) : g.moveTo(sx, sy); pen = true; } else pen = false; } }
   // ---------- yollar: sık noktalara bölünmüş çizgi, km cinsinden birikimli uzunluk ----------
   const km = (a, b) => { const la1 = a[0] * D, la2 = b[0] * D, h = Math.sin((la2 - la1) / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin((b[1] - a[1]) * D / 2) ** 2; return 12742 * Math.asin(Math.min(1, Math.sqrt(h))); };
