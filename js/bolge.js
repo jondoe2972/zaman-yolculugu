@@ -201,7 +201,8 @@
   window.BOLGE = B[id];
   // senkron yükleme: sıra korunur, motor dosyaları bunlardan sonra çalışır
   // bölge verilerinden sonra: deniz savaşları (bütün dünya) ve Yaşa hayatları
-  const SON = '<script src="data/deniz.js?v=1"><\/script><script>window.__denizEkle()<\/script><script src="data/yasam.js?v=1"><\/script><script src="data/yasam-asya.js?v=1"><\/script><script src="data/yasam-amerika.js?v=1"><\/script><script src="data/devlet-notlari.js?v=1"><\/script>';
+  // Yaşa hayatları (yasam*.js) açılışta yüklenmez: js/gec-yukle.js arka planda ya da Yaşa açılınca yükler
+  const SON = '<script src="data/deniz.js?v=1"><\/script><script>window.__denizEkle()<\/script><script src="data/devlet-notlari.js?v=1"><\/script>';
   if (id !== 'dunya') { for (const f of B[id].dosyalar) document.write(`<script src="${f}"><\/script>`); document.write(SON); return; }
 
   // ---- Tüm Dünya: bölgeler aynı global adlara yazdığı için sırayla yüklenir; her bölgeden sonra veriler toplanır ----

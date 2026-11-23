@@ -91,12 +91,14 @@
   // ---------- arama kutusu ----------
   const box = $('#arama'), inp = $('#ara-in'), list = $('#ara-list');
   let sel = 0, cur = [];
-  function openSearch() { box.hidden = false; inp.value = ''; render(''); setTimeout(() => inp.focus(), 30); }
+  function openSearch() { if (window.GecYukle) window.GecYukle.yukle('yasa').catch(() => {}); box.hidden = false; inp.value = ''; render(''); setTimeout(() => inp.focus(), 30); }
   function closeSearch() { box.hidden = true; }
+  window.addEventListener('gecyukle:yasa', () => { INDEX = null; }); // Yaşa hayatları gelince arama dizini yeniden kurulsun
+  { const x = $('#ara-x'); if (x) x.addEventListener('click', closeSearch); } // telefonda Esc tuşu yok
   function render(q) {
     cur = q ? search(q) : Object.values(PAGES).map(pg => ({ tur: 'Ülke', ikon: pg.ikon, ad: pg.ad, alt: pg.altBaslik, act: () => openPage(pg.id) }));
     sel = 0;
-    if (!cur.length) { list.innerHTML = `<p class="ara-yok">"${esc(q)}" için sonuç yok. Şimdilik yalnızca Antik Mısır var; yeni ülkeler yakında.</p>`; return; }
+    if (!cur.length) { list.innerHTML = `<p class="ara-yok">"${esc(q)}" için sonuç bulunamadı. Başka bir yazımla dene (ör. "Osmanlı", "piramit", "Kleopatra").</p>`; return; }
     list.innerHTML = (q ? '' : '<p class="ara-ipucu">Bir ülke, yapı, kişi, şehir, savaş ya da tanrı yaz…</p>') + cur.map((o, i) => `<button class="ara-s${i === sel ? ' on' : ''}" data-i="${i}"><span class="ik">${o.ikon}</span><span class="tx"><b>${esc(o.ad)}</b><small>${esc(o.alt || '')}</small></span><em>${esc(o.tur)}</em></button>`).join('');
   }
   function pick(i) { const o = cur[i]; if (!o) return; closeSearch(); o.act(); }

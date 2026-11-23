@@ -236,17 +236,19 @@
   let pop = null, aktifSek = 'oyun';
   function ciz() {
     if (!pop) return;
-    const kart = o => `<button data-oyun="${o.id}" role="menuitem"><span class="op-ik">${o.ikon}</span><span><b>${o.ad}${o.yeni ? ' <i>yeni</i>' : ''}</b><small>${typeof o.alt === 'function' ? o.alt() : o.alt}</small></span></button>`;
+    // "yeni" rozeti gösterilmiyor: ilk kez gelen biri için hepsi yeni, rozet bir şey anlatmıyordu (o.yeni verisi duruyor)
+    const kart = o => `<button data-oyun="${o.id}" role="menuitem"><span class="op-ik">${o.ikon}</span><span><b>${o.ad}</b><small>${typeof o.alt === 'function' ? o.alt() : o.alt}</small></span></button>`;
     const liste = OYUNLAR.filter(o => aktifSek === 'kesif' ? KESIF_ID.has(o.id) : !KESIF_ID.has(o.id));
     pop.innerHTML = `<div class="op-sekmeler" role="tablist">
       <button type="button" class="${aktifSek === 'oyun' ? 'on' : ''}" data-opsek="oyun" role="tab">🎮 Oyunlar</button>
       <button type="button" class="${aktifSek === 'kesif' ? 'on' : ''}" data-opsek="kesif" role="tab">🧭 Özel Keşif</button>
+      <button type="button" class="op-x" data-opkapat="1" title="Kapat" aria-label="Oyunlar penceresini kapat">✕</button>
     </div><div class="op-grid">${liste.map(kart).join('')}</div>`;
   }
   function konum() {
     if (!pop || !btn) return;
     // Telefonda Oyunlar düğmesi soldan açılan menüde (kapanınca ekran dışında): pencere üst çubuğun altına ortalanır
-    if (window.innerWidth <= 860) {
+    if (window.innerWidth <= 1279) { // telefon ve tablette düğme ☰ menüde
       const ust = document.querySelector('.top'), alt = ust ? ust.getBoundingClientRect().bottom : 50;
       pop.style.top = (alt + 6) + 'px';
       pop.style.left = Math.max(8, (window.innerWidth - pop.offsetWidth) / 2) + 'px';
@@ -284,7 +286,10 @@
     document.body.appendChild(pop);
 
     btn.addEventListener('click', ev => { ev.stopPropagation(); goster(pop.hidden); });
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !pop.hidden) goster(false); });
     pop.addEventListener('click', async ev => {
+      // ✕: telefonda pencere neredeyse bütün ekranı kaplıyor, dışına dokunmak belli değil
+      if (ev.target.closest('[data-opkapat]')) { ev.stopPropagation(); goster(false); return; }
       const sk = ev.target.closest('[data-opsek]');
       if (sk) { ev.stopPropagation(); aktifSek = sk.dataset.opsek; ciz(); konum(); return; }
       const b = ev.target.closest('[data-oyun]'); if (!b) return;
