@@ -12,7 +12,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, tarihkazi: false, fosilkazi: false, akinti: false, ruzgar: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false, gece: false, yayilis: false, iklim: false, taban: false, kutup: false, krater: false, gol: false, saat: false, manyetik: false, tarim: false, yazi: false, din: false, tarihgoc: false, salgin: false, bogaz: false, megakent: false, icat: false, felsefe: false, insanlar: false };
+  const layers = { yapi: false, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: false, yolculuk: false, goc: false, magara: false, tarihkazi: false, fosilkazi: false, akinti: false, ruzgar: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false, gece: false, yayilis: false, iklim: false, taban: false, kutup: false, krater: false, gol: false, saat: false, manyetik: false, tarim: false, yazi: false, din: false, tarihgoc: false, salgin: false, bogaz: false, megakent: false, icat: false, felsefe: false, insanlar: false };
   let yayilisAktif = null;
   // 🌓 Canlı gece/gündüz gölgesi ve büyük şehir ışıkları (gerçek UTC saate göre)
   const GECE_SEHIR = [
@@ -118,6 +118,29 @@ window.Dunya = (() => {
   const BUZ = [prep((() => { const p = []; for (let lo = -180; lo <= 180; lo += 6) p.push([-62, lo]); p.push([-90, 180], [-90, -180]); return p; })()),
     prep([[60, -44], [64, -52], [70, -55], [76, -68], [78, -72], [82, -62], [83.5, -35], [81.5, -15], [76, -19], [70, -22], [65.5, -37.5], [62, -42]])];
   const HAZAR = prep([[47, 49.5], [45, 47.5], [42.5, 48], [40.5, 50], [38.5, 49], [37, 50.5], [37.2, 54], [39.5, 53.5], [41, 52.8], [42.5, 52.5], [44.5, 50.5], [46.8, 53]]);
+  // Büyük iç göller (DUNYA_VERI.kara bunları kara olarak içerirken siyasi sınırlar oyuk bırakır; mavi göl olarak çizilerek yeşil boşluklar giderilir)
+  const GOLLER = [
+    [[46.8,-92.1],[47.8,-89.9],[48.8,-87.0],[48.3,-85.9],[47.0,-84.7],[46.5,-84.4],[46.5,-87.4],[47.4,-88.0],[46.7,-90.8]], // Superior
+    [[45.8,-84.8],[45.0,-85.8],[43.7,-86.5],[42.0,-86.6],[41.6,-87.5],[42.9,-87.9],[44.5,-87.6],[45.6,-87.2],[46.0,-86.2]], // Michigan
+    [[46.2,-83.9],[46.0,-81.5],[45.0,-79.9],[44.5,-80.2],[44.8,-81.3],[43.0,-82.4],[43.8,-83.6],[45.0,-83.4],[45.8,-84.7]], // Huron
+    [[41.7,-83.4],[42.1,-82.7],[42.6,-81.2],[42.9,-78.9],[42.2,-80.0],[41.5,-81.7],[41.5,-82.9]], // Erie
+    [[43.3,-79.8],[43.8,-78.8],[44.2,-76.5],[43.6,-76.2],[43.2,-77.6],[43.2,-79.2]], // Ontario
+    [[-0.1,32.5],[0.4,33.2],[0.3,34.0],[-0.3,34.7],[-1.3,34.0],[-2.5,33.0],[-2.9,32.0],[-2.0,31.6],[-1.0,31.8]], // Victoria
+    [[-3.4,29.1],[-3.4,29.5],[-5.0,29.8],[-6.5,30.2],[-8.1,30.9],[-8.8,31.1],[-8.7,30.6],[-7.5,30.2],[-6.0,29.3],[-4.5,29.1]], // Tanganyika
+    [[-9.5,34.0],[-9.8,34.5],[-11.5,34.8],[-13.5,34.9],[-14.4,35.2],[-14.2,34.5],[-13.0,34.3],[-11.2,34.2]], // Malawi
+    [[46.8,60.7],[46.6,61.6],[45.8,61.0],[44.8,61.5],[43.6,60.5],[43.8,58.6],[45.1,58.3],[46.2,59.2]], // Aral
+    [[-15.2,-69.9],[-15.5,-69.1],[-16.4,-68.7],[-16.3,-69.2],[-15.9,-69.9]], // Titicaca
+    [[51.9,104.9],[51.85,103.85],[51.6,103.55],[51.45,104.85],[51.65,105.75],[52.3,106.4],[52.7,107.9],[53.2,108.45],[53.25,108.85],[54.25,109.65],[54.55,109.5],[55.85,110],[55.75,109.3],[54.15,108.25],[52.1,105.4]], // Baykal
+    [[62.35,-112.2],[62.05,-112.85],[62.05,-113.6],[62.45,-114.4],[62.85,-116.25],[62.45,-115.8],[62.45,-115.55],[61.85,-114.9],[61.75,-115.85],[61.5,-115.9],[61.5,-116.15],[61.25,-116.1],[61.25,-117.65],[61,-117.2],[60.75,-115.75],[61,-113.5],[61.35,-113.5],[61.55,-112],[61.85,-111.75],[61.85,-111.5],[61.95,-111.65],[62.25,-111.25],[62.35,-110.4],[62.45,-110.6],[62.55,-110.1],[62.75,-110.35],[62.6,-108.9],[63,-109.6],[63,-111.1],[62.75,-110.85],[62.9,-111.4],[62.7,-111.15],[62.4,-111.9]], // Great Slave
+    [[66.75,-122.25],[66.35,-124.45],[66.1,-124.15],[66.2,-123.45],[66.05,-123.25],[66.05,-122.95],[66.2,-122.95],[66.2,-122.7],[66.25,-122.8],[66.1,-121.6],[66.05,-122.75],[65.8,-122.45],[65.75,-122.75],[65.65,-122.65],[65.65,-123.2],[65.3,-123.15],[65.3,-123.75],[65,-123.15],[65,-121.7],[64.8,-121.4],[65.3,-119.6],[65.65,-119.95],[65.65,-119.55],[65.8,-119.65],[65.65,-117.8],[65.9,-118.1],[65.95,-117.8],[66.2,-117.85],[66.25,-117.45],[66.7,-117.95],[66.7,-118.45],[66.5,-118.35],[66.4,-118.6],[66.4,-120.2],[66.6,-119.7],[66.7,-119.8],[66.75,-119.05],[67.05,-119.55],[67,-121.2],[66.75,-121.9]], // Great Bear
+    [[53.35,-99.5],[53.05,-99],[53,-99.15],[51.85,-98],[52,-97.45],[51.7,-97.55],[51.4,-96.95],[51.4,-97.2],[51.2,-97.05],[50.7,-97.2],[50.4,-96.9],[50.4,-96.5],[50.6,-96.55],[50.65,-96.3],[51.1,-96.25],[53.8,-97.95],[53.95,-99.2],[53.55,-99.35]], // Winnipeg
+    [[45.35,74.25],[45.45,74.1],[45.95,74.3],[46,74.75],[46.35,74.9],[46.55,75.45],[46.3,78.45],[46.35,78.95],[46.8,79.35],[46.85,78.7],[46.6,78.1],[46.75,77.9],[46.7,76.75],[46.85,76.3],[46.85,74.6],[46.3,73.85],[46.3,73.65],[46,73.55],[46.1,73.7],[45.5,73.35],[44.95,73.95],[45.05,74.15]], // Balkaş
+    [[61.9,33.95],[61.55,35.25],[61.4,35.4],[60.9,35.2],[61.1,36.1],[61.7,36.2],[62.4,35.3],[62.9,35.4],[63.05,35.25],[63.35,34.1],[63.05,34.05],[62.9,34.75],[62.7,35],[62.25,34.9],[62.45,34.45],[62.7,34.45],[62.7,34.15],[62.05,34]], // Onega
+    [[60.15,31.8],[60.9,32.15],[60.9,31.9],[61.25,31.8],[61.6,31],[61.5,30.15],[61.35,29.85],[61.05,29.8],[60.75,30.2],[59.8,30.4],[59.8,30.85],[60.2,31.1]], // Ladoga
+    [[42.15,77.3],[42.35,76.5],[42.65,76.55],[42.75,78.65],[42.15,78.05],[42.1,77.3]] // Issık Göl
+  ].map(prep);
+  // Cliopatria 180° boylamında kesildiği için eksik kalan Çukotka/Wrangel (Rusya) halkaları kara verisinden alınır
+  const CHUKOTKA_H = KARA_BB.filter(r => r.bb[0] > 63.8 && r.bb[1] < 72.0 && r.bb[3] < -169.0 && r.bb[2] <= -179.5).map(r => ({ la: r.pts.map(p => p[0]), lo: r.pts.map(p => p[1]), p: null }));
   // km: ortalama genişlik
   const BOGAZ = [
     { ad: 'İstanbul Boğazı', km: 1.4, p: prep([[40.995, 28.985], [41.02, 29.0], [41.045, 29.015], [41.07, 29.045], [41.09, 29.058], [41.12, 29.07], [41.15, 29.078], [41.175, 29.095], [41.2, 29.115], [41.23, 29.135]]) }
@@ -319,13 +342,18 @@ window.Dunya = (() => {
     for (const k of K) {
       k.H = k.g.map(id => H[id]);
       let a0 = 90, a1 = -90, o0 = 180, o1 = -180; for (const h of k.H) for (let j = 0; j < h.la.length; j++) { a0 = Math.min(a0, h.la[j]); a1 = Math.max(a1, h.la[j]); o0 = Math.min(o0, h.lo[j]); o1 = Math.max(o1, h.lo[j]); }
+      // 180° boylamında kesilen Çukotka + Wrangel Adası'nı Rusya / SSCB / Rus İmparatorluğu sınırlarına ekle
+      if (CHUKOTKA_H.length && /Russia|Soviet/i.test(k.n) && a1 > 64 && o1 >= 178) {
+        for (const ch of CHUKOTKA_H) k.H.push(ch);
+        o0 = Math.min(o0, -180);
+      }
       k.bb = [a0, a1, o0, o1]; if (!k.e) k.e = [(a0 + a1) / 2, (o0 + o1) / 2];
     }
-    // 1976–2024 diliminde Cliopatria'da eksik olan Batı Sahra (Moritanya'nın solundaki boşluk) eklenir
+    // 1976–2024 diliminde Cliopatria'da eksik olan Batı Sahra (Fas, Cezayir ve Moritanya sınırlarına tam oturan çokgen) eklenir
     if (i === 9 && !K.some(k => k.n === 'Western Sahara' && k.y0 <= -2024)) {
-      const wsPts = [[27.67,-13.4],[27.67,-8.67],[26.0,-8.67],[26.0,-12.0],[21.33,-12.0],[21.33,-13.0],[20.75,-17.15],[22.0,-16.8],[23.7,-16.0],[25.5,-14.9],[26.9,-13.8]];
+      const wsPts = [[27.66,-13.5],[27.66,-8.68],[27.2,-8.68],[26.05,-8.65],[26.05,-12.0],[23.5,-11.95],[23.05,-13.05],[21.35,-13.0],[21.3,-17.0],[20.75,-17.02],[20.75,-17.2],[22.0,-17.0],[24.0,-16.2],[26.0,-15.0]];
       const wsH = { la: wsPts.map(p => p[0]), lo: wsPts.map(p => p[1]), p: null };
-      K.push({ n: 'Western Sahara', tr: 'Batı Sahra', y1: -1976, y0: -2024, a: 266000, r: '#d4a03c', w: 'Western Sahara', e: [24.5, -13.1], H: [wsH], bb: [20.75, 27.67, -17.15, -8.67] });
+      K.push({ n: 'Western Sahara', tr: 'Batı Sahra', y1: -1976, y0: -2024, a: 266000, r: '#d4a03c', w: 'Western Sahara', e: [24.5, -13.1], H: [wsH], bb: [20.75, 27.66, -17.2, -8.65] });
     }
     const ada = {}; for (const k of K) (ada[k.n] = ada[k.n] || []).push(k);
     for (const L of Object.values(ada)) { L.sort((x, y) => y.y1 - x.y1); for (let j = 0; j < L.length; j++) { const n = L[j + 1]; if (n && n.y1 >= L[j].y0 - 2) { L[j].sonra = n; n.once = L[j]; } } }
@@ -335,14 +363,15 @@ window.Dunya = (() => {
   };
   function dilimNo(y) { const Z = window.SINIR_DIZIN || []; const d = Z.find(z => y <= z.y[0] && y >= z.y[1]); return d ? d.d : y > (Z[0] || { y: [0] }).y[0] ? 0 : Z.length - 1; }
   function dilimIste(i) { if (DILIM[i] || yukleniyor[i] || i < 0) return; yukleniyor[i] = 1; const sc = document.createElement('script'); sc.src = `data/sinir/sinir-${i}.js?v=1`; sc.onerror = () => { yukleniyor[i] = 0; }; document.head.appendChild(sc); }
-  // ayrıntı düzeyleri: uzaktan bakarken halkanın sadeleştirilmiş sürümü çizilir
+  // ayrıntı düzeyleri: uzaktan bakarken halkanın sadeleştirilmiş sürümü çizilir (küçük adalar asla silinmez)
   function dpLL(la, lo, tol) {
     const n = la.length; if (n < 5) return la.map((a, j) => [a, lo[j]]);
     const keep = new Uint8Array(n); keep[0] = keep[n - 1] = 1; const st = [[0, n - 1]];
     while (st.length) { const [a, b] = st.pop(); let md = 0, mi = -1; const dx = lo[b] - lo[a], dy = la[b] - la[a], L = Math.hypot(dx, dy) || 1e-9; for (let i = a + 1; i < b; i++) { const d = Math.abs(dy * (lo[i] - lo[a]) - dx * (la[i] - la[a])) / L; if (d > md) { md = d; mi = i; } } if (md > tol && mi > 0) { keep[mi] = 1; st.push([a, mi], [mi, b]); } }
-    const out = []; for (let i = 0; i < n; i++) if (keep[i]) out.push([la[i], lo[i]]); return out.length >= 3 ? out : null;
+    const out = []; for (let i = 0; i < n; i++) if (keep[i]) out.push([la[i], lo[i]]);
+    return out.length >= 3 ? out : la.map((a, j) => [a, lo[j]]);
   }
-  const LOD = [0, 0.10, 0.24];
+  const LOD = [0, 0.05, 0.12];
   // kıta adları (uzaktan görünen tek yazılar); yerleri bölge işaretlerinin arasına denk gelecek biçimde seçildi
   const KITA_AD = [[4, 21, 'AFRİKA'], [57, 22, 'AVRUPA'], [50, 95, 'ASYA'], [53, -104, 'KUZEY AMERİKA'], [-24, -60, 'GÜNEY AMERİKA'], [-31, 134, 'OKYANUSYA'], [-80, 20, 'ANTARKTİKA']];
   function halkaYol(h, sv) {
@@ -383,25 +412,19 @@ window.Dunya = (() => {
     const out = [];
     for (const k of K) {
       if (!(Y > k.y0 - 1 && Y <= k.y1 + 0.0001)) continue;
-      const boy = k.y1 - k.y0 + 1, w = clamp(boy * 0.6, 0.8, 15);
-      const bitisT = clamp((k.y0 - 1 + w - Y) / w, 0, 1), baslaT = clamp((k.y1 + 1 - Y) / w, 0, 1);
-      if (k.sonra && bitisT > 0) out.push({ k, mod: 'gecis', A: k, B: k.sonra, t: bitisT });
-      else if (!k.sonra && bitisT > 0 && k.y0 > -2024) out.push({ k, mod: 'son', t: bitisT });
-      else if (!k.once && baslaT < 1) out.push({ k, mod: 'dogus', t: baslaT });
-      else out.push({ k, mod: 'sabit' });
+      // Her yıl var olan devletler tam sınırlarıyla çizilir (daire kırpması ülkelerde yapay boşluklar açıyordu)
+      out.push({ k, mod: 'sabit' });
     }
     return out;
   }
   function sinirCiz(o) {
     const k = o.k, renk = siyasiRenk(k._r || k.r);
+    if (!sekilYol(k)) return;
     g.fillStyle = renk;
-    if (o.mod === 'sabit') { if (!sekilYol(k)) return; g.fill('evenodd'); g.strokeStyle = 'rgba(58,32,14,0.68)'; g.lineWidth = 1.05; g.stroke(); return; }
-    if (o.mod === 'dogus') { g.save(); daireKirp(k.e, o.t * uzak(k.e, k.bb)); if (sekilYol(k)) g.fill('evenodd'); g.restore(); return; }
-    if (o.mod === 'son') { g.save(); daireKirp(k.e, (1 - o.t) * uzak(k.e, k.bb)); if (sekilYol(k)) g.fill('evenodd'); g.restore(); return; }
-    const { A, B, t } = o;
-    g.save(); if (sekilYol(A)) { g.clip('evenodd'); if (sekilYol(B)) g.fill('evenodd'); } g.restore();       // ortak kısım
-    g.save(); daireKirp(A.e, t * uzak(A.e, B.bb)); if (sekilYol(B)) g.fill('evenodd'); g.restore();          // kazanılan yer yayılır
-    g.save(); daireKirp(B.e, (1 - t) * uzak(B.e, A.bb)); if (sekilYol(A)) g.fill('evenodd'); g.restore();    // kaybedilen yer çekilir
+    g.fill('evenodd');
+    // karaPath kırpımı içindeyiz: kendi renginde hafif taşma çizgisi kıyı ve sınır dikiş boşluklarını kapatır
+    g.strokeStyle = renk; g.lineWidth = 2.4; g.lineJoin = 'round'; g.stroke();
+    g.strokeStyle = 'rgba(58,32,14,0.62)'; g.lineWidth = 0.95; g.stroke();
   }
   // Vikiveri eşleştirmesinde yanlış çıkan Türkçe adlar (Cliopatria İngilizce adına göre). Dizi: [[bu yıldan itibaren, ad], ...];
   // eşleşen yıl yoksa verideki ad kalır (ör. "Japon İmparatorluğu" 1947'ye kadar doğru).
@@ -414,7 +437,7 @@ window.Dunya = (() => {
     'Republic of China': [[-1950, 'Tayvan (Çin Cumhuriyeti)'], [null, 'Çin Cumhuriyeti']], 'Republic of Albania': [[-1991, 'Arnavutluk']],
     'Lebanon': [[-1943, 'Lübnan']], 'Sultanate of Brunei': [[-1984, 'Brunei']], 'Luxembourg': [[-1890, 'Lüksemburg']],
     'Mujahideen': 'Mücahitler', 'Russian-occupied territories': 'Rusya işgalindeki topraklar',
-    'Denmark': 'Danimarka', 'Western Sahara': 'Batı Sahra'
+    'Western Sahara': 'Batı Sahra'
   };
   function duzAd(k, y) { const d = AD_DUZELT[k.n]; if (!d) return null; if (typeof d === 'string') return d; for (const [s, ad] of d) if (s == null || y <= s) return ad; return null; }
   const sinirAd = (k, y = Ycur) => ((window.DEVLET_NOT || {})[k.n] || {}).tr || duzAd(k, y) || k.tr || k.n;
@@ -755,13 +778,15 @@ window.Dunya = (() => {
         g.beginPath(); for (const p of BUZ) polyPath(p); g.fillStyle = 'rgba(248,250,252,0.95)'; g.fill();
         // dönemin siyasi sınırları: ikinci dev ofscreen canvas / destination-in yerine doğrudan karaPath klip içinde hızlı çizim!
         if (layers.sinir) {
-          g.globalAlpha = 0.9;
+          // Büyük göl oyuklarının altında göl mavisi taban boya: kıyılarda tek piksel bile yeşil boşluk kalmasın
+          g.beginPath(); for (const p of GOLLER) polyPath(p); g.fillStyle = '#93c2dc'; g.fill(); g.strokeStyle = '#93c2dc'; g.lineWidth = 4.5; g.lineJoin = 'round'; g.stroke();
+          g.globalAlpha = 0.92;
           const tolPx = 1.3 / (R() * D); svNow = tolPx >= LOD[2] ? 2 : tolPx >= LOD[1] ? 1 : 0;
           for (const o of aktifSinirlar(Y)) sinirCiz(o);
           g.globalAlpha = 1;
         }
         g.restore();
-        g.beginPath(); polyPath(HAZAR); g.fillStyle = '#93c2dc'; g.fill(); g.strokeStyle = 'rgba(100,125,90,0.5)'; g.lineWidth = 0.7; g.stroke();
+        g.beginPath(); polyPath(HAZAR); for (const p of GOLLER) polyPath(p); g.fillStyle = '#93c2dc'; g.fill(); g.strokeStyle = 'rgba(100,125,90,0.48)'; g.lineWidth = 0.65; g.stroke();
         g.strokeStyle = `rgba(105,125,90,${0.45 + ez * 0.2})`; g.lineWidth = 0.7 + ez * 0.3; g.stroke(karaPath);
       }
       // dar boğazlar ve nehirler
@@ -942,9 +967,8 @@ window.Dunya = (() => {
         hits.push({ kind: 'kaynak', k, x0: x - s - 3, x1: x + s + 3, y0: y - s - 3, y1: y + s + 3 });
       }
     }
-    // ticaret yolları: yalnızca kullanıldığı yıllarda; ince çizgi, malın aktığı yöne giden noktalar
+    // ticaret yolları: katman açıkken tüm tarihlerde görünür; ince çizgi, malın aktığı yöne giden noktalar
     if (layers.ticaret) for (const t of window.TICARET_YOLLARI || []) {
-      if (!(Y <= t.from && Y >= t.to)) continue;
       const d = yolHazirla(t), deniz = t.tur === 'deniz', col = deniz ? '40,110,165' : '160,85,25';
       const hov = hover && hover.kind === 'yol' && hover.t === t;
       g.beginPath(); linePath(d.p); g.strokeStyle = `rgba(${col},${hov ? 0.95 : 0.5})`; g.lineWidth = hov ? 2.6 : 1.5; g.setLineDash(deniz ? [6, 4] : []); g.stroke(); g.setLineDash([]);
@@ -975,15 +999,13 @@ window.Dunya = (() => {
       yolHit({ kind: 'yolculuk', j }, d, 7);
       g.globalAlpha = 1;
     }
-    // insanlığın yayılışı (data/goc.js): MÖ 3000'den önce Homo sapiens'in Afrika'dan yayılış yolları, beşik ve tarımın doğduğu yerler;
-    // Pasifik yolları kendi yıllarında. Yollar kesik kırmızı çizgi, üstünde akan noktalar, varışta ok.
+    // insanlığın yayılışı (data/goc.js): katman açıkken tüm tarihlerde görünür
     const GOC = window.GOC;
     if (layers.goc && GOC) {
-      const ea = clamp((Y - 3000) / 400, 0, 1);
+      const ea = 1;
       for (const r of GOC.yollar) {
-        const a = r.son != null ? (Y <= r.bas && Y >= r.son ? 1 : 0) : ea; if (a <= 0) continue;
         const d = yolHazirla(r), hov = hover && hover.kind === 'goc' && hover.r === r;
-        g.globalAlpha = a; g.lineCap = 'round'; g.lineJoin = 'round';
+        g.globalAlpha = 1; g.lineCap = 'round'; g.lineJoin = 'round';
         g.beginPath(); linePath(d.p); g.strokeStyle = `rgba(200,80,50,${hov ? 0.5 : 0.26})`; g.lineWidth = hov ? 10 : 7; g.stroke();
         g.strokeStyle = 'rgba(150,45,30,0.9)'; g.lineWidth = 1.7; g.setLineDash([6, 4]); g.stroke(); g.setLineDash([]);
         const sp = clamp(1500 / view.z, 70, 900), off = (T * sp / 3) % sp; g.fillStyle = 'rgba(255,240,220,0.95)';
@@ -1005,11 +1027,10 @@ window.Dunya = (() => {
           hits.unshift({ kind: 'besik', x0: x - 10, x1: x + 150, y0: y - 10, y1: y + 26 }); g.globalAlpha = 1;
         }
       }
-      for (const m of GOC.tarim) { // tarımın doğduğu yerler: başladığı yıldan MÖ 2000'e kadar
-        const a = Y <= m.y ? clamp((Y - 2000) / 300, 0, 1) : 0; if (!a) continue;
+      for (const m of GOC.tarim) { // tarımın doğduğu yerler: katman açıkken tüm tarihlerde görünür
         const [x, y, z] = P(...m.ll); if (z <= 0.1) continue;
         const hov = hover && hover.kind === 'tarim' && hover.m === m;
-        g.globalAlpha = a; g.fillStyle = 'rgba(250,236,170,0.95)'; g.strokeStyle = '#7a5a14'; g.lineWidth = 1.5;
+        g.globalAlpha = 1; g.fillStyle = 'rgba(250,236,170,0.95)'; g.strokeStyle = '#7a5a14'; g.lineWidth = 1.5;
         g.beginPath(); g.arc(x, y, hov ? 11 : 9, 0, 7); g.fill(); g.stroke();
         g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('🌾', x, y + 0.5); g.textBaseline = 'alphabetic';
         if (view.z >= 1.9 || hov) text(x, y + 20, m.ad, { size: 11, w: 700, col: '#5a4010', halo: 3, haloCol: 'rgba(255,248,225,0.9)', serif: true });
@@ -2036,9 +2057,9 @@ window.Dunya = (() => {
         hits.push({ kind: 'donum', d: dn, x0: x - s0 - 4, x1: x + s0 + 4, y0: y - s0 - 4, y1: y + s0 + 4 });
       }
     }
-    // 🪨 Tarihöncesi Mağaralar ve İlk Yerleşimler (MÖ 3000 ve öncesinde kamp ateşli mağara simgesiyle görünür)
-    if (layers.magara && Y >= 3000 && window.ATLAS_MAGARALAR) {
-      const ma = clamp((Y - 3000) / 400, 0.25, 1);
+    // 🪨 Tarihöncesi Mağaralar ve İlk Yerleşimler (katman açıkken tüm tarihlerde görünür)
+    if (layers.magara && window.ATLAS_MAGARALAR) {
+      const ma = 1;
       const shownM = [];
       for (const m of window.ATLAS_MAGARALAR) {
         const [x, y, z] = P(...m.ll); if (z <= 0.1 || x < -24 || x > W + 24 || y < -24 || y > H + 24) continue;
@@ -2180,7 +2201,7 @@ window.Dunya = (() => {
       }
     }
     // ipucu
-    if (hover && hover.kind === 'olay') tip(hover.x1 + 6, hover.y0, hover.e.ad, `${YIL.fmt(hover.e.y)} · ${({ savas: 'Savaş', afet: 'Doğal afet', antlasma: 'Antlaşma', olay: 'Önemli olay' })[hover.e.tur]} · tıkla: ayrıntılar`);
+    if (hover && hover.kind === 'olay') tip(hover.x1 + 6, hover.y0, hover.e.ad, `${YIL.fmt(hover.e.y)} · ${({ savas: 'Savaş', deniz: 'Deniz savaşı', afet: 'Doğal afet', antlasma: 'Antlaşma', olay: 'Önemli olay' })[hover.e.tur] || 'Olay'} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'yapi' && hover.it.lm) tip(hover.x1 + 6, hover.y0, hover.it.ad, `${hover.it.lm.sehir}, ${hover.it.lm.ulke} · ${hover.it.lm.yil || YIL.fmt(hover.it.lm.y)}` + (hover.kids && hover.kids.length ? ` · aynı yerde ${hover.kids.length} yapı daha: ${hover.kids.slice(0, 4).map(o => o.it.ad).join(', ')}${hover.kids.length > 4 ? '…' : ''}` : '') + ' · tıkla: fotoğraf ve bilgi');
     else if (hover && hover.kind === 'yapi') tip(hover.x1 + 6, hover.y0, hover.it.ad, ({ ins: `İnşaat sürüyor · %${Math.round((hover.it.p || 0) * 100)}`, bitti: 'Tamamlanmış', harabe: 'Harabe / yarım kalmış' })[hover.it.st] + (hover.kids && hover.kids.length ? ` · tıkla: bilgi kartı · aynı yerde ${hover.kids.length} yapı daha: ${hover.kids.slice(0, 4).map(o => o.it.ad).join(', ')}${hover.kids.length > 4 ? '…' : ''}` : ' · tıkla: bilgi kartı'));
     else if (hover && hover.kind === 'kume') tip(hover.x1 + 6, hover.y0, `${hover.list.length} yapı`, hover.list.slice(0, 6).map(o => o.it.ad).join(', ') + (hover.list.length > 6 ? '…' : '') + ' · tıkla: yaklaş');

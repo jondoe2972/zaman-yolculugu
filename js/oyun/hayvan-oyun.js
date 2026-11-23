@@ -265,6 +265,7 @@ window.HayvanOyunu = (() => {
 
   function neredeCiz() {
     const k = kutu(), h = s.hedef, I = ist();
+    k.hidden = false;
     const img = fotoCache.get(h.w);
     const acik = s.secim != null;
     const dogruMu = s.secim === s.dogru;
@@ -347,6 +348,7 @@ window.HayvanOyunu = (() => {
 
   function testCiz() {
     const k = kutu(), q = s.q, I = ist();
+    k.hidden = false;
     const acik = s.secim != null;
     const dogruMu = s.secim === q.dogru;
     const kd = s.kademe || kademeBilgi(s.seri);
@@ -392,7 +394,7 @@ window.HayvanOyunu = (() => {
   }
 
   function tikla(ev) {
-    if (ev.target.closest('.ho-x')) return kapat();
+    if (ev.target === el || ev.target.closest('.ho-x')) return kapat();
     const alBtn = ev.target.closest('[data-ho-alan]');
     if (alBtn) { testBasla(alBtn.dataset.hoAlan); return; }
     const op = ev.target.closest('[data-ho-op]');
@@ -449,6 +451,7 @@ window.HayvanOyunu = (() => {
   }
 
   function ac(baslangicMod) {
+    kutu().hidden = false;
     if (baslangicMod === 'tarih' || baslangicMod === 'doga' || baslangicMod === 'karma') { testBasla(baslangicMod); return; }
     if (baslangicMod === 'nerede') { neredeBasla(); return; }
     secim();

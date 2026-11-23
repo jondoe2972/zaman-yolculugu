@@ -933,36 +933,57 @@
     showModal({ ikon: '📅', title: 'Tarihte Bugün & Bu Yıl', sub: `📅 ${baslikTarih} · 🗓️ ${YIL.fmt(Math.round(Y))} ve çevresi`, open: acSekme || 0,
       tabs: [{ ad: '📅 Tarihte Bugün', html }, tbySekme()] });
   }
+  const KAT_STORE_KEY = 'zy-katman-v1';
+  const KAT_VARSAYILAN = { tarih: { sinir: true }, doga: {} };
+  let aktifAtlasMod = 'tarih';
+  function katKayitOku() {
+    try {
+      const raw = JSON.parse(localStorage[KAT_STORE_KEY] || 'null');
+      if (raw && typeof raw === 'object') return raw;
+    } catch (e) { /* */ }
+    return { mod: 'tarih', tarih: { ...KAT_VARSAYILAN.tarih }, doga: { ...KAT_VARSAYILAN.doga } };
+  }
+  function katmanKaydet() {
+    try {
+      const d = katKayitOku();
+      const durum = {};
+      document.querySelectorAll('#katman [data-kat]').forEach(inp => {
+        if (DN.layers[inp.dataset.kat]) durum[inp.dataset.kat] = true;
+      });
+      d.mod = aktifAtlasMod;
+      d[aktifAtlasMod] = durum;
+      localStorage[KAT_STORE_KEY] = JSON.stringify(d);
+    } catch (e) { /* */ }
+  }
   function kpSekmeSec(sek) {
     const el = $('#katman'); if (!el) return;
     el.querySelectorAll('[data-kpsek]').forEach(b => b.classList.toggle('on', b.dataset.kpsek === sek));
     el.querySelectorAll('[data-kpgrup]').forEach(g => { g.hidden = g.dataset.kpgrup !== sek; });
   }
-  function atlasModUygula(mod) {
+  function atlasModUygula(mod, sessiz) {
     const doga = mod === 'doga';
-    if (window.Ses && window.Ses.setAtlasMod) window.Ses.setAtlasMod(doga ? 'doga' : 'tarih');
-    DN.setLayer('yapi', !doga);
+    aktifAtlasMod = doga ? 'doga' : 'tarih';
+    if (window.Ses && window.Ses.setAtlasMod) window.Ses.setAtlasMod(aktifAtlasMod);
+    const kayit = katKayitOku();
+    const secili = (kayit && kayit[aktifAtlasMod] && typeof kayit[aktifAtlasMod] === 'object')
+      ? kayit[aktifAtlasMod]
+      : (KAT_VARSAYILAN[aktifAtlasMod] || {});
+    // Önce bütün katmanları temizle, ardından yalnızca bu atlas için kaydedilmiş (veya tertemiz varsayılan) katmanları aç
+    for (const k of Object.keys(DN.layers)) DN.setLayer(k, false);
+    if (DN.setYayilis) DN.setYayilis(null);
     DN.setLayer('sehir', !doga);
-    DN.setLayer('sinir', !doga);
-    DN.setLayer('ticaret', !doga);
-    DN.setLayer('goc', !doga);
-    DN.setLayer('magara', !doga);
-    if (doga) {
-      for (const k of ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'yolculuk', 'donum', 'liman', 'yayilis', 'gece', 'tarihkazi', 'yazi', 'din', 'tarihgoc', 'salgin', 'bogaz', 'megakent', 'icat', 'felsefe', 'insanlar']) DN.setLayer(k, false);
-      if (DN.setYayilis) DN.setYayilis(null);
-    } else {
-      for (const k of ['iklim', 'taban', 'kutup', 'krater', 'gol', 'saat', 'manyetik', 'tarim', 'ruzgar', 'fosilkazi', 'hayvangoc', 'volkan', 'kaynak']) DN.setLayer(k, false);
-    }
+    for (const [k, v] of Object.entries(secili)) if (v) DN.setLayer(k, true);
     const gb = $('#gecebtn'); if (gb) gb.hidden = doga;
-    DN.setLayer('akinti', doga);
-    DN.setLayer('hayvan', doga);
-    DN.setLayer('bitki', doga);
-    DN.setLayer('cografya', doga);
-    DN.setLayer('nehir', doga);
-    document.querySelectorAll('[data-atlas]').forEach(b => b.classList.toggle('on', b.dataset.atlas === mod));
-    kpSekmeSec(doga ? 'doga' : 'tarih');
+    document.querySelectorAll('[data-atlas]').forEach(b => b.classList.toggle('on', b.dataset.atlas === aktifAtlasMod));
+    kpSekmeSec(aktifAtlasMod);
+    katmanKaydet();
     renderOlayPanel();
-    toast(doga ? '🌿 <b>Doğa Atlası</b> açıldı: yapılar gizlendi; akıntılar, hayvanlar, bitkiler, dağlar ve nehirler görünüyor.' : '🏛️ <b>Tarih Atlası</b> açıldı: devlet sınırları, yapılar ve ticaret yolları görünüyor.');
+    if (!sessiz) {
+      const acikSay = Object.keys(secili).filter(k => secili[k]).length;
+      toast(doga
+        ? (acikSay ? `🌿 <b>Doğa Atlası</b> açıldı (${acikSay} seçili katmanın hatırlandı).` : '🌿 <b>Doğa Atlası</b> tertemiz açıldı — Katmanlar menüsünden istediğini seçebilirsin.')
+        : (acikSay ? `🏛️ <b>Tarih Atlası</b> açıldı (${acikSay} seçili katmanın hatırlandı).` : '🏛️ <b>Tarih Atlası</b> tertemiz açıldı — Katmanlar menüsünden istediğini seçebilirsin.'));
+    }
   }
   // ---------- 🧬 insanlığın yolculuğu (data/goc.js) ----------
   function openGoc(bolum) {
@@ -1447,7 +1468,7 @@
   });
   // ---------- katman menüsü (sağ üstte 🗂️) ----------
   const KATLAR = ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'ticaret', 'yolculuk', 'akinti', 'ruzgar', 'hayvan', 'bitki', 'cografya', 'nehir', 'hayvangoc', 'liman', 'volkan', 'donum', 'magara', 'tarihkazi', 'fosilkazi', 'yayilis', 'gece', 'iklim', 'taban', 'kutup', 'krater', 'gol', 'saat', 'manyetik', 'tarim', 'yazi', 'din', 'tarihgoc', 'salgin', 'bogaz', 'megakent', 'icat', 'felsefe', 'insanlar'];
-  const katSay = k => k === 'yapi' ? (window.YAPILAR || []).filter(y => Y <= y.y).length : k === 'kaynak' ? kaynakAktif().length : k === 'ticaret' ? (window.TICARET_YOLLARI || []).filter(t => Y <= t.from && Y >= t.to).length
+  const katSay = k => k === 'yapi' ? (window.YAPILAR || []).filter(y => Y <= y.y).length : k === 'kaynak' ? kaynakAktif().length : k === 'ticaret' ? (window.TICARET_YOLLARI || []).length
     : k === 'yolculuk' ? (window.YOLCULUKLAR || []).filter(j => Math.abs(Y - j.y) <= DN.aralik).length
     : k === 'akinti' ? ((window.ATLAS_OKYANUS?.akintilar || []).length + (window.ATLAS_OKYANUS?.olaylar || []).length)
     : k === 'ruzgar' ? (window.ATLAS_RUZGARLAR || []).length
@@ -1478,7 +1499,7 @@
     : k === 'liman' ? (window.ATLAS_LIMANLAR || []).length
     : k === 'volkan' ? (window.ATLAS_VOLKANLAR?.volkanlar || []).length
     : k === 'donum' ? (window.DONUM_NOKTALARI || []).length
-    : k === 'magara' ? (Y >= 3000 ? (window.ATLAS_MAGARALAR || []).length : 0)
+    : k === 'magara' ? (window.ATLAS_MAGARALAR || []).length
     : k === 'yayilis' ? (window.ATLAS_YAYILIS || []).length
     : k === 'gece' ? ''
     : (window.OLAYLAR || []).filter(e => e.tur === k && Math.abs(Y - e.y) <= DN.aralik).length;
@@ -1498,17 +1519,26 @@
       const roz = b.querySelector('em'); if (roz) roz.textContent = acik ? ` ${acik}` : '';
     });
   }
-  $('#katman').addEventListener('change', ev => { const k = ev.target.dataset && ev.target.dataset.kat; if (k) { DN.setLayer(k, ev.target.checked); renderOlayPanel(); } });
+  $('#katman').addEventListener('change', ev => { const k = ev.target.dataset && ev.target.dataset.kat; if (k) { DN.setLayer(k, ev.target.checked); katmanKaydet(); renderOlayPanel(); } });
   $('#katman').addEventListener('click', ev => {
     const sk = ev.target.closest('[data-kpsek]'); if (sk) { kpSekmeSec(sk.dataset.kpsek); return; }
     const am = ev.target.closest('[data-atlas]'); if (am) { atlasModUygula(am.dataset.atlas); return; }
+    if (ev.target.closest('#kp-hepsi-ac')) {
+      const grp = $('#katman .kp-grup:not([hidden])');
+      if (grp) grp.querySelectorAll('[data-kat]').forEach(inp => { DN.setLayer(inp.dataset.kat, true); });
+      katmanKaydet(); renderOlayPanel(); return;
+    }
+    if (ev.target.closest('#kp-temizle')) {
+      $('#katman').querySelectorAll('[data-kat]').forEach(inp => { DN.setLayer(inp.dataset.kat, false); });
+      if (DN.setYayilis) DN.setYayilis(null);
+      katmanKaydet(); renderOlayPanel(); return;
+    }
     if (ev.target.closest('#kesif-ac')) { kartlariKapat(); openKesif(); return; }
     if (ev.target.closest('#derin-ac')) { kartlariKapat(); (window.OyunYukle ? window.OyunYukle('derin') : Promise.resolve()).then(() => { if (window.DerinZaman) window.DerinZaman.ac(); }); return; }
   });
   $('#katbtn').addEventListener('click', () => { const el = $('#katman'), ac = el.hidden; if (ac) kartlariKapat('katman'); el.hidden = !ac; $('#katbtn').classList.toggle('on', ac); renderOlayPanel(); });
-  for (const k of KATLAR) DN.setLayer(k, false);
-  DN.setLayer('ticaret', true);
-  DN.setLayer('magara', true);
+  // İlk açılışta tertemiz (Tarih: yalnızca siyasi sınırlar; Doğa: tertemiz küre) — son seçilen katmanlar localStorage'dan hatırlanır
+  atlasModUygula(katKayitOku().mod || 'tarih', true);
   kesifRozetGuncelle();
   $('#aralik').addEventListener('change', e => { DN.setAralik(+e.target.value); renderOlayPanel(); shown = null; });
 

@@ -24,7 +24,7 @@
       'js/oyun/topraklar.js?v=3'
     ],
     hayvan: [
-      'js/oyun/hayvan-oyun.js?v=4'
+      'js/oyun/hayvan-oyun.js?v=6'
     ],
     foto: [
       'js/oyun/foto-tahmin.js?v=2'

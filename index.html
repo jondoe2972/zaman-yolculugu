@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Dünya tarihini interaktif kürede keşfet, o dönemde bir gününü yaşa ve tarih oyunlarını oyna.">
 <meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23241b14'/%3E%3Cpath d='M18 12h28v6c0 7-6 11-11 14 5 3 11 7 11 14v6H18v-6c0-7 6-11 11-14-5-3-11-7-11-14v-6z' fill='none' stroke='%23ffd666' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 18h18c0 4-4 7-9 10-5-3-9-6-9-10zm9 18c5 3 9 6 9 10H23c0-4 4-7 9-10z' fill='%23ffd666'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/stil.css?v=78">
+<link rel="stylesheet" href="css/stil.css?v=81">
 </head>
 <body>
 <header class="top">
@@ -91,14 +91,18 @@
           <button type="button" data-kpsek="doga">🌿 Doğa<em></em></button>
           <button type="button" data-kpsek="olaylar">⚔️ Olaylar<em></em></button>
         </div>
+        <div class="kp-toplu">
+          <button type="button" id="kp-hepsi-ac" title="Bu sekmedeki tüm katmanları aç">✅ Hepsini Aç</button>
+          <button type="button" id="kp-temizle" title="Haritadaki tüm katmanları temizle">🧹 Hepsini Temizle</button>
+        </div>
         <div class="kp-grup" data-kpgrup="tarih">
           <label><input type="checkbox" data-kat="sinir" checked><span>🗺️ Dönemin sınırları</span></label>
-          <label><input type="checkbox" data-kat="yapi" checked><span>🏛️ Dünyaca ünlü yapıtlar ve anıtlar</span><i></i></label>
+          <label><input type="checkbox" data-kat="yapi"><span>🏛️ Dünyaca ünlü yapıtlar ve anıtlar</span><i></i></label>
           <label><input type="checkbox" data-kat="donum"><span>⚡ Dünyayı değiştiren büyük olaylar</span><i></i></label>
           <label><input type="checkbox" data-kat="icat"><span>💡 Dünyayı değiştiren büyük icatlar</span><i></i></label>
           <label><input type="checkbox" data-kat="insanlar"><span>👑 Dünyada yaşamış büyük insanlar</span><i></i></label>
           <label><input type="checkbox" data-kat="felsefe"><span>🦉 Felsefi akımlar ve düşünce okulları</span><i></i></label>
-          <label><input type="checkbox" data-kat="ticaret" checked><span>🐪 Ticaret yolları</span><i></i></label>
+          <label><input type="checkbox" data-kat="ticaret"><span>🐪 Ticaret yolları</span><i></i></label>
           <label><input type="checkbox" data-kat="megakent"><span>👑 Tarih boyunca dünyanın en büyük şehirleri</span><i></i></label>
           <label><input type="checkbox" data-kat="tarihgoc"><span>🏃 Tarih çağlarındaki büyük göç dalgaları</span><i></i></label>
           <label><input type="checkbox" data-kat="din"><span>🕊️ Dinlerin ve inançların doğuşu &amp; yayılışı</span><i></i></label>
@@ -109,8 +113,8 @@
           <label><input type="checkbox" data-kat="tarihkazi"><span>🏺 Tarihî kazılar ve arkeolojik buluntular</span><i></i></label>
           <label><input type="checkbox" data-kat="liman"><span>⚓ Dünya çapındaki önemli limanlar</span><i></i></label>
           <label><input type="checkbox" data-kat="yayilis"><span>🍵 Yemek ve icatların yolculuğu</span><i></i></label>
-          <label><input type="checkbox" data-kat="goc" checked><span>🧬 İnsanlığın yayılışı (MÖ 3000 öncesi)</span></label>
-          <label><input type="checkbox" data-kat="magara" checked><span>🪨 Tarihöncesi mağaralar (MÖ 3000 öncesi)</span><i></i></label>
+          <label><input type="checkbox" data-kat="goc"><span>🧬 İnsanlığın yayılışı</span></label>
+          <label><input type="checkbox" data-kat="magara"><span>🪨 Tarihöncesi mağaralar</span><i></i></label>
           <label><input type="checkbox" data-kat="gece"><span>🌓 Canlı gece / gündüz ve şehir ışıkları</span></label>
         </div>
         <div class="kp-grup" data-kpgrup="doga" hidden>
@@ -247,7 +251,7 @@
 <script src="data/yasam-doga-ek2.js?v=1"></script>
 <script src="data/yasam-doga-antik.js?v=1"></script>
 <script src="data/atlas/donum-noktalari.js?v=2"></script>
-<script src="js/dunya.js?v=101"></script>
+<script src="js/dunya.js?v=103"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
@@ -255,12 +259,12 @@
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="data/yapilar/simgeler.js?v=1"></script>
 <script src="js/kart-paylas.js?v=1"></script>
-<script src="js/uygulama.js?v=112"></script>
+<script src="js/uygulama.js?v=113"></script>
 <script src="js/ses.js?v=4"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=6"></script>
-<script src="js/oyun/oyunlar.js?v=26"></script>
+<script src="js/oyun/oyunlar.js?v=28"></script>
 <script src="js/ara.js?v=26"></script>
 </body>
 </html>
