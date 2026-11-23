@@ -47,6 +47,29 @@ window.ATLAS_DOGA_EK = {
     { id: 'ik-arktik', band: 'kutup', ll: [74.0, -40.0], ad: 'Kutup İklimi (Grönland · >66,5°K)' },
     { id: 'ik-antarktika', band: 'kutup', ll: [-76.0, 20.0], ad: 'Kutup İklimi (Antarktika · >66,5°G)' }
   ],
+  cizgiler: [
+    { id: 'cz-ekvator', ik: '☀️', ad: 'Ekvator (0° Enlemi)', ll: [0, 0], olcu: '40.075 km çevre · 0°', yer: '13 ülkeden geçer (Ekvador, Brezilya, Kenya, Endonezya…)',
+      ozet: 'Dünya\'yı Kuzey ve Güney Yarımküre olarak iki eşit parçaya bölen en büyük paralel dairesidir. Güneş ışınları yılda iki kez (21 Mart ve 23 Eylül ekinokslarında) tam 90° dik açıyla düşer.',
+      ilginc: 'Dünya\'nın kendi ekseni etrafındaki dönüş hızı en yüksek Ekvator\'dadır (saatte 1.670 km!); bu yüzden uzay roketleri yakıt tasarrufu için Ekvator\'a yakın üslerden fırlatılır.', w: 'Equator' },
+    { id: 'cz-yengec', ik: '☀️', ad: 'Yengeç Dönencesi (23°26\' Kuzey)', ll: [23.44, 15], olcu: '23,44° Kuzey · ~36.788 km', yer: 'Meksika, Sahra, Mısır, Suudi Arabistan, Hindistan, Çin',
+      ozet: 'Güneş ışınlarının Kuzey Yarımküre\'de dik açıyla ulaşabildiği en kuzey sınırdır. Her yıl 21 Haziran\'da (Yaz Gündönümü) öğle vakti Güneş tam tepede durur ve gölge boyu sıfır olur.',
+      ilginc: 'Adını 2.000 yıl önce Haziran gündönümünde Güneş\'in Yengeç takımyıldızı hizasında bulunmasından alır. Eratosthenes MÖ 240\'ta bu çizgi üzerindeki Asvan kuyusunu kullanarak Dünya\'nın çevresini hesapladı!', w: 'Tropic of Cancer' },
+    { id: 'cz-oglak', ik: '☀️', ad: 'Oğlak Dönencesi (23°26\' Güney)', ll: [-23.44, 20], olcu: '23,44° Güney · ~36.788 km', yer: 'Şili, Arjantin, Brezilya, Namibya, Güney Afrika, Madagaskar, Avustralya',
+      ozet: 'Güneş ışınlarının Güney Yarımküre\'de dik açıyla düşebildiği en güney sınırdır. 21 Aralık\'ta (Kuzey\'de kış başlarken) Güney Yarımküre\'de yazın en uzun günü yaşanır ve Güneş buraya dik gelir.',
+      ilginc: 'Dünya\'nın eksen eğikliği yavaşça değiştiği için her iki dönence de yılda yaklaşık 15 metre Ekvator\'a doğru kayar.', w: 'Tropic of Capricorn' },
+    { id: 'cz-kkutup', ik: '❄️', ad: 'Kuzey Kutup Dairesi (66°34\' Kuzey)', ll: [66.56, 20], olcu: '66,56° Kuzey · ~15.950 km', yer: 'Norveç, İsveç, Finlandiya, Rusya, Alaska, Kanada, Grönland, İzlanda açıkları',
+      ozet: '21 Haziran\'da Güneş\'in 24 saat boyunca hiç batmadığı ("Gece Yarısı Güneşi") ve 21 Aralık\'ta hiç doğmadığı ("Kutup Gecesi") kuşağın başlangıç sınırıdır.',
+      ilginc: 'Dairenin üzerinde sadece 4 milyon civarında insan yaşar; en büyük şehirler Murmansk, Tromsø ve Rovaniemi\'dir.', w: 'Arctic Circle' },
+    { id: 'cz-gkutup', ik: '🐧', ad: 'Güney Kutup Dairesi (66°34\' Güney)', ll: [-66.56, 40], olcu: '66,56° Güney · ~15.950 km', yer: 'Antarktika kıyıları ve Güney Okyanusu',
+      ozet: '21 Aralık\'ta 24 saat kesintisiz gündüzün, 21 Haziran\'da ise 24 saat gecenin başladığı Güney Yarımküre sınırıdır. Neredeyse tamamı Güney Okyanusu ve Antarktika buzullarından geçer.',
+      ilginc: 'Kuzey Kutup Dairesi\'nin aksine bu çizginin güneyinde kalıcı yerli nüfus yoktur; sadece yıl boyu nöbetleşe kalan bilim insanları yaşar.', w: 'Antarctic Circle' },
+    { id: 'cz-greenwich', ik: '🧭', ad: 'Başlangıç Meridyeni (0° Greenwich)', ll: [51.48, 0], olcu: '0° Boylam · UTC Referansı', yer: 'İngiltere, Fransa, İspanya, Cezayir, Mali, Gana, Antarktika',
+      ozet: 'Dünya\'yı Doğu ve Batı Yarımküre\'ye ayıran ve tüm dünya saat dilimlerinin (UTC / GMT) sıfır noktası kabul edilen hayalî çizgidir.',
+      ilginc: '1884\'te Washington\'da toplanan 25 ülkelik Uluslararası Meridyen Konferansı\'nda Londra\'daki Greenwich Kraliyet Gözlemevi 0° seçildi.', w: 'Prime meridian (Greenwich)' },
+    { id: 'cz-tarih180', ik: '📅', ad: 'Uluslararası Tarih Değiştirme Çizgisi (180°)', ll: [0, 180], olcu: '180° Boylam · Pasifik Okyanusu', yer: 'Bering Boğazı\'ndan Pasifik boyunca güneye uzanır',
+      ozet: 'Başlangıç Meridyeni\'nin tam karşı tarafında yer alır. Bu çizgiyi batıdan doğuya geçince takvim 1 gün geri, doğudan batıya geçince 1 gün ileri gider.',
+      ilginc: 'Ülkeleri ve adaları iki ayrı güne bölmemek için düz inmez, zikzaklar çizer. Kiribati adaları yeni yıla dünyada ilk giren yerdir!', w: 'International Date Line' }
+  ],
 
   // 2) 🌊 OKYANUS TABANI: ÇUKURLAR, DENİZALTI SIRADAĞLARI & MERCAN RESİFLERİ
   okyanusTaban: {

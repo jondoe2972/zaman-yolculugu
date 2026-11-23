@@ -37,6 +37,7 @@
     for (const kz of (window.ATLAS_KAZILAR || {}).doga || []) add({ tur: 'Fosil Buluntusu', ikon: kz.ik || '🦴', ad: kz.ad, alt: `${kz.yas} · ${kz.yer}`, kw: [kz.yer, kz.buluntu, kz.w, 'fosil', 'kehribar', 'kazı'], oncelik: 6, act: () => ZY().openKazi(kz.id, 'doga') });
     const DEK = window.ATLAS_DOGA_EK || {};
     for (const b of DEK.iklimBantlar || []) add({ tur: 'İklim Kuşağı', ikon: b.ik, ad: b.ad, alt: `${b.sicaklik} · ${b.yagis}`, kw: ['iklim', 'biyom', 'ekvator', 'dönence', b.w], oncelik: 5, act: () => ZY().openAtlasEk('iklim', b) });
+    for (const cz of DEK.cizgiler || []) add({ tur: 'Coğrafi Çizgi', ikon: cz.ik, ad: cz.ad, alt: cz.olcu, kw: ['ekvator', 'dönence', 'yengeç', 'oğlak', 'kutup dairesi', 'greenwich', 'meridyen', 'tarih değiştirme', cz.w], oncelik: 6, act: () => ZY().openAtlasEk('cizgi', cz) });
     for (const t of (DEK.okyanusTaban || {}).noktalar || []) add({ tur: 'Okyanus Tabanı', ikon: t.ik, ad: t.ad, alt: `${t.olcu} · ${t.yer}`, kw: [t.yer, 'çukur', 'resif', 'mercan', 'baca', t.w], oncelik: 6, act: () => ZY().openAtlasEk('taban', t) });
     for (const sr of (DEK.okyanusTaban || {}).sirtlar || []) add({ tur: 'Okyanus Sırtı', ikon: sr.ik, ad: sr.ad, alt: sr.olcu, kw: ['okyanus', 'sırt', 'sıradağ', sr.w], oncelik: 5, act: () => ZY().openAtlasEk('taban', sr) });
     for (const k of DEK.kutup || []) add({ tur: 'Kutup & Buzul', ikon: k.ik, ad: k.ad, alt: k.yer, kw: ['aurora', 'kutup', 'buzul', 'buzul çağı', k.yer, k.w], oncelik: 6, act: () => ZY().openAtlasEk('kutup', k) });

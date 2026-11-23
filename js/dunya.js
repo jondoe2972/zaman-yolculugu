@@ -1198,28 +1198,56 @@ window.Dunya = (() => {
     // 🌿 Doğa Atlası Genişleme Katmanları (data/atlas/doga-ek.js)
     const DEK = window.ATLAS_DOGA_EK;
     if (DEK) {
-      // Paralel/Meridyen çizgi yardımcısı
-      const cizParalel = (la, col, lw, dash, etiket) => {
-        g.save(); g.strokeStyle = col; g.lineWidth = lw; if (dash) g.setLineDash(dash);
+      // Paralel/Meridyen çizgi yardımcısı (tüm çizgi ve etiket boyunca tıklanabilir!)
+      const czBul = id => (DEK.cizgiler || []).find(c => c.id === id);
+      const labHit = (obj, lx, ly, txt) => { const hw = txt.length * 3.4 + 6; hits.push({ ...obj, x0: lx - hw, x1: lx + hw, y0: ly - 11, y1: ly + 4 }); };
+      const plHitEkle = (obj, pl, r) => {
+        if (!pl.length) return;
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+        for (const s of pl) for (let i = 0; i < s.length; i += 2) { if (s[i] < x0) x0 = s[i]; if (s[i] > x1) x1 = s[i]; if (s[i + 1] < y0) y0 = s[i + 1]; if (s[i + 1] > y1) y1 = s[i + 1]; }
+        hits.unshift({ ...obj, pl, r, x0: x0 - r, x1: x1 + r, y0: y0 - r, y1: y1 + r });
+      };
+      const cizParalel = (la, col, lw, dash, etiket, cz, hitObj) => {
+        const ho = hitObj || (cz ? { kind: 'cizgi', cz } : null);
+        const hov = ho && hover && ((ho.kind === 'cizgi' && hover.kind === 'cizgi' && hover.cz === ho.cz) || (ho.kind === 'manyetik' && hover.kind === 'manyetik' && hover.mn === ho.mn));
+        g.save(); g.strokeStyle = hov ? '#ffffff' : col; g.lineWidth = hov ? lw + 2 : lw; if (dash) g.setLineDash(dash);
         g.beginPath(); let open = false, ex = null, ey = null;
+        const pl = []; let cur = null;
         for (let lo = -180; lo <= 180; lo += 4) {
           const [x, y, z] = P(la, lo);
-          if (z > 0.02) { if (!open) { g.moveTo(x, y); open = true; } else g.lineTo(x, y); if (Math.abs(lo - Math.round(view.lon / 4) * 4) <= 6) { ex = x; ey = y; } }
-          else open = false;
+          if (z > 0.02) {
+            if (!open) { g.moveTo(x, y); open = true; cur = []; pl.push(cur); } else g.lineTo(x, y);
+            cur.push(x, y);
+            if (Math.abs(lo - Math.round(view.lon / 4) * 4) <= 6) { ex = x; ey = y; }
+          } else { open = false; cur = null; }
         }
         g.stroke(); g.restore();
-        if (etiket && ex != null && ey != null) lab(64, ex, ey - 7, etiket, { size: 10, w: 700, col, halo: 3, haloCol: 'rgba(10,16,28,0.88)', kay: true });
+        if (ho) plHitEkle(ho, pl, 11);
+        if (etiket && ex != null && ey != null) {
+          lab(hov ? 99 : 64, ex, ey - 7, etiket, { size: hov ? 11 : 10, w: 700, col: hov ? '#ffffff' : col, halo: 3, haloCol: 'rgba(10,16,28,0.9)', kay: true });
+          if (ho) labHit(ho, ex, ey - 7, etiket);
+        }
       };
-      const cizMeridyen = (lo, col, lw, dash, etiket) => {
-        g.save(); g.strokeStyle = col; g.lineWidth = lw; if (dash) g.setLineDash(dash);
+      const cizMeridyen = (lo, col, lw, dash, etiket, cz) => {
+        const ho = cz ? { kind: 'cizgi', cz } : null;
+        const hov = ho && hover && hover.kind === 'cizgi' && hover.cz === cz;
+        g.save(); g.strokeStyle = hov ? '#ffffff' : col; g.lineWidth = hov ? lw + 2 : lw; if (dash) g.setLineDash(dash);
         g.beginPath(); let open = false, ex = null, ey = null;
+        const pl = []; let cur = null;
         for (let la = -84; la <= 84; la += 4) {
           const [x, y, z] = P(la, lo);
-          if (z > 0.02) { if (!open) { g.moveTo(x, y); open = true; } else g.lineTo(x, y); if (Math.abs(la - clamp(Math.round(view.lat / 4) * 4, -60, 60)) <= 4) { ex = x; ey = y; } }
-          else open = false;
+          if (z > 0.02) {
+            if (!open) { g.moveTo(x, y); open = true; cur = []; pl.push(cur); } else g.lineTo(x, y);
+            cur.push(x, y);
+            if (Math.abs(la - clamp(Math.round(view.lat / 4) * 4, -60, 60)) <= 4) { ex = x; ey = y; }
+          } else { open = false; cur = null; }
         }
         g.stroke(); g.restore();
-        if (etiket && ex != null && ey != null) lab(62, ex + 4, ey, etiket, { size: 9.5, w: 700, col, halo: 2.8, haloCol: 'rgba(10,16,28,0.88)', kay: true });
+        if (ho) plHitEkle(ho, pl, 11);
+        if (etiket && ex != null && ey != null) {
+          lab(hov ? 99 : 62, ex + 4, ey, etiket, { size: hov ? 10.5 : 9.5, w: 700, col: hov ? '#ffffff' : col, halo: 2.8, haloCol: 'rgba(10,16,28,0.9)', kay: true });
+          if (ho) labHit(ho, ex + 4, ey, etiket);
+        }
       };
       // 1) 🌡️ İklim Kuşakları, Biyomlar & Ekvator/Dönenceler
       if (layers.iklim) {
@@ -1243,12 +1271,12 @@ window.Dunya = (() => {
           }
         }
         g.restore();
-        cizParalel(0, '#fde047', 1.7, [7, 4], '☀️ Ekvator (0°)');
-        cizParalel(23.44, '#fb923c', 1.3, [5, 5], 'Yengeç Dönencesi (23,4°K)');
-        cizParalel(-23.44, '#fb923c', 1.3, [5, 5], 'Oğlak Dönencesi (23,4°G)');
-        cizParalel(66.56, '#7dd3fc', 1.2, [4, 4], 'Kuzey Kutup Dairesi (66,5°K)');
-        cizParalel(-66.56, '#7dd3fc', 1.2, [4, 4], 'Güney Kutup Dairesi (66,5°G)');
-        cizMeridyen(0, 'rgba(255,246,210,0.55)', 1.1, [4, 4], '0° Greenwich');
+        cizParalel(0, '#fde047', 1.8, [7, 4], '☀️ Ekvator (0°)', czBul('cz-ekvator'));
+        cizParalel(23.44, '#fb923c', 1.4, [5, 5], 'Yengeç Dönencesi (23,4°K)', czBul('cz-yengec'));
+        cizParalel(-23.44, '#fb923c', 1.4, [5, 5], 'Oğlak Dönencesi (23,4°G)', czBul('cz-oglak'));
+        cizParalel(66.56, '#7dd3fc', 1.3, [4, 4], 'Kuzey Kutup Dairesi (66,5°K)', czBul('cz-kkutup'));
+        cizParalel(-66.56, '#7dd3fc', 1.3, [4, 4], 'Güney Kutup Dairesi (66,5°G)', czBul('cz-gkutup'));
+        cizMeridyen(0, 'rgba(255,246,210,0.68)', 1.2, [4, 4], '0° Greenwich', czBul('cz-greenwich'));
         for (const n of DEK.iklimNoktalar || []) {
           const b = DEK.iklimBantlar.find(x => x.id === n.band); if (!b) continue;
           const [x, y, z] = P(...n.ll); if (z <= 0.12 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
@@ -1257,7 +1285,8 @@ window.Dunya = (() => {
           g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillText(b.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
-          if (view.z >= 1.3 || hov) lab(hov ? 97 : 56, x, y + r0 + 10, n.ad.split(' (')[0], { size: 10, w: 700, col: '#fef9c3', halo: 3, haloCol: 'rgba(12,18,28,0.88)', kay: true });
+          const lbl = n.ad.split(' (')[0];
+          if (view.z >= 1.3 || hov) { lab(hov ? 97 : 56, x, y + r0 + 10, lbl, { size: 10, w: 700, col: '#fef9c3', halo: 3, haloCol: 'rgba(12,18,28,0.88)', kay: true }); labHit({ kind: 'iklim', n, b }, x, y + r0 + 10, lbl); }
           hits.push({ kind: 'iklim', n, b, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
         }
       }
@@ -1273,7 +1302,9 @@ window.Dunya = (() => {
           g.restore();
           const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
           if (mz > 0.12 && (view.z >= 1.2 || hov)) {
-            lab(hov ? 97 : 58, mx, my - 9, `🏔️ ${sr.ad}`, { size: 10, w: 700, col: '#bae6fd', halo: 3, haloCol: 'rgba(8,20,38,0.9)', kay: true });
+            const srLbl = `🏔️ ${sr.ad}`;
+            lab(hov ? 97 : 58, mx, my - 9, srLbl, { size: 10, w: 700, col: '#bae6fd', halo: 3, haloCol: 'rgba(8,20,38,0.9)', kay: true });
+            labHit({ kind: 'tabansirt', sr }, mx, my - 9, srLbl);
           }
           yolHit({ kind: 'tabansirt', sr }, d, 10);
         }
@@ -1287,25 +1318,32 @@ window.Dunya = (() => {
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillText(t.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
           obstacle(x - r0 - 2, y - r0 - 2, x + r0 + 2, y + r0 + 2);
-          if (view.z >= 1.35 || hov) lab(hov ? 97 : 58, x, y + r0 + 10, t.ad.split(' (')[0], { size: 10.2, w: 700, col: bd, halo: 3, haloCol: 'rgba(8,14,28,0.9)', kay: true });
+          const lbl = t.ad.split(' (')[0];
+          if (view.z >= 1.35 || hov) { lab(hov ? 97 : 58, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: bd, halo: 3, haloCol: 'rgba(8,14,28,0.9)', kay: true }); labHit({ kind: 'taban', t }, x, y + r0 + 10, lbl); }
           hits.push({ kind: 'taban', t, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
         }
       }
       // 3) 🌌 Kutup Işıkları (Aurora), Buz Örtüleri & Buzul Çağı Kara Köprüleri
       if (layers.kutup) {
-        // Parlayan animasyonlu Kuzey & Güney Aurora ovali
-        for (const en of [67.5, -68.0]) {
+        // Parlayan animasyonlu Kuzey & Güney Aurora ovali (şerit boyunca tıklanabilir!)
+        for (const [en, aId] of [[67.5, 'aurora-kuzey'], [-68.0, 'aurora-guney']]) {
+          const aObj = (DEK.kutup || []).find(x => x.id === aId);
           g.save(); g.lineCap = 'round';
+          const pl = []; let cur = null;
           for (const [off, col, lw] of [[0, 'rgba(52,211,153,0.38)', 10], [1.4, 'rgba(167,139,250,0.30)', 6], [-0.8, 'rgba(110,231,183,0.72)', 2.4]]) {
             g.beginPath(); let open = false;
             for (let lo = -180; lo <= 180; lo += 4) {
               const wv = Math.sin(lo * 0.14 + T * 2.1 + off) * 1.4 + Math.cos(lo * 0.08 - T * 1.3) * 0.9;
               const [x, y, z] = P(en + off + wv, lo);
-              if (z > 0.03) { if (!open) { g.moveTo(x, y); open = true; } else g.lineTo(x, y); } else open = false;
+              if (z > 0.03) {
+                if (!open) { g.moveTo(x, y); open = true; if (off === 0) { cur = []; pl.push(cur); } } else g.lineTo(x, y);
+                if (off === 0) cur.push(x, y);
+              } else { open = false; if (off === 0) cur = null; }
             }
             g.strokeStyle = col; g.lineWidth = lw; g.stroke();
           }
           g.restore();
+          if (aObj) plHitEkle({ kind: 'kutup', k: aObj }, pl, 12);
         }
         for (const k of DEK.kutup || []) {
           const [x, y, z] = P(...k.ll); if (z <= 0.08 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
@@ -1315,7 +1353,8 @@ window.Dunya = (() => {
           g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillText(k.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
-          if (view.z >= 1.2 || hov) lab(hov ? 97 : 59, x, y + r0 + 10, k.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(8,16,32,0.9)', kay: true });
+          const lbl = k.ad.split(' (')[0];
+          if (view.z >= 1.2 || hov) { lab(hov ? 97 : 59, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(8,16,32,0.9)', kay: true }); labHit({ kind: 'kutup', k }, x, y + r0 + 10, lbl); }
           hits.push({ kind: 'kutup', k, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
         }
       }
@@ -1334,8 +1373,9 @@ window.Dunya = (() => {
           g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillText('☄️', x, y + 0.5); g.textBaseline = 'alphabetic';
-          if (view.z >= 1.3 || hov) lab(hov ? 97 : 58, x, y + r0 + 12, kr.ad.split(' (')[0], { size: 10.2, w: 700, col: '#fed7aa', halo: 3, haloCol: 'rgba(24,10,6,0.9)', kay: true });
-          hits.push({ kind: 'krater', kr, x0: x - r0 - 5, x1: x + r0 + 5, y0: y - r0 - 5, y1: y + r0 + 5 });
+          const lbl = kr.ad.split(' (')[0];
+          if (view.z >= 1.3 || hov) { lab(hov ? 97 : 58, x, y + r0 + 12, lbl, { size: 10.2, w: 700, col: '#fed7aa', halo: 3, haloCol: 'rgba(24,10,6,0.9)', kay: true }); labHit({ kind: 'krater', kr }, x, y + r0 + 12, lbl); }
+          hits.push({ kind: 'krater', kr, x0: x - r0 - 8, x1: x + r0 + 8, y0: y - r0 - 8, y1: y + r0 + 8 });
         }
       }
       // 5) 💧 Büyük Göller & Dev Şelaleler
@@ -1348,7 +1388,8 @@ window.Dunya = (() => {
           g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillText(gl.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
-          if (view.z >= 1.35 || hov) lab(hov ? 97 : 57, x, y + r0 + 10, gl.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(8,20,42,0.9)', kay: true });
+          const lbl = gl.ad.split(' (')[0];
+          if (view.z >= 1.35 || hov) { lab(hov ? 97 : 57, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(8,20,42,0.9)', kay: true }); labHit({ kind: 'gol', gl }, x, y + r0 + 10, lbl); }
           hits.push({ kind: 'gol', gl, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
         }
       }
@@ -1356,8 +1397,8 @@ window.Dunya = (() => {
       if (layers.saat) {
         for (let h = -11; h <= 12; h++) {
           const lo = h * 15;
-          if (h === 0) cizMeridyen(0, '#fde047', 1.8, [6, 4], 'UTC 0°');
-          else if (h === 12) cizMeridyen(180, '#fb7185', 2.0, [5, 3], '📅 Tarih Değiştirme (180°)');
+          if (h === 0) cizMeridyen(0, '#fde047', 1.8, [6, 4], 'UTC 0°', czBul('cz-greenwich'));
+          else if (h === 12) cizMeridyen(180, '#fb7185', 2.0, [5, 3], '📅 Tarih Değiştirme (180°)', czBul('cz-tarih180'));
           else cizMeridyen(lo, 'rgba(226,232,240,0.28)', 0.9, [3, 5], view.z >= 1.4 ? `UTC${h > 0 ? '+' + h : h}` : null);
         }
         const nowMs = Date.now();
@@ -1377,7 +1418,8 @@ window.Dunya = (() => {
       }
       // 7) 🧲 Manyetik Kutuplar & Güney Atlantik Anomalisi
       if (layers.manyetik) {
-        cizParalel(0, 'rgba(192,132,252,0.45)', 1.2, [5, 5], '🧲 Manyetik Ekvator');
+        const mnTers = (DEK.manyetik || []).find(x => x.id === 'manyetik-tersinme');
+        cizParalel(0, 'rgba(192,132,252,0.52)', 1.3, [5, 5], '🧲 Manyetik Ekvator', null, mnTers ? { kind: 'manyetik', mn: mnTers } : null);
         for (const mn of DEK.manyetik || []) {
           const hov = hover && hover.kind === 'manyetik' && hover.mn === mn, col = mn.renk || '#38bdf8';
           if (mn.pts && mn.pts.length >= 2) {
@@ -1392,19 +1434,21 @@ window.Dunya = (() => {
           const [x, y, z] = P(...mn.ll); if (z <= 0.08 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
           if (mn.tur === 'anomali') {
             const rad = clamp(R * 0.24, 24, 95) * (1 + Math.sin(T * 2.2) * 0.07);
-            g.save(); g.fillStyle = 'rgba(244,63,94,0.18)'; g.strokeStyle = 'rgba(251,113,133,0.78)'; g.lineWidth = 1.6; g.setLineDash([5, 4]);
+            g.save(); g.fillStyle = hov ? 'rgba(244,63,94,0.32)' : 'rgba(244,63,94,0.18)'; g.strokeStyle = hov ? '#fff' : 'rgba(251,113,133,0.78)'; g.lineWidth = hov ? 2.2 : 1.6; g.setLineDash([5, 4]);
             g.beginPath(); g.ellipse(x, y, rad * 1.25, rad * 0.78, -0.25, 0, 7); g.fill(); g.stroke(); g.restore();
+            hits.unshift({ kind: 'manyetik', mn, x0: x - rad * 1.15, x1: x + rad * 1.15, y0: y - rad * 0.72, y1: y + rad * 0.72 });
           }
           const r0 = hov ? 13 : 10.5;
           g.fillStyle = hexA(col, 0.92); g.strokeStyle = hov ? '#fff' : '#e0f2fe'; g.lineWidth = hov ? 2.4 : 1.7;
           g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13.5 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillText(mn.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
-          if (view.z >= 1.1 || hov) lab(hov ? 98 : 62, x, y + r0 + 11, mn.ad.split(' (')[0], { size: 10.2, w: 700, col: '#f0f9ff', halo: 3, haloCol: 'rgba(10,16,32,0.9)', kay: true });
+          const lbl = mn.ad.split(' (')[0];
+          if (view.z >= 1.1 || hov) { lab(hov ? 98 : 62, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: '#f0f9ff', halo: 3, haloCol: 'rgba(10,16,32,0.9)', kay: true }); labHit({ kind: 'manyetik', mn }, x, y + r0 + 11, lbl); }
           hits.push({ kind: 'manyetik', mn, x0: x - r0 - 5, x1: x + r0 + 5, y0: y - r0 - 5, y1: y + r0 + 5 });
         }
       }
-      // 8) 🌾 Dünya Tarım & Besin Anavatanları (Vavilov Merkezleri — Kapsamlı)
+      // 8) 🌾 Dünya Tarım & Besin Anavatanları (Vavilov Merkezleri — Kapsamlı, tüm hale tıklanabilir!)
       if (layers.tarim) {
         for (const tr of DEK.tarim || []) {
           const [x, y, z] = P(...tr.ll); if (z <= 0.1 || x < -30 || x > W + 30 || y < -30 || y > H + 30) continue;
@@ -1413,12 +1457,14 @@ window.Dunya = (() => {
           g.save();
           g.fillStyle = hexA(col, hov ? 0.30 : 0.17); g.strokeStyle = hexA(col, hov ? 0.9 : 0.55); g.lineWidth = hov ? 2.2 : 1.3; g.setLineDash([4, 3]);
           g.beginPath(); g.arc(x, y, haloR, 0, 7); g.fill(); g.stroke(); g.restore();
+          hits.unshift({ kind: 'tarimvav', tr, x0: x - haloR * 0.85, x1: x + haloR * 0.85, y0: y - haloR * 0.85, y1: y + haloR * 0.85 });
           const r0 = hov ? 13 : 10.5;
           g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.5 : 1.8;
           g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillText(tr.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
-          if (view.z >= 1.15 || hov) lab(hov ? 98 : 63, x, y + r0 + 11, tr.ad.split(' (')[0], { size: 10.5, w: 700, col: '#fefce8', halo: 3.2, haloCol: 'rgba(18,14,6,0.9)', kay: true });
+          const lbl = tr.ad.split(' (')[0];
+          if (view.z >= 1.15 || hov) { lab(hov ? 98 : 63, x, y + r0 + 11, lbl, { size: 10.5, w: 700, col: '#fefce8', halo: 3.2, haloCol: 'rgba(18,14,6,0.9)', kay: true }); labHit({ kind: 'tarimvav', tr }, x, y + r0 + 11, lbl); }
           hits.push({ kind: 'tarimvav', tr, x0: x - r0 - 5, x1: x + r0 + 5, y0: y - r0 - 5, y1: y + r0 + 5 });
         }
       }
@@ -1426,62 +1472,76 @@ window.Dunya = (() => {
     // 🏛️ Tarih Atlası Genişleme Katmanları (data/atlas/tarih-ek.js)
     const TEK = window.ATLAS_TARIH_EK;
     if (TEK) {
-      // 1) 🗣️ Yazının Doğuşu, Alfabeler & Dil Aileleri
+      // 1) 🗣️ Yazının Doğuşu, Alfabeler & Dil Aileleri (temiz kalın renkli şeritler + odak karartma)
       if (layers.yazi) {
+        const anyYaziHov = hover && hover.kind === 'yazi';
         for (const yz of TEK.yazilar || []) {
-          const hov = hover && hover.kind === 'yazi' && hover.yz === yz, col = yz.renk || '#f59e0b';
+          const hov = anyYaziHov && hover.yz === yz, dim = anyYaziHov && !hov, col = yz.renk || '#f59e0b';
           if (yz.pts && yz.pts.length >= 2) {
             const d = yolHazirla(yz);
             g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
             g.beginPath(); linePath(d.p);
-            g.strokeStyle = hexA(col, hov ? 0.92 : 0.55); g.lineWidth = hov ? 3.2 : 2.0; g.setLineDash([7, 5]); g.lineDashOffset = -T * 20; g.stroke();
-            yolUclari(d, hov ? '#fff7dc' : col, true);
+            g.strokeStyle = hexA(col, hov ? 0.34 : dim ? 0.05 : 0.16); g.lineWidth = hov ? 12 : 7; g.stroke();
+            g.beginPath(); linePath(d.p);
+            g.strokeStyle = hexA(col, hov ? 0.96 : dim ? 0.18 : 0.65); g.lineWidth = hov ? 4.0 : 2.8; g.stroke();
+            if (!dim) yolUclari(d, hov ? '#fff7dc' : col, true);
             g.restore();
-            yolHit({ kind: 'yazi', yz }, d, 9);
+            yolHit({ kind: 'yazi', yz }, d, 10);
           }
           const [x, y, z] = P(...yz.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
-          const r0 = hov ? 12.5 : 10;
-          g.fillStyle = hexA(col, 0.92); g.strokeStyle = hov ? '#fff' : '#fef3c7'; g.lineWidth = hov ? 2.4 : 1.7;
+          const r0 = hov ? 13 : 10.5;
+          g.save(); if (dim) g.globalAlpha = 0.45;
+          g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fef3c7'; g.lineWidth = hov ? 2.5 : 1.7;
           g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
-          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(yz.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
-          if (view.z >= 1.25 || hov) lab(hov ? 97 : 60, x, y + r0 + 10, yz.ad.split(' (')[0], { size: 10.2, w: 700, col: '#fef3c7', halo: 3, haloCol: 'rgba(20,12,6,0.9)', kay: true });
+          g.font = `${hov ? 13.5 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(yz.ik, x, y + 0.5); g.textBaseline = 'alphabetic'; g.restore();
+          const lbl = yz.ad.split(' (')[0];
+          if (view.z >= 1.25 || hov) { lab(hov ? 97 : 60, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: '#fef3c7', halo: 3, haloCol: 'rgba(20,12,6,0.9)', kay: true }); const hw = lbl.length * 3.4 + 6; hits.push({ kind: 'yazi', yz, x0: x - hw, x1: x + hw, y0: y + r0 - 1, y1: y + r0 + 14 }); }
           hits.push({ kind: 'yazi', yz, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
         }
       }
-      // 2) 🕊️ Dinlerin & İnanç Sistemlerinin Doğuşu ve Yayılışı
+      // 2) 🕊️ Dinlerin & İnanç Sistemlerinin Doğuşu ve Yayılışı (temiz kalın renkli koridorlar + Yahudilik/Hristiyanlık ayrı!)
       if (layers.din) {
+        const anyDinHov = hover && hover.kind === 'din';
         for (const dn of TEK.dinler || []) {
-          const hov = hover && hover.kind === 'din' && hover.dn === dn, col = dn.renk || '#eab308';
+          const hov = anyDinHov && hover.dn === dn, dim = anyDinHov && !hov, col = dn.renk || '#eab308';
           for (const pts of dn.yollar || []) {
             const d = yolHazirla({ pts });
             g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
             g.beginPath(); linePath(d.p);
-            g.strokeStyle = hexA(col, hov ? 0.95 : 0.62); g.lineWidth = hov ? 3.4 : 2.2; g.setLineDash([8, 5]); g.lineDashOffset = -T * 22; g.stroke();
-            yolUclari(d, hov ? '#fff7dc' : col, true);
+            g.strokeStyle = hexA(col, hov ? 0.36 : dim ? 0.04 : 0.16); g.lineWidth = hov ? 13 : 8; g.stroke();
+            g.beginPath(); linePath(d.p);
+            g.strokeStyle = hexA(col, hov ? 0.98 : dim ? 0.16 : 0.66); g.lineWidth = hov ? 4.2 : 3.0; g.stroke();
+            if (!dim) yolUclari(d, hov ? '#fff7dc' : col, true);
             g.restore();
-            yolHit({ kind: 'din', dn }, d, 9);
+            yolHit({ kind: 'din', dn }, d, 10);
           }
           const [x, y, z] = P(...dn.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
-          const r0 = hov ? 13 : 10.5;
-          g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.5 : 1.8;
+          const r0 = hov ? 13.5 : 11;
+          g.save(); if (dim) g.globalAlpha = 0.48;
+          g.fillStyle = hexA(col, 0.95); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.6 : 1.8;
           g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
-          g.font = `${hov ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(dn.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
-          if (view.z >= 1.15 || hov) lab(hov ? 98 : 62, x, y + r0 + 10, dn.ad, { size: 10.5, w: 700, col: '#fffbeb', halo: 3, haloCol: 'rgba(18,12,8,0.9)', kay: true });
-          hits.push({ kind: 'din', dn, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+          g.font = `${hov ? 14 : 12}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(dn.ik, x, y + 0.5); g.textBaseline = 'alphabetic'; g.restore();
+          if (view.z >= 1.05 || hov) {
+            const ly = dn.id === 'yahudilik' ? y + r0 + 12 : dn.id === 'hristiyanlik' ? y - r0 - 7 : y + r0 + 11;
+            lab(hov ? 99 : 64, x, ly, dn.ad.split(' (')[0], { size: 10.5, w: 700, col: '#fffbeb', halo: 3.2, haloCol: 'rgba(18,12,8,0.92)', kay: true });
+            const hw = dn.ad.split(' (')[0].length * 3.5 + 6; hits.push({ kind: 'din', dn, x0: x - hw, x1: x + hw, y0: ly - 11, y1: ly + 4 });
+          }
+          hits.push({ kind: 'din', dn, x0: x - r0 - 5, x1: x + r0 + 5, y0: y - r0 - 5, y1: y + r0 + 5 });
         }
       }
-      // 3) 🏃 Tarih Çağlarındaki Büyük Göç Dalgaları
+      // 3) 🏃 Tarih Çağlarındaki Büyük Göç Dalgaları (kalın temiz akış şeritleri + odak karartma)
       if (layers.tarihgoc) {
+        const anyMgHov = hover && hover.kind === 'tarihgoc';
         for (const mg of TEK.buyukGoc || []) {
-          const d = yolHazirla(mg), hov = hover && hover.kind === 'tarihgoc' && hover.mg === mg, col = mg.renk || '#f59e0b';
+          const d = yolHazirla(mg), hov = anyMgHov && hover.mg === mg, dim = anyMgHov && !hov, col = mg.renk || '#f59e0b';
           g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
           g.beginPath(); linePath(d.p);
-          g.strokeStyle = hexA(col, hov ? 0.35 : 0.16); g.lineWidth = hov ? 12 : 8; g.stroke();
+          g.strokeStyle = hexA(col, hov ? 0.36 : dim ? 0.05 : 0.18); g.lineWidth = hov ? 14 : 9; g.stroke();
           g.beginPath(); linePath(d.p);
-          g.strokeStyle = hov ? '#fff7dc' : col; g.lineWidth = hov ? 3.5 : 2.5; g.setLineDash([10, 6]); g.lineDashOffset = -T * 28; g.stroke();
-          yolUclari(d, hov ? '#fff7dc' : col, true);
+          g.strokeStyle = hov ? '#fff7dc' : hexA(col, dim ? 0.2 : 0.82); g.lineWidth = hov ? 4.4 : 3.2; g.stroke();
+          if (!dim) yolUclari(d, hov ? '#fff7dc' : col, true);
           g.restore();
           const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
           if (mz > 0.12 && (view.z >= 1.15 || hov)) {
@@ -1492,30 +1552,33 @@ window.Dunya = (() => {
           yolHit({ kind: 'tarihgoc', mg }, d, 11);
         }
       }
-      // 4) 🦠 Dünyayı Değiştiren Büyük Salgınlar (Pandemiler)
+      // 4) 🦠 Dünyayı Değiştiren Büyük Salgınlar (temiz kalın şerit + merkez nabzı + odak karartma)
       if (layers.salgin) {
+        const anySgHov = hover && hover.kind === 'salgin';
         for (const sg of TEK.salginlar || []) {
-          const hov = hover && hover.kind === 'salgin' && hover.sg === sg, col = sg.renk || '#e11d48';
+          const hov = anySgHov && hover.sg === sg, dim = anySgHov && !hov, col = sg.renk || '#e11d48';
           if (sg.pts && sg.pts.length >= 2) {
             const d = yolHazirla(sg);
             g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
             g.beginPath(); linePath(d.p);
-            g.strokeStyle = hexA(col, hov ? 0.38 : 0.18); g.lineWidth = hov ? 12 : 8; g.stroke();
+            g.strokeStyle = hexA(col, hov ? 0.38 : dim ? 0.05 : 0.18); g.lineWidth = hov ? 13 : 8.5; g.stroke();
             g.beginPath(); linePath(d.p);
-            g.strokeStyle = hov ? '#fecdd3' : col; g.lineWidth = hov ? 3.2 : 2.3; g.setLineDash([6, 6]); g.lineDashOffset = -T * 24; g.stroke();
-            yolUclari(d, hov ? '#fecdd3' : col, true);
+            g.strokeStyle = hov ? '#fecdd3' : hexA(col, dim ? 0.2 : 0.78); g.lineWidth = hov ? 4.0 : 2.9; g.stroke();
+            if (!dim) yolUclari(d, hov ? '#fecdd3' : col, true);
             g.restore();
             yolHit({ kind: 'salgin', sg }, d, 10);
           }
           const [x, y, z] = P(...sg.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
-          const r0 = hov ? 12.5 : 10, pulse = 1 + Math.sin(T * 3 + sg.ll[0]) * 0.16;
-          g.save(); g.strokeStyle = hexA(col, 0.55); g.lineWidth = 1.6;
-          g.beginPath(); g.arc(x, y, (r0 + 5) * pulse, 0, 7); g.stroke(); g.restore();
-          g.fillStyle = hexA(col, 0.92); g.strokeStyle = hov ? '#fff' : '#fecdd3'; g.lineWidth = hov ? 2.4 : 1.7;
+          const r0 = hov ? 13 : 10.5, pulse = 1 + Math.sin(T * 3 + sg.ll[0]) * 0.16;
+          g.save(); if (dim) g.globalAlpha = 0.45;
+          g.strokeStyle = hexA(col, 0.55); g.lineWidth = 1.6;
+          g.beginPath(); g.arc(x, y, (r0 + 5) * pulse, 0, 7); g.stroke();
+          g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fecdd3'; g.lineWidth = hov ? 2.5 : 1.7;
           g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
-          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(sg.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
-          if (view.z >= 1.25 || hov) lab(hov ? 97 : 60, x, y + r0 + 11, sg.ad.split(' (')[0], { size: 10.2, w: 700, col: '#ffe4e6', halo: 3, haloCol: 'rgba(28,6,14,0.9)', kay: true });
+          g.font = `${hov ? 13.5 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(sg.ik, x, y + 0.5); g.textBaseline = 'alphabetic'; g.restore();
+          const lbl = sg.ad.split(' (')[0];
+          if (view.z >= 1.25 || hov) { lab(hov ? 97 : 60, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: '#ffe4e6', halo: 3, haloCol: 'rgba(28,6,14,0.9)', kay: true }); const hw = lbl.length * 3.4 + 6; hits.push({ kind: 'salgin', sg, x0: x - hw, x1: x + hw, y0: y + r0, y1: y + r0 + 15 }); }
           hits.push({ kind: 'salgin', sg, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
         }
       }
@@ -1529,7 +1592,8 @@ window.Dunya = (() => {
           g.beginPath(); g.moveTo(x, y - r0 - 1); g.lineTo(x + r0 + 1, y); g.lineTo(x, y + r0 + 1); g.lineTo(x - r0 - 1, y); g.closePath(); g.fill(); g.stroke();
           g.font = `${hov ? 12.5 : 10.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillText(bg.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
-          if (view.z >= 1.4 || hov) lab(hov ? 97 : 58, x, y + r0 + 11, bg.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(10,18,34,0.9)', kay: true });
+          const lbl = bg.ad.split(' (')[0];
+          if (view.z >= 1.4 || hov) { lab(hov ? 97 : 58, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(10,18,34,0.9)', kay: true }); const hw = lbl.length * 3.4 + 6; hits.push({ kind: 'bogaz', bg, x0: x - hw, x1: x + hw, y0: y + r0, y1: y + r0 + 15 }); }
           hits.push({ kind: 'bogaz', bg, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
         }
       }
@@ -1553,6 +1617,7 @@ window.Dunya = (() => {
           if (kral || view.z >= 1.35 || hov) {
             const lbl = (kral ? '👑 ' : '') + mk.ad.split(' (')[0];
             lab(kral ? 99 : (hov ? 97 : 58), x, y + r0 + 11, lbl, { size: kral ? 11.2 : 10, w: 700, col: kral ? '#fef08a' : '#f1f5f9', halo: 3.2, haloCol: 'rgba(15,12,8,0.92)', kay: true });
+            const hw = lbl.length * 3.5 + 6; hits.push({ kind: 'megakent', mk, kral, x0: x - hw, x1: x + hw, y0: y + r0, y1: y + r0 + 15 });
           }
           hits.push({ kind: 'megakent', mk, kral, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
         }
@@ -2116,6 +2181,7 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'tarihkazi') tip(hover.x1 + 6, hover.y0, `${hover.kz.ik || '🏺'} ${hover.kz.ad}`, `${hover.kz.yas} · ${hover.kz.yer} · tıkla: buluntular ve tarihî önemi`);
     else if (hover && hover.kind === 'fosilkazi') tip(hover.x1 + 6, hover.y0, `${hover.kz.ik || '🦴'} ${hover.kz.ad}`, `${hover.kz.yas} · ${hover.kz.yer} · tıkla: fosil buluntusu ve bilimsel önemi`);
     else if (hover && hover.kind === 'iklim') tip(hover.x1 + 6, hover.y0, `${hover.b.ik} ${hover.n.ad}`, `${hover.b.sicaklik} · Yağış: ${hover.b.yagis} · tıkla: iklim özellikleri`);
+    else if (hover && hover.kind === 'cizgi') tip(hover.x1 + 6, hover.y0, `${hover.cz.ik} ${hover.cz.ad}`, `${hover.cz.olcu} · tıkla: coğrafi çizgi bilgisi`);
     else if (hover && hover.kind === 'taban') tip(hover.x1 + 6, hover.y0, `${hover.t.ik} ${hover.t.ad}`, `${hover.t.olcu} · ${hover.t.yer} · tıkla: okyanus tabanı`);
     else if (hover && hover.kind === 'tabansirt') tip(hover.x1 + 6, hover.y0, `${hover.sr.ik} ${hover.sr.ad}`, `${hover.sr.olcu} · tıkla: sualtı sıradağı`);
     else if (hover && hover.kind === 'kutup') tip(hover.x1 + 6, hover.y0, `${hover.k.ik} ${hover.k.ad}`, `${hover.k.yer} · tıkla: ayrıntılar`);
