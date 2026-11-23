@@ -1650,3 +1650,20 @@ body:not(.globeonly):not(.maponly) .citycard { bottom: 76px; }
 @media (max-width: 560px) { .ho .ho-secim { grid-template-columns: 1fr; } .ho .ho-kart { padding: 12px; } }
 .kp-modlar em { font-style: normal; opacity: 0.85; font-size: 10.5px; }
 .kp-ayir { margin: 9px 4px 4px; padding-top: 8px; border-top: 1px solid rgba(255, 214, 102, 0.2); font-size: 11px; font-weight: 700; color: #ffd666; letter-spacing: 0.3px; text-transform: uppercase; opacity: 0.9; }
+
+/* 🎮 Tüm oyunlarda açıklama ve sonuç ekranı yüksek kontrast garantisi */
+.hk-kutu .note, .hk-kutu .hk-giris, .hk-kutu .hk-geri, .hk-kutu .dl-secilen, .hk-kutu .dl-ozet-list > div { color: #fff6e2; }
+.hk-kutu .note { color: rgba(255, 244, 222, 0.88); }
+.hk-kutu .dl-ozet-list small, .hk-kutu .hk-stat small { color: rgba(255, 244, 222, 0.84); }
+.hk-kutu .oz-btn { background: rgba(255, 255, 255, 0.09); color: #fff4dd; border-color: rgba(255, 214, 102, 0.38); }
+.hk-kutu .oz-btn:hover { background: rgba(255, 214, 102, 0.22); color: #fff; }
+.hk-kutu .oz-btn.on { background: #ffd666; color: #24170c; border-color: #ffd666; }
+.ho-mod, .ho-mod b, .ho-soru, .ho-ipucu { color: #24160b; }
+.ho-mod small { color: #543b20; }
+.ho-mod em { display: block; margin-top: 3px; font-style: normal; font-size: 11.5px; font-weight: 700; color: #8a4f12; }
+.eo-sonuc, .eo-sonuc p, .eo-sonuc div, .eo-sonuc span { color: #24160b; }
+.eo-sonuc > b { color: #1f1208; }
+.eo-sonuc > small, .eo-sonuc small { color: #432c16; font-size: 13px; }
+.eo-sonuc.iyi { background: #dff4da; border: 1px solid #8fc985; }
+.eo-sonuc.bitti { background: #fde4df; border: 1px solid #e29d91; }
+.eo-acik, .eo-ipucu, .eo-bilgi small, .sb-sonuc small, .sb-not, .sb-ist, .hy-bilgi, .hy-alt, .hy-ipucu, .ft-hint { color: #4a3218; }
