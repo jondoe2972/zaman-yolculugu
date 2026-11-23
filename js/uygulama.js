@@ -1535,6 +1535,28 @@
     if (ev.target.closest('#derin-ac')) { kartlariKapat(); (window.OyunYukle ? window.OyunYukle('derin') : Promise.resolve()).then(() => { if (window.DerinZaman) window.DerinZaman.ac(); }); return; }
   });
   $('#katbtn').addEventListener('click', () => { const el = $('#katman'), ac = el.hidden; if (ac) kartlariKapat('katman'); el.hidden = !ac; $('#katbtn').classList.toggle('on', ac); renderOlayPanel(); });
+  // ---------- 🎨 Canlı Renk Teması Seçici (5 seçkin tema, varsayılan: Canlı Doğa) ----------
+  const TEMA_AD = { doga: '🌍 Canlı Doğa & Modern', safir: '🌌 Safir Gece & Altın', zumrut: '🌿 Zümrüt Orman & Yeşim', mor: '🔮 Bizans Moru & Altın', kutup: '❄️ Kutup Işığı (Aurora)' };
+  function temaUygula(id, sessiz) {
+    if (!TEMA_AD[id]) id = 'doga';
+    document.body.dataset.tema = id;
+    if (DN.setTema) DN.setTema(id);
+    try { localStorage['zy-tema'] = id; } catch (e) { /* */ }
+    document.querySelectorAll('[data-tema-sec]').forEach(b => b.classList.toggle('on', b.dataset.temaSec === id));
+    if (!sessiz) toast(`🎨 Tema değiştirildi: <b>${TEMA_AD[id]}</b>`);
+  }
+  const temaBtn = $('#temabtn'), temaPop = $('#temapop');
+  if (temaBtn && temaPop) {
+    temaBtn.addEventListener('click', ev => { ev.stopPropagation(); temaPop.hidden = !temaPop.hidden; temaBtn.classList.toggle('on', !temaPop.hidden); });
+    temaPop.addEventListener('click', ev => {
+      const b = ev.target.closest('[data-tema-sec]'); if (!b) return;
+      temaUygula(b.dataset.temaSec);
+      temaPop.hidden = true; temaBtn.classList.remove('on');
+    });
+    document.addEventListener('click', ev => { if (!temaPop.hidden && !temaPop.contains(ev.target) && ev.target !== temaBtn) { temaPop.hidden = true; temaBtn.classList.remove('on'); } });
+  }
+  temaUygula((() => { try { const s = localStorage['zy-tema']; return TEMA_AD[s] ? s : 'doga'; } catch (e) { return 'doga'; } })(), true);
+
   // İlk açılışta tertemiz (Tarih: yalnızca siyasi sınırlar; Doğa: tertemiz küre) — son seçilen katmanlar localStorage'dan hatırlanır
   atlasModUygula(katKayitOku().mod || 'tarih', true);
   kesifRozetGuncelle();

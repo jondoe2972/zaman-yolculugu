@@ -1667,3 +1667,173 @@ body:not(.globeonly):not(.maponly) .citycard { bottom: 76px; }
 .eo-sonuc.iyi { background: #dff4da; border: 1px solid #8fc985; }
 .eo-sonuc.bitti { background: #fde4df; border: 1px solid #e29d91; }
 .eo-acik, .eo-ipucu, .eo-bilgi small, .sb-sonuc small, .sb-not, .sb-ist, .hy-bilgi, .hy-alt, .hy-ipucu, .ft-hint { color: #4a3218; }
+
+/* 🎨 5 Seçkin Renk Teması — Tüm Bilgi Kartları, Oyunlar ve Menülerle Tam Uyumlu */
+.temapop { position: fixed; right: 54px; top: 52px; z-index: 90; width: 235px; background: var(--t-panel, rgba(12,28,44,0.96)); border: 1px solid var(--t-border, rgba(56,189,248,0.36)); border-radius: 13px; padding: 8px; box-shadow: 0 14px 36px rgba(0,0,0,.55); display: flex; flex-direction: column; gap: 4px; backdrop-filter: blur(8px); }
+.temapop[hidden] { display: none; }
+.temapop b { font-size: 12px; color: var(--t-title, #4ade80); padding: 2px 6px 4px; }
+.temapop button { text-align: left; border: 1px solid transparent; background: transparent; color: var(--t-text, #f0f9ff); padding: 7px 9px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.temapop button:hover { background: var(--t-soft, rgba(255,255,255,0.09)); }
+.temapop button.on { background: var(--t-accent, #22c55e); color: var(--t-accent-ink, #052110); font-weight: 800; }
+
+/* Tema değişken tanımları */
+body[data-tema="doga"] {
+  --t-bg1: #0d2236; --t-bg2: #071524; --t-panel: rgba(12, 28, 44, 0.96); --t-card: #0e2236; --t-soft: rgba(56, 189, 248, 0.11);
+  --t-accent: #22c55e; --t-accent-ink: #052110; --t-title: #4ade80; --t-border: rgba(56, 189, 248, 0.34);
+  --t-text: #f0f9ff; --t-muted: #b8d6ec; --t-did: rgba(34, 197, 94, 0.14);
+}
+body[data-tema="safir"] {
+  --t-bg1: #0e1c3d; --t-bg2: #071126; --t-panel: rgba(11, 21, 46, 0.96); --t-card: #0e1b3b; --t-soft: rgba(245, 196, 81, 0.10);
+  --t-accent: #f5c451; --t-accent-ink: #0c162e; --t-title: #f5c451; --t-border: rgba(245, 196, 81, 0.34);
+  --t-text: #f8fafc; --t-muted: #c6d4ea; --t-did: rgba(245, 196, 81, 0.13);
+}
+body[data-tema="zumrut"] {
+  --t-bg1: #0b2620; --t-bg2: #051613; --t-panel: rgba(9, 31, 26, 0.96); --t-card: #0b241e; --t-soft: rgba(52, 211, 153, 0.11);
+  --t-accent: #34d399; --t-accent-ink: #05231a; --t-title: #6ee7b7; --t-border: rgba(52, 211, 153, 0.35);
+  --t-text: #ecfdf5; --t-muted: #b7e2d3; --t-did: rgba(52, 211, 153, 0.14);
+}
+body[data-tema="mor"] {
+  --t-bg1: #241240; --t-bg2: #130924; --t-panel: rgba(26, 13, 46, 0.96); --t-card: #1f1038; --t-soft: rgba(234, 179, 8, 0.11);
+  --t-accent: #eab308; --t-accent-ink: #1b0c2e; --t-title: #facc15; --t-border: rgba(232, 197, 94, 0.36);
+  --t-text: #faf5ff; --t-muted: #d8c8ec; --t-did: rgba(234, 179, 8, 0.14);
+}
+body[data-tema="kutup"] {
+  --t-bg1: #071e2e; --t-bg2: #03101a; --t-panel: rgba(7, 26, 40, 0.96); --t-card: #092032; --t-soft: rgba(45, 212, 191, 0.11);
+  --t-accent: #2dd4bf; --t-accent-ink: #041f24; --t-title: #5eead4; --t-border: rgba(45, 212, 191, 0.36);
+  --t-text: #ecfeff; --t-muted: #b5dfe8; --t-did: rgba(45, 212, 191, 0.14);
+}
+
+/* Üst çubuk, zaman çizelgesi ve yüzen paneller */
+body[data-tema] .top, body[data-tema] .tl { background: linear-gradient(180deg, var(--t-bg1), var(--t-bg2)); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .logo b, body[data-tema] .kp-ayir { color: var(--t-title); }
+body[data-tema] .katpop, body[data-tema] .oyunpop, body[data-tema] .sespop, body[data-tema] .tarihpop,
+body[data-tema] .yearcard, body[data-tema] .citycard, body[data-tema] .dl-bar, body[data-tema] .toast, body[data-tema] .tbbtn {
+  background: var(--t-panel); border-color: var(--t-border); color: var(--t-text);
+}
+body[data-tema] .modlar button.on, body[data-tema] .kp-modlar button.on, body[data-tema] .kp-toplu button:hover,
+body[data-tema] .oyunpop .op-sekmeler button.on { background: var(--t-accent); color: var(--t-accent-ink); border-color: var(--t-accent); }
+body[data-tema] .kp-toplu button, body[data-tema] .kp-kesif { border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .kp-kesif:hover { background: var(--t-accent); color: var(--t-accent-ink); }
+body[data-tema] .oyunpop b { color: var(--t-text); }
+body[data-tema] .oyunpop small { color: var(--t-muted); }
+body[data-tema] .oyunpop b i { background: var(--t-accent); color: var(--t-accent-ink); }
+
+/* Bilgi kartları (#modal .sheet), Arama, Hoş Geldin ve Ansiklopedi — tam tema uyumlu ve yüksek kontrast */
+body[data-tema] .sheet, body[data-tema] .ara-kutu, body[data-tema] .hg-kart, body[data-tema] .wiki {
+  background: var(--t-card); color: var(--t-text); border: 1.5px solid var(--t-border);
+}
+body[data-tema] .sheet header { background: var(--t-soft); border-bottom: 1px solid var(--t-border); }
+body[data-tema] .sheet h2, body[data-tema] .sheet h3, body[data-tema] .sheet h4,
+body[data-tema] .hg-kart h2, body[data-tema] .hg-kart h3, body[data-tema] .wiki-ust b { color: var(--t-title); }
+body[data-tema] .sheet .msub, body[data-tema] .sheet .note, body[data-tema] .sheet small,
+body[data-tema] .hg-kart p, body[data-tema] .ara-list small { color: var(--t-muted); }
+body[data-tema] .sheet .x, body[data-tema] .hg-x { background: rgba(255,255,255,0.1); color: var(--t-text); border: 1px solid var(--t-border); }
+body[data-tema] .sheet .tabs { border-bottom-color: var(--t-border); background: rgba(0,0,0,0.18); }
+body[data-tema] .sheet .tabs button { background: rgba(255,255,255,0.08); border-color: var(--t-border); color: var(--t-muted); }
+body[data-tema] .sheet .tabs button:hover { background: var(--t-soft); color: var(--t-text); }
+body[data-tema] .sheet .tabs button.on { background: var(--t-accent); color: var(--t-accent-ink); border-color: var(--t-accent); }
+body[data-tema] .sheet .photos figure, body[data-tema] .sheet .altit { background: var(--t-soft); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .sheet .photos figcaption { color: var(--t-text); }
+body[data-tema] .sheet .photos figcaption span, body[data-tema] .w-kapak figcaption, body[data-tema] .bk-resim figcaption { color: var(--t-muted); }
+body[data-tema] .dv-cip span, body[data-tema] .mbody .yakin .chips button { background: var(--t-soft); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .dv-kisi { background: var(--t-soft); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .dv-kisi:hover { background: rgba(255,255,255,0.14); border-color: var(--t-accent); }
+body[data-tema] .dv-kisi small { color: var(--t-muted); }
+body[data-tema] .tby-bas b, body[data-tema] .tby-yil b, body[data-tema] .tby-ic h4 { color: var(--t-title); }
+body[data-tema] .tby-bas small, body[data-tema] .tby-yil small, body[data-tema] .tby-yer { color: var(--t-muted); }
+body[data-tema] .tby-ar { background: rgba(0,0,0,0.28); border: 1px solid var(--t-border); }
+body[data-tema] .tby-ar button { color: var(--t-muted); }
+body[data-tema] .tby-ar button.on { background: var(--t-accent); color: var(--t-accent-ink); }
+body[data-tema] .tby-filtre button { background: rgba(255,255,255,0.08); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .tby-filtre button em { color: var(--t-muted); }
+body[data-tema] .tby-filtre button.on { background: var(--t-accent); border-color: var(--t-accent); color: var(--t-accent-ink); }
+body[data-tema] .tby-filtre button.on em { color: var(--t-accent-ink); }
+body[data-tema] .tby-kart { border-bottom-color: rgba(255,255,255,0.1); }
+body[data-tema] .tby-kart.simdi { background: var(--t-did); border: 1px solid var(--t-accent); }
+body[data-tema] .tby-ic p { color: var(--t-text); }
+body[data-tema] .mbody h4.tby-grup { background: var(--t-soft); border: 1px solid var(--t-border); color: var(--t-title); }
+body[data-tema] .mbody h4.tby-grup em { color: var(--t-muted); }
+body[data-tema] .w-toc, body[data-tema] .w-kul, body[data-tema] .w-kisi, body[data-tema] .w-kutu-in { background: var(--t-soft); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .w-kutu h4, body[data-tema] .w-tur { background: var(--t-did); color: var(--t-title); }
+body[data-tema] .w-b { background: var(--t-accent); color: var(--t-accent-ink); }
+body[data-tema] .w-b.alt, body[data-tema] .w-tanri button { background: rgba(255,255,255,0.09); border: 1px solid var(--t-border); color: var(--t-text); }
+body[data-tema] .w-track { background: rgba(0,0,0,0.28); }
+body[data-tema] .bk-seviye button, body[data-tema] .bk-kart, body[data-tema] .bk-sonuc, body[data-tema] .bk-tani { background: var(--t-soft); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .bk-hayat, body[data-tema] .bk-rozet, body[data-tema] .bk-ekip span { background: var(--t-did); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .bk button.ikincil, body[data-tema] .bk-dugmeler a, body[data-tema] .bk-dugmeler button { background: rgba(255,255,255,0.1); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .bk-gir input, body[data-tema] .bk-oneri { background: rgba(0,0,0,0.32); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .bk-oneri li.on, body[data-tema] .bk-oneri li:hover { background: var(--t-soft); color: var(--t-title); }
+body[data-tema] .bk-sonuc.iyi { background: rgba(34, 197, 94, 0.2); border-color: #4ade80; }
+body[data-tema] .sheet .rows tr { border-bottom-color: rgba(255,255,255,0.08); }
+body[data-tema] .sheet .rows th { color: var(--t-muted); }
+body[data-tema] .sheet .rows td, body[data-tema] .sheet p, body[data-tema] .sheet li { color: var(--t-text); }
+body[data-tema] .sheet a { color: var(--t-title); }
+body[data-tema] .sheet .did, body[data-tema] .hk-kutu .did { background: var(--t-did); border-left: 4px solid var(--t-accent); color: var(--t-text); }
+body[data-tema] .sheet .did b, body[data-tema] .hk-kutu .did b { color: var(--t-title); }
+body[data-tema] .sheet .did p, body[data-tema] .hk-kutu .did p { color: var(--t-text); }
+body[data-tema] .sheet .pill, body[data-tema] .hk-kutu .pill { background: var(--t-soft); color: var(--t-title); border: 1px solid var(--t-border); }
+body[data-tema] .sheet .phbtn, body[data-tema] .hk-kutu .phbtn, body[data-tema] .citycard .phbtn {
+  background: rgba(255,255,255,0.09); color: var(--t-text); border: 1px solid var(--t-border);
+}
+body[data-tema] .sheet .phbtn:hover, body[data-tema] .hk-kutu .phbtn:hover { background: var(--t-soft); color: #fff; }
+body[data-tema] .sheet .phbtn.icbtn, body[data-tema] .hk-kutu .phbtn.icbtn { background: var(--t-accent); color: var(--t-accent-ink); border-color: var(--t-accent); font-weight: 700; }
+body[data-tema] .tb-kart, body[data-tema] .yd-kart, body[data-tema] .yd-adim, body[data-tema] .yd-karar, body[data-tema] .sym, body[data-tema] .goc-yol {
+  background: var(--t-soft); border-color: var(--t-border); color: var(--t-text);
+}
+body[data-tema] .tb-kart h4, body[data-tema] .yd-kart b, body[data-tema] .yd-adim b, body[data-tema] .sym b, body[data-tema] .goc-yol h4 { color: var(--t-title); }
+body[data-tema] .yd-kart small, body[data-tema] .yd-kart p, body[data-tema] .sym small { color: var(--t-muted); }
+body[data-tema] .ara-sat input { background: rgba(0,0,0,0.28); color: var(--t-text); border-color: var(--t-border); }
+body[data-tema] .ara-list button { color: var(--t-text); border-bottom-color: rgba(255,255,255,0.07); }
+body[data-tema] .ara-list button:hover { background: var(--t-soft); }
+
+/* Tüm Oyun Pencereleri (Hayatta Kal, Blitz, Düello, Tarih/Doğa Bilgini, Hangisi Eski, Foto Tahmin, Sınırdan Bil, Ben Kimim) */
+body[data-tema] .hk-kutu, body[data-tema] .ho .ho-kart, body[data-tema] .eski-oyun,
+body[data-tema] .foto-oyun, body[data-tema] .sinirbil, body[data-tema] .hayat {
+  background: var(--t-card); color: var(--t-text); border: 1.5px solid var(--t-border);
+}
+body[data-tema] .hk-ust, body[data-tema] .eo-ust, body[data-tema] .sb-ust, body[data-tema] .hy-bas { border-bottom-color: var(--t-border); }
+body[data-tema] .hk-ust h2, body[data-tema] .hk-soru, body[data-tema] .hk-sonuc h3, body[data-tema] .hk-stat b,
+body[data-tema] .eo-ust b, body[data-tema] .eo-bas b, body[data-tema] .ho-kart .eo-ust b,
+body[data-tema] .sb-ust b, body[data-tema] .sb-sonuc > b, body[data-tema] .hy-bas b, body[data-tema] .dl-ozet-list b { color: var(--t-title); }
+body[data-tema] .hk-sonuc.kotu h3 { color: #fb7185; }
+body[data-tema] .hk-ust small, body[data-tema] .eo-ust small, body[data-tema] .eo-bas small, body[data-tema] .ho-kart .eo-ust small,
+body[data-tema] .sb-ust small, body[data-tema] .sb-sonuc small, body[data-tema] .sb-not, body[data-tema] .sb-ist,
+body[data-tema] .hy-bas small, body[data-tema] .hy-alt, body[data-tema] .hy-ipucu, body[data-tema] .ft-hint,
+body[data-tema] .eo-ipucu, body[data-tema] .eo-bilgi small, body[data-tema] .eo-acik { color: var(--t-muted); }
+body[data-tema] .ho-kart .ho-x, body[data-tema] .eo-x, body[data-tema] .sb-x, body[data-tema] .hy-x { background: rgba(255,255,255,0.1); color: var(--t-text); }
+body[data-tema] .eo-sayac span, body[data-tema] .ho-kart .eo-sayac span, body[data-tema] .sb-ipucu span {
+  background: var(--t-soft); border-color: var(--t-border); color: var(--t-text);
+}
+body[data-tema] .ho-mod, body[data-tema] .ho-soru, body[data-tema] .ho-sik, body[data-tema] .eo-kart,
+body[data-tema] .ft-cag, body[data-tema] .sb-liste li, body[data-tema] .hk-kart, body[data-tema] .hk-sec {
+  background: var(--t-soft); border-color: var(--t-border); color: var(--t-text);
+}
+body[data-tema] .ho-mod b, body[data-tema] .eo-bilgi b, body[data-tema] .ft-cag b, body[data-tema] .sb-ist b, body[data-tema] .eo-skor b { color: var(--t-text); }
+body[data-tema] .ho-mod small, body[data-tema] .ft-cag small, body[data-tema] .ho-ipucu { color: var(--t-muted); }
+body[data-tema] .ho-mod em { color: var(--t-title); }
+body[data-tema] .ho-sik:hover:not(:disabled), body[data-tema] .ho-mod:hover, body[data-tema] .eo-kart:hover:not(.dogru):not(.yanlis):not(.soluk),
+body[data-tema] .hk-kart:hover, body[data-tema] .hk-sec:hover { border-color: var(--t-accent); background: rgba(255,255,255,0.14); }
+body[data-tema] .ho-sik.dogru, body[data-tema] .eo-kart.dogru, body[data-tema] .sb-liste .sb-dogru { background: rgba(34, 197, 94, 0.24); border-color: #4ade80; color: #ecfdf5; }
+body[data-tema] .ho-sik.yanlis, body[data-tema] .eo-kart.yanlis { background: rgba(239, 68, 68, 0.24); border-color: #fb7185; color: #fff1f2; }
+body[data-tema] .eo-sonuc, body[data-tema] .eo-sonuc p, body[data-tema] .eo-sonuc div, body[data-tema] .eo-sonuc span {
+  background: var(--t-soft); border: 1px solid var(--t-border); color: var(--t-text);
+}
+body[data-tema] .eo-sonuc.iyi { background: rgba(34, 197, 94, 0.2); border-color: #4ade80; }
+body[data-tema] .eo-sonuc.bitti { background: rgba(239, 68, 68, 0.2); border-color: #fb7185; }
+body[data-tema] .eo-sonuc > b { color: #ffffff; }
+body[data-tema] .eo-sonuc > small, body[data-tema] .eo-sonuc small { color: var(--t-text); opacity: 0.92; }
+body[data-tema] .eo-sonuc button, body[data-tema] .eo-kure, body[data-tema] .sb-btn button:not(.ana), body[data-tema] .sb-btn a,
+body[data-tema] .oz-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--t-border); color: var(--t-text); }
+body[data-tema] .eo-sonuc button.ana, body[data-tema] .oz-btn.on, body[data-tema] .ft-alt button,
+body[data-tema] .sb-gir button, body[data-tema] .sb-btn button.ana, body[data-tema] .hy-sec button {
+  background: var(--t-accent); color: var(--t-accent-ink); border-color: var(--t-accent);
+}
+body[data-tema] .hy-sec button.ikincil { background: rgba(255,255,255,0.12); color: var(--t-text); }
+body[data-tema] .hy-bilgi, body[data-tema] .hy-cozum { background: var(--t-did); border-left-color: var(--t-accent); color: var(--t-text); }
+body[data-tema] .hy-nadir { background: var(--t-did); color: var(--t-title); }
+body[data-tema] .hy-puan, body[data-tema] .hayat p, body[data-tema] .hayat p b { color: var(--t-text); }
+body[data-tema] .sb-gir input, body[data-tema] .sb-oneri { background: rgba(0,0,0,0.32); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .sb-oneri li:hover, body[data-tema] .sb-oneri li.on { background: var(--t-soft); color: var(--t-title); }
+body[data-tema] .ft-cag.secili { background: var(--t-accent); color: var(--t-accent-ink); border-color: var(--t-accent); }
+body[data-tema] .ft-cag.secili small { color: var(--t-accent-ink); }
+body[data-tema] .hk-giris, body[data-tema] .hk-geri { background: var(--t-did); border-left-color: var(--t-accent); color: var(--t-text); }

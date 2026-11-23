@@ -294,16 +294,28 @@ window.Dunya = (() => {
     for (let i = 0; i < 900; i++) { const a = rnd(i), b = rnd(i + 999), k = rnd(i + 77); x.fillStyle = k < 0.5 ? `rgba(70,100,45,${0.05 + k * 0.12})` : `rgba(255,255,235,${0.04 + (k - 0.5) * 0.16})`; x.beginPath(); x.ellipse(a * 160, b * 160, 1 + rnd(i + 5) * 3, 0.6 + rnd(i + 6) * 1.6, rnd(i + 7) * 3, 0, 7); x.fill(); }
     return (desen = g.createPattern(c, 'repeat'));
   }
-  // devlet rengi: aynı ton, resimli haritaya uygun canlı ama uyumlu harita karışımı
-  const SINIR_PALET = ['#c95b48', '#4f9a74', '#4d7cb8', '#d4a03c', '#9c62a6', '#d67856', '#3e999e', '#8aa64b', '#c45e86', '#5e6eb8', '#b8804a', '#5ca662', '#b85050', '#6d8f9e'];
+  // devlet rengi ve küre renk temaları (canlı tema seçici — varsayılan: Canlı Doğa)
+  const TEMALAR = {
+    doga: { sp: ['#0e314d', '#04101c'], atm: ['rgba(103,232,249,0.55)', 'rgba(56,189,248,0.18)', 'rgba(34,211,238,0)'], oc: ['#46b5f0', '#2484cc', '#0f4a82'], gol: '#2e95dc', kara: ['#c8e6a8', '#8fc474'], mix: [255, 255, 255, 0.04],
+      palet: ['#ef476f', '#06d6a0', '#118ab2', '#ffd166', '#9b5de5', '#f77f00', '#4cc9f0', '#8ac926', '#f15bb5', '#3a86ff', '#ffbe0b', '#2ec4b6', '#e63946', '#43aa8b'] },
+    safir: { sp: ['#122652', '#050b1a'], atm: ['rgba(96,185,255,0.58)', 'rgba(56,145,235,0.2)', 'rgba(40,120,220,0)'], oc: ['#3a8ed6', '#1c60a3', '#0c315e'], gol: '#2a75b8', kara: ['#cfe0b6', '#98b882'], mix: [255, 255, 255, 0.06],
+      palet: ['#e05263', '#2fb886', '#3b82f6', '#f59e0b', '#a855f7', '#f97316', '#14b8a6', '#84cc16', '#ec4899', '#6366f1', '#eab308', '#22c55e', '#ef4444', '#06b6d4'] },
+    zumrut: { sp: ['#0c2924', '#04120f'], atm: ['rgba(52,211,153,0.48)', 'rgba(16,185,129,0.18)', 'rgba(6,95,70,0)'], oc: ['#2fb5b0', '#187c82', '#0b454d'], gol: '#219196', kara: ['#c7e4a8', '#83b870'], mix: [240, 252, 238, 0.06],
+      palet: ['#10b981', '#f59e0b', '#e11d48', '#3b82f6', '#8b5cf6', '#14b8a6', '#f97316', '#84cc16', '#ec4899', '#06b6d4', '#eab308', '#22c55e', '#d946ef', '#0ea5e9'] },
+    mor: { sp: ['#23113d', '#0b0518'], atm: ['rgba(192,132,252,0.52)', 'rgba(139,92,246,0.18)', 'rgba(88,28,135,0)'], oc: ['#4478c9', '#254a94', '#112554'], gol: '#315ea8', kara: ['#d2dfb8', '#9eb887'], mix: [245, 238, 255, 0.06],
+      palet: ['#f43f5e', '#a855f7', '#eab308', '#14b8a6', '#3b82f6', '#fb923c', '#22c55e', '#ec4899', '#6366f1', '#06b6d4', '#84cc16', '#e879f9', '#f59e0b', '#38bdf8'] },
+    kutup: { sp: ['#071e2e', '#020912'], atm: ['rgba(45,212,191,0.58)', 'rgba(56,189,248,0.2)', 'rgba(14,116,144,0)'], oc: ['#54b8e6', '#257fb3', '#0e426b'], gol: '#3596c9', kara: ['#d6ece4', '#9ec5ba'], mix: [236, 254, 255, 0.08],
+      palet: ['#2dd4bf', '#38bdf8', '#f472b6', '#facc15', '#818cf8', '#fb7185', '#4ade80', '#c084fc', '#fb923c', '#22d3ee', '#a3e635', '#60a5fa', '#e879f9', '#34d399'] }
+  };
+  let temaId = 'doga', tema = TEMALAR.doga;
   const hexRGB = h => { const n = parseInt((h || '#888888').slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
   const rgbDist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
-  function siyasiRenk(hex) { const [r, gr, b] = hexRGB(hex), m = [226, 178, 132]; return `rgb(${Math.round(r * 0.78 + m[0] * 0.22)},${Math.round(gr * 0.78 + m[1] * 0.22)},${Math.round(b * 0.78 + m[2] * 0.22)})`; }
+  function siyasiRenk(hex) { const [r, gr, b] = hexRGB(hex), [mr, mg, mb, mw] = tema.mix; return `rgb(${Math.round(r * (1 - mw) + mr * mw)},${Math.round(gr * (1 - mw) + mg * mw)},${Math.round(b * (1 - mw) + mb * mw)})`; }
   // komşu ülkelerin aynı/benzer renge düşmesini (ör. Türkiye–İran) otomatik engeller
   function renkAyir(list) {
-    const palRgb = SINIR_PALET.map(hexRGB), atan = [];
-    for (const o of list) {
-      const k = o.k; if (!k || !k.bb) continue;
+    const pal = tema.palet, palRgb = pal.map(hexRGB), atan = [];
+    for (let idx = 0; idx < list.length; idx++) {
+      const o = list[idx], k = o.k; if (!k || !k.bb) continue;
       const [a0, a1, o0, o1] = k.bb;
       const komsu = [];
       for (const p of atan) {
@@ -311,7 +323,8 @@ window.Dunya = (() => {
         if (a1 + 1.8 < b[0] || a0 - 1.8 > b[1] || o1 + 1.8 < b[2] || o0 - 1.8 > b[3]) continue;
         komsu.push(p._rgb);
       }
-      let hex = k.r || SINIR_PALET[0], rgb = hexRGB(hex);
+      let hex = temaId === 'klasik' ? (k.r || pal[0]) : pal[(idx * 5 + (k.n ? k.n.charCodeAt(0) : 0)) % pal.length];
+      let rgb = hexRGB(hex);
       if (komsu.some(c => rgbDist(rgb, c) < 88)) {
         let bestI = 0, bestD = -1;
         for (let i = 0; i < palRgb.length; i++) {
@@ -319,7 +332,7 @@ window.Dunya = (() => {
           for (const c of komsu) { const d = rgbDist(palRgb[i], c); if (d < md) md = d; }
           if (md > bestD) { bestD = md; bestI = i; }
         }
-        hex = SINIR_PALET[bestI]; rgb = palRgb[bestI];
+        hex = pal[bestI]; rgb = palRgb[bestI];
       }
       k._r = hex; k._rgb = rgb;
       atan.push(k);
@@ -741,12 +754,12 @@ window.Dunya = (() => {
     // yazı düzeyi: uzakta yalnızca kıta adları (ka), yaklaşınca devlet ve başkent adları (ua)
     const ka = 1 - clamp((view.z - 2.0) / 0.3, 0, 1), ua = clamp((view.z - 2.3) / 0.3, 0, 1);
     // uzay ve yıldızlar (hafif ön-hesaplanmış koordinatlar)
-    const sp = g.createRadialGradient(cx, cy, r * 0.5, cx, cy, Math.max(W, H)); sp.addColorStop(0, '#0d1430'); sp.addColorStop(1, '#03050c');
+    const sp = g.createRadialGradient(cx, cy, r * 0.5, cx, cy, Math.max(W, H)); sp.addColorStop(0, tema.sp[0]); sp.addColorStop(1, tema.sp[1]);
     g.fillStyle = sp; g.fillRect(0, 0, W, H);
     for (let i = 0; i < YILDIZ.length; i++) { const yz = YILDIZ[i], x = (yz[0] * W + view.lon * 0.4) % W, tw = 0.25 + 0.6 * (Math.sin(i * 13 + T * yz[3]) * 0.5 + 0.5); g.fillStyle = `rgba(255,255,255,${tw.toFixed(2)})`; g.fillRect((x + W) % W, yz[1] * H, yz[2], yz[2]); }
     // statik küre tabanı önbelleği: kamera/yıl/sınırlar değişmedikçe kıtalar, sınırlar ve nehirler yeniden çizilmez
     const cw = g.canvas.width, ch = g.canvas.height;
-    const tKey = `${cw}|${ch}|${view.lat.toFixed(4)}|${view.lon.toFixed(4)}|${view.z.toFixed(4)}|${Math.round(Y * 4)}|${layers.sinir ? 1 : 0}|${dilimVer}`;
+    const tKey = `${cw}|${ch}|${view.lat.toFixed(4)}|${view.lon.toFixed(4)}|${view.z.toFixed(4)}|${Math.round(Y * 4)}|${layers.sinir ? 1 : 0}|${dilimVer}|${temaId}`;
     const tb = taban(cw, ch);
     if (tKey !== tabanKey) {
       tabanKey = tKey;
@@ -754,10 +767,10 @@ window.Dunya = (() => {
       tc.setTransform(1, 0, 0, 1, 0, 0); tc.clearRect(0, 0, cw, ch); tc.setTransform(dpr, 0, 0, dpr, 0, 0);
       g = tc;
       // atmosfer
-      const atm = g.createRadialGradient(cx, cy, r * 0.96, cx, cy, r * 1.16); atm.addColorStop(0, 'rgba(200,228,245,0.65)'); atm.addColorStop(0.5, 'rgba(170,210,240,0.2)'); atm.addColorStop(1, 'rgba(150,200,240,0)');
+      const atm = g.createRadialGradient(cx, cy, r * 0.96, cx, cy, r * 1.16); atm.addColorStop(0, tema.atm[0]); atm.addColorStop(0.5, tema.atm[1]); atm.addColorStop(1, tema.atm[2]);
       g.fillStyle = atm; g.beginPath(); g.arc(cx, cy, r * 1.16, 0, 7); g.fill();
       // okyanus
-      const oc = g.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.05, cx, cy, r); oc.addColorStop(0, '#b4d6e8'); oc.addColorStop(0.55, '#8fbedb'); oc.addColorStop(1, '#5e93bd');
+      const oc = g.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.05, cx, cy, r); oc.addColorStop(0, tema.oc[0]); oc.addColorStop(0.55, tema.oc[1]); oc.addColorStop(1, tema.oc[2]);
       g.fillStyle = oc; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill();
       g.save(); g.beginPath(); g.arc(cx, cy, r, 0, 7); g.clip();
       // enlem ızgarası (ön-hesaplanmış)
@@ -770,7 +783,7 @@ window.Dunya = (() => {
       if (anyLand) {
         g.lineJoin = 'bevel';
         g.strokeStyle = 'rgba(232,246,252,0.34)'; g.lineWidth = 4.5; g.stroke(karaPath);
-        const lg = g.createLinearGradient(cx - r, cy - r, cx + r, cy + r); lg.addColorStop(0, '#d3e0b2'); lg.addColorStop(1, '#a9c287');
+        const lg = g.createLinearGradient(cx - r, cy - r, cx + r, cy + r); lg.addColorStop(0, tema.kara[0]); lg.addColorStop(1, tema.kara[1]);
         g.fillStyle = lg; g.fill(karaPath);
         g.save(); g.clip(karaPath);
         g.fillStyle = dokuDesen(); g.globalAlpha = 0.55; g.fillRect(cx - r, cy - r, r * 2, r * 2); g.globalAlpha = 1;
@@ -779,14 +792,14 @@ window.Dunya = (() => {
         // dönemin siyasi sınırları: ikinci dev ofscreen canvas / destination-in yerine doğrudan karaPath klip içinde hızlı çizim!
         if (layers.sinir) {
           // Büyük göl oyuklarının altında göl mavisi taban boya: kıyılarda tek piksel bile yeşil boşluk kalmasın
-          g.beginPath(); for (const p of GOLLER) polyPath(p); g.fillStyle = '#93c2dc'; g.fill(); g.strokeStyle = '#93c2dc'; g.lineWidth = 4.5; g.lineJoin = 'round'; g.stroke();
+          g.beginPath(); for (const p of GOLLER) polyPath(p); g.fillStyle = tema.gol; g.fill(); g.strokeStyle = tema.gol; g.lineWidth = 4.5; g.lineJoin = 'round'; g.stroke();
           g.globalAlpha = 0.92;
           const tolPx = 1.3 / (R() * D); svNow = tolPx >= LOD[2] ? 2 : tolPx >= LOD[1] ? 1 : 0;
           for (const o of aktifSinirlar(Y)) sinirCiz(o);
           g.globalAlpha = 1;
         }
         g.restore();
-        g.beginPath(); polyPath(HAZAR); for (const p of GOLLER) polyPath(p); g.fillStyle = '#93c2dc'; g.fill(); g.strokeStyle = 'rgba(100,125,90,0.48)'; g.lineWidth = 0.65; g.stroke();
+        g.beginPath(); polyPath(HAZAR); for (const p of GOLLER) polyPath(p); g.fillStyle = tema.gol; g.fill(); g.strokeStyle = 'rgba(100,125,90,0.48)'; g.lineWidth = 0.65; g.stroke();
         g.strokeStyle = `rgba(105,125,90,${0.45 + ez * 0.2})`; g.lineWidth = 0.7 + ez * 0.3; g.stroke(karaPath);
       }
       // dar boğazlar ve nehirler
@@ -2349,5 +2362,6 @@ window.Dunya = (() => {
     }
     return null;
   }
-  return { devletler, kayit, nerede, llAt, icerir, karaMi, sinirAd, get sinirAcik() { return layers.sinir; }, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setYayilis: id => { yayilisAktif = id || null; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
+  function setTema(id) { if (!TEMALAR[id]) id = 'doga'; temaId = id; tema = TEMALAR[id]; aktifOnbellek = { y: null, o: [] }; tabanKey = ''; }
+  return { devletler, kayit, nerede, llAt, icerir, karaMi, sinirAd, setTema, get sinirAcik() { return layers.sinir; }, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setYayilis: id => { yayilisAktif = id || null; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
 })();

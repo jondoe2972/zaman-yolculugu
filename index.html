@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Dünya tarihini interaktif kürede keşfet, o dönemde bir gününü yaşa ve tarih oyunlarını oyna.">
 <meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23241b14'/%3E%3Cpath d='M18 12h28v6c0 7-6 11-11 14 5 3 11 7 11 14v6H18v-6c0-7 6-11 11-14-5-3-11-7-11-14v-6z' fill='none' stroke='%23ffd666' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 18h18c0 4-4 7-9 10-5-3-9-6-9-10zm9 18c5 3 9 6 9 10H23c0-4 4-7 9-10z' fill='%23ffd666'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/stil.css?v=83">
+<link rel="stylesheet" href="css/stil.css?v=87">
 </head>
 <body>
 <header class="top">
@@ -39,8 +39,17 @@
   </div>
   <div id="um-perde" class="um-perde" hidden></div>
   <button id="buyil" class="buyil" hidden style="display:none" aria-expanded="false" title="Bu yılın özeti: hükümdar, gündem, geçim, savaşlar">📖<span> Bu yıl</span></button>
+  <button id="temabtn" class="rehber-btn temabtn" title="Renk teması seç" aria-label="Renk teması">🎨</button>
   <button id="sesbtn" class="rehber-btn sesbtn" title="Ses ve ambiyans ayarları" aria-label="Ses ayarları">🔊</button>
 </header>
+<div id="temapop" class="temapop" hidden role="menu" aria-label="Renk teması">
+  <b>🎨 Renk Teması</b>
+  <button type="button" data-tema-sec="doga" class="on">🌍 Canlı Doğa &amp; Modern</button>
+  <button type="button" data-tema-sec="safir">🌌 Safir Gece &amp; Altın</button>
+  <button type="button" data-tema-sec="zumrut">🌿 Zümrüt Orman &amp; Yeşim</button>
+  <button type="button" data-tema-sec="mor">🔮 Bizans Moru &amp; Altın</button>
+  <button type="button" data-tema-sec="kutup">❄️ Kutup Işığı (Aurora)</button>
+</div>
 <main class="app">
   <section class="stage">
     <canvas id="globe" aria-label="Dünya küresi"></canvas>
@@ -245,7 +254,7 @@
 <script src="data/yasam-doga-ek2.js?v=1"></script>
 <script src="data/yasam-doga-antik.js?v=1"></script>
 <script src="data/atlas/donum-noktalari.js?v=2"></script>
-<script src="js/dunya.js?v=103"></script>
+<script src="js/dunya.js?v=106"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
@@ -253,7 +262,7 @@
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="data/yapilar/simgeler.js?v=1"></script>
 <script src="js/kart-paylas.js?v=1"></script>
-<script src="js/uygulama.js?v=114"></script>
+<script src="js/uygulama.js?v=117"></script>
 <script src="js/ses.js?v=4"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
