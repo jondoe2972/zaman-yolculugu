@@ -4,6 +4,7 @@
 'use strict';
 window.Dunya = (() => {
   const D = Math.PI / 180, OUT = '#2a1a0e';
+  const DOKUNMATIK = matchMedia('(pointer: coarse)'); // parmakla kullanılan ekran: fareyle "üstüne gelme" yok
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const rnd = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -13,7 +14,7 @@ window.Dunya = (() => {
   const hits = [];
   let aralik = 100;
   const layers = { yapi: false, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: false, yolculuk: false, goc: false, magara: false, tarihkazi: false, fosilkazi: false, akinti: false, ruzgar: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false, gece: false, yayilis: false, iklim: false, taban: false, kutup: false, krater: false, gol: false, saat: false, manyetik: false, tarim: false, yazi: false, din: false, tarihgoc: false, salgin: false, bogaz: false, megakent: false, icat: false, felsefe: false, insanlar: false };
-  let yayilisAktif = null;
+  let yayilisAktif = null, turRota = null;
   // 🌓 Canlı gece/gündüz gölgesi ve büyük şehir ışıkları (gerçek UTC saate göre)
   const GECE_SEHIR = [
     [41.0,29.0,1.3],[39.9,32.8,0.9],[38.4,27.1,0.8],[51.5,-0.1,1.3],[48.8,2.3,1.3],[40.4,-3.7,1.0],[41.9,12.5,1.0],[52.5,13.4,1.0],[38.0,23.7,0.8],
@@ -294,18 +295,14 @@ window.Dunya = (() => {
     for (let i = 0; i < 900; i++) { const a = rnd(i), b = rnd(i + 999), k = rnd(i + 77); x.fillStyle = k < 0.5 ? `rgba(70,100,45,${0.05 + k * 0.12})` : `rgba(255,255,235,${0.04 + (k - 0.5) * 0.16})`; x.beginPath(); x.ellipse(a * 160, b * 160, 1 + rnd(i + 5) * 3, 0.6 + rnd(i + 6) * 1.6, rnd(i + 7) * 3, 0, 7); x.fill(); }
     return (desen = g.createPattern(c, 'repeat'));
   }
-  // devlet rengi ve küre renk temaları (canlı tema seçici — varsayılan: Canlı Doğa)
+  // devlet rengi ve küre renk temaları (klasik kartografik siyasi harita paletleri — varsayılan: Canlı Doğa)
+  const ATLAS_PALET = ['#dfc27d', '#98bc86', '#cf8b6b', '#89a7bd', '#e2aa73', '#a9b872', '#a59ab8', '#88b5a4', '#d4a66a', '#c4aa88', '#7ea99a', '#c98868'];
   const TEMALAR = {
-    doga: { sp: ['#0e314d', '#04101c'], atm: ['rgba(103,232,249,0.55)', 'rgba(56,189,248,0.18)', 'rgba(34,211,238,0)'], oc: ['#46b5f0', '#2484cc', '#0f4a82'], gol: '#2e95dc', kara: ['#c8e6a8', '#8fc474'], mix: [255, 255, 255, 0.04],
-      palet: ['#ef476f', '#06d6a0', '#118ab2', '#ffd166', '#9b5de5', '#f77f00', '#4cc9f0', '#8ac926', '#f15bb5', '#3a86ff', '#ffbe0b', '#2ec4b6', '#e63946', '#43aa8b'] },
-    safir: { sp: ['#122652', '#050b1a'], atm: ['rgba(96,185,255,0.58)', 'rgba(56,145,235,0.2)', 'rgba(40,120,220,0)'], oc: ['#3a8ed6', '#1c60a3', '#0c315e'], gol: '#2a75b8', kara: ['#cfe0b6', '#98b882'], mix: [255, 255, 255, 0.06],
-      palet: ['#e05263', '#2fb886', '#3b82f6', '#f59e0b', '#a855f7', '#f97316', '#14b8a6', '#84cc16', '#ec4899', '#6366f1', '#eab308', '#22c55e', '#ef4444', '#06b6d4'] },
-    zumrut: { sp: ['#0c2924', '#04120f'], atm: ['rgba(52,211,153,0.48)', 'rgba(16,185,129,0.18)', 'rgba(6,95,70,0)'], oc: ['#2fb5b0', '#187c82', '#0b454d'], gol: '#219196', kara: ['#c7e4a8', '#83b870'], mix: [240, 252, 238, 0.06],
-      palet: ['#10b981', '#f59e0b', '#e11d48', '#3b82f6', '#8b5cf6', '#14b8a6', '#f97316', '#84cc16', '#ec4899', '#06b6d4', '#eab308', '#22c55e', '#d946ef', '#0ea5e9'] },
-    mor: { sp: ['#23113d', '#0b0518'], atm: ['rgba(192,132,252,0.52)', 'rgba(139,92,246,0.18)', 'rgba(88,28,135,0)'], oc: ['#4478c9', '#254a94', '#112554'], gol: '#315ea8', kara: ['#d2dfb8', '#9eb887'], mix: [245, 238, 255, 0.06],
-      palet: ['#f43f5e', '#a855f7', '#eab308', '#14b8a6', '#3b82f6', '#fb923c', '#22c55e', '#ec4899', '#6366f1', '#06b6d4', '#84cc16', '#e879f9', '#f59e0b', '#38bdf8'] },
-    kutup: { sp: ['#071e2e', '#020912'], atm: ['rgba(45,212,191,0.58)', 'rgba(56,189,248,0.2)', 'rgba(14,116,144,0)'], oc: ['#54b8e6', '#257fb3', '#0e426b'], gol: '#3596c9', kara: ['#d6ece4', '#9ec5ba'], mix: [236, 254, 255, 0.08],
-      palet: ['#2dd4bf', '#38bdf8', '#f472b6', '#facc15', '#818cf8', '#fb7185', '#4ade80', '#c084fc', '#fb923c', '#22d3ee', '#a3e635', '#60a5fa', '#e879f9', '#34d399'] }
+    doga: { sp: ['#0e314d', '#04101c'], atm: ['rgba(103,232,249,0.55)', 'rgba(56,189,248,0.18)', 'rgba(34,211,238,0)'], oc: ['#46b5f0', '#2484cc', '#0f4a82'], gol: '#2e95dc', kara: ['#c8e6a8', '#8fc474'], mix: [248, 245, 236, 0.08], palet: ATLAS_PALET },
+    safir: { sp: ['#122652', '#050b1a'], atm: ['rgba(96,185,255,0.58)', 'rgba(56,145,235,0.2)', 'rgba(40,120,220,0)'], oc: ['#3a8ed6', '#1c60a3', '#0c315e'], gol: '#2a75b8', kara: ['#cfe0b6', '#98b882'], mix: [244, 240, 228, 0.08], palet: ATLAS_PALET },
+    zumrut: { sp: ['#0c2924', '#04120f'], atm: ['rgba(52,211,153,0.48)', 'rgba(16,185,129,0.18)', 'rgba(6,95,70,0)'], oc: ['#2fb5b0', '#187c82', '#0b454d'], gol: '#219196', kara: ['#c7e4a8', '#83b870'], mix: [240, 248, 236, 0.08], palet: ATLAS_PALET },
+    mor: { sp: ['#23113d', '#0b0518'], atm: ['rgba(192,132,252,0.52)', 'rgba(139,92,246,0.18)', 'rgba(88,28,135,0)'], oc: ['#4478c9', '#254a94', '#112554'], gol: '#315ea8', kara: ['#d2dfb8', '#9eb887'], mix: [246, 240, 232, 0.08], palet: ATLAS_PALET },
+    kutup: { sp: ['#071e2e', '#020912'], atm: ['rgba(45,212,191,0.58)', 'rgba(56,189,248,0.2)', 'rgba(14,116,144,0)'], oc: ['#54b8e6', '#257fb3', '#0e426b'], gol: '#3596c9', kara: ['#d6ece4', '#9ec5ba'], mix: [242, 248, 246, 0.10], palet: ATLAS_PALET }
   };
   let temaId = 'doga', tema = TEMALAR.doga;
   const hexRGB = h => { const n = parseInt((h || '#888888').slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
@@ -325,7 +322,7 @@ window.Dunya = (() => {
       }
       let hex = temaId === 'klasik' ? (k.r || pal[0]) : pal[(idx * 5 + (k.n ? k.n.charCodeAt(0) : 0)) % pal.length];
       let rgb = hexRGB(hex);
-      if (komsu.some(c => rgbDist(rgb, c) < 88)) {
+      if (komsu.some(c => rgbDist(rgb, c) < 62)) {
         let bestI = 0, bestD = -1;
         for (let i = 0; i < palRgb.length; i++) {
           let md = 999;
@@ -756,7 +753,7 @@ window.Dunya = (() => {
     // uzay ve yıldızlar (hafif ön-hesaplanmış koordinatlar)
     const sp = g.createRadialGradient(cx, cy, r * 0.5, cx, cy, Math.max(W, H)); sp.addColorStop(0, tema.sp[0]); sp.addColorStop(1, tema.sp[1]);
     g.fillStyle = sp; g.fillRect(0, 0, W, H);
-    for (let i = 0; i < YILDIZ.length; i++) { const yz = YILDIZ[i], x = (yz[0] * W + view.lon * 0.4) % W, tw = 0.25 + 0.6 * (Math.sin(i * 13 + T * yz[3]) * 0.5 + 0.5); g.fillStyle = `rgba(255,255,255,${tw.toFixed(2)})`; g.fillRect((x + W) % W, yz[1] * H, yz[2], yz[2]); }
+    if (!turRota) for (let i = 0; i < YILDIZ.length; i++) { const yz = YILDIZ[i], x = (yz[0] * W + view.lon * 0.4) % W, tw = 0.25 + 0.6 * (Math.sin(i * 13 + T * yz[3]) * 0.5 + 0.5); g.fillStyle = `rgba(255,255,255,${tw.toFixed(2)})`; g.fillRect((x + W) % W, yz[1] * H, yz[2], yz[2]); }
     // statik küre tabanı önbelleği: kamera/yıl/sınırlar değişmedikçe kıtalar, sınırlar ve nehirler yeniden çizilmez
     const cw = g.canvas.width, ch = g.canvas.height;
     const tKey = `${cw}|${ch}|${view.lat.toFixed(4)}|${view.lon.toFixed(4)}|${view.z.toFixed(4)}|${Math.round(Y * 4)}|${layers.sinir ? 1 : 0}|${dilimVer}|${temaId}`;
@@ -2177,30 +2174,79 @@ window.Dunya = (() => {
       }
       g.restore();
     }
-    if (ia > 0) {
+    if (ia > 0 && !turRota) {
       // önce bütün işaretlerin yerleri; sonra adlar çakışmayacak biçimde yerleşir (sağ, sol, üst, alt; sığmazsa yalnızca simge).
       // Tüm Dünya'da bölge adları yazılmaz (yalnızca kıta adları); bölgenin adı imleç üstüne gelince görünür.
       const pts = isaretler.map(BGd => { const [x, y, z] = P(...(BGd.isaret || [27, 31])); return { BGd, x, y, z }; }).filter(o => o.z > 0.1);
       kutular.push(...pts.map(o => [o.x - 9, o.y - 9, o.x + 9, o.y + 9]));
       const cakisir = r => kutular.some(k => r[0] < k[2] && r[2] > k[0] && r[1] < k[3] && r[3] > k[1]);
-      g.save(); g.font = '800 15px Georgia, serif';
+      // Dokunmatik ekranda fare yok, "üstüne gelince ad" çıkmaz: Tüm Dünya'da da adlar küçük yazıyla noktanın yanında
+      const dmAd = DM && DOKUNMATIK.matches, adBoy = dmAd ? 12 : 15;
+      g.save(); g.font = `800 ${adBoy}px Georgia, serif`;
       for (const o of pts) {
         const { BGd, x, y } = o, on = BGd.id !== 'misir' || (Y <= 3150 && Y >= 30), ad = (DM ? BGd.ikon + ' ' : '') + (BGd.ad || 'Mısır');
         const tw = g.measureText(ad).width + 4;
         g.globalAlpha = ia; const pr = 1 + Math.sin(T * 2.5) * 0.25;
         g.strokeStyle = 'rgba(255,214,102,0.7)'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 14 * pr, 0, 7); g.stroke();
         g.fillStyle = on ? '#ffd666' : '#bbb'; g.strokeStyle = OUT; g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); g.stroke();
-        const yer = DM ? null : [[x + 14, y, 'left', [x + 12, y - 10, x + 14 + tw, y + 10]], [x - 14, y, 'right', [x - 14 - tw, y - 10, x - 12, y + 10]],
-          [x, y - 22, 'center', [x - tw / 2, y - 32, x + tw / 2, y - 12]], [x, y + 22, 'center', [x - tw / 2, y + 12, x + tw / 2, y + 32]]].find(c => !cakisir(c[3]));
-        if (yer) { kutular.push(yer[3]); text(yer[0], yer[1], ad, { align: yer[2], size: 15, w: 800, col: '#ffe7a3', serif: true }); }
+        const yer = DM && !dmAd ? null : [[x + 14, y, 'left', [x + 12, y - 10, x + 14 + tw, y + 10]], [x - 14, y, 'right', [x - 14 - tw, y - 10, x - 12, y + 10]],
+          [x, y - 22, 'center', [x - tw / 2, y - 32, x + tw / 2, y - 12]], [x, y + 22, 'center', [x - tw / 2, y + 12, x + tw / 2, y + 32]]].find(c => !cakisir(c[3]) && c[3][0] >= 4 && c[3][2] <= W - 4 && c[3][1] >= 4 && c[3][3] <= H - 4); // ekrandan taşan yer seçilmez
+        if (yer) { kutular.push(yer[3]); text(yer[0], yer[1], ad, { align: yer[2], size: adBoy, w: 800, col: '#ffe7a3', serif: true }); }
         const r = yer ? yer[3] : [x - 18, y - 18, x + 18, y + 18];
         hits.push({ kind: 'med', b: DM ? BGd : null, x0: Math.min(x - 18, r[0]), x1: Math.max(x + 18, r[2]), y0: Math.min(y - 18, r[1]), y1: Math.max(y + 18, r[3]) });
         g.globalAlpha = 1;
       }
       g.restore();
     }
+    // 🎬 Rehberli belgesel turu özel rotası ve numaralı duraklar
+    if (turRota && turRota.pts && turRota.pts.length > 1) {
+      hits.length = 0;
+      const cizYol = (pts, stroke, lw, dash) => {
+        g.save(); g.strokeStyle = stroke; g.lineWidth = lw; g.lineCap = 'round'; g.lineJoin = 'round';
+        if (dash) g.setLineDash(dash);
+        g.beginPath();
+        let acik = false;
+        for (let i = 0; i < pts.length; i++) {
+          const [x, y, z] = P(pts[i][0], pts[i][1]);
+          if (z > 0.02) { if (!acik) { g.moveTo(x, y); acik = true; } else g.lineTo(x, y); }
+          else acik = false;
+        }
+        g.stroke(); g.restore();
+      };
+      // Belgesel rotası (koyu dış çizgi + tema/tur vurgu rengi + hareketli ışık akışı)
+      const rCol = turRota.renk || '#ffd666';
+      cizYol(turRota.pts, 'rgba(18, 10, 4, 0.72)', 7.5);
+      cizYol(turRota.pts, rCol, 4.2);
+      g.save(); g.lineDashOffset = -(T * 26); cizYol(turRota.pts, '#fff8dc', 2.0, [10, 14]); g.restore();
+      // Numaralı duraklar
+      const ds = turRota.duraklar || [];
+      for (let i = 0; i < ds.length; i++) {
+        const d = ds[i], [x, y, z] = P(d.ll[0], d.ll[1]);
+        if (z <= 0.04) continue;
+        const aktif = i === turRota.idx;
+        if (aktif) {
+          const ph = (T * 0.9) % 1;
+          g.save(); g.strokeStyle = rCol; g.globalAlpha = 1 - ph; g.lineWidth = 2.5;
+          g.beginPath(); g.arc(x, y, 11 + ph * 22, 0, 7); g.stroke(); g.restore();
+        }
+        const rad = aktif ? 12 : 9;
+        g.save();
+        g.fillStyle = aktif ? rCol : '#1b2638';
+        g.strokeStyle = aktif ? '#1a0e04' : rCol;
+        g.lineWidth = aktif ? 2.5 : 2;
+        g.beginPath(); g.arc(x, y, rad, 0, 7); g.fill(); g.stroke();
+        g.fillStyle = aktif ? '#1a0e04' : '#fff8e1';
+        g.font = `800 ${aktif ? 12 : 10.5}px system-ui, sans-serif`;
+        g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(String(i + 1), x, y + 0.5);
+        g.restore();
+        const kisa = (d.kisa || d.baslik.split(':')[0]);
+        text(x, y - rad - 9, kisa, { size: aktif ? 13.5 : 11.5, w: 800, col: aktif ? rCol : '#fffaf0', halo: 3.5, haloCol: 'rgba(10,14,24,0.88)' });
+        hits.push({ kind: 'turdurak', idx: i, x0: x - 16, x1: x + 16, y0: y - 16, y1: y + 16 });
+      }
+    }
     // aramadan gelen konum işareti: birkaç saniye nabız gibi atan iğne
-    if (pinAt && T - pinAt.t0 < 9) {
+    if (pinAt && !turRota && T - pinAt.t0 < 9) {
       const [x, y, z] = P(pinAt.lat, pinAt.lon);
       if (z > 0.05) {
         const k = (T - pinAt.t0), fade = clamp(9 - k, 0, 1);
@@ -2363,5 +2409,5 @@ window.Dunya = (() => {
     return null;
   }
   function setTema(id) { if (!TEMALAR[id]) id = 'doga'; temaId = id; tema = TEMALAR[id]; aktifOnbellek = { y: null, o: [] }; tabanKey = ''; }
-  return { devletler, kayit, nerede, llAt, icerir, karaMi, sinirAd, setTema, get sinirAcik() { return layers.sinir; }, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setYayilis: id => { yayilisAktif = id || null; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
+  return { devletler, kayit, nerede, llAt, icerir, karaMi, sinirAd, setTema, setTurRota: r => { turRota = r || null; }, get sinirAcik() { return layers.sinir; }, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setYayilis: id => { yayilisAktif = id || null; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
 })();

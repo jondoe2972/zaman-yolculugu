@@ -3,8 +3,20 @@
 (() => {
   const S = window.Sahne, MIS = window.MISIR || {};
   const BG = window.BOLGE || { id: 'misir', ad: 'Mısır', ikon: '🏺', hakkinda: 'Bu çağda Mısır', simgeAd: "Mısır'ın simgeleri", bugunAd: 'Bugünkü Mısır', antikAd: 'Antik Mısır', kultur: true };
-  // bölge seçici (Mısır / Anadolu): sayfa o bölgenin verileriyle yeniden açılır
-  { const bs = document.querySelector('#bolge'); if (bs) { const BL = window.BOLGELER || {}; if (window.KITALAR) bs.innerHTML = '<option value="dunya">🌍 Tüm Dünya</option>' + window.KITALAR.map(k => `<optgroup label="${k.ikon} ${k.ad}">${k.b.filter(b => BL[b]).map(b => `<option value="${b}">${BL[b].ikon} ${BL[b].ad}</option>`).join('')}</optgroup>`).join(''); bs.value = BG.id; bs.addEventListener('change', () => { location.href = location.pathname + (bs.value === 'dunya' ? '' : '?bolge=' + bs.value); }); } }
+  // bölge seçici: 3B küredeyken sayfayı yenilemeden doğrudan o bölgeye uçar
+  { const bs = document.querySelector('#bolge'); if (bs) { const BL = window.BOLGELER || {}; if (window.KITALAR) bs.innerHTML = '<option value="dunya">🌍 Tüm Dünya</option>' + window.KITALAR.map(k => `<optgroup label="${k.ikon} ${k.ad}">${k.b.filter(b => BL[b]).map(b => `<option value="${b}">${BL[b].ikon} ${BL[b].ad}</option>`).join('')}</optgroup>`).join(''); bs.value = BG.id; bs.addEventListener('change', () => {
+    if (DUNYA && window.Dunya) {
+      if (bs.value === 'dunya') { window.Dunya.reset(); toast('🌍 <b>Tüm Dünya</b> görünümüne dönüldü.'); return; }
+      const h = BL[bs.value];
+      if (h && h.merkez) {
+        if (view !== 'dunya') setView('dunya');
+        window.Dunya.goTo(h.merkez[0], h.merkez[1], Math.min(4.2, h.merkezZ || 3.4));
+        toast(`${h.ikon || '🌍'} <b>${h.ad}</b> bölgesine uçuldu.`);
+        return;
+      }
+    }
+    location.href = location.pathname + (bs.value === 'dunya' ? '' : '?bolge=' + bs.value);
+  }); } }
   { const ai = document.querySelector('#about-ikon'), at = document.querySelector('#about-tx'); if (ai) ai.textContent = BG.ikon; if (at) at.textContent = ' ' + BG.ad + ' hakkında'; }
   if (BG.mevsimler) document.querySelectorAll('[data-season]').forEach(b => { const v = BG.mevsimler[b.dataset.season]; if (v) { b.textContent = v[0]; b.title = v[1]; } });
   // Tüm Dünya: bütün bölgeler birlikte; sahne yerine küre, panelde bölgelerin o yılki özeti
@@ -918,9 +930,66 @@
       <p class="note">Zaman çizelgesinde yılı değiştirip takvimi yeniden açarak başka bir yılın olaylarını görebilirsin.</p>`;
   }
   function tbySekme() { return { ad: '🗓️ Tarihte Bu Yıl', html: '', onShow: b => { b.innerHTML = tbyHTML(); } }; }
+  const AA_BOLGELER = [
+    ['avrupa', '🏛️ Avrupa & Akdeniz'],
+    ['ortadogu', '🏜️ Ortadoğu & Afrika'],
+    ['asya', '🏯 Asya & Okyanusya'],
+    ['amerika', '🌎 Amerika']
+  ];
+  const AA_ORNEKLER = [
+    [2560, 'MÖ 2560 · Piramitler & Mamutlar'],
+    [500, 'MÖ 500 · Atina, Buda & Konfüçyüs'],
+    [-1206, 'MS 1206 · Moğollar & Avrupa'],
+    [-1453, 'MS 1453 · İstanbul & Machu Picchu'],
+    [-1776, 'MS 1776 · ABD & Buhar Çağı'],
+    [-1969, 'MS 1969 · Ay’a İniş & Dünya']
+  ];
+  function aaBolgeBul(ll) {
+    if (!ll) return 'ortadogu';
+    const [la, lo] = ll;
+    if (lo < -25) return 'amerika';
+    if (la >= 35 && lo >= -25 && lo <= 45) return 'avrupa';
+    if (lo > 55) return 'asya';
+    return 'ortadogu';
+  }
+  function ayniAndaDunyaHTML(yHedef) {
+    const y = Math.round(yHedef !== undefined ? yHedef : Y);
+    const topla = (ar) => {
+      const gor = new Set(), L = [];
+      const ekle = o => { const k = o.ad.toLocaleLowerCase('tr'); if (gor.has(k)) return; gor.add(k); L.push(o); };
+      for (const a of window.AYNI_ANDA || []) {
+        if (!a.d || !a.ll) continue;
+        const hi = Math.max(a.d[0], a.d[1]), lo = Math.min(a.d[0], a.d[1]);
+        if (lo <= y + ar && hi >= y - ar) ekle({ y: clamp(y, lo, hi), ad: a.k, t: a.t, ll: a.ll, bolge: aaBolgeBul(a.ll), onem: 10 - Math.min(6, Math.round((hi - lo) / 400)) });
+      }
+      for (const d of window.DONUM_NOKTALARI || []) if (d.ll && Math.abs(d.y - y) <= Math.max(25, ar)) ekle({ y: d.y, ad: d.ad, t: d.ozet, ll: d.ll, bolge: aaBolgeBul(d.ll), onem: 8 });
+      for (const e of window.OLAYLAR || []) if (e.ll && Math.abs(e.y - y) <= Math.max(20, ar)) ekle({ y: e.y, ad: e.ad, t: e.ozet || e.sonuc || '', ll: e.ll, bolge: aaBolgeBul(e.ll), onem: (e.onem || 2) + 2 });
+      for (const o of window.TARIHTE_BUGUN || []) if (o.ll && Math.abs(o.y - y) <= Math.max(15, ar)) ekle({ y: o.y, ad: o.ad, t: o.ozet, ll: o.ll, bolge: aaBolgeBul(o.ll), onem: 6 });
+      return L;
+    };
+    let L = topla(15);
+    let arNot = 'tam bu dönem';
+    const farkliBolge = arr => new Set(arr.map(x => x.bolge)).size;
+    if (farkliBolge(L) < 2) { L = topla(60); arNot = '±60 yıl çevresi'; }
+    if (farkliBolge(L) < 2) { L = topla(200); arNot = '±200 yıl çevresi'; }
+    const kartlar = AA_BOLGELER.map(([id, baslik]) => {
+      const items = L.filter(x => x.bolge === id).sort((a, b) => b.onem - a.onem || Math.abs(a.y - y) - Math.abs(b.y - y)).slice(0, 3);
+      if (!items.length) return '';
+      return `<div class="aa-bolge"><h4>${baslik}</h4>${items.map(it => `<div class="aa-item">
+        <b>${esc(it.ad)}</b>
+        ${it.t ? `<p>${esc(it.t)}</p>` : ''}
+        <button class="phbtn icbtn" data-tbgun="${it.y}|${it.ll[0]}|${it.ll[1]}|${esc(it.ad)}">🌍 Oraya uç</button>
+      </div>`).join('')}</div>`;
+    }).filter(Boolean).join('');
+    const hizli = `<div class="aa-hizli"><span>✨ Şaşırtıcı eşzamanlılıklar:</span>${AA_ORNEKLER.map(([yy, lbl]) => `<button type="button" class="phbtn${yy === y ? ' icbtn' : ''}" data-aa-yil="${yy}">${lbl}</button>`).join('')}</div>`;
+    return `<div class="tby-bas"><div><b>🌍 ${YIL.fmt(y)} — Aynı Anda Dünyada</b><small>Farklı kıtalarda eşzamanlı yaşananlar (${arNot})</small></div></div>
+      ${hizli}
+      ${kartlar ? `<div class="aa-grid">${kartlar}</div>` : `<p class="note">Bu yıl için eşzamanlı kayıt bulunamadı. Yukarıdaki şaşırtıcı eşzamanlılıklardan birine tıklayabilirsin.</p>`}`;
+  }
+  function ayniAndaSekme() { return { ad: '🌍 Aynı Anda Dünyada', html: '', onShow: b => { b.innerHTML = ayniAndaDunyaHTML(); } }; }
   function openTarihteBugun(ozelOlay, acSekme) {
     const res = ozelOlay ? { tam: true, ay: ozelOlay.ay, gun: ozelOlay.gun, olaylar: [ozelOlay] } : (window.tarihteBugunBul ? window.tarihteBugunBul() : null);
-    if (!res || !res.olaylar.length) { showModal({ ikon: '🗓️', title: `Tarihte Bu Yıl · ${YIL.fmt(Math.round(Y))}`, sub: 'Seçtiğin yılın çevresindeki önemli olaylar', tabs: [tbySekme()] }); return; }
+    if (!res || !res.olaylar.length) { showModal({ ikon: '🗓️', title: `Tarihte Bu Yıl · ${YIL.fmt(Math.round(Y))}`, sub: 'Seçtiğin yılın çevresindeki önemli olaylar', open: acSekme === 2 ? 1 : 0, tabs: [tbySekme(), ayniAndaSekme()] }); return; }
     const baslikTarih = `${res.gun} ${AY_AD[res.ay] || ''}`;
     const kartlar = res.olaylar.map(o => `<div class="tb-kart">
         <div class="tb-ust"><span class="pill">📅 ${o.gun} ${AY_AD[o.ay]} · ${YIL.fmt(o.y)}</span><small>📍 ${esc(o.yer)}</small></div>
@@ -931,7 +1000,7 @@
     const html = `${res.tam ? '' : `<p class="note">Bugün (${baslikTarih}) için en yakın tarihî dönüm noktaları:</p>`}${kartlar}
       <div class="gos"><button class="phbtn" data-tbrastgele="1">🎲 Başka bir gün gör</button></div>`;
     showModal({ ikon: '📅', title: 'Tarihte Bugün & Bu Yıl', sub: `📅 ${baslikTarih} · 🗓️ ${YIL.fmt(Math.round(Y))} ve çevresi`, open: acSekme || 0,
-      tabs: [{ ad: '📅 Tarihte Bugün', html }, tbySekme()] });
+      tabs: [{ ad: '📅 Tarihte Bugün', html }, tbySekme(), ayniAndaSekme()] });
   }
   const KAT_STORE_KEY = 'zy-katman-v1';
   const KAT_VARSAYILAN = { tarih: { sinir: true }, doga: {} };
@@ -943,12 +1012,13 @@
     } catch (e) { /* */ }
     return { mod: 'tarih', tarih: { ...KAT_VARSAYILAN.tarih }, doga: { ...KAT_VARSAYILAN.doga } };
   }
+  const katKeys = inp => (inp && inp.dataset && inp.dataset.kat ? inp.dataset.kat.split(',').filter(Boolean) : []);
   function katmanKaydet() {
     try {
       const d = katKayitOku();
       const durum = {};
       document.querySelectorAll('#katman [data-kat]').forEach(inp => {
-        if (DN.layers[inp.dataset.kat]) durum[inp.dataset.kat] = true;
+        for (const k of katKeys(inp)) if (DN.layers[k]) durum[k] = true;
       });
       d.mod = aktifAtlasMod;
       d[aktifAtlasMod] = durum;
@@ -1192,14 +1262,10 @@
     const [la, lo, z] = KITA_MERKEZ[kt.id];
     if (view !== 'dunya') setView('dunya');
     DN.goTo(la, lo, z);
-    if (hedefY != null && hedefY !== eskiY) {
-      setYear(hedefY, false);
-      const eskiAd = ((window.KITALAR || []).find(x => x.id === eskiId) || {}).ad || '';
-      toast(`${kt.ikon} <b>${kt.ad}</b> · ${YIL.fmt(hedefY)} yılına geçildi${eskiAd && eskiId !== kt.id ? ` (${eskiAd} · ${YIL.fmt(eskiY)} hatırlandı)` : ''}`);
-    } else {
-      kitaYilKaydet(kt.id, eskiY);
-      toast(`${kt.ikon} <b>${kt.ad}</b> · ${YIL.fmt(eskiY)} — bu kıtada yılı değiştirip başka kıtaya geçince burası hatırlanır.`);
-    }
+    // Yıl değişmez: kıtaya dokunan biri yalnızca oraya gitmeyi bekliyor (eskiden sessizce o kıtada en son bakılan
+    // yıla geçiyordu ve etikette eski bir yıl yazıyordu; kafa karıştırıyordu). hedefY kullanılmıyor.
+    void hedefY;
+    kitaYilKaydet(kt.id, eskiY);
     tlSonAn = '';
   }
 
@@ -1216,7 +1282,7 @@
     const x0 = yearX(P.from);
     tlKitaKutular = [];
     if (DUNYA) {
-      // her kıta bir sıra; sol etikette hatırlanan yıl gösterilir, tıklayınca o kıtanın yılına geçilir
+      // her kıta bir sıra; sol etikette kıtanın adı; tıklayınca küre o kıtaya döner (yıl değişmez)
       const KT = window.KITALAR || [{ id: 'hepsi', ad: '', ikon: '', b: BSIRA }], RENK = { afrika: ['#9a6a2e', '#b8843e'], asya: ['#8e3b32', '#ad5446'], avrupa: ['#2f5a8a', '#4a76a8'], amerika: ['#2e7a4e', '#46966a'], okyanusya: ['#2a8a9a', '#46a8b8'], hepsi: ['#6a5a4a', '#8a7a6a'] };
       const rh = Math.min(13, Math.floor(54 / KT.length)), fs = Math.min(9.5, rh - 1);
       KT.forEach((kt, i) => {
@@ -1228,7 +1294,7 @@
         }));
         const ky = kitaYil[kt.id], isAk = kt.id === ak, isHov = hoverKita && hoverKita.id === kt.id;
         tg.font = `700 ${fs}px system-ui`;
-        const t = `${kt.ikon} ${kt.ad}${ky != null ? ' · ' + YIL.fmt(ky) : ''}`, w = tg.measureText(t).width + 12;
+        const t = `${kt.ikon} ${kt.ad}`, w = tg.measureText(t).width + 12; void ky;
         tg.fillStyle = isHov ? 'rgba(62,44,20,0.96)' : isAk ? 'rgba(42,30,14,0.92)' : 'rgba(25,18,12,0.82)';
         tg.fillRect(2, y0, w, rh - 1);
         if (isAk || isHov) { tg.fillStyle = '#ffd666'; tg.fillRect(2, y0, 2.5, rh - 1); }
@@ -1311,7 +1377,7 @@
     if (hoverKita) {
       const ky = kitaYil[hoverKita.id];
       tip.style.display = 'block';
-      tip.innerHTML = `${hoverKita.ikon} <b>${hoverKita.ad}</b>${ky != null ? ` · son yıl: <b>${YIL.fmt(ky)}</b>` : ''} — tıkla: bu kıtaya ve yılına geç`;
+      tip.innerHTML = `${hoverKita.ikon} <b>${hoverKita.ad}</b> — tıkla: küre bu kıtaya dönsün`; void ky;
       tip.style.left = clamp(x - 10, 4, TW - 260) + 'px';
     } else if (hoverEv) { tip.style.display = 'block'; tip.innerHTML = `<b>${YIL.fmt(hoverEv.y)}</b> ${hoverEv.t}`; tip.style.left = clamp(x - 120, 4, TW - 244) + 'px'; }
     else tip.style.display = 'none';
@@ -1382,7 +1448,10 @@
       if (dragG.d0 && d > 10) { DN.drag(m[0] - dragG.m[0], m[1] - dragG.m[1]); DN.zoom(clamp(d / dragG.d0, 0.8, 1.25), m[0], m[1]); DN.hold(); }
       dragG.d0 = d; dragG.m = m; dragG.moved = true; return;
     }
-    if (!dragG) { const h = DN.hitTest(...cvPos(gcv, ev)); DN.setHover(h); gcv.style.cursor = h ? 'pointer' : 'grab'; return; }
+    if (!dragG) {
+      if (turAktif) { const h = DN.hitTest(...cvPos(gcv, ev)); DN.setHover(null); gcv.style.cursor = (h && h.kind === 'turdurak') ? 'pointer' : 'grab'; return; }
+      const h = DN.hitTest(...cvPos(gcv, ev)); DN.setHover(h); gcv.style.cursor = h ? 'pointer' : 'grab'; return;
+    }
     if (!gpts.has(ev.pointerId)) return;
     const dx = ev.clientX - dragG.x, dy = ev.clientY - dragG.y;
     if (dragG.moved || Math.hypot(dx, dy) > 4) { dragG.moved = true; DN.drag(dx, dy); dragG.x = ev.clientX; dragG.y = ev.clientY; }
@@ -1390,7 +1459,10 @@
   });
   const endG = ev => {
     if (dragG && !dragG.moved && gpts.size <= 1) {
-      if (typeof window.__kureSec === 'function') { const cb = window.__kureSec; window.__kureSec = null; cb(DN.llAt(...cvPos(gcv, ev))); }
+      if (turAktif) {
+        const h = DN.hitTest(...cvPos(gcv, ev), ev.pointerType === 'mouse' ? 0 : 12);
+        if (h && h.kind === 'turdurak') { turOtoDurdur(); turDurakGoster(h.idx); }
+      } else if (typeof window.__kureSec === 'function') { const cb = window.__kureSec; window.__kureSec = null; cb(DN.llAt(...cvPos(gcv, ev))); }
       else { const h = DN.hitTest(...cvPos(gcv, ev), ev.pointerType === 'mouse' ? 0 : 12); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'donum') openDonum(h.d); else if (h && h.kind === 'hatyapi') openHatYapi(h.hy); else if (h && h.kind === 'magara') openMagara(h.m); else if (h && h.kind === 'tarihkazi') openKazi(h.kz, 'tarih'); else if (h && h.kind === 'fosilkazi') openKazi(h.kz, 'doga'); else if (h && h.kind === 'iklim') openAtlasEk('iklim', h.b, h.n); else if (h && h.kind === 'cizgi') openAtlasEk('cizgi', h.cz); else if (h && h.kind === 'taban') openAtlasEk('taban', h.t); else if (h && h.kind === 'tabansirt') openAtlasEk('taban', h.sr); else if (h && h.kind === 'kutup') openAtlasEk('kutup', h.k); else if (h && h.kind === 'krater') openAtlasEk('krater', h.kr); else if (h && h.kind === 'gol') openAtlasEk('gol', h.gl); else if (h && h.kind === 'saat') openAtlasEk('saat', h.s); else if (h && h.kind === 'yazi') openAtlasEk('yazi', h.yz); else if (h && h.kind === 'din') openAtlasEk('din', h.dn); else if (h && h.kind === 'tarihgoc') openAtlasEk('tarihgoc', h.mg); else if (h && h.kind === 'salgin') openAtlasEk('salgin', h.sg); else if (h && h.kind === 'bogaz') openAtlasEk('bogaz', h.bg); else if (h && h.kind === 'manyetik') openAtlasEk('manyetik', h.mn); else if (h && h.kind === 'tarimvav') openAtlasEk('tarim', h.tr); else if (h && h.kind === 'megakent') openAtlasEk('megakent', h.mk); else if (h && h.kind === 'icat') openAtlasEk('icat', h.it); else if (h && h.kind === 'felsefe') openAtlasEk('felsefe', h.it); else if (h && h.kind === 'insanlar') openAtlasEk('insanlar', h.it); else if (h && h.kind === 'surpriz') openSurpriz(h.sp); else if (h && h.kind === 'liman') openLiman(h.lm); else if (h && h.kind === 'nehir') openNehir(h.nr); else if (h && h.kind === 'hayvangoc') openHayvanGoc(h.hg); else if (h && h.kind === 'volkan') openVolkan(h.v); else if (h && h.kind === 'fay') openFay(h.f); else if (h && h.kind === 'akinti') openAkinti(h.a); else if (h && h.kind === 'ruzgar') openRuzgar(h.rz); else if (h && h.kind === 'denizolay') openDenizOlay(h.o); else if (h && h.kind === 'hayvan') openHayvan(h.h); else if (h && h.kind === 'bitki') openBitki(h.bt); else if (h && h.kind === 'yayilis') { DN.setYayilis(h.yy.id); openYayilis(h.yy); } else if (h && h.kind === 'cografya') openCografya(h.cg); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); else if (!h) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) { if (DN.karaMi && !DN.karaMi(ll[0], ll[1])) { const ok = okyanusBul(ll[0], ll[1]); if (ok) openOkyanus(ok); } else { let yakinCg = null; if ((DN.layers.cografya || !DN.sinirAcik) && window.ATLAS_COGRAFYA) { const tol = Math.max(0.65, 2.4 / Math.max(1, (DN.view && DN.view.z) || 1)); let enYakin = tol * tol; for (const cg of window.ATLAS_COGRAFYA) { if (cg.tur !== 'harika' && cg.tur !== 'dag') continue; const d2 = (cg.ll[0] - ll[0]) ** 2 + (cg.ll[1] - ll[1]) ** 2; if (d2 < enYakin) { enYakin = d2; yakinCg = cg; } } } if (yakinCg) openCografya(yakinCg); else if (DN.sinirAcik) { DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else { const db = window.dogaBolgeBul && window.dogaBolgeBul(ll[0], ll[1]); if (db) openDogaBolge(db); } } } } }
     }
     gpts.delete(ev.pointerId);
@@ -1508,8 +1580,10 @@
     kesifRozetGuncelle();
     if (el.hidden) return;
     el.querySelectorAll('[data-kat]').forEach(inp => {
-      const k = inp.dataset.kat; inp.checked = !!DN.layers[k];
-      const c = inp.parentElement.querySelector('i'); if (c) c.textContent = k === 'sinir' ? '' : (katSay(k) || '');
+      const ks = katKeys(inp);
+      inp.checked = ks.some(k => !!DN.layers[k]);
+      const c = inp.parentElement.querySelector('i');
+      if (c) c.textContent = ks.includes('sinir') ? '' : (ks.reduce((t, k) => t + (katSay(k) || 0), 0) || '');
     });
     // Her atlas düğmesinde kaç katmanın açık olduğunu göster
     el.querySelectorAll('[data-atlas]').forEach(b => {
@@ -1518,16 +1592,23 @@
       const roz = b.querySelector('em'); if (roz) roz.textContent = acik ? ` ${acik}` : '';
     });
   }
-  $('#katman').addEventListener('change', ev => { const k = ev.target.dataset && ev.target.dataset.kat; if (k) { DN.setLayer(k, ev.target.checked); katmanKaydet(); renderOlayPanel(); } });
+  $('#katman').addEventListener('change', ev => {
+    const ks = katKeys(ev.target);
+    if (ks.length) {
+      for (const k of ks) DN.setLayer(k, ev.target.checked);
+      if (!ev.target.checked && ks.includes('yayilis') && DN.setYayilis) DN.setYayilis(null);
+      katmanKaydet(); renderOlayPanel();
+    }
+  });
   $('#katman').addEventListener('click', ev => {
     const am = ev.target.closest('[data-atlas]'); if (am) { atlasModUygula(am.dataset.atlas); return; }
     if (ev.target.closest('#kp-hepsi-ac')) {
       const grp = $('#katman .kp-grup:not([hidden])');
-      if (grp) grp.querySelectorAll('[data-kat]').forEach(inp => { DN.setLayer(inp.dataset.kat, true); });
+      if (grp) grp.querySelectorAll('[data-kat]').forEach(inp => { for (const k of katKeys(inp)) DN.setLayer(k, true); });
       katmanKaydet(); renderOlayPanel(); return;
     }
     if (ev.target.closest('#kp-temizle')) {
-      $('#katman').querySelectorAll('[data-kat]').forEach(inp => { DN.setLayer(inp.dataset.kat, false); });
+      $('#katman').querySelectorAll('[data-kat]').forEach(inp => { for (const k of katKeys(inp)) DN.setLayer(k, false); });
       if (DN.setYayilis) DN.setYayilis(null);
       katmanKaydet(); renderOlayPanel(); return;
     }
@@ -1684,7 +1765,15 @@
     const bos = n ? '' : `<p class="note">Bu yıllar için henüz hazır bir hayat yok. En eski hayatlar ${YIL.fmt(YASA_EN_ESKI)} civarından başlıyor.</p><div class="gos"><button class="phbtn" data-yyil="${YASA_EN_ESKI - 500}">${YIL.ek(YASA_EN_ESKI - 500, 'e')} bak</button></div>`;
     return ust + bos + gruplar + gucHTML;
   }
+  // Yaşa verileri geç yüklenir (js/gec-yukle.js): henüz gelmediyse yükle, sonra aç
+  function yasaHazirla(sonra) {
+    const G = window.GecYukle; if (!G || G.hazir('yasa')) return true;
+    toast('⏳ Hayatlar yükleniyor…');
+    G.yukle('yasa').then(sonra, () => toast('Hayatlar yüklenemedi. Bağlantını kontrol edip tekrar dene.'));
+    return false;
+  }
   function openYasam(yil) {
+    if (!yasaHazirla(() => openYasam(yil))) return;
     yasaYil = Math.round(yil ?? Y);
     const y = Math.round(Y), yy = yasaYil, { guc, halk } = rolListesi(), KT = window.YASAM || [];
     const kart = (d, r) => `<button class="rolecard" data-yrol="${r.id}"><canvas data-yrolcv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small><i class="ysm-sinif">${SINIF[r.sinif] || ''}</i> ${r.kim}</small></button>`;
@@ -1772,6 +1861,7 @@
     ] });
   }
   function openYasamDoga(id) {
+    if (!yasaHazirla(() => openYasamDoga(id))) return;
     const YD = window.YASAM_DOGA || {};
     const o = [...(YD.hayvanlar || []), ...(YD.bitkiler || []), ...(YD.mikroplar || [])].find(x => x.id === id);
     if (!o) return;
@@ -1809,6 +1899,7 @@
     ] });
   }
   function openYasamRol(id) {
+    if (!yasaHazirla(() => openYasamRol(id))) return;
     const o = yasamBul(id); if (!o) return; const { k, d, r } = o, opt = yasamOpt(d, r), n = r.gun.length;
     // Yaşa penceresinde seçilen yıl bu dönemdeyse o yıla, değilse dönemin ortasına götürülür
     const secili = yasaYil != null && yasaYil <= d.from && yasaYil >= d.to;
@@ -1835,7 +1926,7 @@
     const umSes = $('#um-ses'), sesBtn = $('#sesbtn'), sesPop = $('#sespop');
     if (umSes && sesBtn) umSes.addEventListener('click', e => { e.stopPropagation(); if (!sesPop || sesPop.hidden) sesBtn.click(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && um.classList.contains('acik')) ac(false); });
-    window.matchMedia('(min-width: 861px)').addEventListener('change', m => { if (m.matches) ac(false); });
+    window.matchMedia('(min-width: 1280px)').addEventListener('change', m => { if (m.matches) ac(false); }); // ☰ menü 1279 px'e kadar kullanılıyor
   })();
   document.querySelectorAll('[data-mod]').forEach(b => b.addEventListener('click', () => {
     const m = b.dataset.mod;
@@ -1892,6 +1983,7 @@
     const yyk = e.target.closest('[data-yy-kure]'); if (yyk) { const yy = (window.ATLAS_YAYILIS || []).find(x => x.id === yyk.dataset.yyKure); if (yy) { playingBeforeModal = false; closeModal(); if (view !== 'dunya') setView('dunya'); DN.setLayer('yayilis', true); if (DN.setYayilis) DN.setYayilis(yy.id); renderOlayPanel(); const mid = yy.pts && yy.pts.length ? yy.pts[Math.floor(yy.pts.length / 2)] : yy.ll; DN.goTo(mid[0], mid[1], 2.2); DN.pin(yy.ll[0], yy.ll[1], (yy.ik || '🧭') + ' ' + yy.ad); toast(`${yy.ik || '🧭'} <b>${esc(yy.ad)}</b> · Yayılış rotası kürede canlı gösteriliyor.`); } return; }
     if (e.target.closest('[data-yy-galeri]')) { openYayilisGaleri(); return; }
     const tbyAr = e.target.closest('[data-tby-ar]'); if (tbyAr) { tbyAralik = +tbyAr.dataset.tbyAr; modal.querySelector('.mbody').innerHTML = tbyHTML(); return; }
+    const aaYil = e.target.closest('[data-aa-yil]'); if (aaYil) { const ny = +aaYil.dataset.aaYil; setYear(ny, true); modal.querySelector('.mbody').innerHTML = ayniAndaDunyaHTML(ny); return; }
     const tbyF = e.target.closest('[data-tby-f]'); if (tbyF) { tbyFiltre = tbyF.dataset.tbyF; const mb = modal.querySelector('.mbody'), st = mb.scrollTop; mb.innerHTML = tbyHTML(); mb.scrollTop = st; return; }
     const tbyAc = e.target.closest('[data-tby-ac]'); if (tbyAc) {
       const [tur, id] = tbyAc.dataset.tbyAc.split('|');
@@ -2508,6 +2600,8 @@
   $('#yc-gizle').addEventListener('click', ev => { ev.stopPropagation(); GIZ.ust = !GIZ.ust; gizliUygula(); });
   $('.yearcard').addEventListener('click', ev => { if (GIZ.ust && !ev.target.closest('button, a')) { GIZ.ust = false; gizliUygula(); } });
   $('#yc-goc').addEventListener('click', ev => { ev.stopPropagation(); openGoc(); });
+  const ycTb = $('#yc-tb'); if (ycTb) ycTb.addEventListener('click', ev => { ev.stopPropagation(); openTarihteBugun(); });
+  const ycAyni = $('#yc-ayni'); if (ycAyni) ycAyni.addEventListener('click', ev => { ev.stopPropagation(); openTarihteBugun(null, 2); });
   $('#tl-gizle').addEventListener('click', () => { GIZ.alt = true; gizliUygula(); });
   $('#tl-ac').addEventListener('click', ev => { if (ev.target.closest('#tl-ac-oyna')) { $('#play').click(); return; } GIZ.alt = false; gizliUygula(); });
   $('#tamekran').addEventListener('click', () => { const hepsi = !!(GIZ.ust && GIZ.alt); GIZ.ust = GIZ.alt = !hepsi; gizliUygula(); });
@@ -2520,7 +2614,117 @@
   });
   const tbKutu = $('#tbbtn'), tbAc = $('#tbbtn-ac'), tbX = $('#tbbtn-x');
   if (tbAc) tbAc.addEventListener('click', () => openTarihteBugun());
-  if (tbX && tbKutu) tbX.addEventListener('click', () => { tbKutu.hidden = true; });
+  // body.tb-gizli: telefonda sağ sütundaki düğmeler, kapatılan 📅 düğmesinin boşluğunu doldursun
+  if (tbX && tbKutu) tbX.addEventListener('click', () => { tbKutu.hidden = true; document.body.classList.add('tb-gizli'); });
+
+  // ---------- 🎬 Rehberli Belgesel Turları (data/belgeseller.js) ----------
+  let turAktif = null, turIdx = 0, turTimer = 0, turReq = 0, turOncekiKatman = null;
+  const turBar = $('#turbar'), turBtn = $('#turbtn'), turPop = $('#turpop');
+  function turMenuCiz() {
+    if (!turPop) return;
+    const L = window.BELGESEL_TURLAR || [];
+    turPop.innerHTML = `<div class="tp-bas">🎬 Belgesel Turları</div>` + L.map(t => `<button type="button" data-tur-sec="${esc(t.id)}" class="${turAktif && turAktif.id === t.id ? 'on' : ''}"><i>${t.ikon || '🎬'}</i><span><b>${esc(t.ad)}</b><small>${esc(t.alt || '')}</small></span></button>`).join('');
+  }
+  function turOtoDurdur() {
+    if (turTimer) { clearInterval(turTimer); turTimer = 0; }
+    const b = $('#tur-oto'); if (b) b.textContent = '▶ Otomatik İzle';
+  }
+  function turDurakGoster(i) {
+    if (!turAktif) return;
+    const D = turAktif.duraklar;
+    turIdx = clamp(i, 0, D.length - 1);
+    const d = D[turIdx], req = ++turReq;
+    if (view !== 'dunya') setView('dunya');
+    // Belgesel modunda yalnızca sade sınırlar (doğa belgeselinde kapalı) + bu belgeselin kendi rotası açık kalır
+    const sinirAc = turAktif.sinir !== false;
+    for (const k of Object.keys(DN.layers)) DN.setLayer(k, sinirAc && k === 'sinir');
+    setYear(d.y, true);
+    if (DN.setTurRota) DN.setTurRota({ pts: turAktif.rota, duraklar: D, idx: turIdx, renk: turAktif.renk || '#ffd666' });
+    DN.goTo(d.ll[0], d.ll[1], d.z || 2.8);
+    $('#tur-ad').textContent = `${turAktif.ikon || '🎬'} ${turAktif.ad}`;
+    $('#tur-yil').textContent = YIL.fmt(d.y);
+    $('#tur-say').textContent = `${turIdx + 1} / ${D.length}`;
+    $('#tur-baslik').textContent = d.baslik;
+    $('#tur-metin').textContent = d.metin;
+    $('#tur-onceki').disabled = turIdx === 0;
+    $('#tur-sonraki').textContent = turIdx === D.length - 1 ? '✓ Bitir' : 'Sonraki ▶';
+    $('#tur-nokta').innerHTML = D.map((_, k) => `<button type="button" class="${k === turIdx ? 'on' : ''}" data-tur-k="${k}" title="Durak ${k + 1}"></button>`).join('');
+    const fBox = $('#tur-foto');
+    fBox.removeAttribute('href');
+    fBox.innerHTML = '<span>📷</span>';
+    if (d.w) {
+      kapakFoto(d.w).then(o => {
+        if (req !== turReq || !o || !turAktif) return;
+        fBox.href = o.page;
+        fBox.innerHTML = `<img src="${esc(o.src)}" alt="${esc(d.baslik)}">`;
+      }).catch(() => {});
+    }
+  }
+  function turBaslat(id) {
+    const L = window.BELGESEL_TURLAR || [];
+    const t = L.find(x => x.id === id) || L[0];
+    if (!t || !turBar) return;
+    turOtoDurdur();
+    playing = false; updPlay();
+    if (!turAktif) turOncekiKatman = { ...DN.layers };
+    closeModal();
+    if ($('#katman')) $('#katman').hidden = true;
+    if (turPop) turPop.hidden = true;
+    turAktif = t;
+    turBar.hidden = false;
+    document.body.classList.add('tur-mod');
+    if (turBtn) turBtn.classList.add('on');
+    GIZ.alt = true; gizliUygula();
+    turDurakGoster(0);
+  }
+  function turBitir() {
+    turOtoDurdur();
+    turAktif = null;
+    if (DN.setTurRota) DN.setTurRota(null);
+    if (turOncekiKatman) {
+      for (const [k, v] of Object.entries(turOncekiKatman)) DN.setLayer(k, !!v);
+      turOncekiKatman = null;
+      renderOlayPanel();
+    }
+    if (turBar) turBar.hidden = true;
+    document.body.classList.remove('tur-mod');
+    if (turBtn) turBtn.classList.remove('on');
+    GIZ.alt = false; gizliUygula();
+  }
+  if (turBtn) turBtn.addEventListener('click', ev => {
+    ev.stopPropagation();
+    if (!turPop) { if (turAktif) turBitir(); else turBaslat(); return; }
+    const ac = turPop.hidden;
+    if (ac) turMenuCiz();
+    turPop.hidden = !ac;
+  });
+  if (turPop) turPop.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-tur-sec]'); if (!b) return;
+    turBaslat(b.dataset.turSec);
+  });
+  document.addEventListener('click', ev => {
+    if (turPop && !turPop.hidden && !ev.target.closest('#turpop, #turbtn')) turPop.hidden = true;
+  });
+  if ($('#tur-kapat')) $('#tur-kapat').addEventListener('click', turBitir);
+  if ($('#tur-onceki')) $('#tur-onceki').addEventListener('click', () => { turOtoDurdur(); turDurakGoster(turIdx - 1); });
+  if ($('#tur-sonraki')) $('#tur-sonraki').addEventListener('click', () => {
+    turOtoDurdur();
+    if (turAktif && turIdx >= turAktif.duraklar.length - 1) turBitir();
+    else turDurakGoster(turIdx + 1);
+  });
+  if ($('#tur-nokta')) $('#tur-nokta').addEventListener('click', ev => {
+    const b = ev.target.closest('[data-tur-k]'); if (!b) return;
+    turOtoDurdur(); turDurakGoster(+b.dataset.turK);
+  });
+  if ($('#tur-oto')) $('#tur-oto').addEventListener('click', () => {
+    if (turTimer) { turOtoDurdur(); return; }
+    $('#tur-oto').textContent = '⏸ Duraklat';
+    turTimer = setInterval(() => {
+      if (!turAktif) { turOtoDurdur(); return; }
+      if (turIdx >= turAktif.duraklar.length - 1) { turOtoDurdur(); return; }
+      turDurakGoster(turIdx + 1);
+    }, 8500);
+  });
   gizliUygula();
 
   // ---------- 📅 tarihe git ----------
@@ -2631,6 +2835,8 @@
   if (!DUNYA && QS.get('yapi')) { const id = QS.get('yapi'); syncScenePart(); setTimeout(() => showMonument(id), 50); }
   modGuncelle();
   if (QS.get('yasa')) { syncScenePart(); setTimeout(yasaAc, 80); }
+  // açılış ekranını, kürenin ilk karesi çizildikten sonra kaldır
+  requestAnimationFrame(() => requestAnimationFrame(() => { if (window.acilisKapat) window.acilisKapat(); }));
   // ---------- ilk ziyaret: 6 sahnelik yenilenmiş interaktif rehber ----------
   const hg = $('#hosgeldin'), hgIc = $('#hg-icerik'), hgNk = $('#hg-noktalar');
   const HG_SAHNELER = [

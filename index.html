@@ -11,15 +11,46 @@
 <meta property="og:url" content="https://jondoe2972.github.io/zaman-yolculugu/">
 <meta property="og:site_name" content="Zaman Yolculuğu">
 <meta property="og:locale" content="tr_TR">
-<meta property="og:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
+<meta property="og:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Zaman Yolculuğu: siyasi sınırlarıyla Avrupa, Afrika ve Asya’yı gösteren dünya küresi">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="⏳ Zaman Yolculuğu: Tarihin Derinliklerinde Kaybolmaya Hazır Mısın?">
 <meta name="twitter:description" content="Dünya tarihini interaktif kürede keşfet, o dönemde bir gününü yaşa ve tarih oyunlarını oyna.">
-<meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
+<meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.jpg">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23241b14'/%3E%3Cpath d='M18 12h28v6c0 7-6 11-11 14 5 3 11 7 11 14v6H18v-6c0-7 6-11 11-14-5-3-11-7-11-14v-6z' fill='none' stroke='%23ffd666' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 18h18c0 4-4 7-9 10-5-3-9-6-9-10zm9 18c5 3 9 6 9 10H23c0-4 4-7 9-10z' fill='%23ffd666'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/stil.css?v=87">
+<link rel="stylesheet" href="css/stil.css?v=100">
+<style>
+/* Açılış ekranı: sayfa kodları inerken boş sayfa yerine görünür (stil.css'e bağlı değil) */
+.acilis { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, #0e314d, #04101c 70%); color: #e6f2ff; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; transition: opacity .4s ease; }
+.acilis.bitti { opacity: 0; pointer-events: none; }
+.ac-ic { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 24px; }
+.ac-kure { width: 84px; height: 84px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #7fd3ff, #2484cc 45%, #0f4a82 75%); box-shadow: 0 0 40px rgba(103,232,249,.45); position: relative; overflow: hidden; }
+.ac-kure::before { content: ''; position: absolute; inset: 18% -40% 22% 0; background: radial-gradient(ellipse at 30% 50%, #8fc474 0 22%, transparent 23%), radial-gradient(ellipse at 62% 35%, #c8e6a8 0 16%, transparent 17%), radial-gradient(ellipse at 48% 72%, #8fc474 0 14%, transparent 15%); animation: acDon 3.2s linear infinite; }
+@keyframes acDon { from { transform: translateX(-30%); } to { transform: translateX(30%); } }
+.ac-ic b { font-family: Georgia, serif; font-size: 26px; color: #ffd666; margin-top: 6px; }
+.ac-yazi { font-size: 15px; color: #b8d6ec; min-height: 1.4em; }
+.ac-cubuk { width: 180px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; }
+.ac-cubuk i { display: block; width: 40%; height: 100%; border-radius: 4px; background: #4ade80; animation: acCubuk 1.3s ease-in-out infinite; }
+@keyframes acCubuk { from { transform: translateX(-110%); } to { transform: translateX(260%); } }
+.ac-yavas { font-size: 12.5px; color: #8fb3cc; max-width: 260px; }
+@media (prefers-reduced-motion: reduce) { .ac-kure::before, .ac-cubuk i { animation: none; } }
+</style>
 </head>
 <body>
+<div id="acilis" class="acilis" role="status" aria-live="polite"><div class="ac-ic"><div class="ac-kure"></div><b>Zaman Yolculuğu</b><span class="ac-yazi" id="ac-yazi">Dünya yükleniyor…</span><div class="ac-cubuk"><i></i></div><span class="ac-yavas" id="ac-yavas" hidden>Bağlantı yavaş görünüyor; ilk açılış biraz sürebilir, sonraki açılışlar hızlı olur.</span></div></div>
+<script>
+// Açılış ekranı: yükleme sırasında değişen kısa yazılar; uygulama hazır olunca uygulama.js kapatır.
+// Bir hata yüzünden kapanmazsa sayfa yüklendikten 4 sn sonra yine de kalkar (ekran kilitli kalmasın).
+(function () {
+  var y = ['Dünya yükleniyor…', 'Kıyılar ve nehirler çiziliyor…', 'Beş bin yılın sınırları hazırlanıyor…', 'Uygarlıklar yerleşiyor…'], i = 0;
+  var t = setInterval(function () { var e = document.getElementById('ac-yazi'); if (!e) return clearInterval(t); e.textContent = y[++i % y.length]; }, 1600);
+  setTimeout(function () { var e = document.getElementById('ac-yavas'); if (e) e.hidden = false; }, 7000);
+  window.acilisKapat = function () { clearInterval(t); var a = document.getElementById('acilis'); if (!a) return; a.classList.add('bitti'); setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 450); };
+  window.addEventListener('load', function () { setTimeout(window.acilisKapat, 4000); });
+})();
+</script>
 <header class="top">
   <button id="menubtn" class="menubtn" aria-expanded="false" aria-controls="ustmenu" title="Menü">☰<span id="menubtn-ad">🌍 Keşfet</span></button>
   <div class="logo">⏳ <b>Zaman Yolculuğu</b></div>
@@ -29,6 +60,7 @@
     <button data-mod="kesfet" title="Küreyi döndür, dönemin sınırlarını, yollarını ve olaylarını keşfet">🌍<span>Keşfet</span></button>
     <button data-mod="oyun" aria-haspopup="menu" aria-expanded="false" title="Oyunlar: Ben kimim?, Sınırdan Bil, Biliyor muydun?">🎮<span>Oyunlar</span></button>
     <button data-mod="yasa" title="Bu yılda yaşasaydın: bir meslek seç, bir gününü yaşa">🧑‍🌾<span>Yaşa</span></button>
+    <button id="turbtn" data-mod="tur" title="Görselli rehberli belgesel turu izle">🎬<span>Belgesel</span></button>
     <button id="ara" data-mod="ara" title="Ara (Ctrl+K)">🔍<span>Ara</span></button>
   </nav>
   <label class="place"><select id="bolge" class="bolgesel" aria-label="Bölge seç"><option value="dunya">🌍 Tüm Dünya</option><option value="misir">🏺 Mısır</option><option value="anadolu">🏛️ Anadolu</option><option value="avrupa">🏰 Avrupa</option></select><select id="era" aria-label="Çağ seç"></select></label>
@@ -50,10 +82,11 @@
   <button type="button" data-tema-sec="mor">🔮 Bizans Moru &amp; Altın</button>
   <button type="button" data-tema-sec="kutup">❄️ Kutup Işığı (Aurora)</button>
 </div>
+<div id="turpop" class="turpop" hidden role="menu" aria-label="Belgesel Turları"></div>
 <main class="app">
   <section class="stage">
     <canvas id="globe" aria-label="Dünya küresi"></canvas>
-    <div class="globectl"><button id="gzin" title="Yakınlaştır">＋</button><button id="gzout" title="Uzaklaştır">－</button><button id="gecebtn" title="Canlı gece / gündüz ve şehir ışıkları">🌓</button><button id="tamekran" class="tamekran" title="Tam ekran: yıl kartını ve zaman çizelgesini gizle">⛶</button></div>
+    <div class="globectl"><button id="gzin" title="Yakınlaştır">＋</button><button id="gzout" title="Uzaklaştır">－</button><button id="tamekran" class="tamekran" title="Tam ekran: yıl kartını ve zaman çizelgesini gizle">⛶</button></div>
     <div class="yearcard">
       <b id="yc-city" class="yc-city" hidden></b>
       <b id="yc-year">MÖ 2560</b>
@@ -61,9 +94,34 @@
       <span id="yc-ruler"></span>
       <span id="yc-site" class="site"></span>
       <button id="yc-goc" class="yc-goc" hidden>🧬 İnsanlık Afrika'dan nasıl yayıldı? ›</button>
+      <div class="yc-aks">
+        <button id="yc-tb" class="yc-goc" type="button" title="Tarihte Bugün ve Tarihte Bu Yıl">📅 Bugün · Bu Yıl</button>
+        <button id="yc-ayni" class="yc-goc" type="button" title="Seçili yılda farklı kıtalarda aynı anda yaşananlar">🌍 Aynı anda ›</button>
+      </div>
       <button id="yc-gizle" class="yc-gizle" title="Yıl kartını küçült" aria-label="Yıl kartını küçült">▴</button>
     </div>
     <button id="tl-ac" class="tl-ac" hidden title="Zaman çizelgesini göster"><span id="tl-ac-oyna" class="tl-ac-oyna">▶</span><b id="tl-ac-yil"></b><span>▴</span></button>
+    <aside id="turbar" class="turbar" hidden aria-label="Rehberli belgesel turu">
+      <a id="tur-foto" class="tur-foto" target="_blank" rel="noopener" title="Fotoğrafı Wikimedia Commons'ta gör"><span>📷</span></a>
+      <div class="tur-ic">
+        <div class="tur-ust">
+          <span id="tur-ad" class="tur-ad"></span>
+          <span id="tur-yil" class="pill"></span>
+          <span id="tur-say" class="tur-say"></span>
+          <button type="button" id="tur-kapat" class="tur-x" title="Turu bitir" aria-label="Turu bitir">✕</button>
+        </div>
+        <h4 id="tur-baslik"></h4>
+        <p id="tur-metin"></p>
+        <div class="tur-alt">
+          <div id="tur-nokta" class="tur-nokta"></div>
+          <div class="tur-btn">
+            <button type="button" id="tur-onceki" class="phbtn">◀ Önceki</button>
+            <button type="button" id="tur-oto" class="phbtn">▶ Otomatik İzle</button>
+            <button type="button" id="tur-sonraki" class="phbtn icbtn">Sonraki ▶</button>
+          </div>
+        </div>
+      </div>
+    </aside>
     <div id="toast" class="toast"></div>
     <div id="sespop" class="sespop" hidden role="dialog" aria-label="Ses ayarları">
       <b>🎧 Ses ve Ambiyans</b>
@@ -87,7 +145,8 @@
       <label><input type="checkbox" id="ses-hayvan" checked><span>🐾 Gerçek hayvan sesleri (aslan, balina, yunus, kurt…)</span></label>
       <small>Ayarların otomatik kaydedilir; tekrar açana kadar aynı kalır.</small>
     </div>
-    <div id="tbbtn" class="tbbtn" title="Tarihte Bugün ve Tarihte Bu Yıl: bugüne ve seçtiğin yıla damga vuran olaylar"><button type="button" id="tbbtn-ac" class="tbbtn-ac">📅<span> Bugün · Bu Yıl</span></button><button type="button" id="tbbtn-x" class="tbbtn-x" title="Gizle" aria-label="Tarihte Bugün düğmesini gizle">✕</button></div>
+    <div id="tbbtn" class="tbbtn" hidden style="display:none" title="Tarihte Bugün ve Tarihte Bu Yıl"><button type="button" id="tbbtn-ac" class="tbbtn-ac">📅<span> Bugün · Bu Yıl</span></button><button type="button" id="tbbtn-x" class="tbbtn-x" title="Gizle" aria-label="Tarihte Bugün düğmesini gizle">✕</button></div>
+    <div id="atif" class="atif">Sınırlar: <a href="https://github.com/Seshat-Global-History-Databank/cliopatria" target="_blank" rel="noopener">Cliopatria</a> (<a href="https://creativecommons.org/licenses/by/4.0/deed.tr" target="_blank" rel="noopener">CC BY 4.0</a>)<span class="atif-uzun"> · Kıyılar: Natural Earth</span> · <a href="#" data-hakkinda="1">ℹ️ <span class="atif-uzun">Hakkında ve </span>kaynaklar</a></div>
     <button id="katbtn" class="katbtn" aria-expanded="false" title="Haritada neler gösterilsin?">🗂️<span> Katmanlar</span></button>
     <div id="katman" class="katpop" hidden>
       <div class="kp-kure">
@@ -102,22 +161,18 @@
         <div class="kp-grup" data-kpgrup="tarih">
           <label><input type="checkbox" data-kat="sinir" checked><span>🗺️ Dönemin sınırları</span></label>
           <label><input type="checkbox" data-kat="yapi"><span>🏛️ Dünyaca ünlü yapıtlar ve anıtlar</span><i></i></label>
-          <label><input type="checkbox" data-kat="donum"><span>⚡ Dünyayı değiştiren büyük olaylar</span><i></i></label>
+          <label><input type="checkbox" data-kat="donum,olay"><span>⚡ Büyük olaylar ve dönüm noktaları</span><i></i></label>
           <label><input type="checkbox" data-kat="icat"><span>💡 Dünyayı değiştiren büyük icatlar</span><i></i></label>
           <label><input type="checkbox" data-kat="insanlar"><span>👑 Dünyada yaşamış büyük insanlar</span><i></i></label>
           <label><input type="checkbox" data-kat="felsefe"><span>🦉 Felsefi akımlar ve düşünce okulları</span><i></i></label>
-          <label><input type="checkbox" data-kat="ticaret"><span>🐪 Ticaret yolları</span><i></i></label>
+          <label><input type="checkbox" data-kat="ticaret,yolculuk,yayilis"><span>🐪 Ticaret, keşif ve icat yolları</span><i></i></label>
+          <label><input type="checkbox" data-kat="goc,tarihgoc"><span>🧬 İnsanlığın yayılışı ve büyük göçler</span><i></i></label>
           <label><input type="checkbox" data-kat="megakent"><span>👑 Tarih boyunca dünyanın en büyük şehirleri</span><i></i></label>
-          <label><input type="checkbox" data-kat="tarihgoc"><span>🏃 Tarih çağlarındaki büyük göç dalgaları</span><i></i></label>
           <label><input type="checkbox" data-kat="din"><span>🕊️ Dinlerin ve inançların doğuşu &amp; yayılışı</span><i></i></label>
           <label><input type="checkbox" data-kat="yazi"><span>🗣️ Yazının doğuşu, alfabeler ve dil aileleri</span><i></i></label>
-          <label><input type="checkbox" data-kat="yolculuk"><span>🧭 Ünlü yolculuklar ve seferler</span><i></i></label>
-          <label><input type="checkbox" data-kat="bogaz"><span>⚓ Stratejik boğazlar ve tarihî geçitler</span><i></i></label>
+          <label><input type="checkbox" data-kat="liman,bogaz"><span>⚓ Önemli limanlar ve stratejik boğazlar</span><i></i></label>
           <label><input type="checkbox" data-kat="salgin"><span>🦠 Dünyayı değiştiren büyük salgınlar</span><i></i></label>
           <label><input type="checkbox" data-kat="tarihkazi"><span>🏺 Tarihî kazılar ve arkeolojik buluntular</span><i></i></label>
-          <label><input type="checkbox" data-kat="liman"><span>⚓ Dünya çapındaki önemli limanlar</span><i></i></label>
-          <label><input type="checkbox" data-kat="yayilis"><span>🍵 Yemek ve icatların yolculuğu</span><i></i></label>
-          <label><input type="checkbox" data-kat="goc"><span>🧬 İnsanlığın yayılışı</span></label>
           <label><input type="checkbox" data-kat="magara"><span>🪨 Tarihöncesi mağaralar</span><i></i></label>
           <label><input type="checkbox" data-kat="gece"><span>🌓 Canlı gece / gündüz ve şehir ışıkları</span></label>
           <div class="kp-ayir">⚔️ Tarihî Olaylar</div>
@@ -125,7 +180,6 @@
           <label><input type="checkbox" data-kat="deniz"><span>⚓ Deniz savaşları</span><i></i></label>
           <label><input type="checkbox" data-kat="antlasma"><span>📜 Antlaşmalar</span><i></i></label>
           <label><input type="checkbox" data-kat="afet"><span>🌋 Doğal afetler</span><i></i></label>
-          <label><input type="checkbox" data-kat="olay"><span>🏛️ Önemli olaylar</span><i></i></label>
           <div class="kp-aralik">Seçili yılın ±<select id="aralik"><option value="1">1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100" selected>100</option><option value="250">250</option><option value="500">500</option></select> yıl çevresi</div>
         </div>
         <div class="kp-grup" data-kpgrup="doga" hidden>
@@ -170,7 +224,7 @@
       <option value="25">25 yıl/sn</option>
       <option value="50">50 yıl/sn</option>
     </select>
-    <button id="tarihgit" class="tarihgit" title="Belirli bir tarihe git">📅</button>
+    <button id="tarihgit" class="tarihgit" title="Belirli bir yıla git">🎯</button>
     <button id="tl-gizle" class="tl-gizle" title="Zaman çizelgesini gizle">⌄</button>
   </div>
   <div id="tarihpop" class="tarihpop" hidden><b>📅 Tarihe git</b><form id="tp-form" class="tp-sat"><input id="tp-yil" type="number" min="1" step="1" inputmode="numeric" placeholder="ör. 1453" aria-label="Yıl"><select id="tp-cag" aria-label="Çağ"><option value="ms">MS</option><option value="mo">MÖ</option></select><button class="tp-git" type="submit">Git</button></form><small id="tp-not"></small></div>
@@ -201,7 +255,7 @@
 </div>
 <div id="arama" class="arama" hidden>
   <div class="ara-kutu" role="dialog" aria-label="Arama">
-    <div class="ara-sat"><span>🔍</span><input id="ara-in" type="search" placeholder="Ülke, yapı, kişi, şehir, savaş, tanrı ara… (ör. Mısır)" autocomplete="off" aria-label="Arama"><kbd>Esc</kbd></div>
+    <div class="ara-sat"><span>🔍</span><input id="ara-in" type="search" placeholder="Ülke, yapı, kişi, şehir, savaş, tanrı ara… (ör. Mısır)" autocomplete="off" aria-label="Arama"><button type="button" id="ara-x" class="ara-x" title="Kapat (Esc)" aria-label="Aramayı kapat">✕</button></div>
     <div id="ara-list" class="ara-list"></div>
   </div>
 </div>
@@ -218,7 +272,8 @@
   </div>
 </div>
 <script src="js/yil.js?v=3"></script>
-<script src="js/bolge.js?v=8"></script>
+<script src="js/gec-yukle.js?v=1"></script>
+<script src="js/bolge.js?v=9"></script>
 <script src="js/sahne.js?v=36"></script>
 <script src="js/cizim.js?v=29"></script>
 <script src="data/kaynaklar.js?v=2"></script>
@@ -249,12 +304,9 @@
 <script src="data/atlas/tarihte-bugun.js?v=1"></script>
 <script src="data/atlas/yolculuk-hikaye.js?v=2"></script>
 <script src="data/atlas/yolculuk-hikaye-ek.js?v=1"></script>
-<script src="data/yasam-doga.js?v=4"></script>
-<script src="data/yasam-doga-ek.js?v=2"></script>
-<script src="data/yasam-doga-ek2.js?v=1"></script>
-<script src="data/yasam-doga-antik.js?v=1"></script>
 <script src="data/atlas/donum-noktalari.js?v=2"></script>
-<script src="js/dunya.js?v=106"></script>
+<script src="js/dunya.js?v=111"></script>
+<script src="data/belgeseller.js?v=1"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
@@ -262,12 +314,14 @@
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="data/yapilar/simgeler.js?v=1"></script>
 <script src="js/kart-paylas.js?v=1"></script>
-<script src="js/uygulama.js?v=117"></script>
+<script src="js/uygulama.js?v=126"></script>
 <script src="js/ses.js?v=4"></script>
+<script src="js/hakkinda.js?v=1"></script>
+<script src="js/katman-sade.js?v=1"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=6"></script>
-<script src="js/oyun/oyunlar.js?v=28"></script>
-<script src="js/ara.js?v=26"></script>
+<script src="js/oyun/oyunlar.js?v=31"></script>
+<script src="js/ara.js?v=28"></script>
 </body>
 </html>

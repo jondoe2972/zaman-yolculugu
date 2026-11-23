@@ -1517,7 +1517,9 @@ body:not(.globeonly):not(.maponly) .citycard { bottom: 76px; }
 .top > .sesbtn { order: 2; }
 .um-ayar > .rehber-btn { order: 3; }
 .um-ayar > .um-ses { display: none; }
-@media (max-width: 860px) {
+/* Telefon ve tablet (≤1279 px): üst çubuğa 5 sekme + 2 seçici + 3 düğme sığmıyor (861–1279 px arasında seçiciler
+   düğmelerin üstüne biniyor, çağ seçici ekrandan taşıyordu); bu yüzden tablette de ☰ menü kullanılır. */
+@media (max-width: 1279px) {
   .top { gap: 8px; padding: 6px 8px; }
   .menubtn { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px 0 12px; border-radius: 99px; border: 1px solid #6b5326; background: #3a2c20; color: #ffe3a3; font-size: 18px; font-weight: 800; cursor: pointer; white-space: nowrap; }
   .menubtn span { font-size: 14px; font-weight: 700; color: #f3e7d0; }
@@ -1724,7 +1726,8 @@ body[data-tema] .sheet, body[data-tema] .ara-kutu, body[data-tema] .hg-kart, bod
 }
 body[data-tema] .sheet header { background: var(--t-soft); border-bottom: 1px solid var(--t-border); }
 body[data-tema] .sheet h2, body[data-tema] .sheet h3, body[data-tema] .sheet h4,
-body[data-tema] .hg-kart h2, body[data-tema] .hg-kart h3, body[data-tema] .wiki-ust b { color: var(--t-title); }
+body[data-tema] .hg-gec-kucuk { color: var(--t-muted); }
+body[data-tema] .hg-kart h1, body[data-tema] .hg-kart h2, body[data-tema] .hg-kart h3, body[data-tema] .wiki-ust b { color: var(--t-title); }
 body[data-tema] .sheet .msub, body[data-tema] .sheet .note, body[data-tema] .sheet small,
 body[data-tema] .hg-kart p, body[data-tema] .ara-list small { color: var(--t-muted); }
 body[data-tema] .sheet .x, body[data-tema] .hg-x { background: rgba(255,255,255,0.1); color: var(--t-text); border: 1px solid var(--t-border); }
@@ -1837,3 +1840,143 @@ body[data-tema] .sb-oneri li:hover, body[data-tema] .sb-oneri li.on { background
 body[data-tema] .ft-cag.secili { background: var(--t-accent); color: var(--t-accent-ink); border-color: var(--t-accent); }
 body[data-tema] .ft-cag.secili small { color: var(--t-accent-ink); }
 body[data-tema] .hk-giris, body[data-tema] .hk-geri { background: var(--t-did); border-left-color: var(--t-accent); color: var(--t-text); }
+
+/* 🌍 Aynı Anda Dünyada (Paralel Tarih Görünümü) */
+.aa-hizli { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 12px; }
+.aa-hizli span { font-size: 12px; font-weight: 700; color: var(--t-muted, #b8d6ec); width: 100%; }
+.aa-hizli button { font-size: 12px; padding: 4px 10px; }
+.aa-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 6px; }
+@media (max-width: 600px) { .aa-grid { grid-template-columns: 1fr; } }
+.aa-bolge { background: var(--t-soft, rgba(56,189,248,0.11)); border: 1px solid var(--t-border, rgba(56,189,248,0.34)); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.aa-bolge h4 { margin: 0; font-size: 13.5px; color: var(--t-title, #4ade80); border-bottom: 1px solid var(--t-border, rgba(56,189,248,0.28)); padding-bottom: 5px; }
+.aa-item { display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+.aa-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.aa-item b { font-size: 13.5px; color: var(--t-text, #f0f9ff); line-height: 1.3; }
+.aa-item p { margin: 0; font-size: 12.5px; color: var(--t-muted, #b8d6ec); line-height: 1.45; }
+.aa-item .phbtn { align-self: flex-start; font-size: 11.5px; padding: 4px 9px; margin-top: 2px; }
+
+/* 🎬 Rehberli Belgesel Turu (Görselli Alt Şerit) */
+.turbar {
+  position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 42;
+  width: min(760px, calc(100% - 24px)); display: grid; grid-template-columns: 164px 1fr; gap: 14px; align-items: stretch;
+  background: var(--t-panel, rgba(12,28,44,0.96)); color: var(--t-text, #f0f9ff);
+  border: 1.5px solid var(--t-border, rgba(56,189,248,0.36)); border-radius: 16px; padding: 12px;
+  box-shadow: 0 18px 46px rgba(0,0,0,0.62); backdrop-filter: blur(10px);
+}
+.turbar[hidden] { display: none; }
+.tur-foto {
+  display: flex; align-items: center; justify-content: center; width: 100%; min-height: 118px; max-height: 144px;
+  border-radius: 11px; overflow: hidden; background: var(--t-soft, rgba(56,189,248,0.12));
+  border: 1px solid var(--t-border, rgba(56,189,248,0.3)); text-decoration: none; color: var(--t-muted, #b8d6ec); font-size: 28px;
+}
+.tur-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tur-ic { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.tur-ust { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.tur-ad { font-size: 12px; font-weight: 800; color: var(--t-title, #4ade80); }
+.tur-ust .pill { font-size: 11.5px; padding: 2px 8px; background: var(--t-soft); color: var(--t-text); border: 1px solid var(--t-border); border-radius: 99px; font-weight: 700; }
+.tur-say { font-size: 11.5px; color: var(--t-muted, #b8d6ec); margin-left: auto; }
+.tur-x {
+  width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--t-border);
+  background: rgba(255,255,255,0.09); color: var(--t-text); font-size: 13px; cursor: pointer; display: grid; place-items: center;
+}
+.tur-x:hover { background: rgba(255,255,255,0.18); }
+.tur-ic h4 { margin: 0; font-size: 15.5px; color: #fff; line-height: 1.25; }
+.tur-ic p { margin: 0; font-size: 13px; color: var(--t-muted, #b8d6ec); line-height: 1.48; }
+.tur-alt { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 4px; flex-wrap: wrap; }
+.tur-nokta { display: flex; align-items: center; gap: 6px; }
+.tur-nokta button { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 0; background: rgba(255,255,255,0.28); cursor: pointer; transition: transform .15s, background .15s; }
+.tur-nokta button.on { background: var(--t-accent, #22c55e); transform: scale(1.3); }
+.tur-btn { display: flex; gap: 6px; flex-wrap: wrap; }
+.turbar .phbtn { background: rgba(255,255,255,0.09); color: var(--t-text); border: 1px solid var(--t-border); font-size: 12px; padding: 5px 10px; border-radius: 99px; font-weight: 700; cursor: pointer; }
+.turbar .phbtn:hover:not(:disabled) { background: var(--t-soft); color: #fff; }
+.turbar .phbtn:disabled { opacity: 0.4; cursor: default; }
+.turbar .phbtn.icbtn { background: var(--t-accent, #22c55e); color: var(--t-accent-ink, #052110); border-color: var(--t-accent, #22c55e); }
+@media (max-width: 640px) {
+  .turbar { grid-template-columns: 1fr; bottom: 10px; padding: 10px; gap: 8px; }
+  .tur-foto { min-height: 92px; max-height: 112px; }
+}
+body.tur-mod .yearcard, body.tur-mod #katbtn, body.tur-mod #katman, body.tur-mod #tbbtn, body.tur-mod #tl-ac { display: none !important; }
+.turpop {
+  position: fixed; left: 50%; top: 54px; transform: translateX(-50%); z-index: 90;
+  width: min(360px, calc(100vw - 20px)); max-height: min(74vh, 520px); overflow-y: auto;
+  background: var(--t-panel, rgba(12,28,44,0.96)); color: var(--t-text, #f0f9ff);
+  border: 1.5px solid var(--t-border, rgba(56,189,248,0.36)); border-radius: 14px; padding: 10px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.58); backdrop-filter: blur(10px);
+  display: flex; flex-direction: column; gap: 5px;
+}
+.turpop[hidden] { display: none; }
+.turpop .tp-bas { font-size: 13px; font-weight: 800; color: var(--t-title, #4ade80); padding: 2px 6px 6px; border-bottom: 1px solid var(--t-border); margin-bottom: 2px; }
+.turpop button {
+  display: grid; grid-template-columns: 28px 1fr; column-gap: 9px; align-items: center; text-align: left;
+  background: var(--t-soft, rgba(56,189,248,0.1)); border: 1px solid transparent; border-radius: 10px;
+  padding: 8px 10px; color: var(--t-text, #f0f9ff); cursor: pointer; transition: background .15s, border-color .15s;
+}
+.turpop button:hover { border-color: var(--t-accent, #22c55e); background: rgba(255,255,255,0.12); }
+.turpop button.on { border-color: var(--t-accent, #22c55e); background: var(--t-did, rgba(34,197,94,0.18)); }
+.turpop button i { font-style: normal; font-size: 20px; text-align: center; }
+.turpop button b { display: block; font-size: 13px; color: var(--t-text, #f0f9ff); line-height: 1.25; }
+.turpop button small { display: block; font-size: 11.5px; color: var(--t-muted, #b8d6ec); line-height: 1.3; margin-top: 1px; }
+.yc-aks { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+.yc-aks .yc-goc { margin-top: 0; font-size: 11.5px; padding: 3px 8px; }
+.yearcard .site { display: none; }
+
+/* Telefon: 📅 Bugün düğmesi yıl kartının üstüne binmesin; sağdaki dikey sütunda 🗂️ Katmanlar'ın altında kare düğme,
+   ✕ köşede küçük rozet. ＋ − ◐ ⛶ onun altına iner (kapatılınca body.tb-gizli ile eski yerine döner). */
+@media (max-width: 860px) {
+  .tbbtn { top: 49px; right: 8px; width: 34px; height: 34px; border-radius: 10px; overflow: visible; justify-content: center; }
+  .tbbtn-ac { width: 100%; height: 100%; padding: 0; justify-content: center; border-radius: 10px; font-size: 15px; }
+  .tbbtn-x { position: absolute; left: -7px; top: -7px; width: 18px; height: 18px; padding: 0; border: 1px solid rgba(255,255,255,.35); border-radius: 50%; background: rgba(10,16,34,.92); color: #e8f0ff; font-size: 9px; display: grid; place-items: center; }
+  body:not(.tb-gizli) .globectl, body:not(.tb-gizli) .mapctl { top: 91px !important; }
+}
+
+/* Kaynak atfı: kürenin sağ altında (Cliopatria CC BY 4.0 atıf şartı) */
+.atif { position: absolute; right: 8px; bottom: 6px; z-index: 3; display: none; font-size: 10.5px; line-height: 1.3; color: rgba(235,242,255,.78); background: rgba(6,12,24,.55); padding: 3px 8px; border-radius: 8px; pointer-events: auto; }
+.globeonly .atif { display: block; }
+.atif a { color: inherit; text-decoration: underline; text-decoration-color: rgba(235,242,255,.4); }
+.atif a:hover { color: #fff; }
+@media (max-width: 860px) { .atif { font-size: 9.5px; right: 6px; bottom: 4px; padding: 2px 6px; } .atif-uzun { display: none; } }
+.hk-liste { list-style: none; padding: 0; margin: 6px 0 12px; display: grid; gap: 10px; }
+.hk-liste li { display: flex; gap: 10px; align-items: flex-start; }
+.hk-liste li > span { flex: 0 0 26px; font-size: 18px; line-height: 1.4; }
+.hk-liste b { display: block; margin-bottom: 1px; }
+.hk-liste p { margin: 0; font-size: 13.5px; line-height: 1.45; }
+.hk-alt { font-size: 12.5px; opacity: .8; margin-top: 14px; }
+.hk a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+body[data-tema] .hk a { color: var(--t-title); }
+
+/* Oyunlar penceresinde ✕ (telefonda pencere ekranın neredeyse tamamını kaplıyor) */
+.oyunpop .op-sekmeler { grid-template-columns: 1fr 1fr 40px; }
+.oyunpop .op-sekmeler .op-x { padding: 0; font-size: 15px; color: #f3e7d0; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); }
+.oyunpop .op-sekmeler .op-x:hover { background: rgba(255,255,255,.18); }
+
+/* Arama kutusunu kapatma düğmesi (eskiden yalnızca "Esc" yazısıydı; telefonda Esc tuşu yok) */
+.ara-x { flex: none; width: 34px; height: 34px; border: 0; border-radius: 50%; background: #eadcbf; color: #6b5034; font-size: 14px; cursor: pointer; display: grid; place-items: center; }
+.ara-x:hover { background: #dcc28e; }
+body[data-tema] .ara-x { background: rgba(255,255,255,0.1); color: var(--t-text); border: 1px solid var(--t-border); }
+
+/* Dokunmatik ekranlarda küçük düğmelere görünmez geniş dokunma alanı (görünüş değişmez; parmakla ıskalanmasın).
+   Öneri: en az ~44 px. */
+@media (pointer: coarse) {
+  #tlzin, #tlzout, #tlztum, #gecebtn, #tamekran, #gzin, #gzout { position: relative; } /* #yc-gizle ve #tbbtn-x zaten absolute */
+  #yc-gizle::after, #tbbtn-x::after { content: ''; position: absolute; inset: -9px; }
+  /* yan yana / üst üste düğmeler: komşusuna taşmayan yönlerde büyüt (yoksa ＋ yerine − basılır) */
+  #tlzin::after, #tlzout::after, #tlztum::after { content: ''; position: absolute; inset: -9px -1px; }
+  #gecebtn::after, #tamekran::after, #gzin::after, #gzout::after { content: ''; position: absolute; inset: -2px -7px; }
+  .yc-goc { min-height: 34px; }
+}
+
+/* Katmanlar: kısa görünümde yalnızca öne çıkan + açık katmanlar (js/katman-sade.js) */
+.katpop:not(.kp-tum) .kp-ek:not(.kp-acik) { display: none !important; }
+.kp-daha { display: block; width: 100%; margin: 6px 0 2px; padding: 9px 12px; border-radius: 10px; border: 1px dashed rgba(255,214,102,.45); background: transparent; color: #ffd666; font-weight: 700; font-size: 13px; cursor: pointer; text-align: center; }
+.kp-daha:hover { background: rgba(255,214,102,.1); }
+body[data-tema] .kp-daha { border-color: var(--t-border); color: var(--t-title); }
+
+/* Telefon: yıl kartı ekranın dörtte birini kaplıyordu. Yıl ile "≈ N yıl önce" aynı satırda, hükümdar satırı tek satır.
+   ("Biliyor muydun?" bölümüne dokunulmadı.) */
+@media (max-width: 860px) {
+  body:not(.ust-gizli) .yearcard { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 10px; row-gap: 3px; padding-top: 8px; padding-bottom: 9px; }
+  body:not(.ust-gizli) .yearcard > * { flex-basis: 100%; }
+  body:not(.ust-gizli) .yearcard > #yc-year, body:not(.ust-gizli) .yearcard > #yc-ago, body:not(.ust-gizli) .yearcard > .yc-goc { flex-basis: auto; }
+  .dunyamod .yearcard #yc-ruler, .yearcard #yc-ruler { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .yearcard > .yc-goc { padding-top: 5px; padding-bottom: 5px; font-size: 12px; }
+}
