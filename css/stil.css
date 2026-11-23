@@ -1980,3 +1980,38 @@ body[data-tema] .kp-daha { border-color: var(--t-border); color: var(--t-title);
   .dunyamod .yearcard #yc-ruler, .yearcard #yc-ruler { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .yearcard > .yc-goc { padding-top: 5px; padding-bottom: 5px; font-size: 12px; }
 }
+
+/* ---------- Sadeleştirme (js/sadelestir.js ve ilgili değişiklikler) ---------- */
+/* 🎨 tema: üst çubukta değil, ses penceresinin içinde */
+#temabtn { display: none !important; }
+.temapop.tema-gomulu, .temapop.tema-gomulu[hidden] { display: flex !important; flex-direction: column; position: static; width: auto; margin-top: 12px; padding: 10px 0 0; border: 0; border-top: 1px solid rgba(255,255,255,.14); border-radius: 0; background: transparent; box-shadow: none; z-index: auto; }
+.ustmenu #um-ses::after { content: 'Ses, müzik ve renk teması'; }
+/* Katmanlar menüsü yalnızca katmanlar içindir: Derin Zaman ve Keşif Defteri Oyunlar penceresinde */
+#katman #derin-ac, #katman #kesif-ac { display: none !important; }
+/* Dokunmatik ekranda ＋ − gereksiz (iki parmakla yakınlaşılıyor): sağdaki sütun sadeleşir */
+@media (pointer: coarse) { .globectl #gzin, .globectl #gzout { display: none !important; } }
+/* Bölge/çağ seçicilerinin açıklaması: yalnızca ☰ menüde (masaüstünde seçicilerin üstüne gelince ipucu) */
+.place-not { display: none; }
+@media (max-width: 1279px) {
+  .ustmenu .place-not { display: block; font-size: 12.5px; line-height: 1.4; color: #c9b894; white-space: normal; margin: 4px 2px -2px; }
+  .ustmenu .place-not b { display: block; font-size: 14px; color: #ffe3a3; margin-bottom: 2px; }
+  body[data-tema] .ustmenu .place-not { color: var(--t-muted); }
+  body[data-tema] .ustmenu .place-not b { color: var(--t-title); }
+}
+/* Bölge modu şeridi: hangi bölgedesin + Tüm Dünya'ya dön */
+.yc-bolge { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -2px 0 6px; padding: 5px 6px 5px 10px; border-radius: 10px; background: rgba(255,214,102,.12); border: 1px solid rgba(255,214,102,.3); font-size: 12.5px; color: #f3e7d0; }
+.yearcard .yc-bolge b { color: #ffd666; font-size: inherit; line-height: inherit; letter-spacing: 0; } /* yıl kartının dev "b" stilini alma */
+.yc-bolge > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.yc-dunya { flex: none; border: 0; border-radius: 99px; padding: 5px 10px; background: #ffd666; color: #2a1d10; font-weight: 800; font-size: 12px; cursor: pointer; }
+body[data-tema] .yc-bolge { background: var(--t-soft); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .yc-bolge b { color: var(--t-title); }
+body[data-tema] .yc-dunya { background: var(--t-accent); color: var(--t-accent-ink); }
+body.ust-gizli .yc-bolge { display: none; }
+/* Oyunlar penceresinin üstünde Keşif Defteri şeridi */
+.oyunpop .op-defter { display: flex; align-items: center; gap: 10px; width: 100%; margin: 0 0 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,214,102,.4); background: rgba(255,214,102,.1); color: inherit; text-align: left; cursor: pointer; }
+.oyunpop .op-defter:hover { background: rgba(255,214,102,.18); }
+.oyunpop .op-defter > span:nth-child(2) { flex: 1; min-width: 0; }
+.oyunpop .op-defter b { display: block; }
+.oyunpop .op-defter small { display: block; opacity: .85; }
+.oyunpop .op-defter em { font-style: normal; font-size: 20px; opacity: .7; }
+body[data-tema] .oyunpop .op-defter { background: var(--t-soft); border-color: var(--t-border); }

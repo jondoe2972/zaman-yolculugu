@@ -60,7 +60,9 @@ window.AyniAnda = (() => {
   // ---------- 2. 🤯 Şaşırt Beni hap kartı ve hızlı düğmesi ----------
   const stage = document.querySelector('.stage');
   let sbEl = null, sf = null;
-  if (stage) {
+  // Kürenin köşesindeki ayrı "🤯 Şaşırt Beni" düğmesi kaldırıldı: yıl kartındaki "Biliyor muydun?" zaten rastgele bilgi veriyor;
+  // Şaşırt Beni, Oyunlar penceresinde duruyor (sasirt() aşağıda çalışmaya devam ediyor).
+  if (stage && false) {
     const sbtn = document.createElement('button');
     sbtn.id = 'sasirtbtn';
     sbtn.className = 'sasirtbtn';

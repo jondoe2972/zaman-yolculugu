@@ -241,9 +241,15 @@
     const liste = OYUNLAR.filter(o => aktifSek === 'kesif' ? KESIF_ID.has(o.id) : !KESIF_ID.has(o.id));
     pop.innerHTML = `<div class="op-sekmeler" role="tablist">
       <button type="button" class="${aktifSek === 'oyun' ? 'on' : ''}" data-opsek="oyun" role="tab">🎮 Oyunlar</button>
-      <button type="button" class="${aktifSek === 'kesif' ? 'on' : ''}" data-opsek="kesif" role="tab">🧭 Özel Keşif</button>
+      <button type="button" class="${aktifSek === 'kesif' ? 'on' : ''}" data-opsek="kesif" role="tab">📚 Bilgi Köşesi</button>
       <button type="button" class="op-x" data-opkapat="1" title="Kapat" aria-label="Oyunlar penceresini kapat">✕</button>
-    </div><div class="op-grid">${liste.map(kart).join('')}</div>`;
+    </div>${defter()}<div class="op-grid">${liste.filter(o => o.id !== 'kesif').map(kart).join('')}</div>`;
+  }
+  // 🧭 Keşif Defteri: eskiden katmanlar menüsünün dibindeydi, kimse bulamıyordu; artık Oyunlar penceresinin en üstünde
+  function defter() {
+    const k = window.ZY && window.ZY.kesifSayi ? window.ZY.kesifSayi() : null;
+    const say = k && k.t ? `${k.g.toLocaleString('tr-TR')} / ${k.t.toLocaleString('tr-TR')} keşif · ${k.xp} XP` : 'Gezdikçe keşiflerin burada birikir';
+    return `<button type="button" class="op-defter" data-oyun="kesif"><span class="op-ik">🧭</span><span><b>Keşif Defterim</b><small>${say}</small></span><em>›</em></button>`;
   }
   function konum() {
     if (!pop || !btn) return;

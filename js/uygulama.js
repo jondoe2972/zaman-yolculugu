@@ -2825,7 +2825,7 @@
     openTarihteBugun,
     openSurpriz: id => { const s = (window.ATLAS_SURPRIZLER || []).find(x => x.id === id); if (s) openSurpriz(s); },
     xpEkle, surprizBulunduMu, openKesif,
-    openKesif: () => openKesif(),
+    openKesif: () => openKesif(), kesifSayi: () => kesifSayi(),
     rehberAc: () => hgAc(0)
   };
   window.__zy = { get Y() { return Y; }, get camX() { return camX; }, get follow() { return follow; }, setYear: y => setYear(y, true), snap: wx => { follow = false; camHedef = null; camX = wx ?? S.focus(Y).wx; }, setView, switchPlace, openInfo, openCity: ad => openCity((MIS.sehirler || []).find(c => c.ad === ad)), showMonument: id => showMonument(id) };
