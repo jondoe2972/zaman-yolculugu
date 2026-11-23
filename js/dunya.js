@@ -12,7 +12,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, tarihkazi: false, fosilkazi: false, akinti: false, ruzgar: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false, gece: false, yayilis: false };
+  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, tarihkazi: false, fosilkazi: false, akinti: false, ruzgar: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false, gece: false, yayilis: false, iklim: false, taban: false, kutup: false, krater: false, gol: false, saat: false, manyetik: false, tarim: false, yazi: false, din: false, tarihgoc: false, salgin: false, bogaz: false, megakent: false };
   let yayilisAktif = null;
   // 🌓 Canlı gece/gündüz gölgesi ve büyük şehir ışıkları (gerçek UTC saate göre)
   const GECE_SEHIR = [
@@ -1195,6 +1195,369 @@ window.Dunya = (() => {
       if (layers.tarihkazi) cizKazilar(KZ.tarih, 'tarihkazi', 'rgba(148,66,28,0.92)', '#fde68a');
       if (layers.fosilkazi) cizKazilar(KZ.doga, 'fosilkazi', 'rgba(120,76,18,0.92)', '#a7f3d0');
     }
+    // 🌿 Doğa Atlası Genişleme Katmanları (data/atlas/doga-ek.js)
+    const DEK = window.ATLAS_DOGA_EK;
+    if (DEK) {
+      // Paralel/Meridyen çizgi yardımcısı
+      const cizParalel = (la, col, lw, dash, etiket) => {
+        g.save(); g.strokeStyle = col; g.lineWidth = lw; if (dash) g.setLineDash(dash);
+        g.beginPath(); let open = false, ex = null, ey = null;
+        for (let lo = -180; lo <= 180; lo += 4) {
+          const [x, y, z] = P(la, lo);
+          if (z > 0.02) { if (!open) { g.moveTo(x, y); open = true; } else g.lineTo(x, y); if (Math.abs(lo - Math.round(view.lon / 4) * 4) <= 6) { ex = x; ey = y; } }
+          else open = false;
+        }
+        g.stroke(); g.restore();
+        if (etiket && ex != null && ey != null) lab(64, ex, ey - 7, etiket, { size: 10, w: 700, col, halo: 3, haloCol: 'rgba(10,16,28,0.88)', kay: true });
+      };
+      const cizMeridyen = (lo, col, lw, dash, etiket) => {
+        g.save(); g.strokeStyle = col; g.lineWidth = lw; if (dash) g.setLineDash(dash);
+        g.beginPath(); let open = false, ex = null, ey = null;
+        for (let la = -84; la <= 84; la += 4) {
+          const [x, y, z] = P(la, lo);
+          if (z > 0.02) { if (!open) { g.moveTo(x, y); open = true; } else g.lineTo(x, y); if (Math.abs(la - clamp(Math.round(view.lat / 4) * 4, -60, 60)) <= 4) { ex = x; ey = y; } }
+          else open = false;
+        }
+        g.stroke(); g.restore();
+        if (etiket && ex != null && ey != null) lab(62, ex + 4, ey, etiket, { size: 9.5, w: 700, col, halo: 2.8, haloCol: 'rgba(10,16,28,0.88)', kay: true });
+      };
+      // 1) 🌡️ İklim Kuşakları, Biyomlar & Ekvator/Dönenceler
+      if (layers.iklim) {
+        g.save();
+        g.beginPath(); g.arc(cx, cy, R, 0, 7); g.clip();
+        for (const b of DEK.iklimBantlar || []) {
+          for (const sgn of (b.lat0 < 0 ? [1] : [1, -1])) {
+            const a0 = b.lat0 < 0 ? b.lat0 : sgn * b.lat0, a1 = b.lat0 < 0 ? b.lat1 : sgn * b.lat1;
+            const loL = []; const loU = [];
+            for (let lo = -180; lo <= 180; lo += 6) {
+              const p0 = P(a0, lo), p1 = P(a1, lo);
+              if (p0[2] > 0.02) loL.push(p0);
+              if (p1[2] > 0.02) loU.push(p1);
+            }
+            if (loL.length > 2 && loU.length > 2) {
+              g.beginPath();
+              loL.forEach((q, i) => i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]));
+              for (let i = loU.length - 1; i >= 0; i--) g.lineTo(loU[i][0], loU[i][1]);
+              g.closePath(); g.fillStyle = hexA(b.renk, 0.14); g.fill();
+            }
+          }
+        }
+        g.restore();
+        cizParalel(0, '#fde047', 1.7, [7, 4], '☀️ Ekvator (0°)');
+        cizParalel(23.44, '#fb923c', 1.3, [5, 5], 'Yengeç Dönencesi (23,4°K)');
+        cizParalel(-23.44, '#fb923c', 1.3, [5, 5], 'Oğlak Dönencesi (23,4°G)');
+        cizParalel(66.56, '#7dd3fc', 1.2, [4, 4], 'Kuzey Kutup Dairesi (66,5°K)');
+        cizParalel(-66.56, '#7dd3fc', 1.2, [4, 4], 'Güney Kutup Dairesi (66,5°G)');
+        cizMeridyen(0, 'rgba(255,246,210,0.55)', 1.1, [4, 4], '0° Greenwich');
+        for (const n of DEK.iklimNoktalar || []) {
+          const b = DEK.iklimBantlar.find(x => x.id === n.band); if (!b) continue;
+          const [x, y, z] = P(...n.ll); if (z <= 0.12 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const hov = hover && hover.kind === 'iklim' && hover.n === n, r0 = hov ? 12 : 9.5;
+          g.fillStyle = hexA(b.renk, 0.92); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.4 : 1.5;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(b.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (view.z >= 1.3 || hov) lab(hov ? 97 : 56, x, y + r0 + 10, n.ad.split(' (')[0], { size: 10, w: 700, col: '#fef9c3', halo: 3, haloCol: 'rgba(12,18,28,0.88)', kay: true });
+          hits.push({ kind: 'iklim', n, b, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+        }
+      }
+      // 2) 🌊 Okyanus Tabanı: Çukurlar, Denizaltı Sıradağları & Mercan Resifleri
+      if (layers.taban && DEK.okyanusTaban) {
+        for (const sr of DEK.okyanusTaban.sirtlar || []) {
+          const d = yolHazirla(sr), hov = hover && hover.kind === 'tabansirt' && hover.sr === sr;
+          g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+          g.beginPath(); linePath(d.p);
+          g.strokeStyle = hov ? 'rgba(56,189,248,0.45)' : 'rgba(14,165,233,0.22)'; g.lineWidth = hov ? 11 : 7.5; g.stroke();
+          g.beginPath(); linePath(d.p);
+          g.strokeStyle = hov ? '#fde047' : '#38bdf8'; g.lineWidth = hov ? 2.8 : 2; g.setLineDash([7, 5]); g.lineDashOffset = -T * 18; g.stroke();
+          g.restore();
+          const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
+          if (mz > 0.12 && (view.z >= 1.2 || hov)) {
+            lab(hov ? 97 : 58, mx, my - 9, `🏔️ ${sr.ad}`, { size: 10, w: 700, col: '#bae6fd', halo: 3, haloCol: 'rgba(8,20,38,0.9)', kay: true });
+          }
+          yolHit({ kind: 'tabansirt', sr }, d, 10);
+        }
+        for (const t of DEK.okyanusTaban.noktalar || []) {
+          const [x, y, z] = P(...t.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const hov = hover && hover.kind === 'taban' && hover.t === t, r0 = hov ? 12.5 : 10;
+          const bg = t.tur === 'cukur' ? 'rgba(15,23,66,0.94)' : t.tur === 'resif' ? 'rgba(190,24,93,0.9)' : 'rgba(124,45,18,0.92)';
+          const bd = t.tur === 'cukur' ? '#60a5fa' : t.tur === 'resif' ? '#fbcfe8' : '#fdba74';
+          g.fillStyle = bg; g.strokeStyle = hov ? '#fde047' : bd; g.lineWidth = hov ? 2.4 : 1.7;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(t.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          obstacle(x - r0 - 2, y - r0 - 2, x + r0 + 2, y + r0 + 2);
+          if (view.z >= 1.35 || hov) lab(hov ? 97 : 58, x, y + r0 + 10, t.ad.split(' (')[0], { size: 10.2, w: 700, col: bd, halo: 3, haloCol: 'rgba(8,14,28,0.9)', kay: true });
+          hits.push({ kind: 'taban', t, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+        }
+      }
+      // 3) 🌌 Kutup Işıkları (Aurora), Buz Örtüleri & Buzul Çağı Kara Köprüleri
+      if (layers.kutup) {
+        // Parlayan animasyonlu Kuzey & Güney Aurora ovali
+        for (const en of [67.5, -68.0]) {
+          g.save(); g.lineCap = 'round';
+          for (const [off, col, lw] of [[0, 'rgba(52,211,153,0.38)', 10], [1.4, 'rgba(167,139,250,0.30)', 6], [-0.8, 'rgba(110,231,183,0.72)', 2.4]]) {
+            g.beginPath(); let open = false;
+            for (let lo = -180; lo <= 180; lo += 4) {
+              const wv = Math.sin(lo * 0.14 + T * 2.1 + off) * 1.4 + Math.cos(lo * 0.08 - T * 1.3) * 0.9;
+              const [x, y, z] = P(en + off + wv, lo);
+              if (z > 0.03) { if (!open) { g.moveTo(x, y); open = true; } else g.lineTo(x, y); } else open = false;
+            }
+            g.strokeStyle = col; g.lineWidth = lw; g.stroke();
+          }
+          g.restore();
+        }
+        for (const k of DEK.kutup || []) {
+          const [x, y, z] = P(...k.ll); if (z <= 0.08 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const hov = hover && hover.kind === 'kutup' && hover.k === k, r0 = hov ? 12.5 : 10;
+          const bg = k.tur === 'aurora' ? 'rgba(16,185,129,0.88)' : k.tur === 'buzul' ? 'rgba(30,64,175,0.88)' : 'rgba(120,80,35,0.92)';
+          g.fillStyle = bg; g.strokeStyle = hov ? '#fde047' : '#e0f2fe'; g.lineWidth = hov ? 2.4 : 1.7;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(k.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (view.z >= 1.2 || hov) lab(hov ? 97 : 59, x, y + r0 + 10, k.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(8,16,32,0.9)', kay: true });
+          hits.push({ kind: 'kutup', k, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+        }
+      }
+      // 4) ☄️ Göktaşı Kraterleri (eşmerkezli şok halkaları!)
+      if (layers.krater) {
+        for (const kr of DEK.kraterler || []) {
+          const [x, y, z] = P(...kr.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const hov = hover && hover.kind === 'krater' && hover.kr === kr, r0 = hov ? 12 : 9.5;
+          const pulse = 1 + Math.sin(T * 2.5 + kr.ll[0]) * 0.14;
+          g.save();
+          g.strokeStyle = hov ? 'rgba(253,224,71,0.85)' : 'rgba(251,146,60,0.55)'; g.lineWidth = 1.4;
+          g.beginPath(); g.arc(x, y, (r0 + 5) * pulse, 0, 7); g.stroke();
+          g.setLineDash([3, 3]); g.beginPath(); g.arc(x, y, (r0 + 9) * pulse, 0, 7); g.stroke();
+          g.restore();
+          g.fillStyle = 'rgba(124,45,18,0.92)'; g.strokeStyle = hov ? '#fde047' : '#fdba74'; g.lineWidth = hov ? 2.4 : 1.6;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText('☄️', x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (view.z >= 1.3 || hov) lab(hov ? 97 : 58, x, y + r0 + 12, kr.ad.split(' (')[0], { size: 10.2, w: 700, col: '#fed7aa', halo: 3, haloCol: 'rgba(24,10,6,0.9)', kay: true });
+          hits.push({ kind: 'krater', kr, x0: x - r0 - 5, x1: x + r0 + 5, y0: y - r0 - 5, y1: y + r0 + 5 });
+        }
+      }
+      // 5) 💧 Büyük Göller & Dev Şelaleler
+      if (layers.gol) {
+        for (const gl of DEK.golSelale || []) {
+          const [x, y, z] = P(...gl.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const hov = hover && hover.kind === 'gol' && hover.gl === gl, r0 = hov ? 12 : 9.5;
+          g.fillStyle = gl.tur === 'selale' ? 'rgba(6,182,212,0.92)' : 'rgba(29,78,216,0.92)';
+          g.strokeStyle = hov ? '#fde047' : '#bae6fd'; g.lineWidth = hov ? 2.4 : 1.6;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(gl.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (view.z >= 1.35 || hov) lab(hov ? 97 : 57, x, y + r0 + 10, gl.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(8,20,42,0.9)', kay: true });
+          hits.push({ kind: 'gol', gl, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+        }
+      }
+      // 6) 🕐 24 Saat Dilimi, Tarih Değiştirme Çizgisi (180°) & Canlı Şehir Saatleri
+      if (layers.saat) {
+        for (let h = -11; h <= 12; h++) {
+          const lo = h * 15;
+          if (h === 0) cizMeridyen(0, '#fde047', 1.8, [6, 4], 'UTC 0°');
+          else if (h === 12) cizMeridyen(180, '#fb7185', 2.0, [5, 3], '📅 Tarih Değiştirme (180°)');
+          else cizMeridyen(lo, 'rgba(226,232,240,0.28)', 0.9, [3, 5], view.z >= 1.4 ? `UTC${h > 0 ? '+' + h : h}` : null);
+        }
+        const nowMs = Date.now();
+        for (const s of DEK.saatSehirler || []) {
+          const [x, y, z] = P(...s.ll); if (z <= 0.12 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const dtLoc = new Date(nowMs + s.utc * 3600000);
+          const hh = String(dtLoc.getUTCHours()).padStart(2, '0'), mm = String(dtLoc.getUTCMinutes()).padStart(2, '0');
+          const txt = `${s.ad} ${hh}:${mm}`;
+          g.save(); g.font = '700 10.5px system-ui';
+          const tw = g.measureText(txt).width + 12, th = 19;
+          g.fillStyle = 'rgba(15,23,42,0.88)'; g.strokeStyle = '#fbbf24'; g.lineWidth = 1.2;
+          g.beginPath(); g.roundRect(x - tw / 2, y - th / 2, tw, th, 6); g.fill(); g.stroke();
+          g.fillStyle = '#fef3c7'; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(txt, x, y + 0.5); g.restore();
+          hits.push({ kind: 'saat', s, saat: `${hh}:${mm}`, x0: x - tw / 2, x1: x + tw / 2, y0: y - th / 2, y1: y + th / 2 });
+        }
+      }
+      // 7) 🧲 Manyetik Kutuplar & Güney Atlantik Anomalisi
+      if (layers.manyetik) {
+        cizParalel(0, 'rgba(192,132,252,0.45)', 1.2, [5, 5], '🧲 Manyetik Ekvator');
+        for (const mn of DEK.manyetik || []) {
+          const hov = hover && hover.kind === 'manyetik' && hover.mn === mn, col = mn.renk || '#38bdf8';
+          if (mn.pts && mn.pts.length >= 2) {
+            const d = yolHazirla(mn);
+            g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+            g.beginPath(); linePath(d.p);
+            g.strokeStyle = hexA(col, hov ? 0.95 : 0.72); g.lineWidth = hov ? 3.5 : 2.3; g.setLineDash([6, 4]); g.lineDashOffset = -T * 20; g.stroke();
+            yolUclari(d, hov ? '#fff' : col, true);
+            g.restore();
+            yolHit({ kind: 'manyetik', mn }, d, 10);
+          }
+          const [x, y, z] = P(...mn.ll); if (z <= 0.08 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          if (mn.tur === 'anomali') {
+            const rad = clamp(R * 0.24, 24, 95) * (1 + Math.sin(T * 2.2) * 0.07);
+            g.save(); g.fillStyle = 'rgba(244,63,94,0.18)'; g.strokeStyle = 'rgba(251,113,133,0.78)'; g.lineWidth = 1.6; g.setLineDash([5, 4]);
+            g.beginPath(); g.ellipse(x, y, rad * 1.25, rad * 0.78, -0.25, 0, 7); g.fill(); g.stroke(); g.restore();
+          }
+          const r0 = hov ? 13 : 10.5;
+          g.fillStyle = hexA(col, 0.92); g.strokeStyle = hov ? '#fff' : '#e0f2fe'; g.lineWidth = hov ? 2.4 : 1.7;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 13.5 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(mn.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (view.z >= 1.1 || hov) lab(hov ? 98 : 62, x, y + r0 + 11, mn.ad.split(' (')[0], { size: 10.2, w: 700, col: '#f0f9ff', halo: 3, haloCol: 'rgba(10,16,32,0.9)', kay: true });
+          hits.push({ kind: 'manyetik', mn, x0: x - r0 - 5, x1: x + r0 + 5, y0: y - r0 - 5, y1: y + r0 + 5 });
+        }
+      }
+      // 8) 🌾 Dünya Tarım & Besin Anavatanları (Vavilov Merkezleri — Kapsamlı)
+      if (layers.tarim) {
+        for (const tr of DEK.tarim || []) {
+          const [x, y, z] = P(...tr.ll); if (z <= 0.1 || x < -30 || x > W + 30 || y < -30 || y > H + 30) continue;
+          const hov = hover && hover.kind === 'tarimvav' && hover.tr === tr, col = tr.renk || '#eab308';
+          const haloR = clamp((tr.r || 7) * (R / 90), 16, 85);
+          g.save();
+          g.fillStyle = hexA(col, hov ? 0.30 : 0.17); g.strokeStyle = hexA(col, hov ? 0.9 : 0.55); g.lineWidth = hov ? 2.2 : 1.3; g.setLineDash([4, 3]);
+          g.beginPath(); g.arc(x, y, haloR, 0, 7); g.fill(); g.stroke(); g.restore();
+          const r0 = hov ? 13 : 10.5;
+          g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.5 : 1.8;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(tr.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (view.z >= 1.15 || hov) lab(hov ? 98 : 63, x, y + r0 + 11, tr.ad.split(' (')[0], { size: 10.5, w: 700, col: '#fefce8', halo: 3.2, haloCol: 'rgba(18,14,6,0.9)', kay: true });
+          hits.push({ kind: 'tarimvav', tr, x0: x - r0 - 5, x1: x + r0 + 5, y0: y - r0 - 5, y1: y + r0 + 5 });
+        }
+      }
+    }
+    // 🏛️ Tarih Atlası Genişleme Katmanları (data/atlas/tarih-ek.js)
+    const TEK = window.ATLAS_TARIH_EK;
+    if (TEK) {
+      // 1) 🗣️ Yazının Doğuşu, Alfabeler & Dil Aileleri
+      if (layers.yazi) {
+        for (const yz of TEK.yazilar || []) {
+          const hov = hover && hover.kind === 'yazi' && hover.yz === yz, col = yz.renk || '#f59e0b';
+          if (yz.pts && yz.pts.length >= 2) {
+            const d = yolHazirla(yz);
+            g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+            g.beginPath(); linePath(d.p);
+            g.strokeStyle = hexA(col, hov ? 0.92 : 0.55); g.lineWidth = hov ? 3.2 : 2.0; g.setLineDash([7, 5]); g.lineDashOffset = -T * 20; g.stroke();
+            yolUclari(d, hov ? '#fff7dc' : col, true);
+            g.restore();
+            yolHit({ kind: 'yazi', yz }, d, 9);
+          }
+          const [x, y, z] = P(...yz.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const r0 = hov ? 12.5 : 10;
+          g.fillStyle = hexA(col, 0.92); g.strokeStyle = hov ? '#fff' : '#fef3c7'; g.lineWidth = hov ? 2.4 : 1.7;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(yz.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (view.z >= 1.25 || hov) lab(hov ? 97 : 60, x, y + r0 + 10, yz.ad.split(' (')[0], { size: 10.2, w: 700, col: '#fef3c7', halo: 3, haloCol: 'rgba(20,12,6,0.9)', kay: true });
+          hits.push({ kind: 'yazi', yz, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+        }
+      }
+      // 2) 🕊️ Dinlerin & İnanç Sistemlerinin Doğuşu ve Yayılışı
+      if (layers.din) {
+        for (const dn of TEK.dinler || []) {
+          const hov = hover && hover.kind === 'din' && hover.dn === dn, col = dn.renk || '#eab308';
+          for (const pts of dn.yollar || []) {
+            const d = yolHazirla({ pts });
+            g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+            g.beginPath(); linePath(d.p);
+            g.strokeStyle = hexA(col, hov ? 0.95 : 0.62); g.lineWidth = hov ? 3.4 : 2.2; g.setLineDash([8, 5]); g.lineDashOffset = -T * 22; g.stroke();
+            yolUclari(d, hov ? '#fff7dc' : col, true);
+            g.restore();
+            yolHit({ kind: 'din', dn }, d, 9);
+          }
+          const [x, y, z] = P(...dn.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const r0 = hov ? 13 : 10.5;
+          g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.5 : 1.8;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(dn.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (view.z >= 1.15 || hov) lab(hov ? 98 : 62, x, y + r0 + 10, dn.ad, { size: 10.5, w: 700, col: '#fffbeb', halo: 3, haloCol: 'rgba(18,12,8,0.9)', kay: true });
+          hits.push({ kind: 'din', dn, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+        }
+      }
+      // 3) 🏃 Tarih Çağlarındaki Büyük Göç Dalgaları
+      if (layers.tarihgoc) {
+        for (const mg of TEK.buyukGoc || []) {
+          const d = yolHazirla(mg), hov = hover && hover.kind === 'tarihgoc' && hover.mg === mg, col = mg.renk || '#f59e0b';
+          g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+          g.beginPath(); linePath(d.p);
+          g.strokeStyle = hexA(col, hov ? 0.35 : 0.16); g.lineWidth = hov ? 12 : 8; g.stroke();
+          g.beginPath(); linePath(d.p);
+          g.strokeStyle = hov ? '#fff7dc' : col; g.lineWidth = hov ? 3.5 : 2.5; g.setLineDash([10, 6]); g.lineDashOffset = -T * 28; g.stroke();
+          yolUclari(d, hov ? '#fff7dc' : col, true);
+          g.restore();
+          const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
+          if (mz > 0.12 && (view.z >= 1.15 || hov)) {
+            const txt = `${mg.ik} ${mg.ad.split(' (')[0]}`;
+            lab(hov ? 98 : 61, mx, my - 10, txt, { size: 10.5, w: 700, col: '#fef3c7', halo: 3.2, haloCol: 'rgba(20,12,8,0.9)', kay: true });
+            const hw = txt.length * 3.3 + 6; hits.push({ kind: 'tarihgoc', mg, x0: mx - hw, x1: mx + hw, y0: my - 21, y1: my });
+          }
+          yolHit({ kind: 'tarihgoc', mg }, d, 11);
+        }
+      }
+      // 4) 🦠 Dünyayı Değiştiren Büyük Salgınlar (Pandemiler)
+      if (layers.salgin) {
+        for (const sg of TEK.salginlar || []) {
+          const hov = hover && hover.kind === 'salgin' && hover.sg === sg, col = sg.renk || '#e11d48';
+          if (sg.pts && sg.pts.length >= 2) {
+            const d = yolHazirla(sg);
+            g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+            g.beginPath(); linePath(d.p);
+            g.strokeStyle = hexA(col, hov ? 0.38 : 0.18); g.lineWidth = hov ? 12 : 8; g.stroke();
+            g.beginPath(); linePath(d.p);
+            g.strokeStyle = hov ? '#fecdd3' : col; g.lineWidth = hov ? 3.2 : 2.3; g.setLineDash([6, 6]); g.lineDashOffset = -T * 24; g.stroke();
+            yolUclari(d, hov ? '#fecdd3' : col, true);
+            g.restore();
+            yolHit({ kind: 'salgin', sg }, d, 10);
+          }
+          const [x, y, z] = P(...sg.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const r0 = hov ? 12.5 : 10, pulse = 1 + Math.sin(T * 3 + sg.ll[0]) * 0.16;
+          g.save(); g.strokeStyle = hexA(col, 0.55); g.lineWidth = 1.6;
+          g.beginPath(); g.arc(x, y, (r0 + 5) * pulse, 0, 7); g.stroke(); g.restore();
+          g.fillStyle = hexA(col, 0.92); g.strokeStyle = hov ? '#fff' : '#fecdd3'; g.lineWidth = hov ? 2.4 : 1.7;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(sg.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (view.z >= 1.25 || hov) lab(hov ? 97 : 60, x, y + r0 + 11, sg.ad.split(' (')[0], { size: 10.2, w: 700, col: '#ffe4e6', halo: 3, haloCol: 'rgba(28,6,14,0.9)', kay: true });
+          hits.push({ kind: 'salgin', sg, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+        }
+      }
+      // 6) ⚓ Stratejik Boğazlar & Tarihî Geçitler
+      if (layers.bogaz) {
+        for (const bg of TEK.bogazlar || []) {
+          const [x, y, z] = P(...bg.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const hov = hover && hover.kind === 'bogaz' && hover.bg === bg, r0 = hov ? 12 : 9.5;
+          g.fillStyle = bg.tur === 'gecit' ? 'rgba(146,64,14,0.92)' : 'rgba(15,44,89,0.92)';
+          g.strokeStyle = hov ? '#fde047' : (bg.tur === 'gecit' ? '#fcd34d' : '#7dd3fc'); g.lineWidth = hov ? 2.4 : 1.7;
+          g.beginPath(); g.moveTo(x, y - r0 - 1); g.lineTo(x + r0 + 1, y); g.lineTo(x, y + r0 + 1); g.lineTo(x - r0 - 1, y); g.closePath(); g.fill(); g.stroke();
+          g.font = `${hov ? 12.5 : 10.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(bg.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (view.z >= 1.4 || hov) lab(hov ? 97 : 58, x, y + r0 + 11, bg.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(10,18,34,0.9)', kay: true });
+          hits.push({ kind: 'bogaz', bg, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+        }
+      }
+      // 7) 🏙️ Tarih Boyunca Dünyanın En Büyük Şehirleri (Zaman Çizelgesine Göre 👑 Taç!)
+      if (layers.megakent) {
+        for (const mk of TEK.megakentler || []) {
+          const [x, y, z] = P(...mk.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          const hov = hover && hover.kind === 'megakent' && hover.mk === mk;
+          const kral = (mk.aralik || []).some(([a, b]) => Ycur <= a && Ycur >= b);
+          const r0 = kral ? (hov ? 15 : 13) : (hov ? 12 : 9.5);
+          if (kral) {
+            const pR = r0 + 6 + Math.sin(T * 4) * 3;
+            g.save(); g.strokeStyle = 'rgba(250,204,21,0.85)'; g.fillStyle = 'rgba(250,204,21,0.22)'; g.lineWidth = 2;
+            g.beginPath(); g.arc(x, y, pR, 0, 7); g.fill(); g.stroke(); g.restore();
+          }
+          g.fillStyle = kral ? 'rgba(202,138,4,0.96)' : 'rgba(51,65,85,0.90)';
+          g.strokeStyle = kral ? '#fef08a' : (hov ? '#fde047' : '#cbd5e1'); g.lineWidth = kral ? 2.6 : (hov ? 2.2 : 1.5);
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${kral ? 14 : (hov ? 13 : 10.5)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(kral ? '👑' : mk.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          if (kral || view.z >= 1.35 || hov) {
+            const lbl = (kral ? '👑 ' : '') + mk.ad.split(' (')[0];
+            lab(kral ? 99 : (hov ? 97 : 58), x, y + r0 + 11, lbl, { size: kral ? 11.2 : 10, w: 700, col: kral ? '#fef08a' : '#f1f5f9', halo: 3.2, haloCol: 'rgba(15,12,8,0.92)', kay: true });
+          }
+          hits.push({ kind: 'megakent', mk, kral, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+        }
+      }
+    }
     // 🏔️ Doğa ve tarihî coğrafya bölgeleri (dağlar, doğa harikaları, çöller, havzalar — data/atlas/cografya-bolge.js)
     if (layers.cografya && window.ATLAS_COGRAFYA) {
       const CG_STIL = { harika: ['✨', '#b35c24'], dag: ['🏔️', '#546270'], col: ['🏜️', '#b88230'], havza: ['🌿', '#367d4a'], nehir: ['🌊', '#2a75ab'] };
@@ -1752,6 +2115,21 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'magara') tip(hover.x1 + 6, hover.y0, `🪨 ${hover.m.ad}`, `${hover.m.donem} · ${hover.m.yer} · tıkla: kazı buluntuları ve nüfus`);
     else if (hover && hover.kind === 'tarihkazi') tip(hover.x1 + 6, hover.y0, `${hover.kz.ik || '🏺'} ${hover.kz.ad}`, `${hover.kz.yas} · ${hover.kz.yer} · tıkla: buluntular ve tarihî önemi`);
     else if (hover && hover.kind === 'fosilkazi') tip(hover.x1 + 6, hover.y0, `${hover.kz.ik || '🦴'} ${hover.kz.ad}`, `${hover.kz.yas} · ${hover.kz.yer} · tıkla: fosil buluntusu ve bilimsel önemi`);
+    else if (hover && hover.kind === 'iklim') tip(hover.x1 + 6, hover.y0, `${hover.b.ik} ${hover.n.ad}`, `${hover.b.sicaklik} · Yağış: ${hover.b.yagis} · tıkla: iklim özellikleri`);
+    else if (hover && hover.kind === 'taban') tip(hover.x1 + 6, hover.y0, `${hover.t.ik} ${hover.t.ad}`, `${hover.t.olcu} · ${hover.t.yer} · tıkla: okyanus tabanı`);
+    else if (hover && hover.kind === 'tabansirt') tip(hover.x1 + 6, hover.y0, `${hover.sr.ik} ${hover.sr.ad}`, `${hover.sr.olcu} · tıkla: sualtı sıradağı`);
+    else if (hover && hover.kind === 'kutup') tip(hover.x1 + 6, hover.y0, `${hover.k.ik} ${hover.k.ad}`, `${hover.k.yer} · tıkla: ayrıntılar`);
+    else if (hover && hover.kind === 'krater') tip(hover.x1 + 6, hover.y0, `☄️ ${hover.kr.ad}`, `${hover.kr.cap} · ${hover.kr.yas} · tıkla: çarpma hikâyesi`);
+    else if (hover && hover.kind === 'gol') tip(hover.x1 + 6, hover.y0, `${hover.gl.ik} ${hover.gl.ad}`, `${hover.gl.olcu} · ${hover.gl.yer} · tıkla: ayrıntılar`);
+    else if (hover && hover.kind === 'saat') tip(hover.x1 + 6, hover.y0, `🕐 ${hover.s.ad} · ${hover.saat}`, `UTC${hover.s.utc >= 0 ? '+' + hover.s.utc : hover.s.utc} · Canlı yerel saat`);
+    else if (hover && hover.kind === 'yazi') tip(hover.x1 + 6, hover.y0, `${hover.yz.ik} ${hover.yz.ad}`, `${hover.yz.donem} · ${hover.yz.aile} · tıkla: ayrıntılar`);
+    else if (hover && hover.kind === 'din') tip(hover.x1 + 6, hover.y0, `${hover.dn.ik} ${hover.dn.ad}`, `${hover.dn.donem} · ${hover.dn.yer} · tıkla: doğuşu ve yayılışı`);
+    else if (hover && hover.kind === 'tarihgoc') tip(hover.x1 + 6, hover.y0, `${hover.mg.ik} ${hover.mg.ad}`, `${hover.mg.donem} · tıkla: büyük göç hikâyesi`);
+    else if (hover && hover.kind === 'salgin') tip(hover.x1 + 6, hover.y0, `${hover.sg.ik} ${hover.sg.ad}`, `${hover.sg.donem} · ${hover.sg.kayip} · tıkla: yayılış ve etkileri`);
+    else if (hover && hover.kind === 'bogaz') tip(hover.x1 + 6, hover.y0, `${hover.bg.ik} ${hover.bg.ad}`, `${hover.bg.olcu} · ${hover.bg.yer} · tıkla: stratejik önemi`);
+    else if (hover && hover.kind === 'manyetik') tip(hover.x1 + 6, hover.y0, `${hover.mn.ik} ${hover.mn.ad}`, `${hover.mn.olcu} · ${hover.mn.yer} · tıkla: manyetik alan bilgisi`);
+    else if (hover && hover.kind === 'tarimvav') tip(hover.x1 + 6, hover.y0, `${hover.tr.ik} ${hover.tr.ad}`, `${hover.tr.donem} · ${hover.tr.yer} · tıkla: tüm ürünler ve yabani ataları`);
+    else if (hover && hover.kind === 'megakent') tip(hover.x1 + 6, hover.y0, `${hover.kral ? '👑 ' : hover.mk.ik + ' '}${hover.mk.ad}`, `${hover.kral ? 'BU YILIN EN BÜYÜK ŞEHRİ! · ' : ''}${hover.mk.donem} · Nüfus: ${hover.mk.nufus} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'surpriz') { const bul = !!(window.ZY && window.ZY.surprizBulunduMu && window.ZY.surprizBulunduMu(hover.sp.id)); tip(hover.x1 + 6, hover.y0, bul ? `${hover.sp.ik} ${hover.sp.ad}` : '✨ Gizli Sürpriz!', bul ? `${hover.sp.yer} · tıkla: hikâyesi` : 'Keşfetmek için tıkla! (+35 XP)'); }
     else if (hover && hover.kind === 'sehir') tip(hover.x1 + 6, hover.y0, hover.c.ad + (hover.c.cap ? ' (başkent)' : ''), hover.c.not || '');
   }

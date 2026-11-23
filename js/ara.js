@@ -35,6 +35,22 @@
     for (const m of window.ATLAS_MAGARALAR || []) add({ tur: 'Tarihöncesi Kazı', ikon: '🪨', ad: m.ad, alt: `${m.donem} · ${m.yer}`, kw: [m.yer, m.w], oncelik: 5, act: () => ZY().openMagara(m.id) });
     for (const kz of (window.ATLAS_KAZILAR || {}).tarih || []) add({ tur: 'Tarihî Kazı', ikon: kz.ik || '🏺', ad: kz.ad, alt: `${kz.yas} · ${kz.yer}`, kw: [kz.yer, kz.buluntu, kz.w, 'kazı', 'arkeoloji'], oncelik: 6, act: () => ZY().openKazi(kz.id, 'tarih') });
     for (const kz of (window.ATLAS_KAZILAR || {}).doga || []) add({ tur: 'Fosil Buluntusu', ikon: kz.ik || '🦴', ad: kz.ad, alt: `${kz.yas} · ${kz.yer}`, kw: [kz.yer, kz.buluntu, kz.w, 'fosil', 'kehribar', 'kazı'], oncelik: 6, act: () => ZY().openKazi(kz.id, 'doga') });
+    const DEK = window.ATLAS_DOGA_EK || {};
+    for (const b of DEK.iklimBantlar || []) add({ tur: 'İklim Kuşağı', ikon: b.ik, ad: b.ad, alt: `${b.sicaklik} · ${b.yagis}`, kw: ['iklim', 'biyom', 'ekvator', 'dönence', b.w], oncelik: 5, act: () => ZY().openAtlasEk('iklim', b) });
+    for (const t of (DEK.okyanusTaban || {}).noktalar || []) add({ tur: 'Okyanus Tabanı', ikon: t.ik, ad: t.ad, alt: `${t.olcu} · ${t.yer}`, kw: [t.yer, 'çukur', 'resif', 'mercan', 'baca', t.w], oncelik: 6, act: () => ZY().openAtlasEk('taban', t) });
+    for (const sr of (DEK.okyanusTaban || {}).sirtlar || []) add({ tur: 'Okyanus Sırtı', ikon: sr.ik, ad: sr.ad, alt: sr.olcu, kw: ['okyanus', 'sırt', 'sıradağ', sr.w], oncelik: 5, act: () => ZY().openAtlasEk('taban', sr) });
+    for (const k of DEK.kutup || []) add({ tur: 'Kutup & Buzul', ikon: k.ik, ad: k.ad, alt: k.yer, kw: ['aurora', 'kutup', 'buzul', 'buzul çağı', k.yer, k.w], oncelik: 6, act: () => ZY().openAtlasEk('kutup', k) });
+    for (const kr of DEK.kraterler || []) add({ tur: 'Göktaşı Krateri', ikon: '☄️', ad: kr.ad, alt: `${kr.cap} · ${kr.yas}`, kw: [kr.yer, 'göktaşı', 'krater', 'meteor', 'asteroit', kr.w], oncelik: 6, act: () => ZY().openAtlasEk('krater', kr) });
+    for (const gl of DEK.golSelale || []) add({ tur: gl.tur === 'selale' ? 'Şelale' : 'Göl', ikon: gl.ik, ad: gl.ad, alt: `${gl.olcu} · ${gl.yer}`, kw: [gl.yer, 'göl', 'şelale', gl.w], oncelik: 6, act: () => ZY().openAtlasEk('gol', gl) });
+    const TEK = window.ATLAS_TARIH_EK || {};
+    for (const yz of TEK.yazilar || []) add({ tur: 'Yazı & Alfabe', ikon: yz.ik, ad: yz.ad, alt: `${yz.donem} · ${yz.aile}`, kw: [yz.yer, yz.aile, 'yazı', 'alfabe', 'dil', yz.w], oncelik: 6, act: () => ZY().openAtlasEk('yazi', yz) });
+    for (const dn of TEK.dinler || []) add({ tur: 'Din & İnanç', ikon: dn.ik, ad: dn.ad, alt: `${dn.donem} · ${dn.yer}`, kw: [dn.yer, 'din', 'inanç', dn.w], oncelik: 6, act: () => ZY().openAtlasEk('din', dn) });
+    for (const mg of TEK.buyukGoc || []) add({ tur: 'Büyük Göç', ikon: mg.ik, ad: mg.ad, alt: mg.donem, kw: ['göç', 'kavimler', mg.w], oncelik: 6, act: () => ZY().openAtlasEk('tarihgoc', mg) });
+    for (const sg of TEK.salginlar || []) add({ tur: 'Büyük Salgın', ikon: sg.ik, ad: sg.ad, alt: `${sg.donem} · ${sg.kayip}`, kw: ['salgın', 'pandemi', 'veba', 'grip', sg.w], oncelik: 6, act: () => ZY().openAtlasEk('salgin', sg) });
+    for (const bg of TEK.bogazlar || []) add({ tur: bg.tur === 'gecit' ? 'Tarihî Geçit' : 'Stratejik Boğaz', ikon: bg.ik, ad: bg.ad, alt: `${bg.olcu} · ${bg.yer}`, kw: [bg.yer, 'boğaz', 'geçit', 'kanal', bg.w], oncelik: 6, act: () => ZY().openAtlasEk('bogaz', bg) });
+    for (const mn of DEK.manyetik || []) add({ tur: 'Manyetik Alan', ikon: mn.ik, ad: mn.ad, alt: `${mn.olcu} · ${mn.yer}`, kw: ['manyetik', 'kutup', 'pusula', 'anomali', mn.yer, mn.w], oncelik: 6, act: () => ZY().openAtlasEk('manyetik', mn) });
+    for (const tr of DEK.tarim || []) add({ tur: 'Tarım Anavatanı', ikon: tr.ik, ad: tr.ad, alt: `${tr.donem} · ${tr.yer}`, kw: ['tarım', 'vavilov', 'evcilleştirme', 'besin', tr.urunler, tr.yer, tr.w], oncelik: 6, act: () => ZY().openAtlasEk('tarim', tr) });
+    for (const mk of TEK.megakentler || []) add({ tur: 'Tarihin En Büyük Şehri', ikon: '👑', ad: mk.ad, alt: `${mk.donem} · ${mk.nufus}`, kw: ['megakent', 'en büyük şehir', 'nüfus', mk.yer, mk.w], oncelik: 6, act: () => ZY().openAtlasEk('megakent', mk) });
     for (const lm of window.ATLAS_LIMANLAR || []) add({ tur: 'Liman', ikon: '⚓', ad: lm.ad, alt: `${lm.ulke} · ${lm.rol}`, kw: [lm.ulke, lm.w], oncelik: 5, act: () => ZY().openLiman(lm.id) });
     for (const nr of window.ATLAS_NEHIRLER || []) add({ tur: 'Nehir', ikon: '🏞️', ad: nr.ad, alt: `${nr.uzunluk} · ${nr.havza}`, kw: [nr.havza, nr.w], oncelik: 5, act: () => ZY().openNehir(nr.id) });
     for (const hg of window.ATLAS_HAYVAN_GOC || []) add({ tur: 'Göç Döngüsü', ikon: hg.ik || '🐋', ad: hg.ad, alt: hg.mesafe, kw: [hg.w], oncelik: 5, act: () => ZY().openHayvanGoc(hg.id) });
@@ -188,7 +204,7 @@
     const t = e.target;
     const h = t.closest('[data-harita]'); if (h) { const [la, lo, z] = h.dataset.harita.split(',').map(Number); closePage(); ZY().showOnMap(la, lo, z, h.dataset.ad); return; }
     const g = t.closest('[data-git]'); if (g) { closePage(); ZY().showInScene(JSON.parse(g.dataset.git)); return; }
-    const y = t.closest('[data-yil]'); if (y) { closePage(); ZY().setYear(+y.dataset.yil); ZY().setView('sahne'); return; }
+    const y = t.closest('[data-yil]'); if (y) { closePage(); ZY().setYear(+y.dataset.yil); ZY().setView('dunya'); return; }
     const b = t.closest('[data-bilgi]'); if (b) { ZY().openInfo(b.dataset.bilgi); return; }
     const gd = t.closest('[data-god]'); if (gd) { ZY().openGod(gd.dataset.god); return; }
     const go = t.closest('[data-goto]'); if (go) { const el = body.querySelector('#w-' + go.dataset.goto); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }

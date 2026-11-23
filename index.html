@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>⏳ Zaman Yolculuğu: Tarihin Derinliklerinde Kaybolmaya Hazır Mısın?</title>
-<meta name="description" content="Dünya tarihini interaktif küre ve canlı sahnelerle keşfet, tarihte yolculuğa çık, o dönemde bir gününü yaşa ve eğlenceli tarih oyunları oyna.">
+<meta name="description" content="Dünya tarihini ve doğasını interaktif 3B kürede keşfet, tarihte yolculuğa çık, o dönemde bir gününü yaşa ve eğlenceli tarih oyunları oyna.">
 <meta property="og:title" content="⏳ Zaman Yolculuğu: Tarihin Derinliklerinde Kaybolmaya Hazır Mısın?">
-<meta property="og:description" content="17 bölge, binlerce yıllık interaktif dünya küresi, canlı tarih sahneleri, o dönemde yaşa deneyimi ve tarih oyunlarıyla geçmişe yolculuk yap.">
+<meta property="og:description" content="17 bölge, binlerce yıllık interaktif dünya küresi, tarih ve doğa atlasları, o dönemde yaşa deneyimi ve tarih oyunlarıyla geçmişe yolculuk yap.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://jondoe2972.github.io/zaman-yolculugu/">
 <meta property="og:site_name" content="Zaman Yolculuğu">
@@ -27,7 +27,6 @@
   <div class="um-bas"><span>⏳ <b>Zaman Yolculuğu</b></span><button type="button" class="um-x" title="Menüyü kapat" aria-label="Menüyü kapat">✕</button></div>
   <nav class="modlar" aria-label="Mod">
     <button data-mod="kesfet" title="Küreyi döndür, dönemin sınırlarını, yollarını ve olaylarını keşfet">🌍<span>Keşfet</span></button>
-    <button data-mod="sahne" title="Bir bölgenin canlı sahnesi: yapılar yılına göre yükselir">🎬<span>Sahne</span></button>
     <button data-mod="oyun" aria-haspopup="menu" aria-expanded="false" title="Oyunlar: Ben kimim?, Sınırdan Bil, Biliyor muydun?">🎮<span>Oyunlar</span></button>
     <button data-mod="yasa" title="Bu yılda yaşasaydın: bir meslek seç, bir gününü yaşa">🧑‍🌾<span>Yaşa</span></button>
     <button id="ara" data-mod="ara" title="Ara (Ctrl+K)">🔍<span>Ara</span></button>
@@ -44,14 +43,8 @@
 </header>
 <main class="app">
   <section class="stage">
-    <canvas id="scene" aria-label="Canlı tarih sahnesi"></canvas>
-    <canvas id="map" aria-label="Bölge haritası"></canvas>
     <canvas id="globe" aria-label="Dünya küresi"></canvas>
     <div class="globectl"><button id="gzin" title="Yakınlaştır">＋</button><button id="gzout" title="Uzaklaştır">－</button><button id="gecebtn" title="Canlı gece / gündüz ve şehir ışıkları">🌓</button><button id="tamekran" class="tamekran" title="Tam ekran: yıl kartını ve zaman çizelgesini gizle">⛶</button></div>
-    <div class="mapctl">
-      <button id="mzin" title="Yakınlaştır">＋</button><button id="mzout" title="Uzaklaştır">－</button>
-      <button data-mapgo="tum">Tüm Mısır</button><button data-mapgo="delta">Delta</button><button data-mapgo="memfis">Memfis · Gize</button><button data-mapgo="teb">Teb</button><button data-mapgo="nubya">Nubya</button>
-    </div>
     <div class="yearcard">
       <b id="yc-city" class="yc-city" hidden></b>
       <b id="yc-year">MÖ 2560</b>
@@ -62,16 +55,6 @@
       <button id="yc-gizle" class="yc-gizle" title="Yıl kartını küçült" aria-label="Yıl kartını küçült">▴</button>
     </div>
     <button id="tl-ac" class="tl-ac" hidden title="Zaman çizelgesini göster"><span id="tl-ac-oyna" class="tl-ac-oyna">▶</span><b id="tl-ac-yil"></b><span>▴</span></button>
-    <button id="follow" class="follow">🎯 Şantiyeye dön</button>
-    <div id="yerserit" class="yerserit">
-      <button class="ys-yan ys-sol" title="Soldaki yere git"><small></small><b></b></button>
-      <div class="ys-orta">
-        <button class="ys-ad" title="Sahnedeki bütün yerler" aria-expanded="false">📍 <b></b> ▾</button>
-        <div class="ys-cubuk" title="Sahnenin tamamı: sarı çerçeve şu an gördüğün yer. Dokun ya da sürükle."><i class="ys-pen"></i></div>
-      </div>
-      <button class="ys-yan ys-sag" title="Sağdaki yere git"><small></small><b></b></button>
-      <div class="ys-liste" hidden></div>
-    </div>
     <div id="toast" class="toast"></div>
     <div id="sespop" class="sespop" hidden role="dialog" aria-label="Ses ayarları">
       <b>🎧 Ses ve Ambiyans</b>
@@ -119,6 +102,12 @@
           <label><input type="checkbox" data-kat="goc" checked><span>🧬 İnsanlığın yayılışı (MÖ 3000 öncesi)</span></label>
           <label><input type="checkbox" data-kat="magara" checked><span>🪨 Tarihöncesi mağaralar (MÖ 3000 öncesi)</span><i></i></label>
           <label><input type="checkbox" data-kat="tarihkazi"><span>🏺 Tarihî kazılar ve arkeolojik buluntular</span><i></i></label>
+          <label><input type="checkbox" data-kat="yazi"><span>🗣️ Yazının doğuşu, alfabeler ve dil aileleri</span><i></i></label>
+          <label><input type="checkbox" data-kat="din"><span>🕊️ Dinlerin ve inançların doğuşu &amp; yayılışı</span><i></i></label>
+          <label><input type="checkbox" data-kat="tarihgoc"><span>🏃 Tarih çağlarındaki büyük göç dalgaları</span><i></i></label>
+          <label><input type="checkbox" data-kat="salgin"><span>🦠 Dünyayı değiştiren büyük salgınlar</span><i></i></label>
+          <label><input type="checkbox" data-kat="bogaz"><span>⚓ Stratejik boğazlar ve tarihî geçitler</span><i></i></label>
+          <label><input type="checkbox" data-kat="megakent"><span>👑 Tarih boyunca dünyanın en büyük şehirleri</span><i></i></label>
           <label><input type="checkbox" data-kat="gece"><span>🌓 Canlı gece / gündüz ve şehir ışıkları</span></label>
         </div>
         <div class="kp-grup" data-kpgrup="doga" hidden>
@@ -132,6 +121,14 @@
           <label><input type="checkbox" data-kat="volkan"><span>🌋 Yanardağlar ve Ateş Çemberi</span><i></i></label>
           <label><input type="checkbox" data-kat="kaynak"><span>⛏️ Dünya madenleri ve yeraltı kaynakları</span><i></i></label>
           <label><input type="checkbox" data-kat="fosilkazi"><span>🦴 Fosil kazıları ve doğa buluntuları</span><i></i></label>
+          <label><input type="checkbox" data-kat="iklim"><span>🌡️ İklim kuşakları, biyomlar &amp; Ekvator</span><i></i></label>
+          <label><input type="checkbox" data-kat="taban"><span>🌊 Okyanus tabanı: çukurlar, sırtlar &amp; resifler</span><i></i></label>
+          <label><input type="checkbox" data-kat="kutup"><span>🌌 Kutup ışıkları (Aurora) &amp; Buzul Çağı</span><i></i></label>
+          <label><input type="checkbox" data-kat="krater"><span>☄️ Göktaşı kraterleri ve jeolojik izler</span><i></i></label>
+          <label><input type="checkbox" data-kat="gol"><span>💧 Büyük göller ve dev şelaleler</span><i></i></label>
+          <label><input type="checkbox" data-kat="saat"><span>🕐 Saat dilimleri &amp; Tarih Değiştirme Çizgisi</span><i></i></label>
+          <label><input type="checkbox" data-kat="manyetik"><span>🧲 Manyetik kutuplar &amp; Güney Atlantik Anomalisi</span><i></i></label>
+          <label><input type="checkbox" data-kat="tarim"><span>🌾 Tarım &amp; besin anavatanları (Vavilov merkezleri)</span><i></i></label>
           <button type="button" id="derin-ac" class="kp-kesif" style="margin-top:6px">🦖 Derin Zaman: Dinozorlar &amp; Pangea</button>
         </div>
         <div class="kp-grup" data-kpgrup="olaylar" hidden>
@@ -144,26 +141,6 @@
         </div>
         <button type="button" id="kesif-ac" class="kp-kesif">🧭 Keşif Defterim <small id="kesif-say"></small></button>
       </div>
-      <div class="kp-sahne">
-        <b>Mevsim</b>
-        <div class="seasons" role="group" aria-label="Mevsim">
-          <button data-season="ahet" title="Ahet: Nil taşkını (yaklaşık Temmuz-Ekim)">🌊 Taşkın</button>
-          <button data-season="peret" class="on" title="Peret: ekim mevsimi (yaklaşık Kasım-Şubat)">🌱 Ekim</button>
-          <button data-season="semu" title="Şemu: hasat mevsimi (yaklaşık Mart-Haziran)">🌾 Hasat</button>
-        </div>
-      </div>
-    </div>
-    <div id="skharita" class="skharita" hidden>
-      <canvas id="skh-cv" aria-label="Sahnenin haritası: kırmızı nokta bulunduğun yer"></canvas>
-      <button id="skh-buyut" class="skh-buyut" title="Haritayı büyüt">⤢</button>
-    </div>
-    <div id="skbuyuk" class="skbuyuk" hidden role="dialog" aria-label="Sahnenin haritası">
-      <div class="skb-ust"><div><b>🗺️ Sahnede neredesin?</b><small id="skb-alt"></small></div><button class="skb-x" title="Kapat">✕</button></div>
-      <div class="skb-govde"><canvas id="skb-cv"></canvas>
-        <div class="skb-ctl"><button data-skb="in" title="Yakınlaştır">＋</button><button data-skb="out" title="Uzaklaştır">－</button><button data-skb="fit" title="Bütün sahneyi göster">⤢</button></div>
-      </div>
-      <div class="skb-lej"><span><i class="lj-bura"></i>Buradasın</span><span><i class="lj-gor"></i>Ekranda gördüğün kısım</span><span><i class="lj-bitti"></i>Ayakta</span><span><i class="lj-ins"></i>Yapılıyor</span><span><i class="lj-harabe"></i>Harabe</span></div>
-      <p class="skb-not">Bir yapıya, bir yer adına ya da kesik çizgi üstünde bir yere dokun: sahne oraya gider.</p>
     </div>
     <div id="ipucu" class="ipucu" hidden></div>
     <div id="citycard" class="citycard" hidden><div class="cc-head"><b class="cc-title"></b><button class="cc-x" title="Kapat">✕</button></div><div class="cc-body"></div><button class="phbtn cc-more">ℹ️ Daha fazla bilgi ve fotoğraflar</button></div>
@@ -194,7 +171,7 @@
   </div>
 </footer>
 <div id="ic" class="ic" hidden>
-  <div class="ichead"><button class="icback">← Sahneye dön</button><div><b class="ictitle"></b><small class="icsub"></small></div></div>
+  <div class="ichead"><button class="icback">← Geri dön</button><div><b class="ictitle"></b><small class="icsub"></small></div></div>
   <div class="icbody"><canvas id="iccv"></canvas>
     <aside class="icside"><div class="ictext"></div><div class="iclist"></div><p class="icnote note"></p></aside></div>
 </div>
@@ -233,7 +210,6 @@
 <script src="js/yil.js?v=3"></script>
 <script src="js/bolge.js?v=8"></script>
 <script src="js/sahne.js?v=36"></script>
-<script src="js/harita.js?v=28"></script>
 <script src="js/cizim.js?v=29"></script>
 <script src="data/kaynaklar.js?v=2"></script>
 <script src="data/yollar.js?v=1"></script>
@@ -252,6 +228,8 @@
 <script src="data/atlas/ekonomi.js?v=1"></script>
 <script src="data/atlas/magaralar.js?v=1"></script>
 <script src="data/atlas/kazilar.js?v=1"></script>
+<script src="data/atlas/doga-ek.js?v=2"></script>
+<script src="data/atlas/tarih-ek.js?v=2"></script>
 <script src="data/atlas/surprizler.js?v=5"></script>
 <script src="data/atlas/limanlar.js?v=1"></script>
 <script src="data/atlas/nehirler.js?v=1"></script>
@@ -265,21 +243,20 @@
 <script src="data/yasam-doga-ek2.js?v=1"></script>
 <script src="data/yasam-doga-antik.js?v=1"></script>
 <script src="data/atlas/donum-noktalari.js?v=2"></script>
-<script src="js/dunya.js?v=95"></script>
+<script src="js/dunya.js?v=97"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
 <script src="data/yapilar/avrupa.js?v=1"></script>
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="data/yapilar/simgeler.js?v=1"></script>
-<script src="js/sahne-harita.js?v=6"></script>
 <script src="js/kart-paylas.js?v=1"></script>
-<script src="js/uygulama.js?v=105"></script>
+<script src="js/uygulama.js?v=108"></script>
 <script src="js/ses.js?v=4"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=6"></script>
 <script src="js/oyun/oyunlar.js?v=23"></script>
-<script src="js/ara.js?v=21"></script>
+<script src="js/ara.js?v=24"></script>
 </body>
 </html>
