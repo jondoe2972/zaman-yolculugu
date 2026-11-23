@@ -957,7 +957,6 @@
   }
   function kpSekmeSec(sek) {
     const el = $('#katman'); if (!el) return;
-    el.querySelectorAll('[data-kpsek]').forEach(b => b.classList.toggle('on', b.dataset.kpsek === sek));
     el.querySelectorAll('[data-kpgrup]').forEach(g => { g.hidden = g.dataset.kpgrup !== sek; });
   }
   function atlasModUygula(mod, sessiz) {
@@ -1512,16 +1511,15 @@
       const k = inp.dataset.kat; inp.checked = !!DN.layers[k];
       const c = inp.parentElement.querySelector('i'); if (c) c.textContent = k === 'sinir' ? '' : (katSay(k) || '');
     });
-    // Her kategori sekmesinde kaç katmanın açık olduğunu göster
-    el.querySelectorAll('[data-kpsek]').forEach(b => {
-      const grp = el.querySelector(`[data-kpgrup="${b.dataset.kpsek}"]`);
+    // Her atlas düğmesinde kaç katmanın açık olduğunu göster
+    el.querySelectorAll('[data-atlas]').forEach(b => {
+      const grp = el.querySelector(`[data-kpgrup="${b.dataset.atlas}"]`);
       const acik = grp ? [...grp.querySelectorAll('[data-kat]')].filter(x => x.checked).length : 0;
       const roz = b.querySelector('em'); if (roz) roz.textContent = acik ? ` ${acik}` : '';
     });
   }
   $('#katman').addEventListener('change', ev => { const k = ev.target.dataset && ev.target.dataset.kat; if (k) { DN.setLayer(k, ev.target.checked); katmanKaydet(); renderOlayPanel(); } });
   $('#katman').addEventListener('click', ev => {
-    const sk = ev.target.closest('[data-kpsek]'); if (sk) { kpSekmeSec(sk.dataset.kpsek); return; }
     const am = ev.target.closest('[data-atlas]'); if (am) { atlasModUygula(am.dataset.atlas); return; }
     if (ev.target.closest('#kp-hepsi-ac')) {
       const grp = $('#katman .kp-grup:not([hidden])');

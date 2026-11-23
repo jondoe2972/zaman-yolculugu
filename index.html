@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Dünya tarihini interaktif kürede keşfet, o dönemde bir gününü yaşa ve tarih oyunlarını oyna.">
 <meta name="twitter:image" content="https://jondoe2972.github.io/zaman-yolculugu/zaman-yolculugu-share.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23241b14'/%3E%3Cpath d='M18 12h28v6c0 7-6 11-11 14 5 3 11 7 11 14v6H18v-6c0-7 6-11 11-14-5-3-11-7-11-14v-6z' fill='none' stroke='%23ffd666' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M23 18h18c0 4-4 7-9 10-5-3-9-6-9-10zm9 18c5 3 9 6 9 10H23c0-4 4-7 9-10z' fill='%23ffd666'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/stil.css?v=81">
+<link rel="stylesheet" href="css/stil.css?v=82">
 </head>
 <body>
 <header class="top">
@@ -83,16 +83,11 @@
     <div id="katman" class="katpop" hidden>
       <div class="kp-kure">
         <div class="kp-modlar" role="group" aria-label="Atlas görünümü">
-          <button type="button" data-atlas="tarih" class="on">🏛️ Tarih Atlası</button>
-          <button type="button" data-atlas="doga">🌿 Doğa Atlası</button>
-        </div>
-        <div class="kp-sekmeler" role="tablist" aria-label="Katman kategorileri">
-          <button type="button" data-kpsek="tarih" class="on">🏛️ Tarih<em></em></button>
-          <button type="button" data-kpsek="doga">🌿 Doğa<em></em></button>
-          <button type="button" data-kpsek="olaylar">⚔️ Olaylar<em></em></button>
+          <button type="button" data-atlas="tarih" class="on">🏛️ Tarih Atlası<em></em></button>
+          <button type="button" data-atlas="doga">🌿 Doğa Atlası<em></em></button>
         </div>
         <div class="kp-toplu">
-          <button type="button" id="kp-hepsi-ac" title="Bu sekmedeki tüm katmanları aç">✅ Hepsini Aç</button>
+          <button type="button" id="kp-hepsi-ac" title="Bu atlastaki tüm katmanları aç">✅ Hepsini Aç</button>
           <button type="button" id="kp-temizle" title="Haritadaki tüm katmanları temizle">🧹 Hepsini Temizle</button>
         </div>
         <div class="kp-grup" data-kpgrup="tarih">
@@ -116,6 +111,13 @@
           <label><input type="checkbox" data-kat="goc"><span>🧬 İnsanlığın yayılışı</span></label>
           <label><input type="checkbox" data-kat="magara"><span>🪨 Tarihöncesi mağaralar</span><i></i></label>
           <label><input type="checkbox" data-kat="gece"><span>🌓 Canlı gece / gündüz ve şehir ışıkları</span></label>
+          <div class="kp-ayir">⚔️ Tarihî Olaylar</div>
+          <label><input type="checkbox" data-kat="savas"><span>⚔️ Savaşlar</span><i></i></label>
+          <label><input type="checkbox" data-kat="deniz"><span>⚓ Deniz savaşları</span><i></i></label>
+          <label><input type="checkbox" data-kat="antlasma"><span>📜 Antlaşmalar</span><i></i></label>
+          <label><input type="checkbox" data-kat="afet"><span>🌋 Doğal afetler</span><i></i></label>
+          <label><input type="checkbox" data-kat="olay"><span>🏛️ Önemli olaylar</span><i></i></label>
+          <div class="kp-aralik">Seçili yılın ±<select id="aralik"><option value="1">1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100" selected>100</option><option value="250">250</option><option value="500">500</option></select> yıl çevresi</div>
         </div>
         <div class="kp-grup" data-kpgrup="doga" hidden>
           <label><input type="checkbox" data-kat="cografya"><span>🏔️ Dağlar (rakım), doğa harikaları ve çöller</span><i></i></label>
@@ -137,14 +139,6 @@
           <label><input type="checkbox" data-kat="fosilkazi"><span>🦴 Fosil kazıları ve doğa buluntuları</span><i></i></label>
           <label><input type="checkbox" data-kat="saat"><span>🕐 Saat dilimleri &amp; Tarih Değiştirme Çizgisi</span><i></i></label>
           <button type="button" id="derin-ac" class="kp-kesif" style="margin-top:6px">🦖 Derin Zaman: Dinozorlar &amp; Pangea</button>
-        </div>
-        <div class="kp-grup" data-kpgrup="olaylar" hidden>
-          <label><input type="checkbox" data-kat="savas"><span>⚔️ Savaşlar</span><i></i></label>
-          <label><input type="checkbox" data-kat="deniz"><span>⚓ Deniz savaşları</span><i></i></label>
-          <label><input type="checkbox" data-kat="antlasma"><span>📜 Antlaşmalar</span><i></i></label>
-          <label><input type="checkbox" data-kat="afet"><span>🌋 Doğal afetler</span><i></i></label>
-          <label><input type="checkbox" data-kat="olay"><span>🏛️ Önemli olaylar</span><i></i></label>
-          <div class="kp-aralik">Seçili yılın ±<select id="aralik"><option value="1">1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100" selected>100</option><option value="250">250</option><option value="500">500</option></select> yıl çevresi</div>
         </div>
         <button type="button" id="kesif-ac" class="kp-kesif">🧭 Keşif Defterim <small id="kesif-say"></small></button>
       </div>
@@ -259,7 +253,7 @@
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="data/yapilar/simgeler.js?v=1"></script>
 <script src="js/kart-paylas.js?v=1"></script>
-<script src="js/uygulama.js?v=113"></script>
+<script src="js/uygulama.js?v=114"></script>
 <script src="js/ses.js?v=4"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
