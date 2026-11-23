@@ -11,34 +11,37 @@
       'data/oyun/kim-zor.js?v=2',
       'data/oyun/kim-dunya.js?v=1',
       'js/oyun/cizimler.js?v=4',
-      'js/oyun/kim.js?v=9'
+      'js/oyun/kim.js?v=10'
     ],
     sinir: [
       'data/oyun/sinir-bil.js?v=1',
-      'js/oyun/sinir-bil.js?v=5'
+      'js/oyun/sinir-bil.js?v=6'
     ],
     eski: [
-      'js/oyun/hangisi-eski.js?v=2'
+      'js/oyun/hangisi-eski.js?v=3'
     ],
     toprak: [
       'js/oyun/topraklar.js?v=3'
     ],
     hayvan: [
-      'js/oyun/hayvan-oyun.js?v=3'
+      'js/oyun/hayvan-oyun.js?v=4'
     ],
     foto: [
-      'js/oyun/foto-tahmin.js?v=1'
+      'js/oyun/foto-tahmin.js?v=2'
     ],
     derin: [
       'data/atlas/derin-zaman.js?v=2',
       'js/oyun/derin-zaman.js?v=4'
     ],
     hayattakal: [
-      'data/oyun/hayatta-kal.js?v=1',
-      'js/oyun/hayatta-kal.js?v=1'
+      'data/oyun/hayatta-kal.js?v=2',
+      'js/oyun/hayatta-kal.js?v=2'
     ],
     duello: [
-      'js/oyun/duello.js?v=1'
+      'js/oyun/duello.js?v=3'
+    ],
+    blitz: [
+      'js/oyun/blitz.js?v=1'
     ],
     katmanlar: [
       'data/atlas/katmanlar.js?v=1',
@@ -90,7 +93,7 @@
     try { return JSON.parse(localStorage['zy-hayvan-ist'] || 'null')?.seriRekor || 0; } catch (e) { return 0; }
   }
 
-  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun', 'foto-oyun', 'derin-zaman', 'katman-ekran', 'hayatta-kal', 'duello-kutu'];
+  const OYUN_KUTULARI = ['sinirbil', 'hayat', 'eski-oyun', 'topraklar', 'sasirt', 'hayvan-oyun', 'foto-oyun', 'derin-zaman', 'katman-ekran', 'hayatta-kal', 'duello-kutu', 'blitz-kutu'];
   function digerleriniKapat(haricId) {
     for (const id of OYUN_KUTULARI) {
       if (id === haricId) continue;
@@ -111,6 +114,14 @@
       ac: async () => {
         await paketYukle('hayattakal');
         if (window.HayattaKal) window.HayattaKal.ac();
+      }
+    },
+    {
+      id: 'blitz', kutu: 'blitz-kutu', ikon: '⚡', ad: '60 Saniye Küre Blitz\'i', yeni: true,
+      alt: '60 sn sayaç! Tarih, Doğa veya Karma — tam isabette +3 sn bonus ve kombo!',
+      ac: async () => {
+        await paketYukle('blitz');
+        if (window.KureBlitz) window.KureBlitz.ac();
       }
     },
     {
@@ -147,11 +158,19 @@
       }
     },
     {
-      id: 'hayvan', kutu: 'hayvan-oyun', ikon: '🐾', ad: 'Hayvanlar Alemi',
-      alt: () => { const r = hayvanRekor(); return r ? `Bu hayvan nerede yaşar? + Doğa Bilgini · 🏆 Seri: ${r}` : 'Fotoğraftan yaşam bölgesini bil + Doğa Bilgini yarışması'; },
+      id: 'tarihbilgin', kutu: 'hayvan-oyun', ikon: '🏛️', ad: 'Tarih Bilgini', yeni: true,
+      alt: 'İcatlar, filozoflar, dinler, alfabeler ve salgınlar — gittikçe zorlaşan 3 can modu!',
       ac: async () => {
         await paketYukle('hayvan');
-        if (window.HayvanOyunu) window.HayvanOyunu.ac();
+        if (window.HayvanOyunu) window.HayvanOyunu.ac('tarih');
+      }
+    },
+    {
+      id: 'hayvan', kutu: 'hayvan-oyun', ikon: '🌿', ad: 'Doğa Bilgini & Hayvanlar',
+      alt: 'Doğa, hayvanlar, kraterler ve Vavilov tarım — Tarih + Doğa karma seçeneğiyle!',
+      ac: async () => {
+        await paketYukle('hayvan');
+        if (window.HayvanOyunu) window.HayvanOyunu.ac('doga');
       }
     },
     {
@@ -161,6 +180,11 @@
         await paketYukle('foto');
         if (window.FotoTahmin) window.FotoTahmin.ac();
       }
+    },
+    {
+      id: 'buyukinsanlar', kutu: 'modal', ikon: '👑', ad: 'Dünyada Yaşamış Büyük İnsanlar', yeni: true,
+      alt: 'Bilim, felsefe, mucit, sanat, kâşif ve liderler — portreli büyük galeri',
+      ac: () => window.ZY && window.ZY.openBuyukInsanlarGaleri && window.ZY.openBuyukInsanlarGaleri()
     },
     {
       id: 'yayilis', kutu: 'modal', ikon: '🍵', ad: 'Yemek ve İcatların Yolculuğu', yeni: true,
@@ -208,7 +232,7 @@
     }
   ];
 
-  const KESIF_ID = new Set(['yayilis', 'derin', 'katmanlar', 'toprak', 'aa', 'kesif', 'rehber']);
+  const KESIF_ID = new Set(['buyukinsanlar', 'yayilis', 'derin', 'katmanlar', 'toprak', 'aa', 'kesif', 'rehber']);
   let pop = null, aktifSek = 'oyun';
   function ciz() {
     if (!pop) return;
@@ -284,6 +308,8 @@
   const oyunQ = qs.get('oyun');
   if (duelloQ) {
     setTimeout(() => paketYukle('duello').then(() => window.HazineDuello && window.HazineDuello.ac(duelloQ)).catch(() => {}), 500);
+  } else if (oyunQ === 'blitz') {
+    setTimeout(() => paketYukle('blitz').then(() => window.KureBlitz && window.KureBlitz.ac()).catch(() => {}), 500);
   } else if (oyunQ === 'hayattakal') {
     setTimeout(() => paketYukle('hayattakal').then(() => window.HayattaKal && window.HayattaKal.ac()).catch(() => {}), 500);
   } else if (oyunQ === 'sinir') {

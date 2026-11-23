@@ -15,7 +15,14 @@ window.HangisiEski = (() => {
     return a > 0 && b < 0 ? a - b - 1 : a - b;
   }
 
-  const havuz = () => (window.YAPILAR || []).filter(y => y && typeof y.y === 'number' && y.y !== 0 && y.ad);
+  function havuz() {
+    const out = (window.YAPILAR || []).filter(y => y && typeof y.y === 'number' && y.y !== 0 && y.ad);
+    const KEK = window.ATLAS_KULTUR_EK || {}, TEK = window.ATLAS_TARIH_EK || {};
+    for (const ic of KEK.icatlar || []) if (typeof ic.y === 'number' && ic.y !== 0) out.push({ id: 'ek:' + ic.id, ad: ic.ad.split(' (')[0], y: ic.y, yil: ic.donem, sehir: ic.yer, ulke: 'Büyük İcat', k: ic.ozet, w: ic.w, o: 5, ikOzel: ic.ik });
+    for (const yz of TEK.yazilar || []) if (typeof yz.y === 'number' && yz.y !== 0) out.push({ id: 'ek:' + yz.id, ad: yz.ad.split(' (')[0], y: yz.y, yil: yz.donem, sehir: yz.yer, ulke: 'Yazı & Alfabe', k: yz.ozet, w: yz.w, o: 4, ikOzel: yz.ik });
+    for (const sg of TEK.salginlar || []) if (typeof sg.y === 'number' && sg.y !== 0) out.push({ id: 'ek:' + sg.id, ad: sg.ad.split(' (')[0], y: sg.y, yil: sg.donem, sehir: sg.donem, ulke: 'Tarihî Salgın', k: sg.ozet, w: sg.w, o: 4, ikOzel: sg.ik });
+    return out;
+  }
   const fotoCache = new Map();
   let fotoIstek = Promise.resolve();
 
@@ -46,25 +53,23 @@ window.HangisiEski = (() => {
     return fotoIstek;
   }
 
-  const ZORLUK = {
-    kolay: { ad: 'Kolay', minOnem: 4, minFark: 400, maxFark: 4500, xp: 5 },
-    orta:  { ad: 'Orta',  minOnem: 2, minFark: 80,  maxFark: 1200, xp: 8 },
-    zor:   { ad: 'Zor',   minOnem: 1, minFark: 5,   maxFark: 180,  xp: 12 }
-  };
-  let zorluk = 'orta';
+  function kademe(seri) {
+    if (seri < 3) return { ad: '🌱 Isınma', minOnem: 5, minFark: 500, maxFark: 4500, xp: 6 };
+    if (seri < 6) return { ad: '⚔️ Orta', minOnem: 4, minFark: 150, maxFark: 1500, xp: 10 };
+    if (seri < 10) return { ad: '🔥 Zor', minOnem: 2, minFark: 30, maxFark: 450, xp: 15 };
+    return { ad: '👑 Efsane', minOnem: 1, minFark: 5, maxFark: 180, xp: 22 };
+  }
 
-  // Zorluğa ve seriye göre iki yapı seçer
+  // Seriye göre gittikçe zorlaşan iki kart seçer
   function ciftSec(seri, gorulen) {
     const tum = havuz();
     if (tum.length < 2) return null;
-    const z = ZORLUK[zorluk] || ZORLUK.orta;
-    const minOnem = zorluk === 'orta' ? (seri < 3 ? 4 : seri < 7 ? 3 : 2) : z.minOnem;
-    let aday = tum.filter(x => (x.o || 1) >= minOnem && !gorulen.has(x.id));
+    const z = kademe(seri);
+    let aday = tum.filter(x => (x.o || 1) >= z.minOnem && !gorulen.has(x.id));
     if (aday.length < 6) aday = tum.filter(x => !gorulen.has(x.id));
     if (aday.length < 2) { gorulen.clear(); aday = tum; }
 
-    const minFark = z.minFark;
-    const maxFark = zorluk === 'orta' ? (seri < 3 ? 1600 : seri < 7 ? 900 : 450) : z.maxFark;
+    const minFark = z.minFark, maxFark = z.maxFark;
 
     let enIyi = null;
     for (let deneme = 0; deneme < 60; deneme++) {
@@ -130,7 +135,8 @@ window.HangisiEski = (() => {
       else cls.push('soluk');
     }
     const src = fotoCache.get(item.w);
-    const ik = IKON[item.t] || '🏛️';
+    const ik = item.ikOzel || IKON[item.t] || '🏛️';
+    const kureBtn = acik && !String(item.id).startsWith('ek:') ? `<button type="button" class="eo-kure" data-eo-kure="${esc(item.id)}" title="Bu yapıyı kürede gör">🌍 Kürede gör</button>` : '';
     return `<div class="${cls.join(' ')}" data-eo-sec="${idx}" role="button" tabindex="0">
       <div class="eo-foto" data-eo-w="${esc(item.w || '')}">
         ${src ? `<img src="${esc(src)}" alt="${esc(item.ad)}">` : `<span class="eo-ik">${ik}</span>`}
@@ -141,7 +147,7 @@ window.HangisiEski = (() => {
         <small>📍 ${esc(item.sehir)}${item.ulke && item.ulke !== item.sehir ? ', ' + esc(item.ulke) : ''}</small>
         ${acik ? `<p class="eo-acik">${esc(item.yil || YIL.fmt(item.y))}</p>` : ''}
       </div>
-      ${acik ? `<button type="button" class="eo-kure" data-eo-kure="${esc(item.id)}" title="Bu yapıyı kürede gör">🌍 Kürede gör</button>` : ''}
+      ${kureBtn}
     </div>`;
   }
 
@@ -155,37 +161,44 @@ window.HangisiEski = (() => {
 
     let alt = '';
     if (!acik) {
-      alt = `<p class="eo-ipucu">Daha eski olduğunu düşündüğün yapıya tıkla</p>`;
+      alt = `<p class="eo-ipucu">Daha eski olduğunu düşündüğün karta tıkla (yapılar, icatlar, alfabeler ve salgınlar!)</p>`;
     } else if (dogru) {
       alt = `<div class="eo-sonuc iyi">
         <b>🎉 Doğru! ${esc(eski.ad)}, ${fark.toLocaleString('tr-TR')} yıl daha eski.</b>
         ${eski.k ? `<small>${esc(eski.k)}</small>` : ''}
         <button data-eo="sonraki" class="ana">Sonraki Tur ›</button>
       </div>`;
+    } else if (!s.bitti) {
+      alt = `<div class="eo-sonuc bitti">
+        <b>🙈 Yanlış! ${esc(eski.ad)}, ${fark.toLocaleString('tr-TR')} yıl daha eski. (${s.can} canın kaldı!)</b>
+        ${eski.k ? `<small>${esc(eski.k)}</small>` : ''}
+        <button data-eo="sonraki" class="ana">Devam Et ›</button>
+      </div>`;
     } else {
       const iz = s.izler.slice(-14).join('');
       const yeniRekor = s.seri > 0 && s.seri >= I.rekor && s.rekorKirildi;
       alt = `<div class="eo-sonuc bitti">
-        <b>🙈 Bu sefer olmadı! ${esc(eski.ad)}, ${fark.toLocaleString('tr-TR')} yıl daha eski.</b>
+        <b>💀 Canların Bitti! ${esc(eski.ad)}, ${fark.toLocaleString('tr-TR')} yıl daha eski.</b>
         <div class="eo-skor">
-          <span><b>🔥 ${s.seri}</b> seri</span>
+          <span><b>🔥 ${s.seri}</b> doğru</span>
           <span><b>🏆 ${I.rekor}</b> rekor${yeniRekor ? ' (yeni!)' : ''}</span>
         </div>
         ${iz ? `<div class="eo-izler" aria-label="Tur geçmişi">${iz}</div>` : ''}
         <div class="eo-btns">
-          <button data-eo="tekrar" class="ana">🔁 Tekrar Oyna</button>
+          <button data-eo="tekrar" class="ana">🔁 Rekor İçin Tekrar Dene</button>
           <button data-eo="paylas">📋 Skoru Paylaş</button>
         </div>
       </div>`;
     }
 
+    const kd = kademe(s.seri);
+    const kalpler = '❤️'.repeat(s.can) + '🖤'.repeat(Math.max(0, 3 - s.can));
     kutu().innerHTML = `
       <div class="eo-ust">
-        <div class="eo-bas"><b>⚖️ Hangisi Daha Eski?</b><small>İki yapıdan hangisi daha önce yapıldı?</small></div>
+        <div class="eo-bas"><b>⚖️ Hangisi Daha Eski? · ${kd.ad}</b><small>${kalpler} · Seri büyüdükçe yıl farkları daralır!</small></div>
         <div class="eo-sayac"><span>🔥 <b>${s.seri}</b></span><span>🏆 <b>${Math.max(I.rekor, s.seri)}</b></span></div>
         <button class="eo-x" title="Kapat" aria-label="Kapat">✕</button>
       </div>
-      <div class="oz-bar">${Object.entries(ZORLUK).map(([k, v]) => `<button type="button" class="oz-btn${zorluk === k ? ' on' : ''}" data-eo-zor="${k}">${v.ad}</button>`).join('')}</div>
       <div class="eo-alan">
         ${kartHTML(s.cift[0], 0)}
         <span class="eo-vs" aria-hidden="true">VS</span>
@@ -217,11 +230,11 @@ window.HangisiEski = (() => {
       s.izler.push('🟩');
       const I = ist();
       if (s.seri > I.rekor) { s.rekorKirildi = true; istKaydet(s.seri, false); }
-      if (window.ZY && window.ZY.xpEkle) window.ZY.xpEkle((ZORLUK[zorluk] || ZORLUK.orta).xp, 'eski');
+      if (window.ZY && window.ZY.xpEkle) window.ZY.xpEkle(kademe(s.seri).xp, 'eski');
     } else {
+      s.can--;
       s.izler.push('🟥');
-      s.bitti = true;
-      istKaydet(s.seri, true);
+      if (s.can <= 0) { s.bitti = true; istKaydet(s.seri, true); }
     }
     ciz();
   }
@@ -246,15 +259,13 @@ window.HangisiEski = (() => {
     const gorulen = new Set();
     const cift = ciftSec(0, gorulen);
     if (!cift) return;
-    s = { seri: 0, cift, secim: null, bitti: false, rekorKirildi: false, izler: [], gorulen, kuyruk: [] };
+    s = { seri: 0, can: 3, cift, secim: null, bitti: false, rekorKirildi: false, izler: [], gorulen, kuyruk: [] };
     sonrakiKuyruk();
     ciz();
   }
 
   function tikla(ev) {
     if (ev.target.closest('.eo-x')) return kapat();
-    const zr = ev.target.closest('[data-eo-zor]');
-    if (zr) { zorluk = zr.dataset.eoZor; basla(); return; }
     const kr = ev.target.closest('[data-eo-kure]');
     if (kr) {
       ev.stopPropagation();

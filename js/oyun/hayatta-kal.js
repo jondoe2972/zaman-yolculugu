@@ -2,7 +2,7 @@
 'use strict';
 (() => {
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  let box = null, sen = null, adim = 0, puan = 0, oldu = null, gecmis = [];
+  let box = null, sen = null, adim = 0, puan = 0, oldu = null, gecmis = [], aktifSec = [];
 
   function kur() {
     if (box) return;
@@ -66,6 +66,8 @@
 
   function adimCiz() {
     const a = sen.adimlar[adim];
+    // Şıkları her seferinde karıştır ki doğru cevap hep ilk sırada olmasın!
+    aktifSec = a.sec.slice().sort(() => Math.random() - 0.5);
     const g = box.querySelector('#hk-govde');
     const onceki = gecmis.length ? `<div class="hk-geri">${esc(gecmis[gecmis.length - 1])}</div>` : '';
     g.innerHTML = `
@@ -77,12 +79,12 @@
       ${adim === 0 ? `<p class="hk-giris">${esc(sen.giris)}</p>` : onceki}
       <div class="hk-soru"><b>${esc(a.soru)}</b></div>
       <div class="hk-secenekler">
-        ${a.sec.map((s, i) => `<button type="button" class="hk-sec" data-hk-karar="${i}">${esc(s.t)}</button>`).join('')}
+        ${aktifSec.map((s, i) => `<button type="button" class="hk-sec" data-hk-karar="${i}">${esc(s.t)}</button>`).join('')}
       </div>`;
   }
 
   function kararVer(idx) {
-    const a = sen.adimlar[adim], s = a && a.sec[idx];
+    const s = aktifSec[idx];
     if (!s) return;
     puan += s.puan;
     gecmis.push(s.sonuc);

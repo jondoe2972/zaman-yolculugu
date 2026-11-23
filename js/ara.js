@@ -52,6 +52,10 @@
     for (const mn of DEK.manyetik || []) add({ tur: 'Manyetik Alan', ikon: mn.ik, ad: mn.ad, alt: `${mn.olcu} · ${mn.yer}`, kw: ['manyetik', 'kutup', 'pusula', 'anomali', mn.yer, mn.w], oncelik: 6, act: () => ZY().openAtlasEk('manyetik', mn) });
     for (const tr of DEK.tarim || []) add({ tur: 'Tarım Anavatanı', ikon: tr.ik, ad: tr.ad, alt: `${tr.donem} · ${tr.yer}`, kw: ['tarım', 'vavilov', 'evcilleştirme', 'besin', tr.urunler, tr.yer, tr.w], oncelik: 6, act: () => ZY().openAtlasEk('tarim', tr) });
     for (const mk of TEK.megakentler || []) add({ tur: 'Tarihin En Büyük Şehri', ikon: '👑', ad: mk.ad, alt: `${mk.donem} · ${mk.nufus}`, kw: ['megakent', 'en büyük şehir', 'nüfus', mk.yer, mk.w], oncelik: 6, act: () => ZY().openAtlasEk('megakent', mk) });
+    const KEK = window.ATLAS_KULTUR_EK || {};
+    for (const ic of KEK.icatlar || []) add({ tur: 'Büyük İcat', ikon: ic.ik, ad: ic.ad, alt: `${ic.donem} · ${ic.mucit}`, kw: ['icat', 'buluş', ic.mucit, ic.yer, ic.w], oncelik: 6, act: () => ZY().openAtlasEk('icat', ic) });
+    for (const fl of KEK.felsefeler || []) add({ tur: 'Felsefi Akım', ikon: fl.ik, ad: fl.ad, alt: `${fl.donem} · ${fl.kurucu}`, kw: ['felsefe', 'düşünce', fl.kurucu, fl.yer, fl.w], oncelik: 6, act: () => ZY().openAtlasEk('felsefe', fl) });
+    for (const bi of KEK.insanlar || []) add({ tur: 'Büyük İnsan', ikon: bi.ik, ad: bi.ad, alt: `${bi.donem} · ${bi.yer}`, kw: ['büyük insan', bi.kat, bi.yer, bi.w], oncelik: 7, act: () => ZY().openAtlasEk('insanlar', bi) });
     for (const lm of window.ATLAS_LIMANLAR || []) add({ tur: 'Liman', ikon: '⚓', ad: lm.ad, alt: `${lm.ulke} · ${lm.rol}`, kw: [lm.ulke, lm.w], oncelik: 5, act: () => ZY().openLiman(lm.id) });
     for (const nr of window.ATLAS_NEHIRLER || []) add({ tur: 'Nehir', ikon: '🏞️', ad: nr.ad, alt: `${nr.uzunluk} · ${nr.havza}`, kw: [nr.havza, nr.w], oncelik: 5, act: () => ZY().openNehir(nr.id) });
     for (const hg of window.ATLAS_HAYVAN_GOC || []) add({ tur: 'Göç Döngüsü', ikon: hg.ik || '🐋', ad: hg.ad, alt: hg.mesafe, kw: [hg.w], oncelik: 5, act: () => ZY().openHayvanGoc(hg.id) });

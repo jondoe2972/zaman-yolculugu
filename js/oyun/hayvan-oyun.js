@@ -1,7 +1,6 @@
-// 🐾 Hayvanlar Alemi Oyunu:
-// 1) 📍 Nerede Yaşar? (fotoğraf ve yaşam ipuçlarından hayvanın kıtasını/okyanusunu tahmin et, seri yap!)
-// 2) 🧠 Doğa Bilgini (Kolay / Orta / Zor seviyeli geniş doğa, göç, okyanus ve yaban hayatı yarışması)
-// Adres: ?oyun=hayvan · Veri: window.ATLAS_HAYVANLAR, ATLAS_HAYVAN_GOC, ATLAS_OKYANUS
+// 🧠 Tarih & Doğa Bilgini + 📍 Nerede Yaşar?
+// Gittikçe zorlaşan sonsuz rekor sistemi: 🌱 Isınma → ⚔️ Orta → 🔥 Zor → 👑 Efsane · ❤️ 3 Can
+// Modlar: 🏛️ Tarih Bilgini · 🌿 Doğa Bilgini · ⚡ Tarih + Doğa Karma · 📍 Nerede Yaşar?
 'use strict';
 window.HayvanOyunu = (() => {
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -11,62 +10,156 @@ window.HayvanOyunu = (() => {
   const karistir = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
   const KITA_GRUPLARI = {
-    'Asya': '🌏 Asya',
-    'Afrika': '🌍 Afrika',
-    'Avrupa': '🏰 Avrupa',
-    'Amerika': '🌎 Amerika',
-    'Okyanusya': '🏝️ Okyanusya',
-    'Okyanus': '🌊 Okyanuslar',
-    'Arktik': '🧊 Kutuplar',
-    'Antarktika': '🧊 Kutuplar'
+    'Asya': '🌏 Asya', 'Afrika': '🌍 Afrika', 'Avrupa': '🏰 Avrupa',
+    'Amerika': '🌎 Amerika', 'Okyanusya': '🏝️ Okyanusya', 'Okyanus': '🌊 Okyanuslar',
+    'Arktik': '🧊 Kutuplar', 'Antarktika': '🧊 Kutuplar'
   };
   const kitaEtiket = h => KITA_GRUPLARI[h.kita] || '🌍 Dünya';
 
-  // Zorluğa göre ayrılmış zengin Doğa Bilgini soru bankası
-  const SORU_BANKASI = {
+  // Gittikçe zorlaşan kademe hesaplayıcı
+  function kademeBilgi(seri) {
+    if (seri < 3) return { tier: 'kolay', ad: '🌱 Isınma', carpan: 1, puan: 100 };
+    if (seri < 6) return { tier: 'orta', ad: '⚔️ Orta', carpan: 1.5, puan: 150 };
+    if (seri < 10) return { tier: 'zor', ad: '🔥 Zor', carpan: 2, puan: 200 };
+    return { tier: 'zor', ad: '👑 Efsane', carpan: 3, puan: 300 };
+  }
+
+  // 🌿 Doğa Bilgini soru bankası (Kolay → Orta → Zor)
+  const DOGA_BANK = {
     kolay: [
       { s: 'Dünya üzerinde yaşamış bilinen en büyük hayvan hangisidir?', d: 'Mavi Balina', y: ['Afrika Fili', 'Balina Köpekbalığı', 'T-Rex'], a: 'Mavi balina 30 metre boya ve 180 tona ulaşarak tüm dinozorlardan bile büyüktür.' },
       { s: 'Hangi kuş uçamaz ama saatte 70 km hızla koşabilir?', d: 'Devekuşu', y: ['İmparator Penguen', 'Kivi', 'Flamingo'], a: 'Devekuşu dünyanın en büyük ve karada en hızlı koşan kuşudur.' },
       { s: 'Yavrularını karnındaki kesede büyüten ve yalnızca Avustralya\'da doğal yaşayan memeli hangisidir?', d: 'Kanguru', y: ['Dev Panda', 'Lama', 'Su Aygırı'], a: 'Kangurular, koalalar ve vombatlar Avustralya\'nın ünlü keseli memelileridir.' },
-      { s: 'Günde yaklaşık 12-14 saat yalnızca bambu yiyerek beslenen ünlü hayvan hangisidir?', d: 'Dev Panda', y: ['Koala', 'Tembel Hayvan', 'Kutup Ayısı'], a: 'Dev pandalar Çin\'in dağlık bambu ormanlarında yaşar ve diyetlerinin %99\'u bambudur.' },
-      { s: 'Hangi hayvanın boynu tüm kara hayvanlarından uzundur ama insanla aynı sayıda (7) boyun omuru vardır?', d: 'Zürafa', y: ['Deve', 'Lama', 'Flamingo'], a: 'Zürafanın her bir boyun omuru yaklaşık 25 cm uzunluğundadır.' },
-      { s: 'Kışın göç etmek yerine aylarca derin uykuya (kış uykusu) yatan hayvan hangisidir?', d: 'Boz Ayı', y: ['Beyaz Leylek', 'Kambur Balina', 'Afrika Aslanı'], a: 'Boz ayılar sonbaharda bolca yağ depolayıp kış boyunca inlerinde kalp atışlarını yavaşlatarak uyur.' },
-      { s: 'Hem karada hem suda yaşayabilen, geceleri avlanan ve "nehir atı" anlamına gelen Afrika hayvanı hangisidir?', d: 'Su Aygırı', y: ['Gergedan', 'Timsah', 'Mors'], a: 'Su aygırı (Hippopotamus) gündüzleri sıcaktan korunmak için nehirde kalır, gece kıyıda otlar.' },
-      { s: 'Hangi kuş türü soğuk Antarktika kışında yumurtasını ayaklarının üstünde sıcak tutar?', d: 'İmparator Penguen', y: ['Albatros', 'Kutup Baykuşu', 'Kuzey Sumrusu'], a: 'Erkek imparator penguenler -40 °C fırtınada iki ay boyunca yemeden yumurtayı ayaklarında ısıtır.' },
+      { s: 'Günde yaklaşık 12–14 saat yalnızca bambu yiyerek beslenen ünlü hayvan hangisidir?', d: 'Dev Panda', y: ['Koala', 'Tembel Hayvan', 'Kutup Ayısı'], a: 'Dev pandalar Çin\'in dağlık bambu ormanlarında yaşar ve diyetlerinin %99\'u bambudur.' },
       { s: 'Hangi kara hayvanı kısa mesafede saatte 110 km hıza ulaşarak en hızlı koşucudur?', d: 'Çita', y: ['Leopar', 'Ceylan', 'Bozkurt'], a: 'Çita 0\'dan 100 km/s hıza yalnızca 3 saniyede çıkabilir.' },
-      { s: 'Renk değiştirerek ortama gizlenebilen ve gözlerini birbirinden bağımsız döndürebilen sürüngen hangisidir?', d: 'Bukalemun', y: ['Komodo Ejderi', 'İguana', 'Geko'], a: 'Bukalemunlar hem kamuflaj hem de ruh hâllerini göstermek için deri rengini değiştirir.' }
+      { s: 'Dünya okyanuslarının bilinen en derin noktası (-10.984 m) hangisidir?', d: 'Mariana Çukuru', y: ['Porto Riko Çukuru', 'Java Çukuru', 'Tonga Çukuru'], a: 'Batı Pasifik\'teki Mariana Çukuru\'na Everest\'i koysanız zirvesi hâlâ 2 km su altında kalır.' },
+      { s: '66 milyon yıl önce dinozorların sonunu getiren dev göktaşı krateri hangisidir?', d: 'Chicxulub Krateri', y: ['Barringer Krateri', 'Vredefort Kubbesi', 'Tunguska'], a: 'Meksika\'nın Yucatán Yarımadası\'ndaki Chicxulub krateri 180 km çapındadır.' },
+      { s: 'Uzaydan çıplak gözle görülebilen, canlı mercanların kurduğu dünyanın en büyük yapısı hangisidir?', d: 'Büyük Set Resifi', y: ['Amazon Ormanı', 'Belize Resifi', 'Kızıldeniz Resifi'], a: 'Avustralya açıklarındaki Büyük Set Resifi 2.300 km boyunca uzanır.' },
+      { s: 'Dünyanın en yüksek şelalesi (979 m) hangisidir?', d: 'Angel Şelalesi', y: ['Niagara Şelalesi', 'Victoria Şelalesi', 'Iguazú Şelalesi'], a: 'Venezuela\'daki Angel Şelalesi\'nde su yere varmadan rüzgârla sis bulutuna dönüşür.' },
+      { s: 'Kahvenin (Coffea arabica) dünyadaki ilk doğal anavatanı neresidir?', d: 'Etiyopya Yaylası', y: ['Brezilya', 'Kolombiya', 'Hindistan'], a: 'Kahve Etiyopya\'nın Kaffa ormanlarından Yemen\'e, oradan Osmanlı üzerinden tüm dünyaya yayıldı.' }
     ],
     orta: [
-      { s: 'Her yıl Kuzey Kutbu ile Antarktika arasında ~80.000 km uçarak dünya göç rekorunu elinde tutan kuş hangisidir?', d: 'Kuzey Sumrusu', y: ['Beyaz Leylek', 'Albatros', 'Kaya Kartalı'], a: 'Kuzey sumrusu her yıl iki yarımkürenin yaz mevsimini birden yaşar ve ömrü boyunca Ay\'a 3 kez gidip gelecek kadar uçar.' },
-      { s: 'Hangi memeli hayvan, yavrularını doğurmak yerine yumurtlayarak dünyaya getirir?', d: 'Ornitorenk', y: ['Koala', 'Kunduz', 'Su Samuru'], a: 'Ornitorenk ve ekidne, dünyada yumurtlayan tek memeli grubudur (tek delikliler).' },
-      { s: 'Üç kalbi, dokuz beyni (her kolda mini sinir ağı) ve bakır bazlı mavi kanı olan deniz canlısı hangisidir?', d: 'Ahtapot', y: ['Manta Vatozu', 'Denizanası', 'Balina Köpekbalığı'], a: 'Ahtapotun iki kalbi solungaçlara, bir kalbi vücuda kan pompalar; kanındaki hemosiyanin ona mavi renk verir.' },
-      { s: 'Kanada\'dan Meksika\'daki çam ormanlarına uzanan göçü tek bir birey değil, 4 nesil hâlinde tamamlayan canlı hangisidir?', d: 'Kral (Monark) Kelebeği', y: ['Yusufçuk', 'Bal Arısı', 'Ateş Böceği'], a: 'Kış için Meksika\'ya uçan kelebekler oraya hiç gitmemiştir; genetik pusulayla atalarının ağaçlarını bulur.' },
-      { s: 'Ekvator çizgisine çok yakın olan Galápagos Adaları\'nda penguenlerin yaşayabilmesini hangi soğuk okyanus akıntısı sağlar?', d: 'Humboldt (Peru) Akıntısı', y: ['Gulf Stream', 'Kuroshio Akıntısı', 'Brezilya Akıntısı'], a: 'Antarktika\'dan gelen soğuk Humboldt Akıntısı, Galápagos sularını serin ve balıkça zengin tutar.' },
-      { s: 'Yaşamının çoğunu açık okyanusta geçirip yumurtlamak için koku duyusuyla tam doğduğu dağ deresine dönen balık hangisidir?', d: 'Pasifik Somonu', y: ['Orkinos', 'Kılıç Balığı', 'Morina'], a: 'Somonlar okyanusta manyetik alanla kıyıya ulaşır, nehirde ise doğdukları derenin eşsiz kokusunu izler.' },
-      { s: 'Dünyadaki en büyük kertenkele türü olup yalnızca Endonezya\'nın birkaç adasında yaşayan etçil sürüngen hangisidir?', d: 'Komodo Ejderi', y: ['Yeşil İguana', 'Gila Canavarı', 'Nil Varanı'], a: 'Komodo ejderi 3 metre boya ve 70 kg ağırlığa ulaşabilir; zehirli ısırığıyla büyük avları indirebilir.' },
-      { s: 'Kışın karanlık Arktik gecelerinde daha fazla ışık toplayabilmek için göz dokusu altından maviye dönen hayvan hangisidir?', d: 'Ren Geyiği (Karibu)', y: ['Kutup Tilkisi', 'Kar Leoparı', 'Kutup Ayısı'], a: 'Ren geyiğinin gözündeki tapetum tabakası yazın altın, kışın derin mavi renge dönüşerek gece görüşünü 1000 kat güçlendirir.' },
-      { s: '17. yüzyılda Mauritius Adası\'nda insanlar ve getirilen hayvanlar yüzünden yalnızca 80 yılda nesli tükenen uçamayan kuş hangisidir?', d: 'Dodo Kuşu', y: ['Büyük Auk', 'Göçmen Güvercin', 'Moa'], a: 'Yırtıcısız adada evrimleşen dodo insanlardan korkmadığı için 1681 civarında tamamen yok oldu.' },
-      { s: 'Hangi nehir, okyanusa akan tüm tatlı suyun yaklaşık %20\'sini tek başına taşır ve pembe nehir yunuslarına ev sahipliği yapar?', d: 'Amazon Nehri', y: ['Nil Nehri', 'Kongo Nehri', 'Yangtze Nehri'], a: 'Amazon\'un debisi kendisinden sonraki en büyük 7 nehrin toplamından fazladır.' },
-      { s: 'Her sonbaharda 500.000\'den fazla bireyle İstanbul Boğazı ve Hatay üzerinden Afrika\'ya süzülerek geçen göçmen kuş hangisidir?', d: 'Beyaz Leylek', y: ['Flamingo', 'Pelikan', 'Kuğu'], a: 'Leylekler açık denizde termal hava akımı olmadığı için İstanbul Boğazı ve Cebelitarık gibi kara köprülerini seçer.' },
-      { s: 'Kutup ayısının tüyleri beyaz görünse de aslında şeffaftır; peki altındaki derisi ne renktir?', d: 'Siyah', y: ['Pembe', 'Beyaz', 'Gri'], a: 'Siyah deri, içi boş şeffaf kıllardan geçen güneş ışığını ve ısıyı maksimum düzeyde emer.' }
+      { s: 'Her yıl Kuzey Kutbu ile Antarktika arasında ~80.000 km uçarak dünya göç rekorunu elinde tutan kuş hangisidir?', d: 'Kuzey Sumrusu', y: ['Beyaz Leylek', 'Albatros', 'Kaya Kartalı'], a: 'Kuzey sumrusu her yıl iki yarımkürenin yazını birden yaşar ve ömrü boyunca Ay\'a 3 kez gidip gelecek kadar uçar.' },
+      { s: 'Hangi memeli hayvan, yavrularını doğurmak yerine yumurtlayarak dünyaya getirir?', d: 'Ornitorenk', y: ['Koala', 'Kunduz', 'Su Samuru'], a: 'Ornitorenk ve ekidne, dünyada yumurtlayan tek memeli grubudur.' },
+      { s: 'Üç kalbi, dokuz beyni ve bakır bazlı mavi kanı olan deniz canlısı hangisidir?', d: 'Ahtapot', y: ['Manta Vatozu', 'Denizanası', 'Balina Köpekbalığı'], a: 'Ahtapotun kanındaki hemosiyanin ona mavi renk verir; her kolunun kendi sinir ağı vardır.' },
+      { s: 'Dünyanın en derin (1.642 m) ve sıvı tatlı suların %20\'sini tek başına tutan gölü hangisidir?', d: 'Baykal Gölü', y: ['Victoria Gölü', 'Superior Gölü', 'Hazar Denizi'], a: 'Sibirya\'daki Baykal Gölü 25 milyon yıllıktır ve dünyadaki tek tatlı su fokuna ev sahipliği yapar.' },
+      { s: 'Bugün yediğimiz modern mısır, Meksika\'da hangi yabani ottan binlerce yıllık seçimle geliştirildi?', d: 'Teosinte', y: ['Siyez', 'Kinoa', 'Sorgum'], a: 'Teosinte sadece 6–12 sert taneli küçük bir ottu; Mezoamerikalı çiftçiler onu dev koçana dönüştürdü.' },
+      { s: 'Ekvator\'daki Galápagos Adaları\'nda penguenlerin yaşayabilmesini hangi soğuk okyanus akıntısı sağlar?', d: 'Humboldt (Peru) Akıntısı', y: ['Gulf Stream', 'Kuroshio Akıntısı', 'Brezilya Akıntısı'], a: 'Antarktika\'dan gelen soğuk Humboldt Akıntısı, Galápagos sularını serin tutar.' },
+      { s: 'Kutup ayısının tüyleri şeffaftır; peki altındaki derisi ne renktir?', d: 'Siyah', y: ['Pembe', 'Beyaz', 'Gri'], a: 'Siyah deri, içi boş şeffaf kıllardan geçen güneş ısısını en yüksek düzeyde emer.' },
+      { s: 'Dünyadaki tüm elmaların yabani atası (Malus sieversii) doğal olarak hangi bölgede orman oluşturur?', d: 'Orta Asya (Kazakistan / Tanrı Dağları)', y: ['Avrupa Alpleri', 'Kuzey Amerika', 'Akdeniz'], a: 'Kazakistan\'ın eski başkenti Almatı\'nın adı doğrudan "Elmaların Babası" anlamına gelir.' },
+      { s: 'Lahana, brokoli, karnabahar ve brüksel lahanası aslında hangi tarım merkezinde tek bir yabani bitkiden üretildi?', d: 'Akdeniz Merkezi', y: ['And Dağları', 'Yeni Gine', 'Batı Afrika'], a: 'Hepsi tek bir yabani hardal türünün (Brassica oleracea) farklı kısımlarının seçilmesiyle doğdu.' },
+      { s: 'Buzul Çağı\'nda Asya ile Amerika\'yı birleştirip ilk insanların ve mamutların geçtiği kara köprüsü hangisidir?', d: 'Beringia', y: ['Doggerland', 'Sundaland', 'Sahul'], a: 'Deniz seviyesi 120 m alçaktayken Sibirya ile Alaska arasında 1.000 km genişliğinde bir bozkır köprüsü vardı.' }
     ],
     zor: [
-      { s: 'Avrupa yılan balıkları (Anguilla anguilla) Avrupa nehirlerinden çıkıp yumurtlamak için hangi uzak deniz bölgesine göç eder?', d: 'Sargasso Denizi', y: ['Kuzey Denizi', 'Akdeniz', 'Bering Denizi'], a: 'Avrupa yılan balıkları 5.000 km yüzüp Bermuda yakınındaki Sargasso Denizi\'nde yumurtlar; yavrular Gulf Stream ile Avrupa\'ya döner.' },
-      { s: '1936 yılında Tazmanya\'daki Hobart Hayvanat Bahçesi\'nde "Benjamin" adlı son bireyinin ölmesiyle nesli tükenen keseli yırtıcı hangisidir?', d: 'Tazmanya Kaplanı (Thylacine)', y: ['Tazmanya Canavarı', 'Quagga', 'Kılıç Dişli Kaplan'], a: 'Sırtındaki çizgiler yüzünden kaplana benzetilen Thylacine aslında etçil bir keseli memeliydi.' },
-      { s: '220 metreyi aşan derinliğiyle dünyanın en derin nehri olan ve Ekvator çizgisini iki kez kesen nehir hangisidir?', d: 'Kongo Nehri', y: ['Amazon Nehri', 'Yangtze Nehri', 'Mekong Nehri'], a: 'Kongo Nehri\'nin derin kanyonları o kadar akıntılıdır ki nehrin iki yakasındaki balık türleri bile birbirinden ayrı evrimleşmiştir.' },
-      { s: 'Hangi okyanus akıntısı saniyede ~130 milyon m³ su taşır (dünyadaki tüm nehirlerin 100 katı) ve Antarktika\'yı sıcak sulardan yalıtır?', d: 'Antarktika Çevresi Akıntısı (ACC)', y: ['Gulf Stream', 'Agulhas Akıntısı', 'Labrador Akıntısı'], a: 'ACC, üç büyük okyanusu birbirine bağlayan ve küresel derin deniz besin dolaşımını çalıştıran ana motordur.' },
-      { s: 'Kışın vücudundaki suyun %60\'ı donmasına rağmen kanını yüksek glikozla doğal antifrize çevirip baharda yeniden canlanan canlı hangisidir?', d: 'Alaska Orman Kurbağası', y: ['Axolotl', 'İmparator Penguen', 'Kutup Ayısı'], a: 'Orman kurbağasının (Lithobates sylvaticus) kalbi kışın tamamen durur, baharda güneşle çözülüp zıplayarak uyanır.' },
-      { s: 'Güney Amerika\'da Casiquiare Kanalı aracılığıyla doğal olarak Amazon Nehri\'ne bağlanan ve Angel Şelalesi\'ni barındıran nehir hangisidir?', d: 'Orinoco Nehri', y: ['Paraná Nehri', 'São Francisco', 'Magdalena'], a: 'İki dev nehir havzasının doğal bir kanalla birbirine bağlanması (bifürkasyon) dünyada son derece nadir bir coğrafya olayıdır.' },
-      { s: 'Yaklaşık 400 yıla kadar yaşayabilen ve bilinen en uzun ömürlü omurgalı hayvan kabul edilen deniz canlısı hangisidir?', d: 'Grönland Köpekbalığı', y: ['Galápagos Kaplumbağası', 'Mavi Balina', 'Dev Kalamar'], a: 'Arktik\'in buzlu derinliklerinde çok yavaş metabolizmayla yaşayan Grönland köpekbalığı 150 yaşında erişkinliğe ulaşır.' },
-      { s: 'Bütün yetişkin yaşamı boyunca hiç su içmeden, yalnızca yediği kuru tohumları metabolize ederek ürettiği suyla yaşayan çöl memelisi hangisidir?', d: 'Kanguru Faresi', y: ['Çöl Tilkisi (Fennek)', 'Tek Hörgüçlü Deve', 'Mirket'], a: 'Kuzey Amerika çöllerindeki kanguru faresinin böbrekleri idrarı kristalleşecek kadar yoğunlaştırıp tek damla su kaybetmez.' },
-      { s: '19. yüzyılda Kuzey Amerika\'da 3 ila 5 milyarlık sürülerle gökyüzünü karartan ama aşırı avlanma yüzünden 1914\'te tamamen yok olan kuş hangisidir?', d: 'Göçmen Güvercin', y: ['Dodo Kuşu', 'Karolina Papağanı', 'Büyük Auk'], a: '"Martha" adlı son göçmen güvercin 1914\'te öldü; bir türün milyarlarca bireyden sıfıra nasıl inebileceğinin en çarpıcı örneğidir.' },
-      { s: 'Namib Çölü\'nün kurak kalmasına yol açarken aynı zamanda kıyıya taşıdığı soğuk sisle çöl böceklerine su ve penguenlere balık sağlayan akıntı hangisidir?', d: 'Benguela Akıntısı', y: ['Agulhas Akıntısı', 'Kanarya Akıntısı', 'Doğu Avustralya Akıntısı'], a: 'Benguela Akıntısı\'nın soğuttuğu kıyı sisi, Namib böceklerinin sırtında damlacık olarak birikip çöl yaşamını besler.' },
-      { s: 'Hangi derin deniz balığı yaklaşık 400 milyon yıldır neredeyse hiç değişmeden yaşadığı için "yaşayan fosil" olarak bilinir ve 1938\'de yeniden keşfedilmiştir?', d: 'Sölakant (Coelacanth)', y: ['Fener Balığı', 'Mersin Balığı', 'Vatoz'], a: '66 milyon yıl önce dinozorlarla birlikte yok olduğu sanılan sölakant, 1938\'de Güney Afrika açıklarında canlı yakalandı.' },
-      { s: 'Avustralya\'nın Doğu kıyısı boyunca güneye akıp Büyük Set Resifi\'ndeki mercan larvalarını ve deniz kaplumbağalarını taşıyan sıcak akıntı hangisidir?', d: 'Doğu Avustralya Akıntısı', y: ['Kuroshio Akıntısı', 'Humboldt Akıntısı', 'Agulhas Akıntısı'], a: 'Mercan Denizi\'nden Sidney\'e akan bu sıcak akıntı, Kayıp Balık Nemo filmindeki ünlü kaplumbağa otoyoluna ilham vermiştir.' },
-      { s: 'Hangi memeli hayvan, uzuvlarını, omuriliğini ve hatta kalp dokusunu yara izi olmadan tamamen yenileyebilen Meksika semenderi ile karıştırılsa da aslında bir amfibidir?', d: 'Axolotl (Meksika Semenderi)', y: ['Tardigrad', 'Bukalemun', 'Ornitorenk'], a: 'Yalnızca Meksiko City yakınındaki Xochimilco kanallarında doğal yaşayan Axolotl, yaşam boyu solungaçlı larva formunda kalır.' },
-      { s: 'Mariana Çukuru\'nun yaklaşık 11 km derinliğindeki tabanında su basıncı deniz seviyesinin kaç katından fazladır?', d: '1.000 katından fazla', y: ['50 katı', '150 katı', '300 katı'], a: '10.994 metre derinlikte basınç ~1.086 bar\'a ulaşır; buna rağmen orada şeffaf salyangoz balıkları ve amfipodlar yaşar.' }
+      { s: 'Avrupa yılan balıkları yumurtlamak için 5.000 km yüzerek hangi uzak deniz bölgesine göç eder?', d: 'Sargasso Denizi', y: ['Kuzey Denizi', 'Akdeniz', 'Bering Denizi'], a: 'Bermuda yakınındaki Sargasso Denizi\'nde yumurtlarlar; yavrular Gulf Stream ile Avrupa\'ya döner.' },
+      { s: 'Dünya\'nın manyetik kalkanının %30 zayıfladığı ve Hubble Teleskobu\'nun geçerken kapandığı bölge hangisidir?', d: 'Güney Atlantik Anomalisi', y: ['Bermuda Şeytan Üçgeni', 'Mariana Çukuru', 'Kuzey Manyetik Kutbu'], a: 'Brezilya–Güney Atlantik üzerindeki bu bölgede Van Allen radyasyon kuşağı yüzeye 200 km\'ye kadar iner.' },
+      { s: 'Yaklaşık 400 yıla kadar yaşayabilen, bilinen en uzun ömürlü omurgalı deniz canlısı hangisidir?', d: 'Grönland Köpekbalığı', y: ['Galápagos Kaplumbağası', 'Mavi Balina', 'Dev Kalamar'], a: 'Arktik derinliklerinde çok yavaş metabolizmayla yaşayan bu köpekbalığı 150 yaşında erişkin olur.' },
+      { s: 'Şeker kamışı ve çekirdeksiz muzun dünyadaki en eski evcilleştirme izleri (9.000 yıllık Kuk Bataklığı) nerededir?', d: 'Papua Yeni Gine Yaylası', y: ['Hindistan', 'Brezilya', 'Mısır'], a: 'UNESCO mirası Kuk Bataklığı, tarımın dünyada bağımsız doğduğu en eski merkezlerden biridir.' },
+      { s: 'Trilyonlarca karat endüstriyel "çarpma elması" barındıran 100 km çaplı Sibirya göktaşı krateri hangisidir?', d: 'Popigai Krateri', y: ['Vredefort Kubbesi', 'Manicouagan', 'Sudbury Havzası'], a: '35,7 milyon yıl önceki dev çarpma, yerdeki grafiti saniyeler içinde elmasa dönüştürdü.' },
+      { s: '400 milyon yıldır neredeyse hiç değişmeden yaşadığı için "yaşayan fosil" denen ve 1938\'de canlı yakalanan balık hangisidir?', d: 'Sölakant (Coelacanth)', y: ['Fener Balığı', 'Mersin Balığı', 'Vatoz'], a: 'Dinozorlarla birlikte tükendiği sanılan sölakant, Güney Afrika açıklarında canlı bulundu.' },
+      { s: 'Kışın vücudundaki suyun %60\'ı donmasına rağmen kanını glikozla antifrize çevirip baharda canlanan canlı hangisidir?', d: 'Alaska Orman Kurbağası', y: ['Axolotl', 'Kutup Ayısı', 'Tardigrad'], a: 'Orman kurbağasının kalbi kışın tamamen durur, baharda güneşle çözülüp zıplayarak uyanır.' },
+      { s: 'Buzul Çağı\'nda Britanya\'yı Kıta Avrupası\'na bağlayıp dev Storegga tsunamisiyle sular altında kalan ova hangisidir?', d: 'Doggerland', y: ['Beringia', 'Sahul', 'Sundaland'], a: 'MÖ 6200 civarında Norveç açıklarındaki dev denizaltı heyelanı Doggerland\'ı Kuzey Denizi\'ne gömdü.' },
+      { s: 'DNA analizlerine göre tüm modern siyez buğdaylarının yabani atası Anadolu\'da hangi dağın eteklerindendir?', d: 'Karacadağ (Diyarbakır–Şanlıurfa)', y: ['Erciyes', 'Ağrı Dağı', 'Uludağ'], a: 'İlk çiftçiler yaklaşık 10.000 yıl önce Karacadağ eteklerindeki yabani siyezi evcilleştirdi.' }
     ]
   };
+
+  // 🏛️ Tarih Bilgini soru bankası (Kolay → Orta → Zor)
+  const TARIH_BANK = {
+    kolay: [
+      { s: 'İnsanlık tarihinin bilinen ilk yazı sistemi (MÖ ~3400) hangisidir?', d: 'Sümer Çivi Yazısı', y: ['Fenike Alfabesi', 'Latin Alfabesi', 'Orhun Alfabesi'], a: 'Sümerler Uruk\'ta kil tabletlere kamışla bastıkları çivi yazısıyla tarih çağlarını başlattı.' },
+      { s: '1450 civarında Avrupa\'da hareketli metal harfli matbaayı geliştirerek kitap devrimini başlatan kimdir?', d: 'Johannes Gutenberg', y: ['Leonardo da Vinci', 'Galileo Galilei', 'Isaac Newton'], a: 'Gutenberg\'in matbaasıyla 50 yıl içinde Avrupa\'da 20 milyondan fazla kitap basıldı.' },
+      { s: 'Akdeniz ile Kızıldeniz\'i birleştirerek Avrupa–Asya deniz yolunu 7.000 km kısaltan geçit hangisidir?', d: 'Süveyş Kanalı', y: ['Panama Kanalı', 'Cebelitarık Boğazı', 'Hürmüz Boğazı'], a: '1869\'da açılan Süveyş Kanalı gemileri Afrika\'yı dolaşmaktan kurtardı.' },
+      { s: '1928\'de laboratuvarda unuttuğu bakteri kabındaki küf sayesinde ilk antibiyotik Penisilini keşfeden kimdir?', d: 'Alexander Fleming', y: ['Louis Pasteur', 'Edward Jenner', 'Marie Curie'], a: 'Fleming\'in keşfi enfeksiyonları ölümcül olmaktan çıkarıp milyonlarca hayat kurtardı.' },
+      { s: 'Tarihte iki farklı bilim dalında (Fizik ve Kimya) Nobel Ödülü kazanan tek bilim insanı kimdir?', d: 'Marie Curie', y: ['Albert Einstein', 'Isaac Newton', 'Nikola Tesla'], a: 'Marie Curie radyoaktivite, polonyum ve radyum çalışmalarıyla çifte Nobel kazandı.' },
+      { s: 'Tarihte nüfusu 1 milyonu aşan ilk antik megakent (MS ~100) hangisidir?', d: 'Roma', y: ['Atina', 'Uruk', 'Londra'], a: 'Antik Roma 11 su kemeri ve dev apartmanlarıyla MS 100\'de 1 milyonu geçti.' },
+      { s: 'Edirne\'deki Selimiye Camii\'ni 86 yaşında tamamlayıp "ustalık eserim" diyen Osmanlı başmimarı kimdir?', d: 'Mimar Sinan', y: ['Piri Reis', 'Uluğ Bey', 'İbn Sina'], a: 'Mimar Sinan 50 yıllık başmimarlık döneminde 350\'den fazla anıtsal eser inşa etti.' },
+      { s: '1903\'te Kitty Hawk\'ta ilk kontrollü motorlu uçak uçuşunu (12 saniye, 36 m) gerçekleştirenler kimlerdir?', d: 'Wright Kardeşler', y: ['Leonardo da Vinci', 'Montgolfier Kardeşler', 'Thomas Edison'], a: 'Orville ve Wilbur Wright bisiklet tamircisiyken havacılık çağını başlattılar.' },
+      { s: '1347\'de Kırım\'dan gemilerle Avrupa\'ya ulaşıp nüfusun neredeyse yarısını yok eden büyük salgın hangisidir?', d: 'Kara Ölüm (Büyük Veba)', y: ['İspanyol Gribi', 'Antoninus Vebası', 'Büyük Kolera'], a: 'Venedik\'te gemilerin 40 gün bekletilmesi (quaranta giorni) bugünkü "karantina" kelimesini doğurdu.' },
+      { s: 'Antik Yunan\'da "sorgulanmamış hayat yaşanmaya değmez" diyen ve hiç yazılı eser bırakmayan filozof kimdir?', d: 'Sokrates', y: ['Aristoteles', 'Epikür', 'Konfüçyüs'], a: 'Sokrates\'in tüm fikirlerini öğrencisi Platon\'un yazdığı diyaloglardan biliyoruz.' }
+    ],
+    orta: [
+      { s: 'Yunan, Latin, Arap, İbrani ve Kiril alfabelerinin tamamının ortak atası olan 22 harfli antik tüccar alfabesi hangisidir?', d: 'Fenike Alfabesi', y: ['Sümer Çivi Yazısı', 'Mısır Hiyeroglifi', 'Maya Glifi'], a: 'Akdeniz\'i dolaşan Fenikeli denizciler pratik 22 harfli alfabelerini tüm dünyaya yaydı.' },
+      { s: 'MS 375\'te Hunların Karadeniz\'in kuzeyine gelmesiyle başlayıp Batı Roma\'yı yıkan büyük hareket hangisidir?', d: 'Büyük Kavimler Göçü', y: ['Deniz Kavimleri Göçü', 'Bantu Göçü', 'Viking Yayılımı'], a: 'Kavimler Göçü bugünkü Fransa, İngiltere ve İspanya\'nın temellerini attı ve Ortaçağ\'ı başlattı.' },
+      { s: 'Bilgisayar biliminin temelindeki "Algoritma" kelimesi, hangi 9. yüzyıl Bağdat matematikçisinin adından gelir?', d: 'El-Harezmi', y: ['İbn Sina', 'Farabi', 'Ömer Hayyam'], a: 'Cebir bilimini kuran Harezmi\'nin Latince adı "Algoritmi" bugünkü algoritma kelimesini doğurdu.' },
+      { s: '1513\'te Amerika kıyılarını olağanüstü doğrulukla çizen ve Kitab-ı Bahriye\'yi yazan Osmanlı amirali kimdir?', d: 'Piri Reis', y: ['Barbaros Hayreddin', 'Evliya Çelebi', 'Kâtip Çelebi'], a: 'Piri Reis\'in haritası 1929\'da Topkapı Sarayı\'nda bulundu ve dünya haritacılık tarihine geçti.' },
+      { s: '"El-Kanun fi\'t-Tıb" kitabı 600 yıl boyunca hem Doğu\'da hem Avrupa üniversitelerinde okutulan hekim kimdir?', d: 'İbn Sina (Avicenna)', y: ['Hipokrat', 'Galen', 'İbn Rüşd'], a: 'Buharalı İbn Sina mikroskoptan 600 yıl önce görünmez hastalık etkenlerini ve karantinayı tanımladı.' },
+      { s: 'MS 775–935 arasında Beytü\'l-Hikme ve kusursuz daire planıyla dünyanın en kalabalık şehri olan başkent hangisidir?', d: 'Bağdat', y: ['Kurtuba', 'İskenderiye', 'Babil'], a: 'Abbasi Halifesi Mansur\'un kurduğu Bağdat, İslam Altın Çağı\'nda 1 milyon nüfusa ulaştı.' },
+      { s: 'Kontrol edebileceğin şeylerle edemeyeceklerini ayırıp iç huzuru savunan, Epiktetos ve Marcus Aurelius\'un okulu hangisidir?', d: 'Stoacılık', y: ['Epikürcülük', 'Varoluşçuluk', 'Sofizm'], a: 'Bir köle (Denizlili Epiktetos) ile bir Roma imparatorunu aynı ilkede buluşturan felsefe okuludur.' },
+      { s: '1843\'te mekanik Analitik Makine için ilk algoritmayı yazarak tarihin ilk bilgisayar programcısı olan kişi kimdir?', d: 'Ada Lovelace', y: ['Alan Turing', 'Marie Curie', 'Tim Berners-Lee'], a: 'Ada Lovelace bilgisayarların gelecekte müzik besteleyip grafik çizebileceğini 100 yıl önceden öngördü.' },
+      { s: '1989\'da CERN\'de World Wide Web\'i icat edip patent almadan tüm insanlığa ücretsiz hediye eden kimdir?', d: 'Tim Berners-Lee', y: ['Bill Gates', 'Steve Jobs', 'Nikola Tesla'], a: 'Berners-Lee 1993\'te web teknolojisini ücretsiz kamu malına bırakarak modern interneti mümkün kıldı.' },
+      { s: '29 yıl boyunca 117.000 km gezerek Marco Polo\'nun 3 katı yol yürüyen 14. yüzyıl gezgini kimdir?', d: 'İbn Battuta', y: ['Evliya Çelebi', 'Zheng He', 'Vasco da Gama'], a: 'Tancalı İbn Battuta Anadolu Beylikleri\'nden Hindistan, Mali ve Çin\'e kadar 44 bugünkü ülkeyi gezdi.' }
+    ],
+    zor: [
+      { s: '1443\'te Kral Büyük Sejong\'un harfleri ağız ve dil şekline göre bilimsel olarak tasarlattığı alfabe hangisidir?', d: 'Hangul (Kore)', y: ['Brahmi', 'Kiril', 'Kanji'], a: 'Dilbilimciler Hangul\'u dünyanın en mantıklı ve öğrenmesi en kolay yazı sistemi kabul eder.' },
+      { s: 'Semerkant\'ta 40 metrelik mermer sekstantla bir yılın süresini yalnızca 58 saniye farkla ölçen astronom sultan kimdir?', d: 'Uluğ Bey', y: ['Ali Kuşçu', 'El-Biruni', 'Ömer Hayyam'], a: 'Timur\'un torunu Uluğ Bey, teleskop icat edilmeden 1.018 yıldızın kataloğunu çıkardı.' },
+      { s: '1854 Londra kolera salgınında vakaları haritalayıp su tulumbasından kaynaklandığını kanıtlayarak epidemiyolojiyi kuran hekim kimdir?', d: 'Dr. John Snow', y: ['Louis Pasteur', 'Edward Jenner', 'Alexander Fleming'], a: 'Broad Street su tulumbasının kolunu söktürerek modern halk sağlığı bilimini başlattı.' },
+      { s: '1717\'de İstanbul\'da Türk kadınlarının uyguladığı çiçek aşısını görüp mektuplarıyla İngiltere\'ye tanıtan kişi kimdir?', d: 'Lady Mary Wortley Montagu', y: ['Florence Nightingale', 'Marie Curie', 'Hypatia'], a: 'Anadolu\'daki bu halk hekimliği geleneği, Edward Jenner\'ın 1796 modern aşısına giden yolu açtı.' },
+      { s: 'Orhun (Göktürk) alfabesini 1893\'te çözen ve ilk okuduğu kelimenin "Tengri" olduğu bilinen dilbilimci kimdir?', d: 'Vilhelm Thomsen', y: ['Jean-François Champollion', 'Heinrich Schliemann', 'Arthur Evans'], a: 'Danimarkalı Thomsen 38 harflik Göktürk alfabesini çözerek Türk tarihinin en eski yazılı belgelerini açığa çıkardı.' },
+      { s: 'İnananlara tarihte ilk kez "Hristiyan" adının verildiği antik kent hangisidir?', d: 'Antakya (Antiochia)', y: ['Roma', 'İskenderiye', 'Efes'], a: 'Bugünkü Hatay\'da yer alan antik Antakya, erken Hristiyanlığın ilk büyük merkezlerinden biriydi.' },
+      { s: 'MS 935–1013 arasında sokak lambaları, 70 kütüphanesi ve 450.000 nüfusuyla dünyanın en kalabalık şehri olan Endülüs başkenti hangisidir?', d: 'Kurtuba (Córdoba)', y: ['Gırnata', 'Sevilla', 'Toledo'], a: 'Aynı dönemde Londra ve Paris ~20.000 nüfuslu kasabalarken Kurtuba\'da 400.000 ciltlik kütüphane vardı.' },
+      { s: 'Batı felsefesinde Aristoteles "Birinci Öğretmen", peki "Erdemli Şehir" eseriyle "İkinci Öğretmen" (Muallim-i Sani) sayılan filozof kimdir?', d: 'Farabi', y: ['İbn Rüşd', 'Gazali', 'El-Kindi'], a: 'Türkistanlı Farabi mantık, müzik teorisi ve siyaset felsefesinde İslam ve Avrupa düşüncesini derinden etkiledi.' },
+      { s: '1507\'de Hint Okyanusu baharat ticaretini kontrol etmek için Portekiz\'in ilk hedef aldığı stratejik geçit hangisidir?', d: 'Hürmüz Boğazı', y: ['Babülmendep', 'Malakka Boğazı', 'Dover Boğazı'], a: 'Basra Körfezi\'nin kapısı olan Hürmüz Boğazı bugün de dünya petrol ticaretinin beşte birini taşır.' }
+    ]
+  };
+
+  // Atlas verilerinden dinamik ekstra sorular üret (çeşitlilik hiç bitmesin!)
+  function dinamikDogaSorulari() {
+    const out = [];
+    const DEK = window.ATLAS_DOGA_EK || {};
+    const kr = DEK.kraterler || [];
+    if (kr.length >= 4) {
+      for (const k of karistir(kr).slice(0, 4)) {
+        const y = karistir(kr.filter(x => x.id !== k.id)).slice(0, 3).map(x => x.ad.split(' (')[0]);
+        out.push({ s: `${k.yer} konumunda bulunan, ${k.cap} büyüklüğündeki göktaşı krateri hangisidir?`, d: k.ad.split(' (')[0], y, a: k.ozet });
+      }
+    }
+    const gl = DEK.golSelale || [];
+    if (gl.length >= 4) {
+      for (const g0 of karistir(gl).slice(0, 4)) {
+        const ayni = gl.filter(x => x.tur === g0.tur && x.id !== g0.id);
+        if (ayni.length < 3) continue;
+        const y = karistir(ayni).slice(0, 3).map(x => x.ad.split(' (')[0]);
+        out.push({ s: `${g0.yer} bölgesindeki (${g0.olcu}) bu ünlü ${g0.tur === 'selale' ? 'şelale' : 'göl'} hangisidir?`, d: g0.ad.split(' (')[0], y, a: g0.ozet });
+      }
+    }
+    const tr = DEK.tarim || [];
+    if (tr.length >= 4) {
+      for (const t of karistir(tr).slice(0, 4)) {
+        const y = karistir(tr.filter(x => x.id !== t.id)).slice(0, 3).map(x => x.ad.split(' (')[0]);
+        const urunKisa = t.urunler.split(',').slice(0, 3).join(',');
+        out.push({ s: `"${urunKisa}" ürünlerinin ilk evcilleştirildiği Vavilov tarım anavatanı hangisidir?`, d: t.ad.split(' (')[0], y, a: t.yabani || t.ozet });
+      }
+    }
+    return out;
+  }
+
+  function dinamikTarihSorulari() {
+    const out = [];
+    const KEK = window.ATLAS_KULTUR_EK || {};
+    const TEK = window.ATLAS_TARIH_EK || {};
+    const ic = KEK.icatlar || [];
+    if (ic.length >= 4) {
+      for (const it of karistir(ic).slice(0, 4)) {
+        const y = karistir(ic.filter(x => x.id !== it.id)).slice(0, 3).map(x => x.ad.split(' (')[0]);
+        out.push({ s: `${it.donem} döneminde ${it.yer} merkezli olarak ortaya çıkan ve mucidi "${it.mucit}" olan büyük icat hangisidir?`, d: it.ad.split(' (')[0], y, a: it.ozet });
+      }
+    }
+    const bi = KEK.insanlar || [];
+    if (bi.length >= 4) {
+      for (const it of karistir(bi).slice(0, 4)) {
+        const y = karistir(bi.filter(x => x.id !== it.id)).slice(0, 3).map(x => x.ad.split(' (')[0]);
+        out.push({ s: `${it.donem} yıllarında yaşamış, ${it.yer} ile anılan bu büyük isim kimdir?\n"${it.ozet.slice(0, 115)}..."`, d: it.ad.split(' (')[0], y, a: it.ilginc || it.detay });
+      }
+    }
+    const bg = TEK.bogazlar || [];
+    if (bg.length >= 4) {
+      for (const it of karistir(bg).slice(0, 4)) {
+        const y = karistir(bg.filter(x => x.id !== it.id)).slice(0, 3).map(x => x.ad.split(' (')[0]);
+        out.push({ s: `${it.yer} konumundaki (${it.olcu}) stratejik geçit hangisidir?`, d: it.ad.split(' (')[0], y, a: it.ozet });
+      }
+    }
+    return out;
+  }
 
   const fotoCache = new Map();
   async function fotoYukle(titles) {
@@ -86,201 +179,190 @@ window.HayvanOyunu = (() => {
     } catch (e) { /* çevrimdışı */ }
   }
 
-  let el = null, s = null, zorluk = 'orta';
-  const ZORLUK = {
-    kolay: { ad: 'Kolay', sik: 3, ipucu: true, xp: 5 },
-    orta:  { ad: 'Orta',  sik: 4, ipucu: false, xp: 8 },
-    zor:   { ad: 'Zor',   sik: 5, ipucu: false, xp: 12 }
-  };
-  const ist = () => oku('zy-hayvan-ist', { seriRekor: 0, testRekor: 0, oyun: 0 });
-  const istKaydet = fn => { const I = ist(); fn(I); yaz('zy-hayvan-ist', I); return I; };
+  let el = null, s = null;
 
   function kutu() {
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'hayvan-oyun';
-      el.className = 'hayvan-oyun';
-      el.setAttribute('role', 'dialog');
-      el.setAttribute('aria-label', 'Hayvanlar Alemi Oyunu');
-      document.querySelector('.stage').appendChild(el);
-      el.addEventListener('click', tikla);
-      window.addEventListener('keydown', ev => { if (ev.key === 'Escape' && el && !el.hidden) kapat(); });
-    }
-    el.hidden = false;
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'hayvan-oyun';
+    el.className = 'ho';
+    el.hidden = true;
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-label', 'Tarih ve Doğa Bilgini');
+    document.body.appendChild(el);
+    el.addEventListener('click', tikla);
+    window.addEventListener('keydown', e => { if (e.key === 'Escape' && el && !el.hidden) kapat(); });
     return el;
   }
 
+  const ist = () => oku('zy-ho-ist2', { dogaRekor: 0, tarihRekor: 0, karmaRekor: 0, neredeRekor: 0, oyun: 0 });
+  const istKaydet = fn => { const d = ist(); fn(d); yaz('zy-ho-ist2', d); return d; };
+
   function secim() {
-    s = null;
+    const k = kutu(); k.hidden = false;
     const I = ist();
-    kutu().innerHTML = `
-      <div class="ho-ust">
-        <div><b>🐾 Hayvanlar Alemi</b><small>Dünya canlıları, göçler ve doğa bilgisiyle kendini dene</small></div>
+    k.innerHTML = `<div class="ho-kart">
+      <div class="eo-ust">
+        <div><b>🧠 Tarih &amp; Doğa Bilgini</b><small>Sorular her turda otomatik zorlaşır: 🌱 Isınma → ⚔️ Orta → 🔥 Zor → 👑 Efsane · ❤️ 3 Can!</small></div>
         <button class="ho-x" title="Kapat" aria-label="Kapat">✕</button>
       </div>
-      <div class="oz-bar">${Object.entries(ZORLUK).map(([k, v]) => `<button type="button" class="oz-btn${zorluk === k ? ' on' : ''}" data-ho-zor="${k}">${v.ad}</button>`).join('')}</div>
-      <div class="ho-modlar">
-        <button data-ho="nerede" class="ho-mod">
-          <span>📍</span>
-          <div><b>Bu Hayvan Nerede Yaşar?</b><small>Fotoğrafı ve ipucunu gör, doğal yaşam bölgesini tahmin et · seri yap!${I.seriRekor ? ` (🏆 Rekor: ${I.seriRekor})` : ''}</small></div>
+      <div class="ho-secim">
+        <button type="button" class="ho-mod" data-ho="tarih">
+          <span>🏛️</span>
+          <b>Tarih Bilgini</b>
+          <small>İcatlar, filozoflar, büyük insanlar, dinler, alfabeler, salgınlar ve megakentler!</small>
+          ${I.tarihRekor ? `<em>🏆 Rekor: ${I.tarihRekor.toLocaleString('tr-TR')} puan</em>` : ''}
         </button>
-        <button data-ho="test" class="ho-mod alt">
-          <span>🧠</span>
-          <div><b>Doğa Bilgini</b><small>Hayvanlar, göç döngüleri, akıntılar ve şaşırtıcı adaptasyonlar (${ZORLUK[zorluk].ad})${I.testRekor ? ` · 🏆 Rekor: ${I.testRekor}` : ''}</small></div>
+        <button type="button" class="ho-mod" data-ho="doga">
+          <span>🌿</span>
+          <b>Doğa Bilgini</b>
+          <small>Hayvanlar, okyanus tabanı, kraterler, Vavilov tarım, göller ve iklim harikaları!</small>
+          ${I.dogaRekor ? `<em>🏆 Rekor: ${I.dogaRekor.toLocaleString('tr-TR')} puan</em>` : ''}
         </button>
-      </div>`;
+        <button type="button" class="ho-mod" data-ho="karma">
+          <span>⚡</span>
+          <b>Tarih + Doğa Karma</b>
+          <small>İki dünyanın en çarpıcı soruları bir arada — gerçek genel kültür testi!</small>
+          ${I.karmaRekor ? `<em>🏆 Rekor: ${I.karmaRekor.toLocaleString('tr-TR')} puan</em>` : ''}
+        </button>
+        <button type="button" class="ho-mod" data-ho="nerede">
+          <span>🐾</span>
+          <b>Nerede Yaşar? (Fotoğraflı)</b>
+          <small>Hayvan fotoğrafına bak, hangi kıta veya okyanusta yaşadığını bil; tur ilerledikçe zorlaşır!</small>
+          ${I.neredeRekor ? `<em>🏆 Rekor: ${I.neredeRekor.toLocaleString('tr-TR')} puan</em>` : ''}
+        </button>
+      </div>
+    </div>`;
   }
 
-  // ---------- Mod 1: 📍 Nerede Yaşar? (Seri) ----------
+  // ---------- 1) 📍 NEREDE YAŞAR? (Gittikçe zorlaşan + 3 Can) ----------
+  const KOLAY_H = new Set(['devpanda', 'bengalkaplani', 'asyafili', 'aslan', 'zurafa', 'kutupayisi', 'penguen', 'kanguru', 'koala', 'komodo', 'orangutan', 'caretta', 'vankedisi', 'lama', 'jaguar', 'goril', 'afrikafili']);
+
   function neredeBasla() {
-    const tum = window.ATLAS_HAYVANLAR || [];
-    const L = karistir(zorluk === 'kolay' ? tum.filter(x => x.durum !== 'Nesli Tükendi') : tum);
-    if (!L.length) return;
-    s = { mod: 'nerede', havuz: L, idx: 0, seri: 0, izler: [], secim: null, bitti: false, secenekler: [] };
+    const H = (window.ATLAS_HAYVANLAR || []).filter(h => h.kita && h.w);
+    const kolay = karistir(H.filter(h => KOLAY_H.has(h.id)));
+    const orta = karistir(H.filter(h => !KOLAY_H.has(h.id) && h.from == null));
+    const zor = karistir(H.filter(h => h.from != null || h.durum === 'Kritik' || h.durum === 'Tükendi'));
+    s = { mod: 'nerede', havuz: { kolay, orta, zor }, gorulen: new Set(), seri: 0, puan: 0, can: 3, izler: [], secim: null, bitti: false };
     neredeTur();
   }
+
   function neredeTur() {
-    if (s.idx >= s.havuz.length) { s.havuz = karistir(window.ATLAS_HAYVANLAR || []); s.idx = 0; }
-    const h = s.havuz[s.idx];
+    const kd = kademeBilgi(s.seri);
+    const hav = s.havuz[kd.tier].filter(x => !s.gorulen.has(x.id));
+    const yedek = [...s.havuz.kolay, ...s.havuz.orta, ...s.havuz.zor].filter(x => !s.gorulen.has(x.id));
+    const h = hav[0] || yedek[0] || s.havuz.kolay[0];
+    if (!h) { s.gorulen.clear(); return neredeTur(); }
+    s.gorulen.add(h.id);
     const dogru = kitaEtiket(h);
-    const z = ZORLUK[zorluk] || ZORLUK.orta;
-    const diger = karistir([...new Set(Object.values(KITA_GRUPLARI))].filter(x => x !== dogru)).slice(0, z.sik - 1);
-    s.hedef = h;
-    s.dogru = dogru;
-    s.secenekler = karistir([dogru, ...diger]);
-    s.secim = null;
-    fotoYukle([h.w, s.havuz[s.idx + 1]?.w, s.havuz[s.idx + 2]?.w]).then(() => {
-      if (el && !el.hidden && s && s.mod === 'nerede' && s.hedef === h) {
-        const box = el.querySelector('.ho-foto[data-ho-w]');
-        if (box && !box.querySelector('img') && fotoCache.get(h.w)) {
-          box.innerHTML = `<img src="${esc(fotoCache.get(h.w))}" alt="${esc(h.ad)}">`;
-        }
-      }
-    });
+    const tumKitalar = [...new Set(Object.values(KITA_GRUPLARI))];
+    const yanlis = karistir(tumKitalar.filter(x => x !== dogru)).slice(0, 3);
+    s.hedef = h; s.dogru = dogru; s.siklar = karistir([dogru, ...yanlis]); s.secim = null; s.kademe = kd;
     neredeCiz();
+    fotoYukle([h.w]).then(() => { if (s && s.hedef === h) neredeCiz(); });
   }
+
   function neredeCiz() {
-    const h = s.hedef, I = ist(), acik = s.secim != null, src = fotoCache.get(h.w), z = ZORLUK[zorluk] || ZORLUK.orta;
-    const dogruMu = acik && s.secim === s.dogru;
-    const ip = zorluk === 'zor' ? `🛡️ ${h.durum}` : z.ipucu ? `🌿 ${h.habitat} · 🍽️ ${h.beslenme}` : `🍽️ ${h.beslenme} · 🛡️ ${h.durum}`;
-    kutu().innerHTML = `
-      <div class="ho-ust">
-        <div><b>📍 Bu Hayvan Nerede Yaşar?</b><small>${z.ad} seviye · Doğal yaşam bölgesini seç</small></div>
-        <div class="eo-sayac"><span>🔥 <b>${s.seri}</b></span><span>🏆 <b>${Math.max(I.seriRekor, s.seri)}</b></span></div>
+    const k = kutu(), h = s.hedef, I = ist();
+    const img = fotoCache.get(h.w);
+    const acik = s.secim != null;
+    const dogruMu = s.secim === s.dogru;
+    const kd = s.kademe || kademeBilgi(s.seri);
+    const kalpler = '❤️'.repeat(s.can) + '🖤'.repeat(Math.max(0, 3 - s.can));
+    k.innerHTML = `<div class="ho-kart">
+      <div class="eo-ust">
+        <div><b>🐾 Nerede Yaşar? · ${kd.ad} (×${kd.carpan})</b><small>${kalpler} · Puan: <b>${s.puan.toLocaleString('tr-TR')}</b></small></div>
+        <div class="eo-sayac"><span>🔥 <b>${s.seri}</b></span><span>🏆 <b>${Math.max(I.neredeRekor, s.puan).toLocaleString('tr-TR')}</b></span></div>
         <button class="ho-x" title="Kapat" aria-label="Kapat">✕</button>
       </div>
-      <div class="ho-kart">
-        <div class="ho-foto" data-ho-w="${esc(h.w || '')}">${src ? `<img src="${esc(src)}" alt="${esc(h.ad)}">` : `<span class="ho-ik">${h.ik}</span>`}</div>
-        <div class="ho-kbilgi">
-          <h3>${h.ik} ${esc(h.ad)}</h3>
-          <small>${esc(ip)}</small>
-          ${acik ? `<p><b>📍 ${esc(h.bolge)}</b> — ${esc(h.ozellik)}</p>` : `<p>Bu tür dünyanın hangi bölgesine / okyanusuna özgüdür?</p>`}
-        </div>
+      <div class="ho-foto">
+        ${img ? `<img src="${esc(img)}" alt="${esc(h.ad)}">` : `<div class="ho-yuk">${h.ik || '🐾'} Fotoğraf yükleniyor…</div>`}
+        <div class="ho-rozet">${h.ik || '🐾'} <b>${esc(h.ad)}</b></div>
+      </div>
+      <div class="ho-ipucu">
+        ${s.seri < 6 ? `<span>🌿 <b>Yaşam alanı:</b> ${esc(h.habitat)}</span>` : `<span>🍽️ <b>Beslenme:</b> ${esc(h.beslenme)}</span>`}
+        <span>⚠️ <b>Durum:</b> ${esc(h.durum)}</span>
       </div>
       <div class="ho-siklar">
-        ${s.secenekler.map(op => {
+        ${s.siklar.map(op => {
           let cls = '';
           if (acik) { if (op === s.dogru) cls = 'dogru'; else if (op === s.secim) cls = 'yanlis'; else cls = 'soluk'; }
           return `<button class="ho-sik ${cls}" data-ho-op="${esc(op)}" ${acik ? 'disabled' : ''}>${esc(op)}</button>`;
         }).join('')}
       </div>
-      ${acik ? (dogruMu ? `<div class="eo-sonuc iyi">
-          <b>🎉 Doğru! ${esc(h.bolge)} (${esc(s.dogru)})</b>
-          <div class="eo-btns">
-            <button data-ho="sonraki" class="ana">Sonraki Hayvan ›</button>
-            <button data-ho="kure">🌍 Kürede Gör</button>
-          </div>
-        </div>` : `<div class="eo-sonuc bitti">
-          <b>🙈 Yanlış! Doğru cevap: ${esc(s.dogru)} (${esc(h.bolge)})</b>
-          <div class="eo-skor"><span><b>🔥 ${s.seri}</b> seri</span><span><b>🏆 ${I.seriRekor}</b> rekor</span></div>
-          <div class="eo-izler">${s.izler.slice(-14).join('')}</div>
-          <div class="eo-btns">
-            <button data-ho="nerede" class="ana">🔁 Tekrar Oyna</button>
-            <button data-ho="paylas">📋 Paylaş</button>
-            <button data-ho="kure">🌍 Kürede Gör</button>
-            <button data-ho="menu">Modlar</button>
-          </div>
-        </div>`) : ''}`;
+      ${acik ? `<div class="eo-sonuc ${dogruMu ? 'iyi' : 'bitti'}">
+        <b>${dogruMu ? `🎉 Doğru! +${kd.puan} puan (${h.bolge})` : s.bitti ? `💀 Canların Bitti! Toplam ${s.puan.toLocaleString('tr-TR')} puan` : `🙈 Yanlış! Doğrusu: ${s.dogru} (${h.bolge})`}</b>
+        <small>${esc(h.ozellik)}</small>
+        <div class="eo-btns">
+          ${!s.bitti ? `<button data-ho="sonraki" class="ana">Sonraki Hayvan ›</button>` : `<button data-ho="nerede" class="ana">🔁 Rekor İçin Tekrar Dene</button><button data-ho="paylas">📋 Paylaş</button><button data-ho="menu">Modlar</button>`}
+          <button data-ho="kure">🌍 Kürede Gör</button>
+        </div>
+      </div>` : ''}
+    </div>`;
   }
 
-  // ---------- Mod 2: 🧠 Doğa Bilgini (Zorluk Seviyeli + Zengin Çeşitlilik, soru sayısı gösterilmez) ----------
-  function soruUret() {
-    const havuz = [];
-    // 1) Seçilen zorluk seviyesine özel hazırlanmış sorular
-    const banka = SORU_BANKASI[zorluk] || SORU_BANKASI.orta;
-    for (const q of karistir(banka)) {
-      havuz.push({
-        soru: q.s,
-        dogru: q.d,
-        siklar: karistir([q.d, ...q.y]),
-        aciklama: q.a
-      });
+  // ---------- 2) 🧠 TARİH / DOĞA / KARMA BİLGİNİ (Gittikçe Zorlaşan + ❤️ 3 Can) ----------
+  const MOD_AD = { tarih: '🏛️ Tarih Bilgini', doga: '🌿 Doğa Bilgini', karma: '⚡ Tarih + Doğa Karma' };
+  const REKOR_KEY = { tarih: 'tarihRekor', doga: 'dogaRekor', karma: 'karmaRekor' };
+
+  function havuzOlustur(alan) {
+    const toQ = item => ({ soru: item.s, dogru: item.d, siklar: karistir([item.d, ...item.y]), aciklama: item.a });
+    const k = [], o = [], z = [];
+    if (alan === 'doga' || alan === 'karma') {
+      k.push(...DOGA_BANK.kolay);
+      o.push(...DOGA_BANK.orta);
+      z.push(...DOGA_BANK.zor, ...dinamikDogaSorulari());
     }
-    // 2) Dinamik göç ve tür soruları (çeşitliliği daha da artırır)
-    const L = karistir(window.ATLAS_HAYVANLAR || []);
-    const adGizle = (metin, ad) => {
-      let out = metin;
-      for (const w of ad.split(/[\s()]+/).filter(x => x.length >= 4)) {
-        out = out.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '___');
-      }
-      return out;
+    if (alan === 'tarih' || alan === 'karma') {
+      k.push(...TARIH_BANK.kolay);
+      o.push(...TARIH_BANK.orta);
+      z.push(...TARIH_BANK.zor, ...dinamikTarihSorulari());
+    }
+    return { kolay: karistir(k).map(toQ), orta: karistir(o).map(toQ), zor: karistir(z).map(toQ) };
+  }
+
+  function testBasla(alan) {
+    const havuz = havuzOlustur(alan);
+    s = { mod: 'test', alan, havuz, gorulen: new Set(), seri: 0, puan: 0, can: 3, secim: null, bitti: false, izler: [], q: null, kademe: kademeBilgi(0) };
+    siradakiTestSoru();
+  }
+
+  function siradakiTestSoru() {
+    const kd = kademeBilgi(s.seri);
+    const al = tier => {
+      const aday = s.havuz[tier].filter(x => !s.gorulen.has(x.soru));
+      return aday.length ? aday[0] : null;
     };
-    const dinamikAdet = zorluk === 'zor' ? 3 : 4;
-    for (const h of L.slice(0, dinamikAdet)) {
-      const ayniKita = zorluk === 'zor' ? L.filter(x => x.id !== h.id && x.kita === h.kita) : [];
-      const hav = ayniKita.length >= 3 ? ayniKita : L.filter(x => x.id !== h.id);
-      const yanlis = karistir(hav).slice(0, 3).map(x => `${x.ik} ${x.ad}`);
-      const dStr = `${h.ik} ${h.ad}`;
-      havuz.push({
-        soru: zorluk === 'kolay'
-          ? `Doğal yaşam alanı "${h.habitat}" olan hayvan hangisidir?`
-          : `Bu özellik hangi canlıya aittir?\n"${adGizle(h.ozellik, h.ad)}"`,
-        dogru: dStr,
-        siklar: karistir([dStr, ...yanlis]),
-        aciklama: `${dStr} (${h.bolge}) — ${h.ozellik}`
-      });
+    let q = al(kd.tier) || al('orta') || al('zor') || al('kolay');
+    if (!q) {
+      s.gorulen.clear();
+      s.havuz = havuzOlustur(s.alan);
+      q = s.havuz[kd.tier][0] || s.havuz.kolay[0];
     }
-    return karistir(havuz);
-  }
-
-  function testBasla() {
-    const sorular = soruUret();
-    if (!sorular.length) return;
-    s = { mod: 'test', sorular, idx: 0, dogruSayi: 0, seri: 0, izler: [], secim: null, bitti: false };
+    s.gorulen.add(q.soru);
+    s.q = q; s.secim = null; s.kademe = kd;
     testCiz();
   }
+
   function testCiz() {
-    const z = ZORLUK[zorluk] || ZORLUK.orta;
-    if (s.bitti) {
-      const I = ist();
-      const baslik = s.dogruSayi >= 8 ? 'Muhteşem! Gerçek bir Doğa Bilginisin 🏆' : s.dogruSayi >= 4 ? 'Harika gidiyorsun! 🌟' : 'Güzel deneme, yeni bilgiler öğrendin 🐾';
-      kutu().innerHTML = `
-        <div class="ho-ust">
-          <div><b>🧠 Doğa Bilgini · ${z.ad}</b><small>Tur özeti</small></div>
-          <button class="ho-x" title="Kapat" aria-label="Kapat">✕</button>
-        </div>
-        <div class="eo-sonuc iyi">
-          <b>${baslik}</b>
-          <div class="eo-skor"><span><b>🔥 ${s.seri}</b> seri</span><span><b>🏆 ${I.testRekor}</b> rekor</span></div>
-          <div class="eo-izler">${s.izler.slice(-14).join('')}</div>
-          <div class="eo-btns">
-            <button data-ho="test" class="ana">🔁 Tekrar Oyna</button>
-            <button data-ho="paylas">📋 Skoru Paylaş</button>
-            <button data-ho="menu">Modlar</button>
-          </div>
-        </div>`;
-      return;
-    }
-    const q = s.sorular[s.idx], acik = s.secim != null;
-    const dogruMu = acik && s.secim === q.dogru;
-    const I = ist();
-    kutu().innerHTML = `
-      <div class="ho-ust">
-        <div><b>🧠 Doğa Bilgini</b><small>${z.ad} seviye · Doğru bildikçe devam eder</small></div>
-        <div class="eo-sayac"><span>🔥 <b>${s.seri}</b></span><span>🏆 <b>${Math.max(I.testRekor, s.seri)}</b></span></div>
+    const k = kutu(), q = s.q, I = ist();
+    const acik = s.secim != null;
+    const dogruMu = s.secim === q.dogru;
+    const kd = s.kademe || kademeBilgi(s.seri);
+    const rek = I[REKOR_KEY[s.alan]] || 0;
+    const kalpler = '❤️'.repeat(s.can) + '🖤'.repeat(Math.max(0, 3 - s.can));
+    k.innerHTML = `<div class="ho-kart">
+      <div class="eo-ust">
+        <div><b>${MOD_AD[s.alan]} · ${kd.ad} (×${kd.carpan})</b><small>${kalpler} · Puan: <b>${s.puan.toLocaleString('tr-TR')}</b></small></div>
+        <div class="eo-sayac"><span>🔥 <b>${s.seri}</b></span><span>🏆 <b>${Math.max(rek, s.puan).toLocaleString('tr-TR')}</b></span></div>
         <button class="ho-x" title="Kapat" aria-label="Kapat">✕</button>
       </div>
-      <div class="oz-bar">${Object.entries(ZORLUK).map(([k, v]) => `<button type="button" class="oz-btn${zorluk === k ? ' on' : ''}" data-ho-tzor="${k}">${v.ad}</button>`).join('')}</div>
+      <div class="oz-bar">
+        <button type="button" class="oz-btn${s.alan === 'tarih' ? ' on' : ''}" data-ho-alan="tarih">🏛️ Tarih</button>
+        <button type="button" class="oz-btn${s.alan === 'doga' ? ' on' : ''}" data-ho-alan="doga">🌿 Doğa</button>
+        <button type="button" class="oz-btn${s.alan === 'karma' ? ' on' : ''}" data-ho-alan="karma">⚡ İkisi Birden</button>
+      </div>
       <div class="ho-soru">${esc(q.soru).replace(/\n/g, '<br>')}</div>
       <div class="ho-siklar">
         ${q.siklar.map(op => {
@@ -290,41 +372,40 @@ window.HayvanOyunu = (() => {
         }).join('')}
       </div>
       ${acik ? `<div class="eo-sonuc ${dogruMu ? 'iyi' : 'bitti'}">
-        <b>${dogruMu ? '🎉 Doğru!' : '🙈 Yanlış!'}</b>
+        <b>${dogruMu ? `🎉 Doğru! +${kd.puan} puan` : s.bitti ? `💀 Canların Bitti! Toplam ${s.puan.toLocaleString('tr-TR')} puan` : `🙈 Yanlış! Doğrusu: ${q.dogru}`}</b>
         <small>${esc(q.aciklama)}</small>
         <div class="eo-btns">
-          ${dogruMu ? `<button data-ho="test-sonraki" class="ana">Sonraki Soru ›</button>` : `<button data-ho="test" class="ana">🔁 Tekrar Oyna</button><button data-ho="paylas">📋 Paylaş</button><button data-ho="menu">Modlar</button>`}
+          ${!s.bitti ? `<button data-ho="test-sonraki" class="ana">Sonraki Soru ›</button>` : `<button data-ho="tekrar" class="ana">🔁 Rekor İçin Tekrar Dene</button><button data-ho="paylas">📋 Paylaş</button><button data-ho="menu">Modlar</button>`}
         </div>
-      </div>` : ''}`;
+      </div>` : ''}
+    </div>`;
   }
 
   function paylasMetni() {
     if (!s) return '';
     const I = ist();
     if (s.mod === 'nerede') {
-      return `🐾 Hayvanlar Alemi · Nerede Yaşar? (${ZORLUK[zorluk].ad})\n${s.izler.slice(-15).join('')}\n🔥 Seri: ${s.seri} · 🏆 Rekor: ${I.seriRekor}\n${location.origin}${location.pathname}?oyun=hayvan`;
+      return `🐾 Nerede Yaşar? (Zaman Yolculuğu)\n${s.izler.slice(-15).join('')}\n⭐ ${s.puan.toLocaleString('tr-TR')} Puan · 🔥 Seri: ${s.seri} · 🏆 Rekor: ${I.neredeRekor.toLocaleString('tr-TR')}\n${location.origin}${location.pathname}?oyun=hayvan`;
     }
-    return `🧠 Doğa Bilgini (${ZORLUK[zorluk].ad})\n${s.izler.slice(-15).join('')}\n🔥 Seri: ${s.seri} · 🏆 Rekor: ${I.testRekor}\n${location.origin}${location.pathname}?oyun=hayvan`;
+    const rek = I[REKOR_KEY[s.alan]] || 0;
+    return `${MOD_AD[s.alan]} (Zaman Yolculuğu)\n${s.izler.slice(-15).join('')}\n⭐ ${s.puan.toLocaleString('tr-TR')} Puan · 🔥 Seri: ${s.seri} · 🏆 Rekor: ${rek.toLocaleString('tr-TR')}\n${location.origin}${location.pathname}?oyun=hayvan`;
   }
 
   function tikla(ev) {
     if (ev.target.closest('.ho-x')) return kapat();
-    const zr = ev.target.closest('[data-ho-zor]');
-    if (zr) { zorluk = zr.dataset.hoZor; secim(); return; }
-    const tzr = ev.target.closest('[data-ho-tzor]');
-    if (tzr) { zorluk = tzr.dataset.hoTzor; testBasla(); return; }
+    const alBtn = ev.target.closest('[data-ho-alan]');
+    if (alBtn) { testBasla(alBtn.dataset.hoAlan); return; }
     const op = ev.target.closest('[data-ho-op]');
     if (op && s && s.mod === 'nerede' && s.secim == null) {
       s.secim = op.dataset.hoOp;
+      const kd = s.kademe || kademeBilgi(s.seri);
       if (s.secim === s.dogru) {
-        s.seri++;
-        s.izler.push('🟩');
-        istKaydet(I => { if (s.seri > I.seriRekor) I.seriRekor = s.seri; });
-        if (window.ZY && window.ZY.xpEkle) window.ZY.xpEkle((ZORLUK[zorluk] || ZORLUK.orta).xp, 'hayvan');
+        s.seri++; s.puan += kd.puan; s.izler.push('🟩');
+        istKaydet(I => { if (s.puan > I.neredeRekor) I.neredeRekor = s.puan; });
+        if (window.ZY && window.ZY.xpEkle) window.ZY.xpEkle(Math.round(kd.puan / 15), 'hayvan');
       } else {
-        s.izler.push('🟥');
-        s.bitti = true;
-        istKaydet(I => { I.oyun++; });
+        s.can--; s.izler.push('🟥');
+        if (s.can <= 0) { s.bitti = true; istKaydet(I => { I.oyun++; }); }
       }
       neredeCiz();
       return;
@@ -332,16 +413,17 @@ window.HayvanOyunu = (() => {
     const tid = ev.target.closest('[data-ho-tid]');
     if (tid && s && s.mod === 'test' && s.secim == null) {
       s.secim = tid.dataset.hoTid;
-      const dogru = s.secim === s.sorular[s.idx].dogru;
+      const kd = s.kademe || kademeBilgi(s.seri);
+      const dogru = s.secim === s.q.dogru;
       if (dogru) {
-        s.dogruSayi++;
-        s.seri++;
-        istKaydet(I => { if (s.seri > I.testRekor) I.testRekor = s.seri; });
-        if (window.ZY && window.ZY.xpEkle) window.ZY.xpEkle((ZORLUK[zorluk] || ZORLUK.orta).xp, 'hayvan');
+        s.seri++; s.puan += kd.puan; s.izler.push('🟩');
+        const rk = REKOR_KEY[s.alan];
+        istKaydet(I => { if (s.puan > (I[rk] || 0)) I[rk] = s.puan; });
+        if (window.ZY && window.ZY.xpEkle) window.ZY.xpEkle(Math.round(kd.puan / 15), 'hayvan');
       } else {
-        istKaydet(I => { I.oyun++; });
+        s.can--; s.izler.push('🟥');
+        if (s.can <= 0) { s.bitti = true; istKaydet(I => { I.oyun++; }); }
       }
-      s.izler.push(dogru ? '🟩' : '🟥');
       testCiz();
       return;
     }
@@ -349,21 +431,13 @@ window.HayvanOyunu = (() => {
     if (!b) return;
     const k = b.dataset.ho;
     if (k === 'nerede') neredeBasla();
-    else if (k === 'test') testBasla();
+    else if (k === 'tarih' || k === 'doga' || k === 'karma') testBasla(k);
+    else if (k === 'tekrar' && s) testBasla(s.alan || 'karma');
     else if (k === 'menu') secim();
-    else if (k === 'sonraki') { s.idx++; neredeTur(); }
-    else if (k === 'test-sonraki') {
-      s.idx++;
-      s.secim = null;
-      if (s.idx >= s.sorular.length) {
-        // Havuz biterse taze karıştırıp devam et
-        s.sorular = soruUret();
-        s.idx = 0;
-      }
-      testCiz();
-    } else if (k === 'kure' && s && s.hedef) {
-      const h = s.hedef;
-      kapat();
+    else if (k === 'sonraki') neredeTur();
+    else if (k === 'test-sonraki') siradakiTestSoru();
+    else if (k === 'kure' && s && s.hedef) {
+      const h = s.hedef; kapat();
       if (window.ZY && window.ZY.hayvanKurede) window.ZY.hayvanKurede(h.id);
     } else if (k === 'paylas') {
       const t = paylasMetni();
@@ -374,9 +448,13 @@ window.HayvanOyunu = (() => {
     }
   }
 
-  function ac() { secim(); }
+  function ac(baslangicMod) {
+    if (baslangicMod === 'tarih' || baslangicMod === 'doga' || baslangicMod === 'karma') { testBasla(baslangicMod); return; }
+    if (baslangicMod === 'nerede') { neredeBasla(); return; }
+    secim();
+  }
   function kapat() { if (el) el.hidden = true; }
-  function rekor() { return Math.max(ist().seriRekor, ist().testRekor); }
+  function rekor() { const I = ist(); return Math.max(I.dogaRekor, I.tarihRekor, I.karmaRekor, I.neredeRekor); }
 
   return { ac, kapat, rekor };
 })();

@@ -12,7 +12,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, tarihkazi: false, fosilkazi: false, akinti: false, ruzgar: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false, gece: false, yayilis: false, iklim: false, taban: false, kutup: false, krater: false, gol: false, saat: false, manyetik: false, tarim: false, yazi: false, din: false, tarihgoc: false, salgin: false, bogaz: false, megakent: false };
+  const layers = { yapi: true, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: true, yolculuk: false, goc: true, magara: true, tarihkazi: false, fosilkazi: false, akinti: false, ruzgar: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false, gece: false, yayilis: false, iklim: false, taban: false, kutup: false, krater: false, gol: false, saat: false, manyetik: false, tarim: false, yazi: false, din: false, tarihgoc: false, salgin: false, bogaz: false, megakent: false, icat: false, felsefe: false, insanlar: false };
   let yayilisAktif = null;
   // 🌓 Canlı gece/gündüz gölgesi ve büyük şehir ışıkları (gerçek UTC saate göre)
   const GECE_SEHIR = [
@@ -321,6 +321,12 @@ window.Dunya = (() => {
       let a0 = 90, a1 = -90, o0 = 180, o1 = -180; for (const h of k.H) for (let j = 0; j < h.la.length; j++) { a0 = Math.min(a0, h.la[j]); a1 = Math.max(a1, h.la[j]); o0 = Math.min(o0, h.lo[j]); o1 = Math.max(o1, h.lo[j]); }
       k.bb = [a0, a1, o0, o1]; if (!k.e) k.e = [(a0 + a1) / 2, (o0 + o1) / 2];
     }
+    // 1976–2024 diliminde Cliopatria'da eksik olan Batı Sahra (Moritanya'nın solundaki boşluk) eklenir
+    if (i === 9 && !K.some(k => k.n === 'Western Sahara' && k.y0 <= -2024)) {
+      const wsPts = [[27.67,-13.4],[27.67,-8.67],[26.0,-8.67],[26.0,-12.0],[21.33,-12.0],[21.33,-13.0],[20.75,-17.15],[22.0,-16.8],[23.7,-16.0],[25.5,-14.9],[26.9,-13.8]];
+      const wsH = { la: wsPts.map(p => p[0]), lo: wsPts.map(p => p[1]), p: null };
+      K.push({ n: 'Western Sahara', tr: 'Batı Sahra', y1: -1976, y0: -2024, a: 266000, r: '#d4a03c', w: 'Western Sahara', e: [24.5, -13.1], H: [wsH], bb: [20.75, 27.67, -17.15, -8.67] });
+    }
     const ada = {}; for (const k of K) (ada[k.n] = ada[k.n] || []).push(k);
     for (const L of Object.values(ada)) { L.sort((x, y) => y.y1 - x.y1); for (let j = 0; j < L.length; j++) { const n = L[j + 1]; if (n && n.y1 >= L[j].y0 - 2) { L[j].sonra = n; n.once = L[j]; } } }
     K.sort((x, y) => y.a - x.a);
@@ -336,7 +342,7 @@ window.Dunya = (() => {
     while (st.length) { const [a, b] = st.pop(); let md = 0, mi = -1; const dx = lo[b] - lo[a], dy = la[b] - la[a], L = Math.hypot(dx, dy) || 1e-9; for (let i = a + 1; i < b; i++) { const d = Math.abs(dy * (lo[i] - lo[a]) - dx * (la[i] - la[a])) / L; if (d > md) { md = d; mi = i; } } if (md > tol && mi > 0) { keep[mi] = 1; st.push([a, mi], [mi, b]); } }
     const out = []; for (let i = 0; i < n; i++) if (keep[i]) out.push([la[i], lo[i]]); return out.length >= 3 ? out : null;
   }
-  const LOD = [0, 0.25, 0.7];
+  const LOD = [0, 0.10, 0.24];
   // kıta adları (uzaktan görünen tek yazılar); yerleri bölge işaretlerinin arasına denk gelecek biçimde seçildi
   const KITA_AD = [[4, 21, 'AFRİKA'], [57, 22, 'AVRUPA'], [50, 95, 'ASYA'], [53, -104, 'KUZEY AMERİKA'], [-24, -60, 'GÜNEY AMERİKA'], [-31, 134, 'OKYANUSYA'], [-80, 20, 'ANTARKTİKA']];
   function halkaYol(h, sv) {
@@ -389,7 +395,7 @@ window.Dunya = (() => {
   function sinirCiz(o) {
     const k = o.k, renk = siyasiRenk(k._r || k.r);
     g.fillStyle = renk;
-    if (o.mod === 'sabit') { if (!sekilYol(k)) return; g.fill('evenodd'); g.globalCompositeOperation = 'source-atop'; g.strokeStyle = 'rgba(255,250,235,0.48)'; g.lineWidth = 3; g.stroke(); g.globalCompositeOperation = 'source-over'; g.strokeStyle = 'rgba(58,32,14,0.72)'; g.lineWidth = 1.15; g.stroke(); return; }
+    if (o.mod === 'sabit') { if (!sekilYol(k)) return; g.fill('evenodd'); g.strokeStyle = 'rgba(58,32,14,0.68)'; g.lineWidth = 1.05; g.stroke(); return; }
     if (o.mod === 'dogus') { g.save(); daireKirp(k.e, o.t * uzak(k.e, k.bb)); if (sekilYol(k)) g.fill('evenodd'); g.restore(); return; }
     if (o.mod === 'son') { g.save(); daireKirp(k.e, (1 - o.t) * uzak(k.e, k.bb)); if (sekilYol(k)) g.fill('evenodd'); g.restore(); return; }
     const { A, B, t } = o;
@@ -407,7 +413,8 @@ window.Dunya = (() => {
     'Second Republic of Austria': 'Avusturya', 'Éire': 'İrlanda', 'Georgia': 'Gürcistan', 'Slovakia': 'Slovakya',
     'Republic of China': [[-1950, 'Tayvan (Çin Cumhuriyeti)'], [null, 'Çin Cumhuriyeti']], 'Republic of Albania': [[-1991, 'Arnavutluk']],
     'Lebanon': [[-1943, 'Lübnan']], 'Sultanate of Brunei': [[-1984, 'Brunei']], 'Luxembourg': [[-1890, 'Lüksemburg']],
-    'Mujahideen': 'Mücahitler', 'Russian-occupied territories': 'Rusya işgalindeki topraklar'
+    'Mujahideen': 'Mücahitler', 'Russian-occupied territories': 'Rusya işgalindeki topraklar',
+    'Denmark': 'Danimarka', 'Western Sahara': 'Batı Sahra'
   };
   function duzAd(k, y) { const d = AD_DUZELT[k.n]; if (!d) return null; if (typeof d === 'string') return d; for (const [s, ad] of d) if (s == null || y <= s) return ad; return null; }
   const sinirAd = (k, y = Ycur) => ((window.DEVLET_NOT || {})[k.n] || {}).tr || duzAd(k, y) || k.tr || k.n;
@@ -700,11 +707,12 @@ window.Dunya = (() => {
     if (!w || !h || !ctx || !ctx.canvas || !ctx.canvas.width || !ctx.canvas.height) return;
     g = ctx; W = w; H = h; T += dt; idle += dt; Ycur = Y;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // hareket: hedef, eylemsizlik, yavaş dönüş
-    if (target) { const e = 1 - Math.exp(-dt * 2.6); let dl = ((target.lon - view.lon + 540) % 360) - 180; view.lon += dl * e; view.lat += (target.lat - view.lat) * e; zt = lerp(zt, target.z, e); if (Math.abs(dl) < 0.02 && Math.abs(target.z - zt) < 0.01) target = null; }
-    else if (Math.hypot(vel[0], vel[1]) > 0.01) { view.lon -= vel[0]; view.lat = clamp(view.lat + vel[1], -80, 80); vel = vel.map(v => v * Math.pow(0.04, dt)); }
-    else if (idle > 6 && zt < 1.6) view.lon += dt * 3;
-    view.z = lerp(view.z, zt, 1 - Math.exp(-dt * 9));
+    // hareket: hedef, eylemsizlik (düşük hızda hemen durur ki taban önbelleği kilitlensin)
+    if (target) { const e = 1 - Math.exp(-dt * 2.6); let dl = ((target.lon - view.lon + 540) % 360) - 180; view.lon += dl * e; view.lat += (target.lat - view.lat) * e; zt = lerp(zt, target.z, e); if (Math.abs(dl) < 0.03 && Math.abs(target.lat - view.lat) < 0.03 && Math.abs(target.z - zt) < 0.01) { view.lon = target.lon; view.lat = target.lat; zt = target.z; target = null; } }
+    else if (Math.hypot(vel[0], vel[1]) > 0.015) { view.lon -= vel[0]; view.lat = clamp(view.lat + vel[1], -80, 80); vel = vel.map(v => v * Math.pow(0.04, dt)); }
+    else { vel[0] = 0; vel[1] = 0; }
+    if (Math.abs(view.z - zt) < 0.002) view.z = zt;
+    else view.z = lerp(view.z, zt, 1 - Math.exp(-dt * 9));
     cl0 = Math.cos(view.lat * D); sl0 = Math.sin(view.lat * D); l0 = view.lon * D;
     const DM = !!(window.BOLGE && window.BOLGE.dunya), r = R(), cx = W / 2, cy = H / 2, ez = DM ? clamp((view.z - 1.15) / 0.7, 0, 1) : clamp((view.z - 1.8) / 1.4, 0, 1);
     // yazı düzeyi: uzakta yalnızca kıta adları (ka), yaklaşınca devlet ve başkent adları (ua)
@@ -737,29 +745,24 @@ window.Dunya = (() => {
       let anyLand = false;
       for (const p of KARA) if (polyPathOn(karaPath, p)) anyLand = true;
       if (anyLand) {
-        g.lineJoin = 'round';
-        for (const [w, a] of [[14, 0.16], [5, 0.28]]) { g.strokeStyle = `rgba(232,246,252,${a})`; g.lineWidth = w; g.stroke(karaPath); }
+        g.lineJoin = 'bevel';
+        g.strokeStyle = 'rgba(232,246,252,0.34)'; g.lineWidth = 4.5; g.stroke(karaPath);
         const lg = g.createLinearGradient(cx - r, cy - r, cx + r, cy + r); lg.addColorStop(0, '#d3e0b2'); lg.addColorStop(1, '#a9c287');
         g.fillStyle = lg; g.fill(karaPath);
         g.save(); g.clip(karaPath);
         g.fillStyle = dokuDesen(); g.globalAlpha = 0.55; g.fillRect(cx - r, cy - r, r * 2, r * 2); g.globalAlpha = 1;
         g.beginPath(); for (const p of COLP) polyPath(p); g.fillStyle = 'rgba(236,222,182,0.88)'; g.fill();
         g.beginPath(); for (const p of BUZ) polyPath(p); g.fillStyle = 'rgba(248,250,252,0.95)'; g.fill();
+        // dönemin siyasi sınırları: ikinci dev ofscreen canvas / destination-in yerine doğrudan karaPath klip içinde hızlı çizim!
+        if (layers.sinir) {
+          g.globalAlpha = 0.9;
+          const tolPx = 1.3 / (R() * D); svNow = tolPx >= LOD[2] ? 2 : tolPx >= LOD[1] ? 1 : 0;
+          for (const o of aktifSinirlar(Y)) sinirCiz(o);
+          g.globalAlpha = 1;
+        }
         g.restore();
         g.beginPath(); polyPath(HAZAR); g.fillStyle = '#93c2dc'; g.fill(); g.strokeStyle = 'rgba(100,125,90,0.5)'; g.lineWidth = 0.7; g.stroke();
         g.strokeStyle = `rgba(105,125,90,${0.45 + ez * 0.2})`; g.lineWidth = 0.7 + ez * 0.3; g.stroke(karaPath);
-      }
-      // dönemin siyasi sınırları: karaya kırpılıp gölgesiz hızlı bindirme (shadowBlur kaldırıldı)
-      if (layers.sinir && anyLand) {
-        const L = katman(cw, ch), lc = L.getContext('2d'), gg = g;
-        lc.setTransform(1, 0, 0, 1, 0, 0); lc.clearRect(0, 0, L.width, L.height); lc.setTransform(dpr, 0, 0, dpr, 0, 0);
-        g = lc; g.lineJoin = 'round'; let var_ = false;
-        const tolPx = 1.3 / (R() * D); svNow = tolPx >= LOD[2] ? 2 : tolPx >= LOD[1] ? 1 : 0;
-        for (const o of aktifSinirlar(Y)) { sinirCiz(o); var_ = true; }
-        g.globalCompositeOperation = 'destination-in'; g.fill(karaPath); g.globalCompositeOperation = 'source-over';
-        g = gg;
-        if (var_) { g.save(); g.globalAlpha = 0.9; g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(L, 0, 0); g.restore(); }
-        g.beginPath(); polyPath(HAZAR); g.fillStyle = '#93c2dc'; g.fill();
       }
       // dar boğazlar ve nehirler
       g.lineCap = 'round'; g.lineJoin = 'round';
@@ -1623,6 +1626,32 @@ window.Dunya = (() => {
         }
       }
     }
+    // 💡🦉👑 Büyük İcatlar, Felsefi Akımlar ve Büyük İnsanlar (data/atlas/kultur-ek.js)
+    const KEK = window.ATLAS_KULTUR_EK;
+    if (KEK) {
+      const cizKulturNokta = (liste, kind, bg, bd, txCol, zLbl) => {
+        const shownK = [], minSep = view.z >= 3.5 ? 14 : 20;
+        for (const it of liste || []) {
+          const [x, y, z] = P(...it.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
+          if (shownK.some(q => Math.abs(q[0] - x) < minSep && Math.abs(q[1] - y) < minSep)) continue;
+          shownK.push([x, y]);
+          const hov = hover && hover.kind === kind && hover.it === it, r0 = hov ? 13 : 10.5;
+          g.fillStyle = bg; g.strokeStyle = hov ? '#ffffff' : bd; g.lineWidth = hov ? 2.5 : 1.7;
+          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
+          g.font = `${hov ? 13.5 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(it.ik || '✨', x, y + 0.5); g.textBaseline = 'alphabetic';
+          const lbl = it.ad.split(' (')[0];
+          if (view.z >= zLbl || hov) {
+            lab(hov ? 98 : 61, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: txCol, halo: 3.1, haloCol: 'rgba(14,10,8,0.92)', kay: true });
+            const hw = lbl.length * 3.4 + 6; hits.push({ kind, it, x0: x - hw, x1: x + hw, y0: y + r0, y1: y + r0 + 15 });
+          }
+          hits.push({ kind, it, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
+        }
+      };
+      if (layers.icat) cizKulturNokta(KEK.icatlar, 'icat', 'rgba(180,83,9,0.93)', '#fde047', '#fef9c3', 1.25);
+      if (layers.felsefe) cizKulturNokta(KEK.felsefeler, 'felsefe', 'rgba(88,28,135,0.93)', '#e9d5ff', '#f3e8ff', 1.15);
+      if (layers.insanlar) cizKulturNokta(KEK.insanlar, 'insanlar', 'rgba(30,58,138,0.93)', '#93c5fd', '#eff6ff', 1.25);
+    }
     // 🏔️ Doğa ve tarihî coğrafya bölgeleri (dağlar, doğa harikaları, çöller, havzalar — data/atlas/cografya-bolge.js)
     if (layers.cografya && window.ATLAS_COGRAFYA) {
       const CG_STIL = { harika: ['✨', '#b35c24'], dag: ['🏔️', '#546270'], col: ['🏜️', '#b88230'], havza: ['🌿', '#367d4a'], nehir: ['🌊', '#2a75ab'] };
@@ -2196,6 +2225,9 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'manyetik') tip(hover.x1 + 6, hover.y0, `${hover.mn.ik} ${hover.mn.ad}`, `${hover.mn.olcu} · ${hover.mn.yer} · tıkla: manyetik alan bilgisi`);
     else if (hover && hover.kind === 'tarimvav') tip(hover.x1 + 6, hover.y0, `${hover.tr.ik} ${hover.tr.ad}`, `${hover.tr.donem} · ${hover.tr.yer} · tıkla: tüm ürünler ve yabani ataları`);
     else if (hover && hover.kind === 'megakent') tip(hover.x1 + 6, hover.y0, `${hover.kral ? '👑 ' : hover.mk.ik + ' '}${hover.mk.ad}`, `${hover.kral ? 'BU YILIN EN BÜYÜK ŞEHRİ! · ' : ''}${hover.mk.donem} · Nüfus: ${hover.mk.nufus} · tıkla: ayrıntılar`);
+    else if (hover && hover.kind === 'icat') tip(hover.x1 + 6, hover.y0, `${hover.it.ik} ${hover.it.ad}`, `${hover.it.donem} · ${hover.it.mucit} · tıkla: nasıl icat edildi?`);
+    else if (hover && hover.kind === 'felsefe') tip(hover.x1 + 6, hover.y0, `${hover.it.ik} ${hover.it.ad}`, `${hover.it.donem} · ${hover.it.kurucu} · tıkla: temel fikirler`);
+    else if (hover && hover.kind === 'insanlar') tip(hover.x1 + 6, hover.y0, `${hover.it.ik} ${hover.it.ad}`, `${hover.it.donem} · ${hover.it.yer} · tıkla: hayatı ve mirası`);
     else if (hover && hover.kind === 'surpriz') { const bul = !!(window.ZY && window.ZY.surprizBulunduMu && window.ZY.surprizBulunduMu(hover.sp.id)); tip(hover.x1 + 6, hover.y0, bul ? `${hover.sp.ik} ${hover.sp.ad}` : '✨ Gizli Sürpriz!', bul ? `${hover.sp.yer} · tıkla: hikâyesi` : 'Keşfetmek için tıkla! (+35 XP)'); }
     else if (hover && hover.kind === 'sehir') tip(hover.x1 + 6, hover.y0, hover.c.ad + (hover.c.cap ? ' (başkent)' : ''), hover.c.not || '');
   }
