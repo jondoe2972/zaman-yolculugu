@@ -8,6 +8,7 @@ window.BELGESEL_TURLAR = [
     alt: 'Çin’den Akdeniz’e medeniyet ve ticaret köprüsü',
     renk: '#ffd666',
     sinir: true,
+    filtre: /Han|Tang|Song|Yuan|Ming|Qing|Kushan|Parthia|Sasan|Abbas|Umayy|Seljuk|Selçuk|Mongol|Moğol|Ilkhan|Timur|Ottoman|Osmanlı|Byzant|Bizans|Venice|Venedik|Genoa|Uyghur|Uygur|Göktürk|Turkic|Tibet|Samanid|Ghaznav|Khwarazm|Xiongnu/i,
     rota: [
       [34.26, 108.94], [36.06, 103.83], [38.93, 100.45], [40.14, 94.66], [42.95, 89.18],
       [39.47, 75.99], [40.52, 72.80], [39.65, 66.96], [39.77, 64.42], [37.66, 62.18],
@@ -42,6 +43,7 @@ window.BELGESEL_TURLAR = [
     alt: 'Küçük bir tepeden Akdeniz imparatorluğuna',
     renk: '#f59e0b',
     sinir: true,
+    filtre: /Roman|Roma|Byzant|Bizans|Carthag|Kartaca|Ptolem|Egypt|Mısır|Gaul|Galya|Parthia|Sasan|Ostrogoth|Visigoth|Vandal|Hun/i,
     rota: [
       [41.90, 12.49], [36.85, 10.32], [43.95, 4.53], [47.54, 4.50], [41.90, 12.49],
       [31.20, 29.92], [37.98, 23.73], [41.01, 28.97], [41.90, 12.49]
@@ -74,6 +76,7 @@ window.BELGESEL_TURLAR = [
     alt: 'Orta Asya bozkırlarından Anadolu’ya ve Cumhuriyet’e',
     renk: '#fbbf24',
     sinir: true,
+    filtre: /Turk|Türk|Göktürk|Uyghur|Uygur|Karahan|Seljuk|Selçuk|Rum|Anatolia|Ottoman|Osmanlı|Turkey|Türkiye|Khazar|Hazar|Ghaznav|Timur|Xiongnu|Hun|Khwarazm|Avar|Kipchak|Golden Horde|Altın Orda/i,
     rota: [
       [47.55, 102.84], [43.25, 76.95], [39.65, 66.96], [37.66, 62.18],
       [39.15, 42.53], [37.87, 32.48], [41.01, 28.97], [39.93, 32.85]
@@ -106,6 +109,7 @@ window.BELGESEL_TURLAR = [
     alt: 'Okyanusların haritasını çizen cesur yolculuklar',
     renk: '#38bdf8',
     sinir: true,
+    filtre: /Portugal|Portekiz|Spain|İspanya|Castile|Kastilya|Aragon|Ottoman|Osmanlı|Inca|İnka|Aztec|Aztek|Vijayanagar|Calicut|Mamluk|Memlük|Ming|Morocco|Fas/i,
     rota: [
       [38.72, -9.14], [14.70, -17.44], [-34.36, 18.47], [11.25, 75.78],
       [38.72, -9.14], [24.05, -74.53], [-52.50, -68.40], [10.31, 123.89], [37.38, -5.99]
@@ -138,6 +142,7 @@ window.BELGESEL_TURLAR = [
     alt: 'Avcılıktan ilk tapınaklara, şehirlere ve yazıya',
     renk: '#eab308',
     sinir: true,
+    filtre: /Sumer|Sümer|Akkad|Akad|Babylon|Babil|Assyr|Asur|Egypt|Mısır|Hittite|Hitit|Indus|Harappa|Shang|Zhou|Elam|Mitanni|Minoan|Mycenae/i,
     rota: [
       [37.22, 38.92], [37.67, 32.83], [31.32, 45.64], [29.98, 31.13],
       [27.33, 68.14], [36.12, 114.32]
@@ -170,6 +175,7 @@ window.BELGESEL_TURLAR = [
     alt: '11 yılda üç kıtaya uzanan efsanevi yürüyüş',
     renk: '#fb7185',
     sinir: true,
+    filtre: /Macedon|Makedon|Alexander|İskender|Achaemen|Persia|Pers|Egypt|Mısır|Ptolem|Seleuc|Antigon|Thrace|Trakya|Greek|Yunan|Athen|Sparta|Nanda|Maurya|Porus|Paurava|Lydia|Phrygia/i,
     rota: [
       [40.76, 22.52], [39.96, 26.24], [39.65, 31.99], [31.20, 29.92],
       [32.54, 44.42], [29.93, 52.89], [32.92, 73.73]
@@ -202,6 +208,7 @@ window.BELGESEL_TURLAR = [
     alt: 'Dünya’yı ölçmekten Ay’a ayak basmaya',
     renk: '#4ade80',
     sinir: true,
+    filtre: /Ptolem|Egypt|Mısır|Abbas|Baghdad|Bağdat|Holy Roman|Kutsal Roma|German|Almanya|Italy|İtalya|Florence|Floransa|Tuscany|Venice|Papal|England|İngiltere|Britain|Britanya|United Kingdom|France|Fransa|United States|Amerika/i,
     rota: [
       [31.20, 29.92], [33.31, 44.36], [49.99, 8.25], [43.77, 11.25],
       [51.48, 0.00], [28.57, -80.65]

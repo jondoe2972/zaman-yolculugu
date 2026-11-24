@@ -756,7 +756,7 @@ window.Dunya = (() => {
     if (!turRota) for (let i = 0; i < YILDIZ.length; i++) { const yz = YILDIZ[i], x = (yz[0] * W + view.lon * 0.4) % W, tw = 0.25 + 0.6 * (Math.sin(i * 13 + T * yz[3]) * 0.5 + 0.5); g.fillStyle = `rgba(255,255,255,${tw.toFixed(2)})`; g.fillRect((x + W) % W, yz[1] * H, yz[2], yz[2]); }
     // statik küre tabanı önbelleği: kamera/yıl/sınırlar değişmedikçe kıtalar, sınırlar ve nehirler yeniden çizilmez
     const cw = g.canvas.width, ch = g.canvas.height;
-    const tKey = `${cw}|${ch}|${view.lat.toFixed(4)}|${view.lon.toFixed(4)}|${view.z.toFixed(4)}|${Math.round(Y * 4)}|${layers.sinir ? 1 : 0}|${dilimVer}|${temaId}`;
+    const tKey = `${cw}|${ch}|${view.lat.toFixed(4)}|${view.lon.toFixed(4)}|${view.z.toFixed(4)}|${Math.round(Y * 4)}|${layers.sinir ? 1 : 0}|${dilimVer}|${temaId}|${turRota ? turRota.id : ''}`;
     const tb = taban(cw, ch);
     if (tKey !== tabanKey) {
       tabanKey = tKey;
@@ -792,7 +792,7 @@ window.Dunya = (() => {
           g.beginPath(); for (const p of GOLLER) polyPath(p); g.fillStyle = tema.gol; g.fill(); g.strokeStyle = tema.gol; g.lineWidth = 4.5; g.lineJoin = 'round'; g.stroke();
           g.globalAlpha = 0.92;
           const tolPx = 1.3 / (R() * D); svNow = tolPx >= LOD[2] ? 2 : tolPx >= LOD[1] ? 1 : 0;
-          for (const o of aktifSinirlar(Y)) sinirCiz(o);
+          for (const o of aktifSinirlar(Y)) if (turSinirUygun(o)) sinirCiz(o);
           g.globalAlpha = 1;
         }
         g.restore();
@@ -865,6 +865,7 @@ window.Dunya = (() => {
       if (view.z > 8 && misirVar) for (const [la, lo, ad] of [[24.08, 32.89, '1. Çağlayan'], [21.8, 31.25, '2. Çağlayan'], [19.75, 30.4, '3. Çağlayan'], [18.68, 32.15, '4. Çağlayan']]) { const [x, y, z] = P(la, lo); if (z <= 0) continue; g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - 5, y - 3); g.lineTo(x, y + 2); g.lineTo(x + 5, y - 3); g.stroke(); lab(30, x + 8, y, ad, { align: 'left', size: 10.5, col: '#dfe9f5' }); }
       // devlet adları: ekranda yeterince büyük olanlar, büyükten küçüğe öncelikli
       if (layers.sinir && ua > 0) for (const o of aktifSinirlar(Y)) {
+        if (!turSinirUygun(o)) continue;
         const k = o.k; if (o.mod === 'son' || o.mod === 'dogus') continue;
         const px = Math.sqrt(k.a) / 111 * R() * D; if (px < 55) continue;
         const [x, y, z] = P(...k.e); if (z <= 0.08) continue;
@@ -2408,6 +2409,11 @@ window.Dunya = (() => {
     }
     return null;
   }
+  function turSinirUygun(o) {
+    if (!turRota || !turRota.filtre) return true;
+    const k = o && o.k; if (!k) return false;
+    return turRota.filtre.test((k.n || '') + ' ' + (k.tr || '') + ' ' + (sinirAd(k) || ''));
+  }
   function setTema(id) { if (!TEMALAR[id]) id = 'doga'; temaId = id; tema = TEMALAR[id]; aktifOnbellek = { y: null, o: [] }; tabanKey = ''; }
-  return { devletler, kayit, nerede, llAt, icerir, karaMi, sinirAd, setTema, setTurRota: r => { turRota = r || null; }, get sinirAcik() { return layers.sinir; }, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setYayilis: id => { yayilisAktif = id || null; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
+  return { devletler, kayit, nerede, llAt, icerir, karaMi, sinirAd, setTema, setTurRota: r => { turRota = r || null; tabanKey = ''; }, get sinirAcik() { return layers.sinir; }, sinirDurum: y => aktifSinirlar(y).filter(o => o.mod !== 'sabit').map(o => [o.k.n, o.mod, +(o.t || 0).toFixed(2)]), pin, layers, setLayer: (k, v) => { layers[k] = v; }, setYayilis: id => { yayilisAktif = id || null; }, setAralik: v => { aralik = v; }, get aralik() { return aralik; }, draw, hitTest, drag, hold, release, zoom, zoomTo, goEgypt, goTo, reset, setHover: h => { hover = h; }, get view() { return view; } };
 })();

@@ -15,7 +15,9 @@
         return;
       }
     }
-    location.href = location.pathname + (bs.value === 'dunya' ? '' : '?bolge=' + bs.value);
+    // Bölge modunda yalnızca o bölgenin verisi yüklü: başka bir bölge sayfası açmak yerine Tüm Dünya'ya geçilir ve küre
+    // seçilen bölgeye döner (?git=). Böylece bu tek seferlik yüklemeden sonra bölge seçimleri sayfayı yeniden yüklemez.
+    location.href = location.pathname + '?bolge=dunya&yil=' + Math.round(Y) + (bs.value === 'dunya' ? '' : '&git=' + bs.value);
   }); } }
   { const ai = document.querySelector('#about-ikon'), at = document.querySelector('#about-tx'); if (ai) ai.textContent = BG.ikon; if (at) at.textContent = ' ' + BG.ad + ' hakkında'; }
   if (BG.mevsimler) document.querySelectorAll('[data-season]').forEach(b => { const v = BG.mevsimler[b.dataset.season]; if (v) { b.textContent = v[0]; b.title = v[1]; } });
@@ -1756,7 +1758,7 @@
       }).join('');
     }).join('');
     const guc = (window.ROLLER || []).filter(r => r.from >= b && r.to <= a);
-    const gucHTML = guc.length ? `<h3 class="ysm-kita">👑 Bu yıllarda güç sahibi olsaydın</h3><div class="secim">${guc.map(r => { const gy = clamp(yy, r.to, r.from); return `<button data-yasagit="${r.bolge}|${gy}">${r.ikon} <b>${r.ad}</b><small>${BLR[r.bolge] ? BLR[r.bolge].ad : r.bolge} · ${YIL.fmt(gy)}</small></button>`; }).join('')}</div>` : '';
+    const gucHTML = guc.length ? `<h3 class="ysm-kita">👑 Bu yıllarda güç sahibi olsaydın</h3><div class="secim">${guc.map(r => { const gy = clamp(yy, r.to, r.from); return `<button data-yasagit="${r.bolge}|${gy}|${r.id}">${r.ikon} <b>${r.ad}</b><small>${BLR[r.bolge] ? BLR[r.bolge].ad : r.bolge} · ${YIL.fmt(gy)}</small></button>`; }).join('')}</div>` : '';
     const ust = `<div class="ysm-yil">
       <div class="ysm-yil-bas">Seçtiğin yıl <b>${YIL.fmt(yy)}</b><small>${YIL.fmt(a)} ile ${YIL.fmt(b)} arasında, yani ${YASA_PAY} yıl önce ve sonra yaşanabilecek hayatlar</small></div>
       <div class="ysm-yil-sat"><button class="phbtn" data-yyil="${yilKaydir(yy, -YASA_PAY)}">◀ −${YASA_PAY} yıl</button><button class="phbtn" data-yyil="rastgele">🎲 Rastgele</button><button class="phbtn" data-yyil="${yilKaydir(yy, YASA_PAY)}">+${YASA_PAY} yıl ▶</button></div>
@@ -2148,7 +2150,17 @@
     const yh = e.target.closest('[data-yolharita]'); if (yh) { const t = TICARET_YOLLARI.find(x => x.id === yh.dataset.yolharita); DN.setLayer('ticaret', true); playingBeforeModal = false; yolHaritada(t.pts, kmYol(t.pts)); return; }
     const yg2 = e.target.closest('[data-yolcugoster]'); if (yg2) { const j = YOLCULUKLAR.find(x => x.id === yg2.dataset.yolcugoster); DN.setLayer('yolculuk', true); playingBeforeModal = false; yolHaritada(j.pts, j.km, j.y); return; }
     const g2 = e.target.closest('[data-gitbolge2]'); if (g2) { gitBolge(g2.dataset.gitbolge2); return; }
-    const yg = e.target.closest('[data-yasagit]'); if (yg) { const [b, y] = yg.dataset.yasagit.split('|'); location.href = location.pathname + '?bolge=' + b + '&yil=' + y + '&yasa=1'; return; }
+    const yg = e.target.closest('[data-yasagit]'); if (yg) {
+      const [b, y, rid] = yg.dataset.yasagit.split('|');
+      // Tüm Dünya'da bütün bölgelerin verisi zaten yüklü: sayfa yeniden yüklenmez; yıl ayarlanır, küre bölgeye döner, rol açılır
+      if (DUNYA) {
+        setYear(+y); const h = BLR[b];
+        if (h && h.merkez) { if (view !== 'dunya') setView('dunya'); DN.goTo(h.merkez[0], h.merkez[1], Math.min(4.2, h.merkezZ || 3.4)); }
+        if (rid && rolBul(rid)) openRole(rid); else openYasam(+y);
+        return;
+      }
+      location.href = location.pathname + '?bolge=' + b + '&yil=' + y + '&yasa=1'; return;
+    }
     const nx = e.target.closest('[data-next]'); if (nx) { const btn = modal.querySelector(`.tabs [data-tab="${nx.dataset.next}"]`); if (btn) btn.click(); return; }
     const sy = e.target.closest('[data-sym]');
     if (sy) { openSymbol(sy.dataset.sym); return; }
@@ -2638,9 +2650,10 @@
     // Belgesel modunda yalnızca sade sınırlar (doğa belgeselinde kapalı) + bu belgeselin kendi rotası açık kalır
     const sinirAc = turAktif.sinir !== false;
     for (const k of Object.keys(DN.layers)) DN.setLayer(k, sinirAc && k === 'sinir');
+    if (d.y > P.from || d.y < P.to) { P = ALL; if (eraSel) eraSel.value = P.id; }
     setYear(d.y, true);
-    if (DN.setTurRota) DN.setTurRota({ pts: turAktif.rota, duraklar: D, idx: turIdx, renk: turAktif.renk || '#ffd666' });
-    DN.goTo(d.ll[0], d.ll[1], d.z || 2.8);
+    if (DN.setTurRota) DN.setTurRota({ id: turAktif.id, pts: turAktif.rota, duraklar: D, idx: turIdx, renk: turAktif.renk || '#ffd666', filtre: turAktif.filtre || null });
+    DN.goTo(d.ll[0], d.ll[1], Math.min(5.2, (d.z || 3.0) + 1.1));
     $('#tur-ad').textContent = `${turAktif.ikon || '🎬'} ${turAktif.ad}`;
     $('#tur-yil').textContent = YIL.fmt(d.y);
     $('#tur-say').textContent = `${turIdx + 1} / ${D.length}`;
@@ -2832,6 +2845,7 @@
   updPlay();
   setView('dunya');
   if (BG.merkez) DN.goEgypt(BG.merkez, BG.merkezZ);
+  { const gb = QS.get('git'), h = BLR[gb]; if (DUNYA && h && h.merkez) { DN.goTo(h.merkez[0], h.merkez[1], Math.min(4.2, h.merkezZ || 3.4)); const bs = $('#bolge'); if (bs) bs.value = gb; QS.delete('git'); history.replaceState(null, '', location.pathname + (QS.toString() ? '?' + QS : '') + location.hash); } }
   if (!DUNYA && QS.get('yapi')) { const id = QS.get('yapi'); syncScenePart(); setTimeout(() => showMonument(id), 50); }
   modGuncelle();
   if (QS.get('yasa')) { syncScenePart(); setTimeout(yasaAc, 80); }

@@ -2015,3 +2015,42 @@ body.ust-gizli .yc-bolge { display: none; }
 .oyunpop .op-defter small { display: block; opacity: .85; }
 .oyunpop .op-defter em { font-style: normal; font-size: 20px; opacity: .7; }
 body[data-tema] .oyunpop .op-defter { background: var(--t-soft); border-color: var(--t-border); }
+
+/* ---------- Yaşa: koyu temalarda okunurluk ----------
+   Yaşa'nın kutu ve kartları açık (krem/beyaz) zeminle yazılmıştı; koyu temalar yazıyı açık renge çevirince
+   açık zemin üstünde açık yazı kalıyordu (kontrast 1,03–1,5). Koyu temada bu zeminler temanın koyu tonlarına döner. */
+body[data-tema] .rolecard, body[data-tema] .godcard { background: rgba(255,255,255,0.05); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .rolecard:hover, body[data-tema] .godcard:hover { border-color: var(--t-accent); background: rgba(255,255,255,0.09); }
+body[data-tema] .rolecard.guc { background: var(--t-did); border-color: var(--t-accent); }
+body[data-tema] .rolecard b, body[data-tema] .godcard b { color: var(--t-text); }
+body[data-tema] .rolecard small, body[data-tema] .godcard small { color: var(--t-muted); }
+body[data-tema] .ysm-sinif { color: var(--t-title); }
+body[data-tema] .ysm-donem { border-top-color: var(--t-border); }
+body[data-tema] .ysm-donem.simdi { background: var(--t-did); }
+body[data-tema] .ysm-donem h4 { color: var(--t-title); }
+body[data-tema] .ysm-donem h4 small { color: var(--t-muted); }
+body[data-tema] .ysm-kita { color: var(--t-title); }
+body[data-tema] .ysm-yil { background: var(--t-soft); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .ysm-yil-bas { color: var(--t-text); }
+body[data-tema] .ysm-yil-bas b { color: var(--t-title); }
+body[data-tema] .ysm-yil-bas small, body[data-tema] .ysm-yil-form { color: var(--t-muted); }
+body[data-tema] .ysm-yil-form input, body[data-tema] .ysm-yil-form select { background: rgba(0,0,0,0.3); color: var(--t-text); border-color: var(--t-border); }
+body[data-tema] .yd-sec-kutu { background: rgba(255,255,255,0.04); border-color: var(--t-border); }
+body[data-tema] .yd-sec-kutu summary { color: var(--t-title); }
+body[data-tema] .yd-sec-kutu[open] summary { border-bottom-color: var(--t-border); }
+body[data-tema] .yd-adim { border-left-color: var(--t-accent); }
+body[data-tema] .yd-secenek button.on { background: var(--t-accent); color: var(--t-accent-ink); border-color: var(--t-accent); }
+body[data-tema] .yd-sonuc.iyi { color: #bbf7d0; border-color: rgba(74,222,128,.45); }
+body[data-tema] .yd-sonuc.uyari { color: #fed7aa; border-color: rgba(251,146,60,.45); }
+/* İnsan sekmesindeki iç sekme çubuğu satır içi krem zeminle yazılmış (style="background:#efe2c4") */
+body[data-tema] .mbody .tabs { background: rgba(0,0,0,0.22) !important; }
+/* "bu yıllarda" rozeti: beyaz yazı açık turuncuda okunmuyordu (2,2) */
+.ysm-rozet { background: #b45309; }
+.ysm-rozet.soluk { background: #6b5a3e; }
+/* Sitenin genelindeki seçim düğmeleri, fotoğraf altı yazısı ve bilgi tabloları (Yaşa dahil her kartta) */
+body[data-tema] .secim button { background: rgba(255,255,255,0.06); border-color: var(--t-border); color: var(--t-text); }
+body[data-tema] .secim button:hover { background: var(--t-soft); border-color: var(--t-accent); }
+body[data-tema] .secim button small { color: var(--t-muted); }
+body[data-tema] .kapak small { background: rgba(0,0,0,0.35); color: var(--t-muted); }
+body[data-tema] .tech th { color: var(--t-muted); border-bottom-color: var(--t-border); }
+body[data-tema] .tech td { border-bottom-color: var(--t-border); }
