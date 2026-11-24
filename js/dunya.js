@@ -13,7 +13,7 @@ window.Dunya = (() => {
   let zt = 1, target = null, idle = 0, hover = null, vel = [0, 0];
   const hits = [];
   let aralik = 100;
-  const layers = { yapi: false, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: false, yolculuk: false, goc: false, magara: false, tarihkazi: false, fosilkazi: false, akinti: false, ruzgar: false, hayvan: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false, gece: false, yayilis: false, iklim: false, taban: false, kutup: false, krater: false, gol: false, saat: false, manyetik: false, tarim: false, yazi: false, din: false, tarihgoc: false, salgin: false, bogaz: false, megakent: false, icat: false, felsefe: false, insanlar: false };
+  const layers = { yapi: false, sehir: true, sinir: true, savas: false, deniz: false, afet: false, antlasma: false, olay: false, kaynak: false, ticaret: false, yolculuk: false, goc: false, magara: false, tarihkazi: false, fosilkazi: false, akinti: false, ruzgar: false, hayvan: false, tukenen: false, bitki: false, cografya: false, nehir: false, hayvangoc: false, liman: false, volkan: false, donum: false, gece: false, yayilis: false, iklim: false, taban: false, kutup: false, krater: false, gol: false, saat: false, manyetik: false, tarim: false, yazi: false, din: false, tarihgoc: false, salgin: false, bogaz: false, megakent: false, icat: false, felsefe: false, insanlar: false };
   let yayilisAktif = null, turRota = null;
   // 🌓 Canlı gece/gündüz gölgesi ve büyük şehir ışıkları (gerçek UTC saate göre)
   const GECE_SEHIR = [
@@ -1995,24 +1995,20 @@ window.Dunya = (() => {
         hits.push({ kind: 'volkan', v, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
       }
     }
-    // 🐾 Bölge hayvanları ve okyanus canlıları (nesli tükenenler yıla göre görünür — data/atlas/hayvanlar.js)
-    if (layers.hayvan && window.ATLAS_HAYVANLAR && view.z >= 1.55) {
+    // 🐾 Bölge hayvanları (yaşayanlar) ve ⏳ nesli tükenen canlılar — iki ayrı katman, yıldan bağımsız (data/atlas/hayvanlar.js)
+    if ((layers.hayvan || layers.tukenen) && window.ATLAS_HAYVANLAR && view.z >= 1.55) {
       const minD = clamp(42 - view.z * 2.5, 22, 38);
       const shownH = [];
       const fa = clamp((view.z - 1.55) / 0.5, 0.2, 1);
       g.globalAlpha = fa;
       for (const h of window.ATLAS_HAYVANLAR) {
-        if ((h.from != null && Y > h.from) || (h.to != null && Y < h.to)) continue;
+        const tuk = h.durum === 'Nesli Tükendi';
+        if (tuk ? !layers.tukenen : !layers.hayvan) continue;
         const [x, y, z] = P(...h.ll); if (z <= 0.1 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
         if (shownH.some(q => Math.abs(q[0] - x) < minD && Math.abs(q[1] - y) < minD)) continue;
         shownH.push([x, y]);
         const hov = hover && hover.kind === 'hayvan' && hover.h === h;
-        const s0 = hov ? 13 : 10.5, tuk = h.durum === 'Nesli Tükendi', den = h.kita === 'Okyanus';
-        const sonYillar = tuk && h.to != null && Y >= h.to && (Y - h.to) <= 250;
-        if (sonYillar) {
-          g.strokeStyle = `rgba(245,158,11,${0.35 + 0.3 * Math.sin(T * 4)})`; g.lineWidth = 2;
-          g.beginPath(); g.arc(x, y, s0 + 4, 0, 7); g.stroke();
-        }
+        const s0 = hov ? 13 : 10.5, den = h.kita === 'Okyanus';
         g.fillStyle = tuk ? '#fff0cc' : den ? '#e4f5ff' : '#fbf6e8';
         g.strokeStyle = hov ? '#ffd666' : tuk ? '#c87018' : den ? '#2b88c4' : '#3d8a4e';
         g.lineWidth = hov ? 2.4 : 1.7;
@@ -2319,7 +2315,7 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'akinti') tip(hover.x1 + 6, hover.y0, hover.a.ad, `${hover.a.tip === 'sicak' ? '🔥 Sıcak akıntı' : '❄️ Soğuk akıntı'} · ${hover.a.hiz} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'ruzgar') tip(hover.x1 + 6, hover.y0, `${hover.rz.ik} ${hover.rz.ad}`, `${hover.rz.mevsim} · ${hover.rz.hiz} · tıkla: ayrıntılar`);
     else if (hover && hover.kind === 'denizolay') tip(hover.x1 + 6, hover.y0, hover.o.ad, `${hover.o.tip === 'girdap' ? '🌀 Girdap / Döngü' : '🌪️ Fırtına alanı'} · ${hover.o.yer} · tıkla: ayrıntılar`);
-    else if (hover && hover.kind === 'hayvan') tip(hover.x1 + 6, hover.y0, `${hover.h.ik} ${hover.h.ad}`, `${hover.h.bolge} · ${hover.h.durum} · tıkla: bilgi ve fotoğraf`);
+    else if (hover && hover.kind === 'hayvan') tip(hover.x1 + 6, hover.y0, `${hover.h.ik} ${hover.h.ad}`, `${hover.h.bolge} · ${hover.h.durum === 'Nesli Tükendi' ? '⏳ ' + hover.h.sayi : hover.h.durum} · tıkla: bilgi ve fotoğraf`);
     else if (hover && hover.kind === 'bitki') tip(hover.x1 + 6, hover.y0, `${hover.bt.ik} ${hover.bt.ad}`, `${hover.bt.bolge} · tıkla: meyvesi ve kullanım alanları`);
     else if (hover && hover.kind === 'cografya') tip(hover.x1 + 6, hover.y0, hover.cg.ad, `${hover.cg.yukseklik ? hover.cg.yukseklik + ' · ' : ''}${hover.cg.konum} · tıkla: ayrıntı ve fotoğraf`);
     else if (hover && hover.kind === 'nehir') tip(hover.x1 + 6, hover.y0, `🏞️ ${hover.nr.ad}`, `${hover.nr.uzunluk} · ${hover.nr.havza} · tıkla: doğa ve tarih`);

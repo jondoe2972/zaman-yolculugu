@@ -2056,3 +2056,6 @@ body[data-tema] .tech th { color: var(--t-muted); border-bottom-color: var(--t-b
 body[data-tema] .tech td { border-bottom-color: var(--t-border); }
 /* Doğa Atlası'nda çağ seçici anlamsız (bölge seçici biyomları listeliyor) */
 .atlas-doga .place #era, .atlas-doga .place .place-not.cag { display: none !important; }
+.atlas-doga footer.tl, .atlas-doga #tl-ac, .atlas-doga #tarihpop { display: none !important; } /* Doğa Atlası yıldan bağımsız: zaman çizelgesi gereksiz */
+.atlas-doga .yearcard #yc-year, .atlas-doga .yearcard #yc-ago, .atlas-doga .yearcard #yc-ruler, .atlas-doga .yearcard .yc-aks { display: none !important; }
+.atlas-doga .yearcard::before { content: "🌿 Doğa Atlası"; display: block; font-weight: 800; font-size: 18px; padding-right: 30px; }

@@ -327,7 +327,7 @@
     ['okyanus', '🌊 Okyanuslar ve Denizler', () => (window.ATLAS_OKYANUS?.okyanuslar || []).length],
     ['akinti', '🌀 Akıntılar, Girdaplar ve Fırtınalar', () => (window.ATLAS_OKYANUS?.akintilar || []).length + (window.ATLAS_OKYANUS?.olaylar || []).length],
     ['ruzgar', '💨 Yıllık Rüzgâr Dalgaları ve Sistemleri', () => (window.ATLAS_RUZGARLAR || []).length],
-    ['hayvan', '🐾 Bölge ve Okyanus Hayvanları', () => (window.ATLAS_HAYVANLAR || []).length],
+    ['hayvan', '🐾 Bölge Hayvanları ve Nesli Tükenen Canlılar', () => (window.ATLAS_HAYVANLAR || []).length],
     ['bitki', '🌿 Yöreye Özgü Bitkiler ve Ağaçlar', () => (window.ATLAS_BITKILER || []).length],
     ['cografya', '🏔️ Dağlar, Çöller ve Tarihî Havzalar', () => (window.ATLAS_COGRAFYA || []).length],
     ['dogabolge', '🪨 Jeolojik Bölgeler, Çöller ve Alt-Bölgeler', () => ((window.ATLAS_DOGA_BOLGELER?.ozel || []).length + (window.ATLAS_DOGA_BOLGELER?.altbolgeler || []).length + (window.ATLAS_DOGA_BOLGELER?.kitalar || []).length)],
@@ -547,12 +547,11 @@
     const rozRenk = tuk ? '⏳ Nesli Tükendi' : h.durum === 'Kritik' ? '🔴 Kritik Tehlike Altında' : h.durum === 'Tehlikede' ? '🟠 Tehlikede' : h.durum === 'Hassas' ? '🟡 Hassas' : '🟢 Yaygın';
     const genel = `<div class="kapak" data-kapak="${esc(h.w)}"></div>
       <span class="pill">${rozRenk}</span>
-      ${rowsHTML([['Yaşadığı Bölge', `${h.bolge} (${h.kita})`], ['Yaşam Alanı', h.habitat], ['Beslenme', h.beslenme], ['Tahmini Sayı', h.sayi]])}
+      ${rowsHTML([['Yaşadığı Bölge', `${h.bolge} (${h.kita})`], ['Yaşam Alanı', h.habitat], ['Beslenme', h.beslenme], [tuk ? 'Ne Zaman Tükendi' : 'Tahmini Sayı', h.sayi]])}
       <div class="did"><b>✨ İlgi Çekici Özelliği</b><p>${esc(h.ozellik)}</p></div>
       <div class="gos">
         <button class="phbtn icbtn" data-hayvangit="${esc(h.id)}">🌍 Kürede yaşam alanına git</button>
         ${window.Ses && window.Ses.hayvanSesiVarMi && window.Ses.hayvanSesiVarMi(h) ? `<button class="phbtn" data-hses="${esc(h.id)}|${esc(h.ad)}|${esc(h.w || '')}">🔊 Gerçek Sesi Dinle</button>` : ''}
-        ${tuk && h.to != null ? `<button class="phbtn" data-go="${Math.min(P.from, Math.max(P.to, h.to + 200))}">⏳ Yaşadığı döneme git</button>` : ''}
       </div>`;
     showModal({ ikon: h.ik || '🐾', title: h.ad, sub: `${h.bolge} · ${h.durum}`, tabs: [
       { ad: '🐾 Hakkında', html: genel, onShow: b => kapakYukle(b.querySelector('.kapak')) },
@@ -562,8 +561,7 @@
   function hayvanKurede(id) {
     const h = (window.ATLAS_HAYVANLAR || []).find(x => x.id === id); if (!h) return;
     closeModal(); if (view !== 'dunya') setView('dunya');
-    DN.setLayer('hayvan', true); renderOlayPanel();
-    if (h.to != null && Y < h.to) setYear(h.to + 200, true);
+    DN.setLayer(h.durum === 'Nesli Tükendi' ? 'tukenen' : 'hayvan', true); renderOlayPanel();
     DN.goTo(h.ll[0], h.ll[1], 4.2); DN.pin(h.ll[0], h.ll[1], `${h.ik} ${h.ad}`);
   }
   function openCografya(cg) {
@@ -1089,7 +1087,9 @@
   function atlasModUygula(mod, sessiz) {
     const doga = mod === 'doga';
     aktifAtlasMod = doga ? 'doga' : 'tarih';
+    document.body.classList.toggle('atlas-doga', doga); // Doğa'da zaman çizelgesi gizlenir (css)
     bolgeSecici(doga);
+    requestAnimationFrame(resize);
     if (window.Ses && window.Ses.setAtlasMod) window.Ses.setAtlasMod(aktifAtlasMod);
     const kayit = katKayitOku();
     const secili = (kayit && kayit[aktifAtlasMod] && typeof kayit[aktifAtlasMod] === 'object')
@@ -1620,7 +1620,8 @@
     : k === 'icat' ? (window.ATLAS_KULTUR_EK?.icatlar || []).length
     : k === 'felsefe' ? (window.ATLAS_KULTUR_EK?.felsefeler || []).length
     : k === 'insanlar' ? (window.ATLAS_KULTUR_EK?.insanlar || []).length
-    : k === 'hayvan' ? (window.ATLAS_HAYVANLAR || []).filter(h => (h.from == null || Y <= h.from) && (h.to == null || Y >= h.to)).length
+    : k === 'hayvan' ? (window.ATLAS_HAYVANLAR || []).filter(h => h.durum !== 'Nesli Tükendi').length
+    : k === 'tukenen' ? (window.ATLAS_HAYVANLAR || []).filter(h => h.durum === 'Nesli Tükendi').length
     : k === 'bitki' ? (window.ATLAS_BITKILER || []).length
     : k === 'cografya' ? (window.ATLAS_COGRAFYA || []).length
     : k === 'nehir' ? (window.ATLAS_NEHIRLER || []).length

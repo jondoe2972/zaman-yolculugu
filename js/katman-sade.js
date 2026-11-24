@@ -4,7 +4,7 @@
 (() => {
   const ONE_CIKAN = {
     tarih: ['sinir', 'yapi', 'donum', 'ticaret', 'din', 'megakent', 'goc', 'savas'],
-    doga: ['cografya', 'nehir', 'iklim', 'akinti', 'volkan', 'hayvan', 'hayvangoc']
+    doga: ['cografya', 'nehir', 'iklim', 'akinti', 'volkan', 'hayvan', 'tukenen', 'hayvangoc']
   };
   const ANAHTAR = 'zy-kp-tum';
   const pop = document.getElementById('katman'); if (!pop) return;
