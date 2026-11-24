@@ -6,6 +6,7 @@
   // bölge seçici: 3B küredeyken sayfayı yenilemeden doğrudan o bölgeye uçar
   { const bs = document.querySelector('#bolge'); if (bs) { const BL = window.BOLGELER || {}; if (window.KITALAR) bs.innerHTML = '<option value="dunya">🌍 Tüm Dünya</option>' + window.KITALAR.map(k => `<optgroup label="${k.ikon} ${k.ad}">${k.b.filter(b => BL[b]).map(b => `<option value="${b}">${BL[b].ikon} ${BL[b].ad}</option>`).join('')}</optgroup>`).join(''); bs.value = BG.id; bs.addEventListener('change', () => {
     if (DUNYA && window.Dunya) {
+      if (bs.value.startsWith('dg:')) { dogaSecimGit(bs.value); return; } // Doğa Atlası seçenekleri (aşağıda)
       if (bs.value === 'dunya') { window.Dunya.reset(); toast('🌍 <b>Tüm Dünya</b> görünümüne dönüldü.'); return; }
       const h = BL[bs.value];
       if (h && h.merkez) {
@@ -1031,9 +1032,64 @@
     const el = $('#katman'); if (!el) return;
     el.querySelectorAll('[data-kpgrup]').forEach(g => { g.hidden = g.dataset.kpgrup !== sek; });
   }
+  // ---------- Bölge seçici atlasla birlikte değişir ----------
+  // Tarih Atlası: tarihî bölgeler (Çin, Mısır…). Doğa Atlası: önem sırasına göre seçilmiş 16 biyom ve doğa bölgesi.
+  // Seçince küre oraya döner (sayfa yeniden yüklenmez) ve o yerin doğa kartı açılır.
+  const DOGA_SECIM = [
+    ['🌳 Yağmur ormanları, savanlar ve resifler', [
+      ['db', 'db-amazon', '🌴 Amazon Yağmur Ormanı'], ['db', 'db-kongo', '🦍 Kongo Havzası ve Doğu Afrika Rifti'],
+      ['db', 'ab-guneydogu-asya', '🌧️ Güneydoğu Asya muson ormanları'], ['ik', 'Tropikal Muson', '🌦️ Hindistan musonu'],
+      ['ik', 'Tropikal Savan', '🦒 Doğu Afrika savanı'], ['db', 'ab-madagaskar', '🦎 Madagaskar'],
+      ['db', 'ab-dogu-avustralya', '🐠 Doğu Avustralya ve Set Resifi']]],
+    ['🏜️ Çöller ve dağlar', [
+      ['db', 'db-sahra', '🏜️ Sahra Çölü'], ['db', 'db-gobi', '🐫 Gobi ve Taklamakan çölleri'], ['db', 'db-himalaya', '🏔️ Himalayalar ve Tibet'],
+      ['db', 'db-and', '⛰️ And Dağları'], ['db', 'ab-bati-kamerika', '🌲 Batı Kuzey Amerika: sekoyalar ve kanyonlar']]],
+    ['❄️ Ilıman, soğuk ve kutuplar', [
+      ['ik', 'Akdeniz İklimi (Ege', '🫒 Akdeniz iklimi'], ['db', 'db-sibirya', '🌲 Sibirya taygası ve tundra'],
+      ['db', 'db-gronland', '🧊 Grönland buzul örtüsü'], ['db', 'dk-antarktika', '🐧 Antarktika', [-78, 20, 1.8]]]]
+  ];
+  function dogaHedef(tur, id, konum) {
+    if (tur === 'ik') {
+      const DEK = window.ATLAS_DOGA_EK || {}, n = (DEK.iklimNoktalar || []).find(x => x.ad.startsWith(id)); if (!n) return null;
+      return { la: n.ll[0], lo: n.ll[1], z: 3, ac: () => openAtlasEk('iklim', (DEK.iklimBantlar || []).find(x => x.id === n.band), n) };
+    }
+    const DB = window.ATLAS_DOGA_BOLGELER || {}, b = [...(DB.ozel || []), ...(DB.altbolgeler || []), ...(DB.kitalar || [])].find(x => x.id === id);
+    if (b && konum) return { la: konum[0], lo: konum[1], z: konum[2], ac: () => openDogaBolge(b) }; // kıta kayıtlarında sınır kutusu yok
+    if (!b || !b.bb) return null;
+    const [la0, la1, lo0, lo1raw] = b.bb, lo1 = lo1raw < lo0 ? lo1raw + 360 : lo1raw; // tarih çizgisini aşan kutu
+    const la = (la0 + la1) / 2, lo = ((lo0 + lo1) / 2 + 540) % 360 - 180;
+    const genis = Math.max(la1 - la0, (lo1 - lo0) * Math.cos(la * Math.PI / 180));
+    return { la, lo, z: clamp(110 / Math.max(genis, 1), 1.4, 5), ac: () => openDogaBolge(b) };
+  }
+  function bolgeSecici(doga) {
+    const bs = $('#bolge'); if (!bs || !DUNYA) return;
+    if (bs._tarihHTML == null) bs._tarihHTML = bs.innerHTML;
+    document.body.classList.toggle('atlas-doga', doga);
+    const not = document.querySelector('.place .place-not');
+    if (!doga) {
+      if (bs.dataset.atlas === 'doga') { bs.innerHTML = bs._tarihHTML; bs.value = 'dunya'; }
+      bs.dataset.atlas = 'tarih'; bs.title = 'Tüm Dünya ya da bir bölge';
+      if (not) not.innerHTML = '<b>📍 Nereye bakalım?</b>Bir bölge seç: küre oraya döner.';
+      return;
+    }
+    if (bs.dataset.atlas === 'doga') return;
+    let h = '<option value="dunya">🌍 Bütün Dünya</option>';
+    DOGA_SECIM.forEach(([grup, l], gi) => { h += `<optgroup label="${esc(grup)}">${l.map(([, , ad], i) => `<option value="dg:${gi}:${i}">${esc(ad)}</option>`).join('')}</optgroup>`; });
+    bs.innerHTML = h; bs.value = 'dunya'; bs.dataset.atlas = 'doga'; bs.title = 'Bir biyom ya da doğa bölgesi seç';
+    if (not) not.innerHTML = '<b>🌿 Hangi doğaya bakalım?</b>Yağmur ormanları, çöller, dağlar ve kutuplar: seçince küre oraya döner.';
+  }
+  // seçicinin "change" olayı (dosyanın başında) dg: değerlerini buraya gönderir
+  function dogaSecimGit(v) {
+    const [, gi, i] = v.split(':'), s = (DOGA_SECIM[+gi] || [, []])[1][+i]; if (!s) return;
+    const hd = dogaHedef(s[0], s[1], s[3]); if (!hd) return;
+    if (view !== 'dunya') setView('dunya');
+    DN.goTo(hd.la, hd.lo, hd.z);
+    setTimeout(hd.ac, 700); // küre dönerken kart üstüne açılmasın
+  }
   function atlasModUygula(mod, sessiz) {
     const doga = mod === 'doga';
     aktifAtlasMod = doga ? 'doga' : 'tarih';
+    bolgeSecici(doga);
     if (window.Ses && window.Ses.setAtlasMod) window.Ses.setAtlasMod(aktifAtlasMod);
     const kayit = katKayitOku();
     const secili = (kayit && kayit[aktifAtlasMod] && typeof kayit[aktifAtlasMod] === 'object')

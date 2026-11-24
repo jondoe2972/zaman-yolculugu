@@ -71,7 +71,14 @@ window.Dunya = (() => {
 
   // ---------- veri ----------
   const VERI = window.DUNYA_VERI || { kara: [], nehir: [] };
-  const prep = pts => { const n = pts.length, la = new Float32Array(n), lo = new Float32Array(n); for (let i = 0; i < n; i++) { la[i] = pts[i][0] * D; lo[i] = pts[i][1] * D; } return { n, cl: la.map(Math.cos), sl: la.map(Math.sin), lo }; };
+  // prep: noktaların küre üstündeki yeri (X = cos(enlem)·cos(boylam), Yv = cos(enlem)·sin(boylam)) bir kez hesaplanır;
+  // küre dönerken her karede nokta başına cos/sin hesaplamak gerekmez (hız: bkz. linePath ve polyPathOn)
+  const prep = pts => {
+    const n = pts.length, la = new Float32Array(n), lo = new Float32Array(n); for (let i = 0; i < n; i++) { la[i] = pts[i][0] * D; lo[i] = pts[i][1] * D; }
+    const cl = la.map(Math.cos), sl = la.map(Math.sin), X = new Float32Array(n), Yv = new Float32Array(n);
+    for (let i = 0; i < n; i++) { X[i] = cl[i] * Math.cos(lo[i]); Yv[i] = cl[i] * Math.sin(lo[i]); }
+    return { n, cl, sl, lo, X, Yv };
+  };
   const KARA = VERI.kara.map(prep);
   // Hızlı kara/deniz ayrımı (okyanusa tıklamayı algılamak için)
   const KARA_BB = VERI.kara.map(pts => {
@@ -154,7 +161,9 @@ window.Dunya = (() => {
   const getNilKollar = () => nilKollar || (window.Harita && window.Harita.KOLLAR ? (nilKollar = window.Harita.KOLLAR.map(prep)) : []);
 
   // ---------- izdüşüm ----------
-  let cl0 = 1, sl0 = 0, l0 = 0;
+  let cl0 = 1, sl0 = 0, l0 = 0, cL0 = 1, sL0 = 0; // cL0/sL0: boylam dönüşünün cos/sin'i (kare başına bir kez)
+  let BX = new Float32Array(4096), BY = new Float32Array(4096), BZ = new Float32Array(4096); // ortak tamponlar (her çokgen için yeni dizi açılmasın)
+  const AZ_PX = 0.7; // ekranda bundan yakın ardışık noktalar çizilmez (görüntü değişmez, çizgi sayısı azalır)
   const R = () => Math.min(W, H) * 0.42 * view.z;
   function pj(cl, sl, lo) {
     const d = lo - l0, cd = Math.cos(d);
@@ -168,9 +177,12 @@ window.Dunya = (() => {
     if (n < 3) return false;
     let any = false, allVis = true, backIdx = -1;
     let minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
-    const xs = new Float32Array(n), ys = new Float32Array(n), zs = new Float32Array(n);
+    if (BX.length < n) { const m = 1 << Math.ceil(Math.log2(n)); BX = new Float32Array(m); BY = new Float32Array(m); BZ = new Float32Array(m); }
+    const xs = BX, ys = BY, zs = BZ, PX = p.X, PY = p.Yv, SL = p.sl;
     for (let i = 0; i < n; i++) {
-      const [x, y, z] = pj(p.cl[i], p.sl[i], p.lo[i]);
+      let x, y, z;
+      if (PX) { const ccd = PX[i] * cL0 + PY[i] * sL0; x = PY[i] * cL0 - PX[i] * sL0; y = cl0 * SL[i] - sl0 * ccd; z = sl0 * SL[i] + cl0 * ccd; }
+      else [x, y, z] = pj(p.cl[i], p.sl[i], p.lo[i]);
       xs[i] = x; ys[i] = y; zs[i] = z;
       if (z > 0) {
         any = true;
@@ -185,8 +197,8 @@ window.Dunya = (() => {
     if (!any) return false;
     if (allVis) {
       if (maxx < -20 || minx > W + 20 || maxy < -20 || miny > H + 20) return false;
-      dst.moveTo(cx + xs[0] * r, cy - ys[0] * r);
-      for (let i = 1; i < n; i++) dst.lineTo(cx + xs[i] * r, cy - ys[i] * r);
+      let lx = cx + xs[0] * r, ly = cy - ys[0] * r; dst.moveTo(lx, ly);
+      for (let i = 1; i < n; i++) { const sx = cx + xs[i] * r, sy = cy - ys[i] * r; if (i < n - 1 && Math.abs(sx - lx) + Math.abs(sy - ly) < AZ_PX) continue; dst.lineTo(sx, sy); lx = sx; ly = sy; }
       dst.closePath();
       return true;
     }
@@ -197,17 +209,19 @@ window.Dunya = (() => {
       const hx = xs[i] + t * (xs[j] - xs[i]), hy = ys[i] + t * (ys[j] - ys[i]);
       return Math.atan2(-hy, hx);
     };
-    let drew = false, open = false, aStart = 0;
+    let drew = false, open = false, aStart = 0, plx = 0, ply = 0;
     for (let k = 0; k < n; k++) {
       const i = (backIdx + k) % n, j = (i + 1) % n;
       const zi = zs[i] > 0, zj = zs[j] > 0;
       if (!zi && zj) {
         aStart = ufukA(i, j);
         dst.moveTo(cx + Math.cos(aStart) * r, cy + Math.sin(aStart) * r);
-        dst.lineTo(cx + xs[j] * r, cy - ys[j] * r);
+        plx = cx + xs[j] * r; ply = cy - ys[j] * r; dst.lineTo(plx, ply);
         open = true; drew = true;
       } else if (zi && zj && open) {
-        dst.lineTo(cx + xs[j] * r, cy - ys[j] * r);
+        const zk = zs[(j + 1) % n] > 0; // bir sonraki nokta ufkun ardındaysa bu nokta mutlaka çizilir
+        const sx = cx + xs[j] * r, sy = cy - ys[j] * r;
+        if (!zk || Math.abs(sx - plx) + Math.abs(sy - ply) >= AZ_PX) { dst.lineTo(sx, sy); plx = sx; ply = sy; }
       } else if (zi && !zj && open) {
         const aEnd = ufukA(i, j);
         dst.lineTo(cx + Math.cos(aEnd) * r, cy + Math.sin(aEnd) * r);
@@ -226,7 +240,27 @@ window.Dunya = (() => {
     return drew;
   }
   const polyPath = p => polyPathOn(g, p);
-  function linePath(p) { const r = R(); let pen = false; for (let i = 0; i < p.n; i++) { const [x, y, z] = pj(p.cl[i], p.sl[i], p.lo[i]); if (z > 0.02) { const sx = W / 2 + x * r, sy = H / 2 - y * r; pen ? g.lineTo(sx, sy) : g.moveTo(sx, sy); pen = true; } else pen = false; } }
+  function linePath(p) {
+    if (p.X) {
+      // Ekranın epey dışındaki parçalar yola eklenmez (yakınlaşınca nehirlerin, yolların çoğu ekran dışında kalır);
+      // ekrana giren/çıkan parça, dışarıdaki komşu noktasıyla birlikte çizilir ki çizgi kenarda kesik durmasın.
+      const r = R(), cx = W / 2, cy = H / 2, PX = p.X, PY = p.Yv, SL = p.sl, n = p.n, M = 60;
+      let pen = false, lx = 0, ly = 0, oncekiIc = false, onceVar = false, ox = 0, oy = 0;
+      for (let i = 0; i < n; i++) {
+        const ccd = PX[i] * cL0 + PY[i] * sL0, z = sl0 * SL[i] + cl0 * ccd;
+        if (z <= 0.02) { pen = false; onceVar = false; oncekiIc = false; continue; }
+        const sx = cx + (PY[i] * cL0 - PX[i] * sL0) * r, sy = cy - (cl0 * SL[i] - sl0 * ccd) * r;
+        const ic = sx > -M && sx < W + M && sy > -M && sy < H + M;
+        if (ic || oncekiIc) {
+          if (!pen) { if (onceVar && !oncekiIc) { g.moveTo(ox, oy); g.lineTo(sx, sy); } else g.moveTo(sx, sy); pen = true; lx = sx; ly = sy; }
+          else if (!ic || i === n - 1 || Math.abs(sx - lx) + Math.abs(sy - ly) >= AZ_PX) { g.lineTo(sx, sy); lx = sx; ly = sy; }
+          if (!ic) pen = false;
+        }
+        oncekiIc = ic; onceVar = true; ox = sx; oy = sy;
+      }
+      return;
+    }
+    const r = R(); let pen = false; for (let i = 0; i < p.n; i++) { const [x, y, z] = pj(p.cl[i], p.sl[i], p.lo[i]); if (z > 0.02) { const sx = W / 2 + x * r, sy = H / 2 - y * r; pen ? g.lineTo(sx, sy) : g.moveTo(sx, sy); pen = true; } else pen = false; } }
   function ekranParcalari(p) {
     const r = R(), segs = []; let cur = null;
     for (let i = 0; i < p.n; i++) {
@@ -336,6 +370,10 @@ window.Dunya = (() => {
     }
   }
   let katmanCv = null, tabanCv = null, tabanKey = '', dilimVer = 0;
+  // hareket hâlinde taban yarı çözünürlükte (TABAN_HAREKET) ayrı tuvale çizilir; kamera durunca tam çözünürlüğe döner
+  let tabanKCv = null, sonKam = '';
+  const TABAN_HAREKET = 0.5;
+  function tabanK(w, h) { if (!tabanKCv) tabanKCv = document.createElement('canvas'); if (tabanKCv.width !== w || tabanKCv.height !== h) { tabanKCv.width = w; tabanKCv.height = h; } return tabanKCv; }
   function katman(w, h) { if (!katmanCv) katmanCv = document.createElement('canvas'); if (katmanCv.width !== w || katmanCv.height !== h) { katmanCv.width = w; katmanCv.height = h; } return katmanCv; }
   function taban(w, h) { if (!tabanCv) tabanCv = document.createElement('canvas'); if (tabanCv.width !== w || tabanCv.height !== h) { tabanCv.width = w; tabanCv.height = h; tabanKey = ''; } return tabanCv; }
   const llPath = pts => { const p = prep(pts); return () => polyPath(p); };
@@ -746,7 +784,7 @@ window.Dunya = (() => {
     else { vel[0] = 0; vel[1] = 0; }
     if (Math.abs(view.z - zt) < 0.002) view.z = zt;
     else view.z = lerp(view.z, zt, 1 - Math.exp(-dt * 9));
-    cl0 = Math.cos(view.lat * D); sl0 = Math.sin(view.lat * D); l0 = view.lon * D;
+    cl0 = Math.cos(view.lat * D); sl0 = Math.sin(view.lat * D); l0 = view.lon * D; cL0 = Math.cos(l0); sL0 = Math.sin(l0);
     const DM = !!(window.BOLGE && window.BOLGE.dunya), r = R(), cx = W / 2, cy = H / 2, ez = DM ? clamp((view.z - 1.15) / 0.7, 0, 1) : clamp((view.z - 1.8) / 1.4, 0, 1);
     // yazı düzeyi: uzakta yalnızca kıta adları (ka), yaklaşınca devlet ve başkent adları (ua)
     const ka = 1 - clamp((view.z - 2.0) / 0.3, 0, 1), ua = clamp((view.z - 2.3) / 0.3, 0, 1);
@@ -756,12 +794,16 @@ window.Dunya = (() => {
     if (!turRota) for (let i = 0; i < YILDIZ.length; i++) { const yz = YILDIZ[i], x = (yz[0] * W + view.lon * 0.4) % W, tw = 0.25 + 0.6 * (Math.sin(i * 13 + T * yz[3]) * 0.5 + 0.5); g.fillStyle = `rgba(255,255,255,${tw.toFixed(2)})`; g.fillRect((x + W) % W, yz[1] * H, yz[2], yz[2]); }
     // statik küre tabanı önbelleği: kamera/yıl/sınırlar değişmedikçe kıtalar, sınırlar ve nehirler yeniden çizilmez
     const cw = g.canvas.width, ch = g.canvas.height;
-    const tKey = `${cw}|${ch}|${view.lat.toFixed(4)}|${view.lon.toFixed(4)}|${view.z.toFixed(4)}|${Math.round(Y * 4)}|${layers.sinir ? 1 : 0}|${dilimVer}|${temaId}|${turRota ? turRota.id : ''}`;
-    const tb = taban(cw, ch);
+    // Kamera bu karede kıpırdadıysa (döndürme, yakınlaşma, uçuş) taban yarı çözünürlükte çizilip büyütülür:
+    // boyanan piksel dörtte bire iner, FPS artar. Kamera durduğu ilk karede tam çözünürlükle yeniden çizilir.
+    const kam = `${view.lat.toFixed(4)}|${view.lon.toFixed(4)}|${view.z.toFixed(4)}`, hareket = kam !== sonKam; sonKam = kam;
+    const ks = hareket ? TABAN_HAREKET : 1, tw = Math.ceil(cw * ks), th = Math.ceil(ch * ks);
+    const tKey = `${cw}|${ch}|${kam}|${Math.round(Y * 4)}|${layers.sinir ? 1 : 0}|${dilimVer}|${temaId}|${turRota ? turRota.id : ''}|${ks}`;
+    const tb = hareket ? tabanK(tw, th) : taban(cw, ch);
     if (tKey !== tabanKey) {
       tabanKey = tKey;
       const tc = tb.getContext('2d'), anaG = g;
-      tc.setTransform(1, 0, 0, 1, 0, 0); tc.clearRect(0, 0, cw, ch); tc.setTransform(dpr, 0, 0, dpr, 0, 0);
+      tc.setTransform(1, 0, 0, 1, 0, 0); tc.clearRect(0, 0, tw, th); tc.setTransform(dpr * ks, 0, 0, dpr * ks, 0, 0);
       g = tc;
       // atmosfer
       const atm = g.createRadialGradient(cx, cy, r * 0.96, cx, cy, r * 1.16); atm.addColorStop(0, tema.atm[0]); atm.addColorStop(0.5, tema.atm[1]); atm.addColorStop(1, tema.atm[2]);
@@ -802,7 +844,8 @@ window.Dunya = (() => {
       // dar boğazlar ve nehirler
       g.lineCap = 'round'; g.lineJoin = 'round';
       if (view.z > 2.5) for (const b of BOGAZ) { g.beginPath(); linePath(b.p); g.strokeStyle = '#8fbedb'; g.lineWidth = clamp(b.km * r / 6371 * 2.5, 2.5, 40); g.stroke(); }
-      if (view.z > 1.6) for (const n of NEHIR) { if (n.nil) continue; g.beginPath(); linePath(n); g.strokeStyle = `rgba(80,145,195,${clamp((view.z - 1.6) / 2, 0, 0.75)})`; g.lineWidth = 0.8 + ez; g.stroke(); }
+      // 675 nehir aynı renk ve kalınlıkta: tek yol, tek stroke (eskiden her nehir ayrı çiziliyordu)
+      if (view.z > 1.6) { g.beginPath(); for (const n of NEHIR) if (!n.nil) linePath(n); g.strokeStyle = `rgba(80,145,195,${clamp((view.z - 1.6) / 2, 0, 0.75)})`; g.lineWidth = 0.8 + ez; g.stroke(); }
       const nilW = clamp(view.z * 0.6, 1.4, 9);
       for (const n of NEHIR) if (n.nil) { g.beginPath(); linePath(n); g.strokeStyle = `rgba(90,150,60,${0.55 * (1 - ez * 0.85)})`; g.lineWidth = nilW * 1.8; g.stroke(); }
       if (view.z > 4 && view.z < 30) for (const br of getNilKollar()) { g.beginPath(); linePath(br); g.strokeStyle = `rgba(90,150,60,${0.55 * (1 - ez * 0.85)})`; g.lineWidth = nilW * 1.4; g.stroke(); }
@@ -815,7 +858,7 @@ window.Dunya = (() => {
       g = anaG;
     }
     // önbellekteki küre tabanını tek seferde bas
-    g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(tb, 0, 0); g.restore();
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(tb, 0, 0, cw, ch); g.restore();
     g.save(); g.beginPath(); g.arc(cx, cy, r, 0, 7); g.clip();
     // 🌓 Canlı Gece / Gündüz gölgesi ve (yalnızca Tarih Atlası'nda) gece tarafındaki altın şehir ışıkları
     if (layers.gece && (layers.sehir || layers.yapi)) {

@@ -2054,3 +2054,5 @@ body[data-tema] .secim button small { color: var(--t-muted); }
 body[data-tema] .kapak small { background: rgba(0,0,0,0.35); color: var(--t-muted); }
 body[data-tema] .tech th { color: var(--t-muted); border-bottom-color: var(--t-border); }
 body[data-tema] .tech td { border-bottom-color: var(--t-border); }
+/* Doğa Atlası'nda çağ seçici anlamsız (bölge seçici biyomları listeliyor) */
+.atlas-doga .place #era, .atlas-doga .place .place-not.cag { display: none !important; }
