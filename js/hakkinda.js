@@ -7,6 +7,8 @@
   const KAYNAK = [
     ['🗺️', 'Tarihî sınırlar', `${a('https://github.com/Seshat-Global-History-Databank/cliopatria', 'Cliopatria')}, Seshat Global History Databank (MÖ 3400 – MS 2024). Lisans: ${a('https://creativecommons.org/licenses/by/4.0/deed.tr', 'CC BY 4.0')}. Makale: ${a('https://doi.org/10.1038/s41597-025-04516-9', 'Scientific Data, 2025')}. Türkçe devlet adlarının bir kısmı Vikiveri'den eşleştirildi ve elle düzeltildi.`],
     ['🌍', 'Kıyılar, göller ve nehirler', `${a('https://www.naturalearthdata.com/', 'Natural Earth')} 1:50m (kamu malı).`],
+    ['🧩', 'Simgeler ve emojiler',`${a('https://github.com/googlefonts/noto-emoji', 'Noto Emoji')} · © Google LLC · resimler ${a('https://www.apache.org/licenses/LICENSE-2.0', 'Apache 2.0')}, yazı tipi ${a('https://openfontlicense.org/', 'SIL OFL 1.1')}. Her cihazda aynı görünsün diye haritadaki simgeler ve sayfadaki emojiler sitenin kendi resim dosyalarından çizilir.`],
+    ['🐋', 'Göç hayvanı 3B modelleri', `${a('https://poly.pizza/', 'Poly Pizza')} üzerinden: Poly by Google, Google Data Arts Team ve Paul Spooner (${a('https://creativecommons.org/licenses/by/3.0/deed.tr', 'CC BY')}); Quaternius (CC0). İkonlar Blender ile render edildi.`],
     ['📖', 'Ülke, kişi ve yapı bilgileri', `${a('https://www.wikidata.org/', 'Vikiveri')} (CC0) ve ${a('https://tr.wikipedia.org/', 'Vikipedi')} özetleri (${a('https://creativecommons.org/licenses/by-sa/4.0/deed.tr', 'CC BY-SA 4.0')}). Her kartta özetin alındığı maddeye bağlantı var.`],
     ['📷', 'Fotoğraflar', `${a('https://commons.wikimedia.org/', 'Wikimedia Commons')}. Her fotoğrafın altında çekeni ve lisansı yazıyor; yalnızca özgür lisanslı görseller gösterilir.`],
     ['🎵', 'Müzik ve doğa sesleri', `Wikimedia Commons kayıtları (her biri kendi lisansıyla) ve ${a('https://developers.google.com/assistant/tools/sound-library', 'Google Sound Library')}.`],
@@ -30,6 +32,13 @@
     window.ZY.showModal({ ikon: 'ℹ️', title: 'Hakkında ve kaynaklar', sub: 'Bu site nedir, bilgiler nereden geliyor?', tabs: [{ ad: 'ℹ️ Hakkında', html }] });
   }
   window.Hakkinda = { ac };
+  // Zaman çizelgesinin yüksekliği CSS'e bildirilir: atıf şeridi dar ekranda çizelgenin hemen üstünde durur (stil.css, .atif)
+  const tl = document.querySelector('.tl');
+  if (tl) {
+    const olc = () => { const h = Math.round(tl.getBoundingClientRect().height); document.documentElement.style.setProperty('--tl-h', (h || 30) + 'px'); };
+    olc(); window.addEventListener('resize', olc); window.addEventListener('load', olc);
+    if (window.ResizeObserver) new ResizeObserver(olc).observe(tl);
+  }
   document.addEventListener('click', ev => { if (ev.target.closest('[data-hakkinda]')) { ev.preventDefault(); ac(); } });
   if (new URLSearchParams(location.search).get('hakkinda')) setTimeout(ac, 400);
 })();

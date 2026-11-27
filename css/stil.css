@@ -1920,6 +1920,166 @@ body.tur-mod .yearcard, body.tur-mod #katbtn, body.tur-mod #katman, body.tur-mod
 .yc-aks .yc-goc { margin-top: 0; font-size: 11.5px; padding: 3px 8px; }
 .yearcard .site { display: none; }
 
+/* ============================================================================
+   ✨ HİBRİT ARAYÜZ: iOS Liquid Glass (üst/sağ) + NatGeo Editoryal (yıl/dönem) + Ultra-Minimal Zaman Çizelgesi
+   ============================================================================ */
+.ui-ic { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.85; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; vertical-align: -2px; }
+
+/* %100 tam ekran 3B küre: üst ve alt duvarlar kalkar */
+body.dunyamod { display: block; position: relative; overflow: hidden; }
+body.dunyamod .app { width: 100vw; height: 100dvh; grid-template-columns: 1fr; }
+body.dunyamod .stage { width: 100%; height: 100%; }
+
+/* 1. iOS LIQUID GLASS — Yüzen üst kapsüller ve sağ cam butonlar */
+body.dunyamod .top {
+  position: fixed; top: 14px; left: 0; right: 0; z-index: 60;
+  background: transparent !important; border: 0 !important; box-shadow: none !important;
+  padding: 0 18px; pointer-events: none; justify-content: center; gap: 10px;
+}
+body.dunyamod .top > * { pointer-events: auto; }
+body.dunyamod .logo { display: none; }
+body.dunyamod .ustmenu {
+  display: flex; align-items: center; gap: 8px; flex: 0 1 auto; justify-content: center;
+  background: transparent; border: 0; padding: 0;
+}
+body.dunyamod .modlar {
+  display: inline-flex; align-items: center; gap: 2px; padding: 4px 5px; border-radius: 999px;
+  background: rgba(12, 20, 32, 0.56); backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.24);
+}
+body.dunyamod .modlar button {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; border-radius: 999px;
+  border: 0 !important; background: transparent; color: rgba(255,255,255,0.84);
+  font-size: 12.5px; font-weight: 500; letter-spacing: -0.01em; transition: background .18s, color .18s;
+}
+body.dunyamod .modlar button:hover { background: rgba(255,255,255,0.12); color: #fff; }
+body.dunyamod .modlar button.on {
+  background: rgba(255, 255, 255, 0.94) !important; color: #0b1320 !important; font-weight: 600;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+}
+body.dunyamod .place {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 999px;
+  background: rgba(12, 20, 32, 0.54); backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+body.dunyamod .place select {
+  background: transparent; border: 0; color: rgba(255,255,255,0.9); font-size: 12px; font-weight: 500;
+  padding: 3px 6px; border-radius: 99px; cursor: pointer; max-width: 210px;
+}
+body.dunyamod .place select option, body.dunyamod .place select optgroup { background: #101928; color: #f0f6ff; }
+body.dunyamod .um-ayar { display: none; }
+body.dunyamod #temabtn, body.dunyamod #sesbtn {
+  position: fixed; top: 14px; width: 38px; height: 38px; border-radius: 50%;
+  display: grid; place-items: center; padding: 0;
+  background: rgba(12, 20, 32, 0.56); backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.22); color: rgba(255,255,255,0.92);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.24);
+}
+body.dunyamod #temabtn { right: 62px; }
+body.dunyamod #sesbtn { right: 16px; }
+body.dunyamod #temabtn:hover, body.dunyamod #sesbtn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+body.dunyamod .globectl {
+  top: 64px; right: 16px; gap: 0; border-radius: 16px; overflow: hidden;
+  background: rgba(12, 20, 32, 0.56); backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+body.dunyamod .globectl button {
+  width: 38px; height: 36px; border: 0; border-radius: 0; background: transparent; color: rgba(255,255,255,0.92);
+  border-bottom: 1px solid rgba(255,255,255,0.12); font-size: 16px;
+}
+body.dunyamod .globectl button:last-child { border-bottom: 0; }
+body.dunyamod .globectl button:hover { background: rgba(255,255,255,0.14); }
+body.dunyamod .katbtn {
+  top: 214px; right: 16px; bottom: auto; display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+  background: rgba(12, 20, 32, 0.58) !important; backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.22) !important; color: #fff !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.24);
+}
+body.dunyamod .katbtn:hover { background: rgba(255,255,255,0.16) !important; }
+body.dunyamod .katpop { top: 256px; right: 16px; bottom: auto; }
+body.dunyamod .temapop { top: 60px; right: 16px; }
+body.dunyamod .sespop { top: 60px; right: 16px; }
+body.dunyamod .turpop { top: 62px; }
+
+/* 2. NATIONAL GEOGRAPHIC / MÜZE EDİTORYAL — Sol üst yıl & dönem */
+body.dunyamod .yearcard {
+  position: fixed; left: 22px; top: 74px; z-index: 30;
+  background: transparent !important; border: 0 !important; border-left: 3px solid var(--t-accent, #ffcc00) !important;
+  border-radius: 0 !important; box-shadow: none !important; padding: 2px 30px 2px 14px;
+  gap: 3px; max-width: 280px; backdrop-filter: none;
+}
+body.dunyamod #yc-ago {
+  order: -1; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--t-title, #ffcc00); text-shadow: 0 1px 10px rgba(0,0,0,0.75);
+}
+body.dunyamod #yc-year {
+  font-family: Georgia, "Times New Roman", serif; font-size: 36px; font-weight: 400; line-height: 1.04;
+  letter-spacing: -0.01em; color: #faf6ee; text-shadow: 0 3px 22px rgba(0,0,0,0.72);
+}
+body.dunyamod #yc-ruler {
+  font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 13px;
+  color: rgba(246, 241, 230, 0.86); text-shadow: 0 1px 12px rgba(0,0,0,0.8); line-height: 1.35;
+}
+body.dunyamod .yearcard .yc-aks { margin-top: 6px; gap: 10px; }
+body.dunyamod .yearcard .yc-goc {
+  background: transparent !important; border: 0 !important; border-bottom: 1.5px solid rgba(255,255,255,0.45) !important;
+  border-radius: 0 !important; padding: 2px 0 !important; color: #faf6ee !important;
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-shadow: 0 1px 10px rgba(0,0,0,0.85);
+}
+body.dunyamod .yearcard .yc-goc:hover { border-bottom-color: var(--t-accent, #ffcc00) !important; color: var(--t-title, #ffcc00) !important; }
+body.dunyamod .yc-gizle {
+  top: 2px; right: 0; background: rgba(12,20,32,0.45); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.75);
+}
+
+/* 4. ULTRA-MİNİMAL SİNEMATİK — Havada süzülen ince zaman çizelgesi */
+body.dunyamod .tl {
+  position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 40;
+  width: min(640px, calc(100vw - 32px)); border-radius: 22px; padding: 7px 14px;
+  background: rgba(10, 16, 26, 0.50) !important; backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 14px 42px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.16);
+  gap: 10px;
+}
+body.dunyamod .tl .ctrl { gap: 4px; }
+body.dunyamod .tl .ctrl button {
+  width: 30px; height: 30px; border-radius: 50%; font-size: 14px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.9);
+  display: grid; place-items: center; padding: 0;
+}
+body.dunyamod .tl .ctrl button:hover { background: rgba(255,255,255,0.2); color: #fff; }
+body.dunyamod .tl .ctrl .play {
+  width: 34px; height: 34px; background: rgba(255,255,255,0.94); color: #0b1320; border: 0; font-size: 13px;
+}
+body.dunyamod .tl .ctrl select {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 99px; padding: 4px 7px; font-size: 11px; color: rgba(255,255,255,0.86);
+}
+body.dunyamod .tl .ctrl select option { background: #101928; color: #f0f6ff; }
+body.dunyamod #timeline { height: 44px; }
+body.dunyamod .tl-gizle { line-height: 1; padding-bottom: 4px !important; }
+body.dunyamod .tlzoom button {
+  width: 24px; height: 24px; font-size: 13px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.16); color: #fff;
+}
+body.dunyamod .tarihpop { bottom: 78px; }
+body.dunyamod .toast { top: 68px; border-radius: 999px; padding: 8px 16px; backdrop-filter: blur(18px); }
+
+@media (max-width: 960px) {
+  body.dunyamod .top { justify-content: flex-start; padding: 0 12px; top: 10px; }
+  body.dunyamod .menubtn {
+    background: rgba(12, 20, 32, 0.62); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 999px; padding: 6px 12px; color: #fff;
+  }
+  body.dunyamod .yearcard { top: 58px; left: 14px; }
+  body.dunyamod #yc-year { font-size: 26px; }
+  body.dunyamod .tl { width: calc(100vw - 16px); bottom: 10px; padding: 6px 10px; border-radius: 18px; }
+  body.dunyamod #timeline { height: 48px; }
+}
+
 /* Telefon: 📅 Bugün düğmesi yıl kartının üstüne binmesin; sağdaki dikey sütunda 🗂️ Katmanlar'ın altında kare düğme,
    ✕ köşede küçük rozet. ＋ − ◐ ⛶ onun altına iner (kapatılınca body.tb-gizli ile eski yerine döner). */
 @media (max-width: 860px) {
@@ -2059,3 +2219,594 @@ body[data-tema] .tech td { border-bottom-color: var(--t-border); }
 .atlas-doga footer.tl, .atlas-doga #tl-ac, .atlas-doga #tarihpop { display: none !important; } /* Doğa Atlası yıldan bağımsız: zaman çizelgesi gereksiz */
 .atlas-doga .yearcard #yc-year, .atlas-doga .yearcard #yc-ago, .atlas-doga .yearcard #yc-ruler, .atlas-doga .yearcard .yc-aks { display: none !important; }
 .atlas-doga .yearcard::before { content: "🌿 Doğa Atlası"; display: block; font-weight: 800; font-size: 18px; padding-right: 30px; }
+
+/* ============================================================================
+   🎯 TEK MERKEZLİ TASARIM SİSTEMİ (5 Renk · 2 Font · 6 Boyut · 2 Köşe)
+   Bir rengi veya boyutu değiştirmek için yalnızca :root altındaki tek satırı değiştir.
+   ============================================================================ */
+:root {
+  /* 1 Ana Renk + 1 Vurgu Rengi + 3 Gri (Mor-mavi geçiş ve neon yok) */
+  --c-ana:   #1F4E5B; /* Ana renk: Derin okyanus / petrol çiviti */
+  --c-vurgu: #D95D39; /* Vurgu rengi: Sıcak kiremit / mercan (ekran başına tek ana aksiyon) */
+  --c-gri1:  #F6F2E9; /* 1. Gri (Açık): Sıcak taş / kâğıt yüzeyi */
+  --c-gri2:  #DDD4C3; /* 2. Gri (Orta): Kenarlık, ayraç ve ikincil yüzey */
+  --c-gri3:  #221E1A; /* 3. Gri (Koyu): Ana mürekkep metin */
+
+  /* 2 Font (Google Fonts — Inter yok) */
+  --f-baslik: "Young Serif", Georgia, serif;
+  --f-metin:  "Instrument Sans", system-ui, sans-serif;
+
+  /* 6 Yazı Boyutu (Oranlı ölçek: 13 / 15 / 17 / 21 / 28 / 40) */
+  --fs-1: 13px;
+  --fs-2: 15px;
+  --fs-3: 17px;
+  --fs-4: 21px;
+  --fs-5: 28px;
+  --fs-6: 40px;
+
+  /* 2 Köşe Değeri (6px iç/buton, 14px dış panel; 999px yalnızca etiketlerde) */
+  --r-kucuk: 6px;
+  --r-buyuk: 14px;
+}
+
+body[data-tasarim="kesin"] {
+  font-family: var(--f-metin) !important;
+  font-size: var(--fs-2) !important;
+  color: var(--c-gri3) !important;
+  /* Tüm tema değişkenlerini tek merkezden koyu mürekkep + sıcak taş zeminle eşitle (sıfır okunmayan açık yazı) */
+  --t-bg1: #EAE2D3 !important;
+  --t-bg2: #DDD4C3 !important;
+  --t-panel: #F6F2E9 !important;
+  --t-card: #F6F2E9 !important;
+  --t-soft: #EAE2D3 !important;
+  --t-accent: #D95D39 !important;
+  --t-accent-ink: #F6F2E9 !important;
+  --t-title: #1F4E5B !important;
+  --t-border: #C9BFA9 !important;
+  --t-text: #221E1A !important;
+  --t-muted: #544B3F !important;
+  --t-did: #EDE6D7 !important;
+}
+
+/* Yasaklar: Buzlu cam (backdrop-filter), renk geçişli butonlar, sol kenarı 4px çizgili kutular ve emojili modal ikonları kapalı */
+body[data-tasarim="kesin"] * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-tasarim="kesin"] .sheet header .mi { display: none !important; }
+body[data-tasarim="kesin"] #modal, body[data-tasarim="kesin"] #arama { z-index: 120 !important; }
+body[data-tasarim="kesin"] .yearcard *:not(#yc-tb):not(#yc-ago):not(.ana) { color: var(--c-gri3) !important; text-shadow: none !important; }
+body[data-tasarim="kesin"] .aa-kart {
+  background: var(--c-gri1) !important; color: var(--c-gri3) !important;
+  border: 1.5px solid var(--c-gri2) !important; border-radius: var(--r-kucuk) !important;
+}
+body[data-tasarim="kesin"] .aa-kart button, body[data-tasarim="kesin"] .aa-kart a {
+  background: var(--c-gri2) !important; color: var(--c-gri3) !important;
+  border: 0 !important; border-radius: var(--r-kucuk) !important; font-weight: 600 !important;
+}
+body[data-tasarim="kesin"] .aa-kart button.ana {
+  background: var(--c-vurgu) !important; color: var(--c-gri1) !important;
+}
+body[data-tasarim="kesin"] .yc-aa {
+  background: #EDE6D7 !important; border: 1px solid var(--c-gri2) !important;
+  border-radius: var(--r-kucuk) !important; color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] .yc-aa i { color: var(--c-ana) !important; font-style: normal !important; font-weight: 700 !important; }
+body[data-tasarim="kesin"] .m-wiki {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid var(--c-gri2);
+}
+body[data-tasarim="kesin"] .m-wiki a.phbtn {
+  text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+  background: var(--c-gri1) !important; color: var(--c-ana) !important;
+  border: 1.5px solid var(--c-ana) !important; border-radius: var(--r-kucuk) !important;
+  padding: 6px 12px !important; font-size: var(--fs-1) !important; font-weight: 700 !important;
+}
+body[data-tasarim="kesin"] .m-wiki a.phbtn:hover {
+  background: var(--c-ana) !important; color: var(--c-gri1) !important;
+}
+body[data-tasarim="kesin"] .menubtn, body[data-tasarim="kesin"] .menubtn * { color: var(--c-gri3) !important; }
+body[data-tasarim="kesin"] .ara-sat input { background: var(--c-gri1) !important; color: var(--c-gri3) !important; border: 1.5px solid var(--c-gri2) !important; border-radius: var(--r-kucuk) !important; }
+body[data-tasarim="kesin"] .ara-list button, body[data-tasarim="kesin"] .ara-list button * { color: var(--c-gri3) !important; }
+body[data-tasarim="kesin"] .ara-list button:hover { background: var(--c-gri2) !important; }
+/* Ayarlar, Oyunlar ve tüm iç kartlarda açık zemin üstüne koyu mürekkep kontrast garantisi */
+body[data-tasarim="kesin"] .sespop *, body[data-tasarim="kesin"] .oyunpop *:not(.on):not(i),
+body[data-tasarim="kesin"] .turpop *:not(.on), body[data-tasarim="kesin"] .citycard *:not(.icbtn) {
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] .sespop select, body[data-tasarim="kesin"] .katpop select {
+  background: var(--c-gri1) !important; color: var(--c-gri3) !important;
+  border: 1.5px solid var(--c-gri2) !important; border-radius: var(--r-kucuk) !important;
+}
+body[data-tasarim="kesin"] .ses-sustur, body[data-tasarim="kesin"] .temapop button {
+  background: #EDE6D7 !important; color: var(--c-gri3) !important;
+  border: 1px solid var(--c-gri2) !important; border-radius: var(--r-kucuk) !important;
+}
+body[data-tasarim="kesin"] .temapop button.on {
+  background: var(--c-ana) !important; color: var(--c-gri1) !important; border-color: var(--c-ana) !important;
+}
+
+/* Tipografi Hiyerarşisi (6 Boyut + Young Serif & Instrument Sans) */
+body[data-tasarim="kesin"] #yc-year {
+  font-family: var(--f-baslik) !important;
+  font-size: var(--fs-6) !important;
+  line-height: 1.05 !important;
+  color: var(--c-gri3) !important;
+  text-shadow: none !important;
+}
+body[data-tasarim="kesin"] .sheet h2,
+body[data-tasarim="kesin"] .hg-kart h2,
+body[data-tasarim="kesin"] .hk-ust h2 {
+  font-family: var(--f-baslik) !important;
+  font-size: var(--fs-5) !important;
+  line-height: 1.15 !important;
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] .sheet h3,
+body[data-tasarim="kesin"] .tur-ic h4,
+body[data-tasarim="kesin"] .eo-ust b,
+body[data-tasarim="kesin"] .tby-bas b {
+  font-family: var(--f-baslik) !important;
+  font-size: var(--fs-4) !important;
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] .sheet h4,
+body[data-tasarim="kesin"] .tb-kart h4,
+body[data-tasarim="kesin"] .tby-ic h4,
+body[data-tasarim="kesin"] .aa-bolge h4,
+body[data-tasarim="kesin"] .tp-bas {
+  font-family: var(--f-baslik) !important;
+  font-size: var(--fs-3) !important;
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] p,
+body[data-tasarim="kesin"] li,
+body[data-tasarim="kesin"] td {
+  font-family: var(--f-metin) !important;
+  font-size: var(--fs-2) !important;
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] .katpop label span {
+  font-family: var(--f-metin) !important;
+  font-size: var(--fs-1) !important;
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] small,
+body[data-tasarim="kesin"] th,
+body[data-tasarim="kesin"] .msub,
+body[data-tasarim="kesin"] .note,
+body[data-tasarim="kesin"] #yc-ago,
+body[data-tasarim="kesin"] #yc-ruler {
+  font-family: var(--f-metin) !important;
+  font-size: var(--fs-1) !important;
+}
+
+/* Ana Ekran Yüzen Paneller: 14px dış köşe, sıcak taş zemin (--c-gri1), orta taş kenarlık (--c-gri2) */
+body[data-tasarim="kesin"] .modlar,
+body[data-tasarim="kesin"] .place,
+body[data-tasarim="kesin"] .globectl,
+body[data-tasarim="kesin"] #sesbtn,
+body[data-tasarim="kesin"] .katbtn,
+body[data-tasarim="kesin"] .yearcard,
+body[data-tasarim="kesin"] .tl,
+body[data-tasarim="kesin"] .katpop,
+body[data-tasarim="kesin"] .oyunpop,
+body[data-tasarim="kesin"] .turpop,
+body[data-tasarim="kesin"] .sespop,
+body[data-tasarim="kesin"] .sheet,
+body[data-tasarim="kesin"] .turbar,
+body[data-tasarim="kesin"] .ara-kutu {
+  background: var(--c-gri1) !important;
+  color: var(--c-gri3) !important;
+  border: 1.5px solid var(--c-gri2) !important;
+  border-radius: var(--r-buyuk) !important;
+  box-shadow: 0 10px 28px rgba(34, 30, 26, 0.22) !important;
+}
+
+/* Üst Menü & Seçiciler (6px iç köşe) */
+body[data-tasarim="kesin"] .modlar { padding: 4px !important; gap: 4px !important; }
+body[data-tasarim="kesin"] .modlar button {
+  border-radius: var(--r-kucuk) !important;
+  padding: 7px 13px !important;
+  font-size: var(--fs-1) !important;
+  font-weight: 600 !important;
+  color: var(--c-gri3) !important;
+  background: transparent !important;
+}
+body[data-tasarim="kesin"] .modlar button:hover { background: var(--c-gri2) !important; }
+body[data-tasarim="kesin"] .modlar button.on {
+  background: var(--c-ana) !important;
+  color: var(--c-gri1) !important;
+  box-shadow: none !important;
+}
+body[data-tasarim="kesin"] .place { padding: 4px 10px !important; }
+body[data-tasarim="kesin"] .place select {
+  color: var(--c-gri3) !important;
+  font-size: var(--fs-1) !important;
+  font-weight: 600 !important;
+}
+body[data-tasarim="kesin"] .place select option,
+body[data-tasarim="kesin"] .place select optgroup {
+  background: var(--c-gri1) !important;
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] .globectl button,
+body[data-tasarim="kesin"] #sesbtn {
+  color: var(--c-gri3) !important;
+  border-color: var(--c-gri2) !important;
+  border-radius: var(--r-kucuk) !important;
+}
+/* Sağ üstte Ayarlar (#sesbtn) ve hemen solunda Katmanlar (#katbtn): alt zaman çizelgesiyle asla çakışmaz ve ekrana tam sığar */
+body[data-tasarim="kesin"] #sesbtn {
+  position: fixed !important; top: 14px !important; right: 16px !important;
+  width: auto !important; height: 36px !important; padding: 0 12px !important;
+  display: inline-flex !important; align-items: center !important; gap: 6px !important;
+  font-size: var(--fs-1) !important; font-weight: 700 !important;
+}
+body[data-tasarim="kesin"] .katbtn {
+  position: fixed !important; top: 14px !important; right: 112px !important; bottom: auto !important;
+  height: 36px !important; padding: 0 13px !important;
+  border-radius: var(--r-kucuk) !important;
+  font-size: var(--fs-1) !important;
+  font-weight: 700 !important;
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] .globectl {
+  top: 60px !important; right: 16px !important;
+}
+body[data-tasarim="kesin"] #katman.katpop {
+  position: fixed !important; top: 54px !important; right: 16px !important; left: auto !important; bottom: auto !important;
+  width: min(300px, calc(100vw - 24px)) !important;
+  max-height: min(430px, calc(100dvh - 140px)) !important;
+  padding: 0 12px 10px !important;
+  border: 2px solid var(--c-ana) !important;
+  overflow-y: auto !important; z-index: 95 !important;
+}
+body[data-tasarim="kesin"] #katman .kp-modlar {
+  background: var(--c-ana) !important;
+  margin: 0 -12px 8px !important;
+  padding: 8px 10px !important;
+  border-radius: 0 !important;
+}
+body[data-tasarim="kesin"] #katman .kp-modlar button {
+  color: rgba(246, 242, 233, 0.78) !important;
+  border-color: rgba(246, 242, 233, 0.25) !important;
+  background: transparent !important;
+  padding: 5px 8px !important;
+}
+body[data-tasarim="kesin"] #katman .kp-modlar button.on {
+  background: var(--c-gri1) !important;
+  color: var(--c-gri3) !important;
+  border-color: var(--c-gri1) !important;
+}
+body[data-tasarim="kesin"] #katman .kp-grup label {
+  padding: 5px 6px !important;
+  font-size: var(--fs-1) !important;
+}
+body[data-tasarim="kesin"] #sespop.sespop {
+  position: fixed !important; top: 56px !important; right: 16px !important;
+  max-height: min(70vh, calc(100dvh - 150px)) !important;
+  overflow-y: auto !important; z-index: 96 !important;
+}
+
+/* Sol Üst Yıl Kartı: Bilinçli Asimetri + Ekran Başına Tek Ana Vurgu Butonu (#yc-tb) */
+body[data-tasarim="kesin"] .yearcard {
+  padding: 14px 16px !important;
+  max-width: 290px !important;
+}
+body[data-tasarim="kesin"] #yc-ago {
+  color: var(--c-ana) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-shadow: none !important;
+}
+body[data-tasarim="kesin"] #yc-ruler {
+  color: var(--c-gri3) !important;
+  opacity: 0.75;
+  font-style: normal !important;
+  text-shadow: none !important;
+}
+body[data-tasarim="kesin"] .yearcard .aa,
+body[data-tasarim="kesin"] .yearcard #ayni-anda {
+  border-top: 1px solid var(--c-gri2) !important;
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] .yearcard .aa *,
+body[data-tasarim="kesin"] .yearcard #ayni-anda * {
+  color: var(--c-gri3) !important;
+  text-shadow: none !important;
+}
+/* Ekranın TEK ana aksiyon butonu: Vurgu rengi (--c-vurgu) + 6px köşe */
+body[data-tasarim="kesin"] .yearcard #yc-tb {
+  background: var(--c-vurgu) !important;
+  color: var(--c-gri1) !important;
+  border: 0 !important;
+  border-radius: var(--r-kucuk) !important;
+  padding: 7px 12px !important;
+  font-size: var(--fs-1) !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+}
+
+/* Bilgi Kartı (#modal .sheet) & Katmanlar: Sıcak kitap okunaklılığı, sol şeritsiz kutular, 6px butonlar */
+body[data-tasarim="kesin"] .sheet header {
+  background: var(--c-gri1) !important;
+  border-bottom: 1.5px solid var(--c-gri2) !important;
+  padding: 18px 52px 14px 20px !important;
+}
+body[data-tasarim="kesin"] .sheet .msub { color: var(--c-ana) !important; font-weight: 600 !important; }
+body[data-tasarim="kesin"] .sheet .x {
+  background: var(--c-gri2) !important;
+  color: var(--c-gri3) !important;
+  border: 0 !important;
+  border-radius: var(--r-kucuk) !important;
+}
+body[data-tasarim="kesin"] .sheet .tabs {
+  background: var(--c-gri1) !important;
+  border-bottom: 1.5px solid var(--c-gri2) !important;
+  padding: 8px 16px !important;
+  gap: 6px !important;
+}
+body[data-tasarim="kesin"] .sheet .tabs button {
+  border-radius: var(--r-kucuk) !important;
+  background: transparent !important;
+  color: var(--c-gri3) !important;
+  border: 1.5px solid var(--c-gri2) !important;
+  font-size: var(--fs-1) !important;
+  font-weight: 600 !important;
+  padding: 6px 12px !important;
+}
+body[data-tasarim="kesin"] .sheet .tabs button.on {
+  background: var(--c-ana) !important;
+  color: var(--c-gri1) !important;
+  border-color: var(--c-ana) !important;
+}
+/* Tam hap şekli (999px) YALNIZCA bilgi etiketlerinde (.pill) */
+body[data-tasarim="kesin"] .sheet .pill {
+  border-radius: 999px !important;
+  background: var(--c-gri2) !important;
+  color: var(--c-gri3) !important;
+  border: 0 !important;
+  font-size: var(--fs-1) !important;
+  font-weight: 600 !important;
+}
+/* Sol kenarı renkli kutu YASAK: Tam çerçeveli, 6px köşeli sade bilgi kutusu */
+body[data-tasarim="kesin"] .sheet .did,
+body[data-tasarim="kesin"] .hk-kutu .did,
+body[data-tasarim="kesin"] .hy-bilgi {
+  background: var(--c-gri1) !important;
+  border: 1.5px solid var(--c-gri2) !important;
+  border-left-width: 1.5px !important;
+  border-radius: var(--r-kucuk) !important;
+  padding: 12px 14px !important;
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] .sheet .did b {
+  color: var(--c-ana) !important;
+  font-family: var(--f-baslik) !important;
+  font-size: var(--fs-2) !important;
+}
+body[data-tasarim="kesin"] .sheet .rows tr { border-bottom: 1px solid var(--c-gri2) !important; }
+body[data-tasarim="kesin"] .sheet .rows th { color: var(--c-ana) !important; font-weight: 600 !important; }
+body[data-tasarim="kesin"] .sheet .photos figure,
+body[data-tasarim="kesin"] .kapak img {
+  border-radius: var(--r-kucuk) !important;
+  border: 1px solid var(--c-gri2) !important;
+  background: var(--c-gri1) !important;
+}
+/* Buton Hiyerarşisi: İkincil butonlar çerçeveli, yalnızca tek ana aksiyon (.icbtn) vurgu rengi */
+body[data-tasarim="kesin"] .sheet .phbtn,
+body[data-tasarim="kesin"] .kp-toplu button,
+body[data-tasarim="kesin"] .kp-daha {
+  border-radius: var(--r-kucuk) !important;
+  background: var(--c-gri1) !important;
+  color: var(--c-gri3) !important;
+  border: 1.5px solid var(--c-gri2) !important;
+  font-size: var(--fs-1) !important;
+  font-weight: 600 !important;
+}
+body[data-tasarim="kesin"] .sheet .phbtn.icbtn {
+  background: var(--c-vurgu) !important;
+  color: var(--c-gri1) !important;
+  border-color: var(--c-vurgu) !important;
+}
+body[data-tasarim="kesin"] .kp-modlar button {
+  border-radius: var(--r-kucuk) !important;
+  font-size: var(--fs-1) !important;
+  color: var(--c-gri3) !important;
+  background: transparent !important;
+  border: 1.5px solid var(--c-gri2) !important;
+}
+body[data-tasarim="kesin"] .kp-modlar button.on {
+  background: var(--c-ana) !important;
+  color: var(--c-gri1) !important;
+  border-color: var(--c-ana) !important;
+}
+body[data-tasarim="kesin"] .katpop label i,
+body[data-tasarim="kesin"] .kp-modlar button em {
+  background: var(--c-gri2) !important;
+  color: var(--c-gri3) !important;
+  border-radius: var(--r-kucuk) !important;
+  font-size: var(--fs-1) !important;
+  border: 0 !important;
+  margin-left: 6px !important;
+  padding: 1px 6px !important;
+}
+body[data-tasarim="kesin"] .kapak,
+body[data-tasarim="kesin"] .kapak small {
+  background: var(--c-gri2) !important;
+  color: var(--c-gri3) !important;
+}
+body[data-tasarim="kesin"] .tl .ctrl button,
+body[data-tasarim="kesin"] .tl .ctrl select,
+body[data-tasarim="kesin"] .tlzoom button {
+  border-radius: var(--r-kucuk) !important;
+  background: var(--c-gri1) !important;
+  color: var(--c-gri3) !important;
+  border: 1.5px solid var(--c-gri2) !important;
+  font-size: var(--fs-1) !important;
+}
+body[data-tasarim="kesin"] .tl .ctrl .play {
+  background: var(--c-vurgu) !important;
+  color: var(--c-gri1) !important;
+  border-color: var(--c-vurgu) !important;
+}
+
+@media (max-width: 860px) {
+  body[data-tasarim="kesin"] #yc-year { font-size: var(--fs-5) !important; }
+  body[data-tasarim="kesin"] .menubtn {
+    background: var(--c-gri1) !important;
+    color: var(--c-gri3) !important;
+    border: 1.5px solid var(--c-gri2) !important;
+    border-radius: var(--r-kucuk) !important;
+    font-size: var(--fs-1) !important;
+    font-weight: 700 !important;
+  }
+}
+
+/* ============================================================================
+   🧭 SOL "☰ KEŞFET" MENÜSÜ (#ustmenu): %100 TAM OPAK + 3 FARKLI TASARIM SEÇENEĞİ
+   (data-menu-stil="bento" | "fihrist" | "kompakt")
+   ============================================================================ */
+.um-stil-sec { display: none; }
+@media (max-width: 1279px) {
+  body[data-tasarim="kesin"] #sesbtn { top: 10px !important; right: 12px !important; padding: 0 10px !important; height: 36px !important; }
+  body[data-tasarim="kesin"] #sesbtn span { display: none !important; }
+  body[data-tasarim="kesin"] .katbtn { top: 10px !important; right: 54px !important; height: 36px !important; padding: 0 11px !important; }
+  body[data-tasarim="kesin"] #katman.katpop { top: 52px !important; right: 12px !important; left: auto !important; width: min(296px, calc(100vw - 24px)) !important; max-height: min(410px, calc(100dvh - 135px)) !important; }
+
+  /* Ortak Tam Opak Çekmece Temeli (Asla saydam değil!) */
+  body[data-tasarim="kesin"] .ustmenu {
+    background: var(--c-gri1) !important;
+    color: var(--c-gri3) !important;
+    border-right: 2px solid var(--c-gri2) !important;
+    box-shadow: 16px 0 44px rgba(20, 16, 12, 0.35) !important;
+    padding: 16px !important;
+    gap: 12px !important;
+    z-index: 130 !important;
+  }
+  body[data-tasarim="kesin"] .um-perde {
+    background: rgba(20, 16, 12, 0.48) !important;
+    z-index: 125 !important;
+  }
+  body[data-tasarim="kesin"] .um-bas {
+    display: flex !important; align-items: center; justify-content: space-between; gap: 8px;
+    padding-bottom: 10px; border-bottom: 1.5px solid var(--c-gri2);
+    color: var(--c-gri3) !important; font-family: var(--f-baslik) !important; font-size: var(--fs-3) !important;
+  }
+  body[data-tasarim="kesin"] .um-x {
+    width: 32px; height: 32px; flex-shrink: 0; border-radius: var(--r-kucuk) !important;
+    background: var(--c-gri2) !important; color: var(--c-gri3) !important; border: 0 !important;
+  }
+  body[data-tasarim="kesin"] .um-stil-sec {
+    display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 4px;
+    background: #EAE2D3; padding: 4px; border-radius: var(--r-kucuk); border: 1px solid var(--c-gri2);
+  }
+  body[data-tasarim="kesin"] .um-stil-sec button {
+    border: 0; background: transparent; color: var(--c-gri3); font-size: 11px; font-weight: 700;
+    padding: 5px 4px; border-radius: 4px; cursor: pointer;
+  }
+  body[data-tasarim="kesin"] .um-stil-sec button.on {
+    background: var(--c-vurgu); color: var(--c-gri1);
+  }
+  body[data-tasarim="kesin"] .ustmenu .place {
+    background: #EAE2D3 !important; border: 1.5px solid var(--c-gri2) !important;
+    border-radius: var(--r-kucuk) !important; padding: 10px !important; box-shadow: none !important;
+    width: 100% !important; min-width: 0 !important; overflow: hidden !important;
+  }
+  body[data-tasarim="kesin"] .ustmenu .place-not { color: #544B3F !important; font-size: var(--fs-1) !important; }
+  body[data-tasarim="kesin"] .ustmenu .place-not b { color: var(--c-ana) !important; font-family: var(--f-baslik) !important; font-size: var(--fs-2) !important; }
+  body[data-tasarim="kesin"] .ustmenu .place select {
+    background: var(--c-gri1) !important; color: var(--c-gri3) !important;
+    border: 1.5px solid var(--c-gri2) !important; border-radius: var(--r-kucuk) !important;
+    padding: 8px 10px !important; font-size: var(--fs-1) !important;
+    width: 100% !important; max-width: 100% !important; min-width: 0 !important;
+  }
+  body[data-tasarim="kesin"] .ustmenu .um-ayar {
+    display: flex !important; border-top: 1.5px solid var(--c-gri2) !important; padding-top: 10px !important;
+  }
+  body[data-tasarim="kesin"] .ustmenu .um-ayar .rehber-btn,
+  body[data-tasarim="kesin"] .ustmenu #um-ses::after,
+  body[data-tasarim="kesin"] .ustmenu #rehber-ac::after {
+    background: #EAE2D3 !important; color: var(--c-gri3) !important;
+    border-radius: var(--r-kucuk) !important; font-size: var(--fs-1) !important;
+  }
+
+  /* 1. FİKİR: BENTO KART IZGARASI (data-menu-stil="bento") */
+  body[data-tasarim="kesin"][data-menu-stil="bento"] .ustmenu .modlar {
+    display: grid !important; grid-template-columns: repeat(2, 1fr); gap: 8px !important;
+    background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important;
+  }
+  body[data-tasarim="kesin"][data-menu-stil="bento"] .ustmenu .modlar button {
+    display: flex !important; flex-direction: column; align-items: flex-start; justify-content: space-between;
+    min-height: 64px; padding: 10px 12px !important;
+    background: #EAE2D3 !important; color: var(--c-gri3) !important;
+    border: 1.5px solid var(--c-gri2) !important; border-radius: var(--r-kucuk) !important;
+    font-size: var(--fs-2) !important; font-weight: 700 !important;
+  }
+  body[data-tasarim="kesin"][data-menu-stil="bento"] .ustmenu .modlar button#ara {
+    grid-column: 1 / -1; flex-direction: row; align-items: center; min-height: 44px;
+  }
+  body[data-tasarim="kesin"][data-menu-stil="bento"] .ustmenu .modlar button.on {
+    background: var(--c-ana) !important; color: var(--c-gri1) !important; border-color: var(--c-ana) !important;
+  }
+
+  /* 2. FİKİR: KİTAP FİHRİSTİ / EDİTORYAL İÇİNDEKİLER (data-menu-stil="fihrist") */
+  body[data-tasarim="kesin"][data-menu-stil="fihrist"] .ustmenu .modlar {
+    display: flex !important; flex-direction: column; gap: 0 !important;
+    background: var(--c-gri1) !important; border: 1.5px solid var(--c-gri2) !important;
+    border-radius: var(--r-kucuk) !important; box-shadow: none !important; padding: 0 !important; overflow: hidden;
+  }
+  body[data-tasarim="kesin"][data-menu-stil="fihrist"] .ustmenu .modlar button {
+    border-radius: 0 !important; padding: 12px 14px !important;
+    font-family: var(--f-baslik) !important; font-size: var(--fs-3) !important;
+    border-bottom: 1px solid var(--c-gri2) !important; background: var(--c-gri1) !important; color: var(--c-gri3) !important;
+  }
+  body[data-tasarim="kesin"][data-menu-stil="fihrist"] .ustmenu .modlar button:last-child { border-bottom: 0 !important; }
+  body[data-tasarim="kesin"][data-menu-stil="fihrist"] .ustmenu .modlar button.on {
+    background: #EAE2D3 !important; color: var(--c-vurgu) !important;
+    box-shadow: inset 4px 0 0 var(--c-vurgu) !important;
+  }
+
+  /* 3. FİKİR: YÜZEN OPAK KOMUT KUTUSU / POPOVER (data-menu-stil="kompakt") */
+  body[data-tasarim="kesin"][data-menu-stil="kompakt"] .ustmenu {
+    top: 54px !important; left: 12px !important; bottom: auto !important;
+    width: min(310px, calc(100vw - 24px)) !important; max-height: calc(100dvh - 70px) !important;
+    border: 2px solid var(--c-ana) !important; border-radius: var(--r-buyuk) !important;
+    box-shadow: 0 18px 48px rgba(20, 16, 12, 0.42) !important;
+    padding: 0 14px 14px !important;
+  }
+  body[data-tasarim="kesin"][data-menu-stil="kompakt"] .um-bas {
+    background: var(--c-ana) !important; color: var(--c-gri1) !important;
+    margin: 0 -14px 8px !important; padding: 12px 14px !important; border-bottom: 0 !important;
+  }
+  body[data-tasarim="kesin"][data-menu-stil="kompakt"] .um-bas * { color: var(--c-gri1) !important; }
+  body[data-tasarim="kesin"][data-menu-stil="kompakt"] .um-x { background: rgba(255,255,255,0.18) !important; }
+  body[data-tasarim="kesin"][data-menu-stil="kompakt"] .ustmenu .modlar {
+    background: #EAE2D3 !important; border: 1px solid var(--c-gri2) !important;
+    border-radius: var(--r-kucuk) !important; padding: 4px !important; box-shadow: none !important;
+  }
+}
+
+/* ============================================================================
+   Düzeltmeler (28.11.2026)
+   ============================================================================ */
+/* 1) Atıf şeridi (Cliopatria CC BY şartı) havada süzülen zaman çizelgesinin altında kalmasın: çizelgenin atfı
+      örttüğü genişliklerde atıf çizelgenin hemen üstüne çıkar. --tl-h çizelgenin yüksekliği (hakkinda.js ölçer). */
+@media (max-width: 1380px) {
+  body.dunyamod .atif { position: fixed; right: 10px; bottom: calc(var(--tl-h, 64px) + 22px); z-index: 39; }
+}
+/* 2) Telefonda yıl yazısı sağ üstteki ▴ küçültme düğmesinin altına girmesin */
+@media (max-width: 860px) {
+  body.dunyamod:not(.ust-gizli) .yearcard #yc-year { margin-right: 32px; }
+}
+/* 3) ☰ menüdeki "1 · Bento Kart / 2 · Kitap Fihristi / 3 · Yüzen Kutu" deneme seçicisi gizli; geçerli tasarım
+      <body data-menu-stil="kompakt">. Seçiciyi geri getirmek için bu kuralı silmek yeter. */
+body[data-tasarim="kesin"] .um-stil-sec { display: none !important; }
+/* 4) Emojiler cihazın yazı tipiyle değil sitenin kendi resmiyle gösterilir (js/emo.js, resimler img/emo/, Google Noto Emoji).
+      Karakter öğenin içinde kalır ama kutunun dışına itilip kırpılır; yerine arka plan resmi görünür. */
+emo-s.on {
+  display: inline-block; width: 1.2em; height: 1.2em; vertical-align: -0.24em; margin: 0 0.03em;
+  overflow: hidden; white-space: nowrap; text-indent: -99em; line-height: 1; text-shadow: none;
+  background: center / contain no-repeat;
+}

@@ -261,6 +261,256 @@ window.Dunya = (() => {
       return;
     }
     const r = R(); let pen = false; for (let i = 0; i < p.n; i++) { const [x, y, z] = pj(p.cl[i], p.sl[i], p.lo[i]); if (z > 0.02) { const sx = W / 2 + x * r, sy = H / 2 - y * r; pen ? g.lineTo(sx, sy) : g.moveTo(sx, sy); pen = true; } else pen = false; } }
+  // ---------- akıntılar için yatayda kesintisiz tekrarlanan su dokusu (bir kez üretilir) ----------
+  const DOKU_W = 512, DOKU_H = 64, _doku = {};
+  function suDokusu(sicak) {
+    const k = sicak ? 's' : 'c'; if (_doku[k]) return _doku[k];
+    const cv = document.createElement('canvas'); cv.width = DOKU_W + 64; cv.height = DOKU_H;
+    const cx = cv.getContext('2d'), im = cx.createImageData(DOKU_W, DOKU_H), dt = im.data;
+    let tohum = sicak ? 7 : 3; const rnd = () => (tohum = (tohum * 16807) % 2147483647) / 2147483647;
+    // x yönünde periyodik değer gürültüsü (ızgara x'te sarılır)
+    const katmanlar = [[6, 3], [12, 5], [24, 8], [48, 12]].map(([gx, gy]) => ({ gx, gy, v: Array.from({ length: gx * (gy + 1) }, rnd) }));
+    const yumus = t => t * t * (3 - 2 * t);
+    const gurultu = (L, x, y) => {
+      const fx = x / DOKU_W * L.gx, fy = y / DOKU_H * L.gy, ix = Math.floor(fx), iy = Math.floor(fy), ax = yumus(fx - ix), ay = yumus(fy - iy);
+      const v = (i, j) => L.v[(j % (L.gy + 1)) * L.gx + ((i % L.gx) + L.gx) % L.gx];
+      const a = v(ix, iy) + (v(ix + 1, iy) - v(ix, iy)) * ax, b = v(ix, iy + 1) + (v(ix + 1, iy + 1) - v(ix, iy + 1)) * ax;
+      return a + (b - a) * ay;
+    };
+    const [r0, g0, b0] = sicak ? [226, 96, 52] : [38, 150, 214];
+    const [r1, g1, b1] = sicak ? [255, 214, 160] : [205, 246, 255];
+    for (let y = 0; y < DOKU_H; y++) {
+      const kenar = Math.pow(Math.sin(Math.PI * (y + 0.5) / DOKU_H), 1.3);
+      for (let x = 0; x < DOKU_W; x++) {
+        // akış yönünde uzamış damarlar: y'yi gürültüyle kıvır, sinüs bantları
+        const n = gurultu(katmanlar[0], x, y) * 0.5 + gurultu(katmanlar[1], x, y) * 0.3 + gurultu(katmanlar[2], x, y) * 0.2;
+        const damar = Math.pow(Math.abs(Math.sin((y / DOKU_H) * 9.0 + n * 6.0 + x / DOKU_W * Math.PI * 4)), 6);
+        const kopuk = Math.max(0, gurultu(katmanlar[3], x, y) - 0.62) * 3.2;
+        const isik = Math.min(1, damar * 0.85 + kopuk);
+        const i = (y * DOKU_W + x) * 4;
+        dt[i] = r0 + (r1 - r0) * isik; dt[i + 1] = g0 + (g1 - g0) * isik; dt[i + 2] = b0 + (b1 - b0) * isik;
+        dt[i + 3] = 255 * kenar * (0.28 + 0.72 * isik) * (0.75 + 0.25 * n);
+      }
+    }
+    cx.putImageData(im, 0, 0);
+    cx.drawImage(cv, 0, 0, 64, DOKU_H, DOKU_W, 0, 64, DOKU_H);   // sarma payı
+    return (_doku[k] = cv);
+  }
+  // ---------- genel doku üretici (x yönünde kesintisiz) ----------
+  function dokuUret(anahtar, tohum0, piksel) {
+    if (_doku[anahtar]) return _doku[anahtar];
+    const cv = document.createElement('canvas'); cv.width = DOKU_W + 64; cv.height = DOKU_H;
+    const cx = cv.getContext('2d'), im = cx.createImageData(DOKU_W, DOKU_H), dt = im.data;
+    let tohum = tohum0; const rnd = () => (tohum = (tohum * 16807) % 2147483647) / 2147483647;
+    const kat = [[5, 4], [11, 7], [23, 11]].map(([gx, gy]) => ({ gx, gy, v: Array.from({ length: gx * (gy + 1) }, rnd) }));
+    const ym = t => t * t * (3 - 2 * t);
+    const gr = (L, x, y) => {
+      const fx = x / DOKU_W * L.gx, fy = y / DOKU_H * L.gy, ix = Math.floor(fx), iy = Math.floor(fy), ax = ym(fx - ix), ay = ym(fy - iy);
+      const v = (i, j) => L.v[(j % (L.gy + 1)) * L.gx + ((i % L.gx) + L.gx) % L.gx];
+      const a = v(ix, iy) + (v(ix + 1, iy) - v(ix, iy)) * ax, b = v(ix, iy + 1) + (v(ix + 1, iy + 1) - v(ix, iy + 1)) * ax;
+      return a + (b - a) * ay;
+    };
+    for (let y = 0; y < DOKU_H; y++) for (let x = 0; x < DOKU_W; x++) {
+      const n = gr(kat[0], x, y) * 0.55 + gr(kat[1], x, y) * 0.3 + gr(kat[2], x, y) * 0.15;
+      const [r, gg, b, a] = piksel(x, y, n), i = (y * DOKU_W + x) * 4;
+      dt[i] = r; dt[i + 1] = gg; dt[i + 2] = b; dt[i + 3] = a;
+    }
+    cx.putImageData(im, 0, 0);
+    cx.drawImage(cv, 0, 0, 64, DOKU_H, DOKU_W, 0, 64, DOKU_H);
+    return (_doku[anahtar] = cv);
+  }
+  // rüzgâr dokusu: ince, tüy gibi uzun hava çizgileri; rengin hafif bir tonu ile
+  function ruzgarDokusu(renk) {
+    const n0 = parseInt(renk.slice(1), 16), rr = n0 >> 16, rg = (n0 >> 8) & 255, rb = n0 & 255;
+    return dokuUret('r' + renk, 11, (x, y, n) => {
+      const kenar = Math.pow(Math.sin(Math.PI * (y + 0.5) / DOKU_H), 0.9);
+      const cizgi = Math.pow(Math.abs(Math.sin((y / DOKU_H) * 16 + n * 5 + x / DOKU_W * Math.PI * 4)), 16);
+      const t = 0.25 + 0.75 * cizgi;
+      return [255 + (rr - 255) * 0.35 * (1 - cizgi), 255 + (rg - 255) * 0.35 * (1 - cizgi), 255 + (rb - 255) * 0.35 * (1 - cizgi),
+              255 * kenar * (0.04 + 0.96 * cizgi) * (0.7 + 0.3 * n) * t];
+    });
+  }
+  // bir dokuyu ekran parçası boyunca kaydırarak çizer (matris elle; ekran dışı atlanır)
+  function dokuAkit(seg, Lpx, doku, HW, kay, olc, ST, inc) {
+    const tb = g.getTransform();
+    for (let s1 = 0; s1 < Lpx; s1 += ST) {
+      const w = inc(s1 + ST / 2); if (w <= 0.02) continue;
+      const [x, y, tx, ty] = segNokta(seg, s1);
+      if (x < -50 || y < -50 || x > W + 50 || y > H + 50) continue;
+      const h = HW * (0.3 + 0.7 * w);
+      g.setTransform(tb.a * tx + tb.c * ty, tb.b * tx + tb.d * ty, -tb.a * ty + tb.c * tx, -tb.b * ty + tb.d * tx,
+        tb.a * x + tb.c * y + tb.e, tb.b * x + tb.d * y + tb.f);
+      const sx = ((s1 * olc - kay) % DOKU_W + DOKU_W) % DOKU_W;
+      g.drawImage(doku, sx, 0, ST * olc + 1, DOKU_H, -0.5, -h, ST + 1.2, h * 2);
+    }
+    g.setTransform(tb);
+  }
+  // emoji'ler bir kez küçük bir resme çizilir (haritada seçilsin diye koyu yumuşak gölgeyle), sonra hızlıca kopyalanır
+  const _emo = {}, EMO_PX = 46, EMO_PAY = 13;
+  function emojiResim(ik) {
+    if (_emo[ik]) return _emo[ik];
+    const c = document.createElement('canvas'), x = c.getContext('2d'); x.font = EMO_PX + 'px system-ui';
+    const w = Math.max(EMO_PX, Math.ceil(x.measureText(ik).width));
+    c.width = w + EMO_PAY * 2; c.height = EMO_PX + EMO_PAY * 2;
+    x.font = EMO_PX + 'px system-ui'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#fffdf5';
+    x.shadowColor = 'rgba(8,14,22,0.85)'; x.shadowBlur = 7; x.shadowOffsetY = 1.5;
+    x.fillText(ik, c.width / 2, c.height / 2 + 3); x.shadowBlur = 3; x.fillText(ik, c.width / 2, c.height / 2 + 3);
+    return (_emo[ik] = c);
+  }
+  // arka plansız simge: (x, y) merkezli, görünen yarı boyu r olan emoji
+  // Simgeler cihazın emojisiyle değil sitenin kendi resmiyle çizilir (Windows, Android, iOS: herkes aynı simgeyi görür).
+  // Resimler: Google Noto Emoji, tek sayfada img/simgeler.webp; hangi emojinin hangi hücrede olduğu data/simge-dizin.js
+  // (üretim: node araclar/simge-sayfa.js + python araclar/simge-sayfa.py). Sayfa yüklenene kadar ve dizinde olmayan
+  // bir simgede cihazın emojisine düşülür.
+  let _smImg = null, _smTam = null, _smYari = null;
+  const _smIdx = new Map(), _smSeg = (typeof Intl !== 'undefined' && Intl.Segmenter) ? new Intl.Segmenter('tr', { granularity: 'grapheme' }) : null;
+  function simgeSayfa() {
+    if (_smTam) return _smTam;
+    if (!_smImg) {
+      _smImg = new Image();
+      _smImg.onload = () => {
+        // gölge bir kez, bütün sayfaya birden uygulanır (hücre kenarındaki pay gölgenin komşuya taşmasını önler)
+        const c = document.createElement('canvas'); c.width = _smImg.width; c.height = _smImg.height;
+        const x = c.getContext('2d'); x.shadowColor = 'rgba(8,14,22,0.8)'; x.shadowBlur = 6; x.shadowOffsetY = 1.5; x.drawImage(_smImg, 0, 0);
+        x.shadowBlur = 2.5; x.shadowOffsetY = 0.5; x.drawImage(_smImg, 0, 0);
+        const y = document.createElement('canvas'); y.width = c.width >> 1; y.height = c.height >> 1;
+        const yx = y.getContext('2d'); yx.imageSmoothingQuality = 'high'; yx.drawImage(c, 0, 0, y.width, y.height);
+        _smYari = y; _smTam = c;
+      };
+      _smImg.src = 'img/simgeler.webp?v=1';
+    }
+    return null;
+  }
+  function simgeHucreleri(ik, D) {
+    let ix = _smIdx.get(ik); if (ix !== undefined) return ix;
+    ix = [];
+    for (const p of (_smSeg ? Array.from(_smSeg.segment(ik), q => q.segment) : [ik.trim()])) {
+      const i = D.s[p.replace(/\uFE0F/g, '')];
+      if (i !== undefined) ix.push(i); else if (/\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(p)) { ix = null; break; }
+    }
+    if (ix && !ix.length) ix = null;
+    _smIdx.set(ik, ix); return ix;
+  }
+  // arka plansız simge: (x, y) merkezli, görünen yarı boyu r
+  function simge(ik, x, y, r) {
+    const D = window.SIMGE_DIZIN, tam = D ? simgeSayfa() : null, ix = tam ? simgeHucreleri(ik, D) : null;
+    if (ix) {
+      const en = r * 2.1, boy = en * D.hucre / D.resim, yari = en * DPRc <= D.resim * 0.55, kay = yari ? _smYari : tam, H = yari ? D.hucre / 2 : D.hucre;
+      for (let j = 0; j < ix.length; j++) {
+        const i = ix[j], cx = x + (j - (ix.length - 1) / 2) * en;
+        g.drawImage(kay, (i % D.sutun) * H, Math.floor(i / D.sutun) * H, H, H, cx - boy / 2, y - boy / 2, boy, boy);
+      }
+      return;
+    }
+    const c = emojiResim(ik), k = r * 2.1 / EMO_PX, w = c.width * k, h = c.height * k;
+    g.drawImage(c, x - w / 2, y - h / 2, w, h);
+  }
+  // ---------- kasırga ve girdap: bir kez çizilen sarmal resimler; her karede döndürülerek basılır ----------
+  let _kasirga = null, _girdap = null, DPRc = 1;
+  // Bir resmin yarıya inen kopyaları: ekrandaki boya en yakın kopya seçilir; böylece küçük çizimde (dönerken de) ne bulanır ne titrer.
+  function mipZinciri(c) {
+    const z = [c]; let o = c;
+    while (o.width > 40) { const k = document.createElement('canvas'); k.width = k.height = o.width >> 1; const x = k.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(o, 0, 0, k.width, k.height); z.push(k); o = k; }
+    return z;
+  }
+  function mipSec(z, cssPx) { const px = cssPx * DPRc; let i = 0; while (i < z.length - 1 && z[i + 1].width >= px) i++; return z[i]; }
+  // Kasırga: net kenarlı, resimli harita tarzında bulut sarmalı (yumuşak leke değil): pofuduk kenarlı kollar, ince gri-mavi çerçeve,
+  // kolların içinde dönüşü gösteren ince çizgiler, ortada yoğun bulut diski ve keskin bir göz.
+  function kasirgaResim() {
+    if (_kasirga) return _kasirga;
+    const N = 512, c = document.createElement('canvas'); c.width = c.height = N; const x = c.getContext('2d'), m = N / 2;
+    let th = 9; const rn = () => (th = (th * 16807) % 2147483647) / 2147483647;
+    const toplar = [];   // [x, y, yarıçap]
+    const KOL = [[0, 1], [Math.PI, 1], [Math.PI / 2, 0.62], [Math.PI * 1.5, 0.62]];   // iki ana, iki ince kol
+    const kolNokta = (a0, guc, t) => { const a = a0 + t * (guc === 1 ? 3.7 : 2.9), rr = (0.20 + (guc === 1 ? 0.70 : 0.58) * Math.pow(t, 0.92)) * m; return [m + Math.cos(a) * rr, m + Math.sin(a) * rr, a]; };
+    const kolEn = (guc, t) => m * (0.155 * Math.pow(1 - t, 0.75) + 0.012) * guc;
+    for (const [a0, guc] of KOL) for (let i = 0; i <= 64; i++) {
+      const t = i / 64, [px, py, a] = kolNokta(a0, guc, t), w = kolEn(guc, t);
+      toplar.push([px, py, w]);
+      if (i % 2 === 0 && t < 0.93) { const ya = a + (rn() - 0.5) * 1.2; toplar.push([px + Math.cos(ya) * w * 0.62, py + Math.sin(ya) * w * 0.62, w * (0.50 + rn() * 0.2)]); }   // dış kenardaki pofuduklar
+    }
+    for (let i = 0; i < 18; i++) { const a = i / 18 * 6.283, rr = m * 0.265; toplar.push([m + Math.cos(a) * rr, m + Math.sin(a) * rr, m * (0.085 + rn() * 0.03)]); }
+    toplar.push([m, m, m * 0.30]);
+    const bas = (renk, ek) => { x.fillStyle = renk; x.beginPath(); for (const [px, py, r] of toplar) { x.moveTo(px + r + ek, py); x.arc(px, py, Math.max(0.5, r + ek), 0, 6.2832); } x.fill(); };
+    bas('#7f9cb8', m * 0.020);   // çerçeve
+    bas('#ffffff', 0);
+    // kolların iç yanında hafif gölge + dönüş çizgileri
+    x.lineCap = 'round';
+    for (const [a0, guc] of KOL) {
+      for (const [kay, kal, renk] of [[-0.42, 0.34, 'rgba(206,221,235,0.9)'], [0.05, 0.05, 'rgba(120,150,180,0.75)'], [0.42, 0.04, 'rgba(120,150,180,0.5)']]) {
+        x.strokeStyle = renk;
+        for (let i = 2; i < 58; i++) {
+          const t0 = i / 64, t1 = (i + 1.3) / 64, [x0, y0, q0] = kolNokta(a0, guc, t0), [x1, y1, q1] = kolNokta(a0, guc, t1), w0 = kolEn(guc, t0), w1 = kolEn(guc, t1);
+          // kay < 0: merkeze bakan yan; nokta, kol ekseninden merkeze/dışa doğru kaydırılır
+          const u0 = [(x0 - m), (y0 - m)], l0 = Math.hypot(u0[0], u0[1]) || 1, u1 = [(x1 - m), (y1 - m)], l1 = Math.hypot(u1[0], u1[1]) || 1;
+          x.lineWidth = Math.max(0.8, w0 * kal * 2);
+          x.beginPath(); x.moveTo(x0 + u0[0] / l0 * w0 * kay, y0 + u0[1] / l0 * w0 * kay); x.lineTo(x1 + u1[0] / l1 * w1 * kay, y1 + u1[1] / l1 * w1 * kay); x.stroke();
+        }
+      }
+    }
+    // göz duvarı gölgesi ve göz
+    const gd = x.createRadialGradient(m, m, m * 0.07, m, m, m * 0.24); gd.addColorStop(0, 'rgba(150,176,202,0.95)'); gd.addColorStop(0.45, 'rgba(206,221,235,0.7)'); gd.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = gd; x.beginPath(); x.arc(m, m, m * 0.24, 0, 7); x.fill();
+    x.globalCompositeOperation = 'destination-out'; x.fillStyle = '#000'; x.beginPath(); x.arc(m, m, m * 0.072, 0, 7); x.fill();
+    x.globalCompositeOperation = 'source-over';
+    x.strokeStyle = '#6f8dab'; x.lineWidth = m * 0.018; x.beginPath(); x.arc(m, m, m * 0.072, 0, 7); x.stroke();
+    return (_kasirga = mipZinciri(c));
+  }
+  function girdapResim() {
+    if (_girdap) return _girdap;
+    const N = 384, c = document.createElement('canvas'); c.width = c.height = N; const x = c.getContext('2d'), m = N / 2, olc = N / 144;
+    // içine çeken koyu derinlik
+    const d = x.createRadialGradient(m, m, 0, m, m, m); d.addColorStop(0, 'rgba(3,22,54,0.92)'); d.addColorStop(0.3, 'rgba(8,58,110,0.6)'); d.addColorStop(0.75, 'rgba(20,110,170,0.2)'); d.addColorStop(1, 'rgba(20,110,170,0)');
+    x.fillStyle = d; x.beginPath(); x.arc(m, m, m, 0, 7); x.fill();
+    // merkeze doğru sarılan köpük çizgileri: dört kalın kol, aralarında ince kollar
+    x.lineCap = 'round';
+    for (let kol = 0; kol < 8; kol++) {
+      const ince = kol % 2 === 1, D = 90;
+      for (let i = 0; i < D; i++) {
+        const t0 = i / D, t1 = (i + 1.25) / D, f = t => [m + Math.cos(kol * 0.7854 + t * 4.6) * (0.07 + 0.88 * t) * m, m + Math.sin(kol * 0.7854 + t * 4.6) * (0.07 + 0.88 * t) * m];
+        const [x0, y0] = f(t0), [x1, y1] = f(t1);
+        x.strokeStyle = `rgba(226,248,255,${(ince ? 0.42 : 0.9) * Math.sin(Math.PI * Math.min(1, t0 * 1.15 + 0.06)) ** 0.8 * (1 - t0 * 0.55)})`;
+        x.lineWidth = (ince ? 0.9 : 2.4) * (0.45 + 0.9 * (1 - t0)) * olc;
+        x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke();
+      }
+    }
+    const k = x.createRadialGradient(m, m, 0, m, m, m * 0.12); k.addColorStop(0, 'rgba(2,12,32,0.95)'); k.addColorStop(1, 'rgba(2,12,32,0)');
+    x.fillStyle = k; x.beginPath(); x.arc(m, m, m * 0.12, 0, 7); x.fill();
+    return (_girdap = mipZinciri(c));
+  }
+  // Göç hayvanları: Blender'da üretilmiş hareketli 3B sprite'lar (img/goc-hayvanlar.webp; betik: blender-deneme/goc_sprite.py).
+  // Satır = hayvan (GOC_IDX); sütun = yön * 4 + hareket karesi. 9 yön: 0 ekranda aşağı (izleyiciye doğru), 4 sağa, 8 yukarı (uzağa);
+  // sola gidişte resim aynalanır (16 yön). Kamera eğik kuş bakışı olduğundan hayvan döndükçe gerçekten 3B döner.
+  const GOC_IDX = { 'serengeti-gnu': 0, 'meyve-yarasasi': 1, 'kiyi-cullugu': 2, 'gezgin-yusufcuk': 3, 'avrupa-yilanbaligi': 4,
+    'ren-geyigi': 5, 'gri-balina': 6, 'sardalya-gocu': 7, 'beyaz-leylek': 8, 'kuzey-sumrusu': 9, 'sarkici-kus': 10, 'hint-kazi': 11,
+    'kral-kelebek': 12, 'pasifik-somonu': 13, 'deniz-fili': 14, 'buyuk-beyaz': 15, 'kir-kirlangici': 16, 'deniz-kaplumbaga': 17,
+    'kambur-balina': 18, 'kalahari-zebra': 19 };
+  const GOC_HP = 96;
+  // [ortam (h hava, s su, k kara), saniyedeki hareket döngüsü (kanat/kuyruk/koşu), boyut çarpanı]
+  const GOC_TUR = [['k', 2.1, 1.15], ['h', 2.4, 1.05], ['h', 2.2, 1.2], ['h', 4.5, 0.95], ['s', 1.5, 1.15], ['k', 1.9, 1.2], ['s', 0.6, 1.35],
+    ['s', 2.2, 0.95], ['h', 1.6, 1.3], ['h', 2.2, 1.15], ['h', 1.0, 1.25], ['h', 2.0, 1.25], ['h', 2.8, 1.0], ['s', 2.2, 0.95],
+    ['s', 1.1, 1.1], ['s', 1.2, 1.35], ['h', 3.2, 1.05], ['s', 0.8, 1.0], ['s', 0.55, 1.4], ['k', 2.4, 1.1]];
+  let _gocImg = null, _gocHazir = false, _gocGolge = null;
+  function gocSprite() {
+    if (!_gocImg) { _gocImg = new Image(); _gocImg.onload = () => { _gocHazir = true; }; _gocImg.src = 'img/goc-hayvanlar.webp?v=4'; }
+    return _gocHazir ? _gocImg : null;
+  }
+  // uçan hayvanların yere düşen gölgesi: aynı karelerin koyu silüeti (yarı çözünürlükte, bir kez üretilir)
+  function gocGolge(img) {
+    if (_gocGolge) return _gocGolge;
+    const c = document.createElement('canvas'); c.width = img.width >> 1; c.height = img.height >> 1;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0, c.width, c.height);
+    x.globalCompositeOperation = 'source-in'; x.fillStyle = '#04101c'; x.fillRect(0, 0, c.width, c.height);
+    return (_gocGolge = c);
+  }
+  // emoji'nin başı hangi yöne bakıyor (Windows emojilerinde geyik ve zebra sağa, çoğu hayvan sola bakar)
+  const _WIN = /Windows/.test(navigator.userAgent);
+  function emojiYon(ik) {
+    if (ik === '🦇' || ik === '🦋' || ik === '🐍') return 'yok';
+    if (ik === '🪰') return 'ust';
+    if ((ik === '🦌' || ik === '🦓') && _WIN) return 'sag';
+    return 'sol';
+  }
   function ekranParcalari(p) {
     const r = R(), segs = []; let cur = null;
     for (let i = 0; i < p.n; i++) {
@@ -284,22 +534,59 @@ window.Dunya = (() => {
   const km = (a, b) => { const la1 = a[0] * D, la2 = b[0] * D, h = Math.sin((la2 - la1) / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin((b[1] - a[1]) * D / 2) ** 2; return 12742 * Math.asin(Math.min(1, Math.sqrt(h))); };
   function yolHazirla(r) {
     if (r._d) return r._d;
-    const pts = [];
-    for (let i = 0; i < r.pts.length - 1; i++) {
-      const a = r.pts[i], b = r.pts[i + 1];
-      let dlo = b[1] - a[1]; if (dlo > 180) dlo -= 360; if (dlo < -180) dlo += 360;
-      const dla = b[0] - a[0], n = Math.max(1, Math.ceil(Math.hypot(dla, dlo) / 0.6));
-      for (let j = 0; j < n; j++) pts.push([a[0] + dla * j / n, a[1] + dlo * j / n]);
+    // Köşesiz yol: verilen noktaların hepsinden geçen merkezcil Catmull-Rom eğrisi (taşma yapmaz, düğüm atmaz).
+    // Boylamlar önce kesintisiz açılır (tarih çizgisini geçen yollar); ilk ve son nokta aynıysa eğri halka olarak kapanır.
+    const K = [[r.pts[0][0], r.pts[0][1]]];
+    for (let i = 1; i < r.pts.length; i++) {
+      const o = K[K.length - 1]; let dlo = r.pts[i][1] - r.pts[i - 1][1]; if (dlo > 180) dlo -= 360; if (dlo < -180) dlo += 360;
+      const lo = o[1] + dlo;   // atlanan (aynı) noktada fark sıfır olduğundan o[1] hep bir önceki açılmış boylamdır
+      if (Math.abs(r.pts[i][0] - o[0]) + Math.abs(dlo) > 1e-6) K.push([r.pts[i][0], lo]);
     }
-    pts.push(r.pts[r.pts.length - 1]);
+    const m = K.length, pts = []; let halka = false;
+    if (m === 1) pts.push(K[0], K[0]);
+    else if (m === 2) {
+      const [a, b] = K, n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.6));
+      for (let j = 0; j <= n; j++) pts.push([a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n]);
+    } else {
+      const ilk = r.pts[0], son = r.pts[r.pts.length - 1];
+      halka = m > 3 && Math.abs(ilk[0] - son[0]) < 1e-6 && Math.abs(((ilk[1] - son[1]) % 360 + 540) % 360 - 180) < 1e-6;
+      const al = i => {
+        if (halka) { const c = m - 1, j = ((i % c) + c) % c, tur = Math.floor(i / c) * (K[c][1] - K[0][1]); return [K[j][0], K[j][1] + tur]; }
+        if (i < 0) return [2 * K[0][0] - K[1][0], 2 * K[0][1] - K[1][1]];
+        if (i >= m) return [2 * K[m - 1][0] - K[m - 2][0], 2 * K[m - 1][1] - K[m - 2][1]];
+        return K[i];
+      };
+      const dt = (a, b) => Math.max(1e-3, Math.sqrt(Math.hypot(b[0] - a[0], b[1] - a[1])));
+      for (let i = 0; i < m - 1; i++) {
+        const p0 = al(i - 1), p1 = al(i), p2 = al(i + 1), p3 = al(i + 2);
+        const t1 = dt(p0, p1), t2 = t1 + dt(p1, p2), t3 = t2 + dt(p2, p3);
+        const uz = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]), n = Math.max(Math.ceil(uz / 0.6), Math.min(10, Math.ceil(uz / 0.04)));
+        for (let j = 0; j < n; j++) {
+          const t = t1 + (t2 - t1) * j / n, q = [0, 0];
+          for (let e = 0; e < 2; e++) {
+            const A1 = (t1 - t) / t1 * p0[e] + t / t1 * p1[e];
+            const A2 = (t2 - t) / (t2 - t1) * p1[e] + (t - t1) / (t2 - t1) * p2[e];
+            const A3 = (t3 - t) / (t3 - t2) * p2[e] + (t - t2) / (t3 - t2) * p3[e];
+            const B1 = (t2 - t) / t2 * A1 + t / t2 * A2;
+            const B2 = (t3 - t) / (t3 - t1) * A2 + (t - t1) / (t3 - t1) * A3;
+            q[e] = (t2 - t) / (t2 - t1) * B1 + (t - t1) / (t2 - t1) * B2;
+          }
+          q[0] = clamp(q[0], -89.5, 89.5); pts.push(q);
+        }
+      }
+      pts.push([K[m - 1][0], K[m - 1][1]]);
+    }
     const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + km(pts[i - 1], pts[i]));
-    return (r._d = { pts, cum, L: cum[cum.length - 1] || 1, p: prep(pts) });
+    return (r._d = { pts, cum, L: cum[cum.length - 1] || 1, p: prep(pts), halka });
   }
   // Yol/göç/rüzgâr gibi çizgiler için tek dokunma alanı: bütün çizgi boyunca r piksel (eskiden yalnızca seyrek noktalarda küçük kutular vardı)
   function yolHit(o, d, r) {
     const pl = []; let cur = null, x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    for (const pt of d.pts) {
-      const [x, y, z] = P(...pt);
+    // fare algılama için ~80 nokta yeter (yarıçap toleransı içinde); her karede yüzlerce nokta izdüşürülmez
+    const n = d.pts.length, adim = Math.max(1, Math.floor(n / 80));
+    for (let i = 0; i < n; i = (i === n - 1) ? n : Math.min(n - 1, i + adim)) {
+      const pt = d.pts[i];
+      const [x, y, z] = P(pt[0], pt[1]);
       if (z > 0.05) {
         if (!cur) { cur = []; pl.push(cur); } cur.push(x, y);
         if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
@@ -730,10 +1017,46 @@ window.Dunya = (() => {
     g.font = `${o.it ? 'italic ' : ''}${o.w || 600} ${o.size || 12}px ${o.serif ? 'Georgia, serif' : 'system-ui, sans-serif'}`;
     g.textAlign = o.align || 'center'; g.textBaseline = 'middle';
     if (o.ls) { try { g.letterSpacing = o.ls + 'px'; } catch (e) { /* eski tarayıcı */ } }
-    g.lineWidth = o.halo ?? 3; g.strokeStyle = o.haloCol || 'rgba(20,14,8,0.75)'; g.lineJoin = 'round'; g.strokeText(t, x, y);
-    g.fillStyle = o.col || '#fff'; g.fillText(t, x, y);
+    g.lineWidth = o.halo ?? 3; g.strokeStyle = o.haloCol || 'rgba(20,14,8,0.75)'; g.lineJoin = 'round';
+    const pr = yaziParcala(t);
+    if (pr) {
+      // içinde emoji olan yazı: parçalar soldan sağa dizilir; emojiler sitenin kendi resmiyle çizilir
+      const sz = o.size || 12, ew = sz * 1.3, gen = pr.map(q => q.e ? ew : g.measureText(q.m).width), top = gen.reduce((a, b) => a + b, 0);
+      let cx = g.textAlign === 'center' ? x - top / 2 : g.textAlign === 'right' ? x - top : x; g.textAlign = 'left';
+      for (let i = 0; i < pr.length; i++) {
+        if (pr[i].e) simge(pr[i].e, cx + ew / 2, y, sz * 0.54);
+        else { g.strokeText(pr[i].m, cx, y); g.fillStyle = o.col || '#fff'; g.fillText(pr[i].m, cx, y); }
+        cx += gen[i];
+      }
+    } else { g.strokeText(t, x, y); g.fillStyle = o.col || '#fff'; g.fillText(t, x, y); }
     try { g.letterSpacing = '0px'; } catch (e) { /* */ }
     g.textBaseline = 'alphabetic';
+  }
+  // Yazıyı [{ m: 'yazı' } | { e: 'emoji' }] parçalarına ayırır; içinde site resmi olan emoji yoksa (ya da resim sayfası
+  // henüz yüklenmediyse) null döner ve yazı olduğu gibi çizilir.
+  const _yzParca = new Map(), YZ_EMO = /[\p{Extended_Pictographic}\p{Regional_Indicator}]/u;
+  function yaziParcala(t) {
+    const D = window.SIMGE_DIZIN; if (!D || !_smSeg || typeof t !== 'string') return null;
+    if (!_smTam) { if (YZ_EMO.test(t)) simgeSayfa(); return null; }
+    let p = _yzParca.get(t); if (p !== undefined) return p;
+    p = null;
+    if (YZ_EMO.test(t)) {
+      const liste = []; let yazi = '', var1 = false;
+      for (const { segment } of _smSeg.segment(t)) {
+        if (D.s[segment.replace(/️/g, '')] !== undefined) { if (yazi) { liste.push({ m: yazi }); yazi = ''; } liste.push({ e: segment }); var1 = true; }
+        else yazi += segment;
+      }
+      if (yazi) liste.push({ m: yazi });
+      if (var1) p = liste;
+    }
+    if (_yzParca.size > 3000) _yzParca.clear();
+    _yzParca.set(t, p); return p;
+  }
+  // ipucu kutusu gibi düz (kenarlıksız) yazılar için: emojileri site resmiyle, sola dayalı çizer
+  function duzYazi(t, x, y, sz) {
+    const pr = yaziParcala(t); if (!pr) { g.fillText(t, x, y); return; }
+    const ew = sz * 1.3; let cx = x;
+    for (const q of pr) { if (q.e) { simge(q.e, cx + ew / 2, y - sz * 0.36, sz * 0.54); cx += ew; } else { g.fillText(q.m, cx, y); cx += g.measureText(q.m).width; } }
   }
 
   // Etiket kuyruğu: yazılar hemen çizilmez; kare sonunda önem sırasına göre, üst üste binmeyecek şekilde yerleştirilir.
@@ -776,7 +1099,7 @@ window.Dunya = (() => {
   // items: [{id, ad, type, ll, st, p}], cities: [{ad, ll, cap, tur}]
   function draw(ctx, w, h, dpr, dt, Y, items, cities) {
     if (!w || !h || !ctx || !ctx.canvas || !ctx.canvas.width || !ctx.canvas.height) return;
-    g = ctx; W = w; H = h; T += dt; idle += dt; Ycur = Y;
+    g = ctx; W = w; H = h; T += dt; idle += dt; Ycur = Y; DPRc = dpr || 1;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     // hareket: hedef, eylemsizlik (düşük hızda hemen durur ki taban önbelleği kilitlensin)
     if (target) { const e = 1 - Math.exp(-dt * 2.6); let dl = ((target.lon - view.lon + 540) % 360) - 180; view.lon += dl * e; view.lat += (target.lat - view.lat) * e; zt = lerp(zt, target.z, e); if (Math.abs(dl) < 0.03 && Math.abs(target.lat - view.lat) < 0.03 && Math.abs(target.z - zt) < 0.01) { view.lon = target.lon; view.lat = target.lat; zt = target.z; target = null; } }
@@ -1085,8 +1408,7 @@ window.Dunya = (() => {
         const [x, y, z] = P(...m.ll); if (z <= 0.1) continue;
         const hov = hover && hover.kind === 'tarim' && hover.m === m;
         g.globalAlpha = 1; g.fillStyle = 'rgba(250,236,170,0.95)'; g.strokeStyle = '#7a5a14'; g.lineWidth = 1.5;
-        g.beginPath(); g.arc(x, y, hov ? 11 : 9, 0, 7); g.fill(); g.stroke();
-        g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('🌾', x, y + 0.5); g.textBaseline = 'alphabetic';
+        g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge('🌾', x, y, hov ? 11.5 : 9.5); g.textBaseline = 'alphabetic';
         if (view.z >= 1.9 || hov) text(x, y + 20, m.ad, { size: 11, w: 700, col: '#5a4010', halo: 3, haloCol: 'rgba(255,248,225,0.9)', serif: true });
         hits.unshift({ kind: 'tarim', m, x0: x - 12, x1: x + 12, y0: y - 12, y1: y + 12 }); g.globalAlpha = 1;
       }
@@ -1114,46 +1436,50 @@ window.Dunya = (() => {
         const d = yolHazirla(a), sicak = a.tip === 'sicak', col = sicak ? '232,92,56' : '43,159,217';
         const hov = hover && hover.kind === 'akinti' && hover.a === a;
         g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
-        // Yumuşak su kanalı tabanı
-        g.beginPath(); linePath(d.p);
-        g.strokeStyle = `rgba(${col},${hov ? 0.36 : 0.16})`; g.lineWidth = hov ? 14 : 9.5; g.stroke();
-        // Çift sinüs dalgalı akan su şeritleri + köpüklü dalga tepeleri
+        // Akan su: akıntının eğrisi boyunca kayan gerçek bir su dokusu (akış yönünde uzamış ışık
+        // damarları, köpük parlamaları). İki katman farklı hızda akar: derinlik hissi. Üstte pırıltılar.
         const segs = ekranParcalari(d.p);
-        const amp1 = hov ? 3.8 : 2.8, amp2 = hov ? 2.5 : 1.8, sep = hov ? 3.3 : 2.4;
+        const zs = clamp(view.z / 1.6, 0.85, 1.8);
+        const HW = (hov ? 10 : 8) * zs;
+        const doku = suDokusu(sicak);
+        const acik = sicak ? '255,226,196' : '226,248,255';
+        g.beginPath(); linePath(d.p);
+        g.strokeStyle = `rgba(${col},${hov ? 0.16 : 0.09})`; g.lineWidth = HW * 2.8; g.stroke();
         for (const seg of segs) {
-          const Lpx = seg[seg.length - 1][2]; if (Lpx < 8) continue;
-          const step = 4.5;
-          // 1. Ana su dalgası
-          g.beginPath();
-          for (let s = 0; s <= Lpx; s += step) {
-            const [x, y, tx, ty] = segNokta(seg, s), w = Math.sin(s * 0.15 - T * 4.4) * amp1;
-            const px = x - ty * w, py = y + tx * w;
-            s === 0 ? g.moveTo(px, py) : g.lineTo(px, py);
+          const Lpx = seg[seg.length - 1][2]; if (Lpx < 12) continue;
+          const inc = s1 => Math.min(1, s1 / 50, (Lpx - s1) / 50);
+          // performans: dönüşüm matrisi elle hesaplanır (save/rotate/restore yok), parçalar büyük,
+          // ekran dışı parçalar atlanır; küre hareket ederken yalnızca alt katman çizilir
+          const ST = hareket ? 14 : 10, iki = !hareket;
+          const tb = g.getTransform(), kay1 = T * 16 * zs, kay2 = T * 31 * zs;
+          g.globalAlpha = hov ? 1 : 0.9;
+          for (let s1 = 0; s1 < Lpx; s1 += ST) {
+            const w = inc(s1 + ST / 2); if (w <= 0.02) continue;
+            const [x, y, tx, ty] = segNokta(seg, s1);
+            if (x < -40 || y < -40 || x > W + 40 || y > H + 40) continue;
+            const h = HW * (0.3 + 0.7 * w);
+            const A = tb.a * tx + tb.c * ty, B = tb.b * tx + tb.d * ty, C = -tb.a * ty + tb.c * tx, Dd = -tb.b * ty + tb.d * tx;
+            g.setTransform(A, B, C, Dd, tb.a * x + tb.c * y + tb.e, tb.b * x + tb.d * y + tb.f);
+            const sx1 = ((s1 - kay1) % DOKU_W + DOKU_W) % DOKU_W;
+            g.drawImage(doku, sx1, 0, ST + 1, DOKU_H, -0.5, -h, ST + 1.2, h * 2);
+            if (iki) {
+              const sx2 = ((s1 * 1.7 - kay2) % DOKU_W + DOKU_W) % DOKU_W, h2 = h * 0.62;
+              g.globalAlpha = hov ? 0.55 : 0.4;
+              g.drawImage(doku, sx2, 0, ST * 1.7 + 1, DOKU_H, -0.5, -h2, ST + 1.2, h2 * 2);
+              g.globalAlpha = hov ? 1 : 0.9;
+            }
           }
-          g.strokeStyle = `rgba(${col},${hov ? 1 : 0.88})`; g.lineWidth = hov ? 2.7 : 1.95; g.stroke();
-          // 2. Eşlik eden köpük/ripil dalgası
-          g.beginPath();
-          for (let s = 0; s <= Lpx; s += step) {
-            const [x, y, tx, ty] = segNokta(seg, s), w = Math.sin(s * 0.15 - T * 4.4 + 2.3) * amp2 + sep;
-            const px = x - ty * w, py = y + tx * w;
-            s === 0 ? g.moveTo(px, py) : g.lineTo(px, py);
+          g.setTransform(tb);
+          g.globalAlpha = 1; g.globalCompositeOperation = 'lighter';
+          // pırıltılar
+          g.fillStyle = `rgba(${acik},0.9)`;
+          for (let k = 0; k < Lpx / 30; k++) {
+            const s1 = (k * 30 + T * 26 * zs + (k * 53.7) % 30) % Lpx, w = inc(s1);
+            const tw = Math.sin(T * 4.2 + k * 2.1); if (tw < 0.6 || w < 0.3) continue;
+            const [x, y, tx, ty] = segNokta(seg, s1), o = Math.sin(k * 7.7) * HW * 0.55;
+            g.beginPath(); g.arc(x - ty * o, y + tx * o, 0.9 + (tw - 0.6) * 2, 0, 7); g.fill();
           }
-          g.strokeStyle = sicak ? `rgba(255,224,190,${hov ? 0.85 : 0.58})` : `rgba(195,244,255,${hov ? 0.85 : 0.58})`;
-          g.lineWidth = hov ? 1.6 : 1.1; g.stroke();
-          // 3. Akan köpüklü dalga tepeleri (minyatür okyanus dalgası)
-          const sp = 42, off = (T * 30) % sp;
-          g.strokeStyle = sicak ? 'rgba(255,246,230,0.92)' : 'rgba(232,252,255,0.94)';
-          g.lineWidth = hov ? 2.1 : 1.5;
-          for (let s0 = off; s0 < Lpx - 6; s0 += sp) {
-            const [x, y, tx, ty] = segNokta(seg, s0), ang = Math.atan2(ty, tx);
-            g.save(); g.translate(x, y); g.rotate(ang);
-            g.beginPath();
-            g.moveTo(-5.5, 2.2);
-            g.quadraticCurveTo(-1, -4.4, 4.6, -1.6);
-            g.quadraticCurveTo(2.4, -0.4, 2.9, 1.5);
-            g.stroke();
-            g.restore();
-          }
+          g.globalCompositeOperation = 'source-over';
         }
         yolUclari(d, `rgba(${col},0.95)`, true);
         const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
@@ -1164,27 +1490,28 @@ window.Dunya = (() => {
       for (const o of OK.olaylar || []) {
         const [x, y, z] = P(...o.ll); if (z <= 0.08) continue;
         const hov = hover && hover.kind === 'denizolay' && hover.o === o;
-        const s0 = hov ? 13 : 10.5;
+        // Arka plansız, dönen gerçek efekt: girdapta merkeze sarılan köpük kolları, kasırgada gözlü bulut sarmalı.
+        // İki katman farklı hızda döner (derinlik); kasırga kuzey yarımkürede saat yönünün tersine, güneyde saat yönünde döner.
+        const girdap = o.tip === 'girdap', buyut = hov ? 1.15 : 1;
+        const s0 = (girdap ? clamp(11 + view.z * 4.5, 15, 30) : clamp(12 + view.z * 4.5, 17, 32)) * buyut;
         g.save(); g.translate(x, y);
-        if (o.tip === 'girdap') {
-          g.fillStyle = 'rgba(20,95,145,0.88)'; g.strokeStyle = hov ? '#ffd666' : '#a8ecff'; g.lineWidth = 1.6;
-          g.beginPath(); g.arc(0, 0, s0, 0, 7); g.fill(); g.stroke();
-          g.rotate(T * 1.5);
-          g.strokeStyle = '#e8fbff'; g.lineWidth = 1.6; g.lineCap = 'round';
-          for (let k = 0; k < 2; k++) { g.rotate(Math.PI); g.beginPath(); g.arc(0, 0, s0 * 0.62, 0, 2.3); g.stroke(); g.beginPath(); g.arc(0, 0, s0 * 0.3, 0.3, 2.4); g.stroke(); }
-          g.fillStyle = '#ffd666'; g.beginPath(); g.arc(0, 0, 1.8, 0, 7); g.fill();
+        if (girdap) {
+          const zm = girdapResim();
+          g.save(); g.rotate(T * 1.1); g.drawImage(mipSec(zm, s0 * 2), -s0, -s0, s0 * 2, s0 * 2); g.restore();
+          g.save(); g.rotate(T * 2.3 + 1); g.globalAlpha = 0.8; g.drawImage(mipSec(zm, s0 * 1.16), -s0 * 0.58, -s0 * 0.58, s0 * 1.16, s0 * 1.16); g.restore();
+          const nb = (T * 0.6) % 1;   // dışarıdan içeri daralan halka: suyun çekildiği hissi
+          g.strokeStyle = `rgba(210,244,255,${0.45 * nb})`; g.lineWidth = 1.2; g.beginPath(); g.arc(0, 0, s0 * (1.08 - 0.5 * nb), 0, 7); g.stroke();
         } else {
-          // Kasırga / fırtına simgesi
-          g.fillStyle = 'rgba(176,48,42,0.88)'; g.strokeStyle = hov ? '#ffd666' : '#ffd2a8'; g.lineWidth = 1.6;
-          g.beginPath(); g.arc(0, 0, s0, 0, 7); g.fill(); g.stroke();
-          g.rotate(-T * 2.4);
-          g.strokeStyle = '#fff5e6'; g.lineWidth = 2; g.lineCap = 'round';
-          for (let k = 0; k < 2; k++) { g.rotate(Math.PI); g.beginPath(); g.arc(0, 0, s0 * 0.58, 0.2, 2.2); g.stroke(); g.beginPath(); g.moveTo(s0 * 0.3, s0 * 0.15); g.quadraticCurveTo(s0 * 0.85, -s0 * 0.2, s0 * 0.55, -s0 * 0.72); g.stroke(); }
-          g.fillStyle = '#ffd666'; g.beginPath(); g.arc(0, 0, 2.2, 0, 7); g.fill();
+          const im = mipSec(kasirgaResim(), s0 * 2), yn = o.ll[0] < 0 ? -1 : 1;
+          g.scale(yn, 1);
+          // bulutun denize düşen gölgesi: aynı sarmalın koyu, kaydırılmış kopyası yerine hafif bir leke (hızlı)
+          g.fillStyle = 'rgba(6,20,40,0.16)'; g.beginPath(); g.arc(s0 * 0.10 * yn, s0 * 0.14, s0 * 0.66, 0, 7); g.fill();
+          g.save(); g.rotate(-T * 0.7); g.drawImage(im, -s0, -s0, s0 * 2, s0 * 2); g.restore();
+          if (hov) { g.strokeStyle = 'rgba(255,214,102,0.8)'; g.lineWidth = 1.4; g.beginPath(); g.arc(0, 0, s0 * 0.98, 0, 7); g.stroke(); }
         }
         g.restore();
-        if (view.z >= 1.6 || hov) text(x, y + s0 + 9, o.ad.split(' (')[0], { size: 10.5, w: 700, col: o.tip === 'girdap' ? '#c8f2ff' : '#ffd9c2', halo: 3, haloCol: 'rgba(10,18,34,0.85)' });
-        hits.push({ kind: 'denizolay', o, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
+        if (view.z >= 1.6 || hov) text(x, y + s0 + 9, o.ad.split(' (')[0], { size: 10.5, w: 700, col: girdap ? '#c8f2ff' : '#ffd9c2', halo: 3, haloCol: 'rgba(10,18,34,0.85)' });
+        hits.push({ kind: 'denizolay', o, x0: x - s0 * 0.8, x1: x + s0 * 0.8, y0: y - s0 * 0.8, y1: y + s0 * 0.8 });
       }
     }
     // 💨 Dünyayı değiştiren yıllık rüzgâr dalgaları ve küresel rüzgâr sistemleri (data/atlas/ruzgarlar.js)
@@ -1193,48 +1520,41 @@ window.Dunya = (() => {
         const d = yolHazirla(rz), hov = hover && hover.kind === 'ruzgar' && hover.rz === rz;
         const col = rz.renk || '#38bdf8';
         g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
-        // Çok hafif atmosferik esinti koridoru
+        // Hava koridoru + iki katman akan tüy gibi hava çizgileri + parlayan, kıvrılarak geçen rüzgâr hamleleri
         g.beginPath(); linePath(d.p);
-        g.strokeStyle = hexA(col, hov ? 0.24 : 0.09); g.lineWidth = hov ? 16 : 11; g.stroke();
-        // 3 paralel hızlı esen rüzgâr şeridi + uçlarda kıvrılan rüzgâr helezonları (~@)
+        g.strokeStyle = hexA(col, hov ? 0.16 : 0.06); g.lineWidth = hov ? 30 : 22; g.stroke();
         const segs = ekranParcalari(d.p);
+        const zs = clamp(view.z / 1.6, 0.85, 1.8), HW = (hov ? 13 : 10.5) * zs, rdoku = ruzgarDokusu(col);
         for (const seg of segs) {
-          const Lpx = seg[seg.length - 1][2]; if (Lpx < 10) continue;
-          for (const lane of [-1, 0, 1]) {
-            const latBase = lane * (hov ? 5.2 : 4.1);
-            const per = lane === 0 ? 78 : 70, glen = lane === 0 ? 38 : 26;
-            const speed = lane === 0 ? 66 : (lane > 0 ? 54 : 58);
-            const off = (T * speed + (lane + 1) * 27) % per;
-            g.strokeStyle = lane === 0 ? (hov ? '#fff7dc' : 'rgba(240,250,255,0.92)') : hexA(col, hov ? 0.95 : 0.78);
-            g.lineWidth = lane === 0 ? (hov ? 2.4 : 1.75) : (hov ? 1.8 : 1.25);
-            for (let sStart = off - per; sStart < Lpx; sStart += per) {
-              const a0 = Math.max(0, sStart), a1 = Math.min(Lpx, sStart + glen);
-              if (a1 - a0 < 8) continue;
-              g.beginPath();
-              let endX = 0, endY = 0, endTx = 1, endTy = 0;
-              for (let s = a0; s <= a1; s += 5) {
-                const sCl = Math.min(s, a1);
-                const [x, y, tx, ty] = segNokta(seg, sCl);
-                const flutter = Math.sin(sCl * 0.09 - T * 3.5 + lane * 2) * 1.2;
-                const lat = latBase + flutter;
-                const px = x - ty * lat, py = y + tx * lat;
-                s === a0 ? g.moveTo(px, py) : g.lineTo(px, py);
-                endX = px; endY = py; endTx = tx; endTy = ty;
-              }
-              g.stroke();
-              // Rüzgârın ucunda kıvrılan esinti spirali
-              if (sStart + glen <= Lpx - 2 && a1 - a0 > 14) {
-                const ang = Math.atan2(endTy, endTx), dir = lane === 0 ? -1 : (lane > 0 ? 1 : -1);
-                const cr = hov ? 4.2 : 3.2;
-                g.save(); g.translate(endX, endY); g.rotate(ang);
-                g.beginPath();
-                if (dir < 0) g.arc(0, -cr, cr, Math.PI * 0.5, -Math.PI * 0.85, true);
-                else g.arc(0, cr, cr, -Math.PI * 0.5, Math.PI * 0.85, false);
-                g.stroke();
-                g.restore();
+          const Lpx = seg[seg.length - 1][2]; if (Lpx < 12) continue;
+          const inc = s1 => Math.min(1, s1 / 60, (Lpx - s1) / 60);
+          g.globalAlpha = hov ? 1 : 0.85; dokuAkit(seg, Lpx, rdoku, HW, T * 46 * zs, 1.0, hareket ? 30 : 22, inc);
+          if (!hareket && (hov || view.z > 1.5)) { g.globalAlpha = hov ? 0.7 : 0.5; dokuAkit(seg, Lpx, rdoku, HW * 0.6, T * 82 * zs, 1.6, 24, inc); }
+          g.globalAlpha = 1;
+          // rüzgâr hamleleri: uzun kuyruklu, kıvrılarak ilerleyen parlak çizgiler
+          g.globalCompositeOperation = 'lighter';
+          const per = 170 * zs, hiz = 95 * zs, uz = 80 * zs, KD = 4;
+          const kova = Array.from({ length: KD }, () => new Path2D());   // aynı saydamlıktaki parçalar tek seferde çizilir
+          for (const lane of [-0.45, 0.5]) {
+            const off = (T * hiz + (lane + 1) * 63) % per;
+            for (let s0 = off - per; s0 < Lpx; s0 += per) {
+              let onceki = null;
+              for (let k = 0; k <= 8; k++) {
+                const sk = s0 + uz * k / 8; if (sk < 0 || sk > Lpx) { onceki = null; continue; }
+                const [x, y, tx, ty] = segNokta(seg, sk), w = inc(sk);
+                const o = (lane * HW + Math.sin(sk * 0.045 - T * 2.4 + lane * 3) * HW * 0.35) * (0.3 + 0.7 * w);
+                const nk = [x - ty * o, y + tx * o];
+                if (onceki && w > 0.15) { const b = Math.min(KD - 1, Math.floor((k - 1) / 2)); kova[b].moveTo(onceki[0], onceki[1]); kova[b].lineTo(nk[0], nk[1]); }
+                onceki = nk;
               }
             }
           }
+          for (let b = 0; b < KD; b++) {
+            g.strokeStyle = `rgba(255,255,255,${((b + 1) / KD) ** 1.5 * (hov ? 0.95 : 0.7)})`;
+            g.lineWidth = (hov ? 1.9 : 1.4) * (0.45 + 0.55 * (b + 1) / KD);
+            g.stroke(kova[b]);
+          }
+          g.globalCompositeOperation = 'source-over';
         }
         yolUclari(d, hov ? '#fff7dc' : col, true);
         const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
@@ -1258,13 +1578,8 @@ window.Dunya = (() => {
           shownKz.push([x, y]);
           const hov = hover && hover.kind === kind && hover.kz === kz, s0 = hov ? 12.5 : 10;
           g.fillStyle = bg; g.strokeStyle = hov ? '#ffd666' : border; g.lineWidth = hov ? 2.4 : 1.6;
-          if (kind === 'fosilkazi') {
-            g.beginPath(); g.roundRect(x - s0, y - s0, s0 * 2, s0 * 2, 5); g.fill(); g.stroke();
-          } else {
-            g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
-          }
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(kz.ik || (kind === 'fosilkazi' ? '🦴' : '🏺'), x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge(kz.ik || (kind === 'fosilkazi' ? '🦴' : '🏺'), x, y, s0); g.textBaseline = 'alphabetic';
           obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
           if (view.z >= 1.55 || hov) lab(hov ? 97 : 58, x, y + s0 + 10, kz.ad.split(' (')[0], { size: 10.5, w: 700, col: kind === 'fosilkazi' ? '#fef08a' : '#ffe8c2', halo: 3, haloCol: 'rgba(24,14,8,0.88)', kay: true });
           hits.push({ kind, kz, x0: x - s0 - 4, x1: x + s0 + 4, y0: y - s0 - 4, y1: y + s0 + 4 });
@@ -1360,9 +1675,8 @@ window.Dunya = (() => {
           const [x, y, z] = P(...n.ll); if (z <= 0.12 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
           const hov = hover && hover.kind === 'iklim' && hover.n === n, r0 = hov ? 12 : 9.5;
           g.fillStyle = hexA(b.renk, 0.92); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.4 : 1.5;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(b.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge(b.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = n.ad.split(' (')[0];
           if (view.z >= 1.3 || hov) { lab(hov ? 97 : 56, x, y + r0 + 10, lbl, { size: 10, w: 700, col: '#fef9c3', halo: 3, haloCol: 'rgba(12,18,28,0.88)', kay: true }); labHit({ kind: 'iklim', n, b }, x, y + r0 + 10, lbl); }
           hits.push({ kind: 'iklim', n, b, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
@@ -1392,9 +1706,8 @@ window.Dunya = (() => {
           const bg = t.tur === 'cukur' ? 'rgba(15,23,66,0.94)' : t.tur === 'resif' ? 'rgba(190,24,93,0.9)' : 'rgba(124,45,18,0.92)';
           const bd = t.tur === 'cukur' ? '#60a5fa' : t.tur === 'resif' ? '#fbcfe8' : '#fdba74';
           g.fillStyle = bg; g.strokeStyle = hov ? '#fde047' : bd; g.lineWidth = hov ? 2.4 : 1.7;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(t.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge(t.ik, x, y, r0); g.textBaseline = 'alphabetic';
           obstacle(x - r0 - 2, y - r0 - 2, x + r0 + 2, y + r0 + 2);
           const lbl = t.ad.split(' (')[0];
           if (view.z >= 1.35 || hov) { lab(hov ? 97 : 58, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: bd, halo: 3, haloCol: 'rgba(8,14,28,0.9)', kay: true }); labHit({ kind: 'taban', t }, x, y + r0 + 10, lbl); }
@@ -1428,9 +1741,8 @@ window.Dunya = (() => {
           const hov = hover && hover.kind === 'kutup' && hover.k === k, r0 = hov ? 12.5 : 10;
           const bg = k.tur === 'aurora' ? 'rgba(16,185,129,0.88)' : k.tur === 'buzul' ? 'rgba(30,64,175,0.88)' : 'rgba(120,80,35,0.92)';
           g.fillStyle = bg; g.strokeStyle = hov ? '#fde047' : '#e0f2fe'; g.lineWidth = hov ? 2.4 : 1.7;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(k.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge(k.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = k.ad.split(' (')[0];
           if (view.z >= 1.2 || hov) { lab(hov ? 97 : 59, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(8,16,32,0.9)', kay: true }); labHit({ kind: 'kutup', k }, x, y + r0 + 10, lbl); }
           hits.push({ kind: 'kutup', k, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
@@ -1448,9 +1760,8 @@ window.Dunya = (() => {
           g.setLineDash([3, 3]); g.beginPath(); g.arc(x, y, (r0 + 9) * pulse, 0, 7); g.stroke();
           g.restore();
           g.fillStyle = 'rgba(124,45,18,0.92)'; g.strokeStyle = hov ? '#fde047' : '#fdba74'; g.lineWidth = hov ? 2.4 : 1.6;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText('☄️', x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge('☄️', x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = kr.ad.split(' (')[0];
           if (view.z >= 1.3 || hov) { lab(hov ? 97 : 58, x, y + r0 + 12, lbl, { size: 10.2, w: 700, col: '#fed7aa', halo: 3, haloCol: 'rgba(24,10,6,0.9)', kay: true }); labHit({ kind: 'krater', kr }, x, y + r0 + 12, lbl); }
           hits.push({ kind: 'krater', kr, x0: x - r0 - 8, x1: x + r0 + 8, y0: y - r0 - 8, y1: y + r0 + 8 });
@@ -1463,9 +1774,8 @@ window.Dunya = (() => {
           const hov = hover && hover.kind === 'gol' && hover.gl === gl, r0 = hov ? 12 : 9.5;
           g.fillStyle = gl.tur === 'selale' ? 'rgba(6,182,212,0.92)' : 'rgba(29,78,216,0.92)';
           g.strokeStyle = hov ? '#fde047' : '#bae6fd'; g.lineWidth = hov ? 2.4 : 1.6;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(gl.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge(gl.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = gl.ad.split(' (')[0];
           if (view.z >= 1.35 || hov) { lab(hov ? 97 : 57, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(8,20,42,0.9)', kay: true }); labHit({ kind: 'gol', gl }, x, y + r0 + 10, lbl); }
           hits.push({ kind: 'gol', gl, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
@@ -1518,9 +1828,8 @@ window.Dunya = (() => {
           }
           const r0 = hov ? 13 : 10.5;
           g.fillStyle = hexA(col, 0.92); g.strokeStyle = hov ? '#fff' : '#e0f2fe'; g.lineWidth = hov ? 2.4 : 1.7;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13.5 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(mn.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge(mn.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = mn.ad.split(' (')[0];
           if (view.z >= 1.1 || hov) { lab(hov ? 98 : 62, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: '#f0f9ff', halo: 3, haloCol: 'rgba(10,16,32,0.9)', kay: true }); labHit({ kind: 'manyetik', mn }, x, y + r0 + 11, lbl); }
           hits.push({ kind: 'manyetik', mn, x0: x - r0 - 5, x1: x + r0 + 5, y0: y - r0 - 5, y1: y + r0 + 5 });
@@ -1538,9 +1847,8 @@ window.Dunya = (() => {
           hits.unshift({ kind: 'tarimvav', tr, x0: x - haloR * 0.85, x1: x + haloR * 0.85, y0: y - haloR * 0.85, y1: y + haloR * 0.85 });
           const r0 = hov ? 13 : 10.5;
           g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.5 : 1.8;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(tr.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge(tr.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = tr.ad.split(' (')[0];
           if (view.z >= 1.15 || hov) { lab(hov ? 98 : 63, x, y + r0 + 11, lbl, { size: 10.5, w: 700, col: '#fefce8', halo: 3.2, haloCol: 'rgba(18,14,6,0.9)', kay: true }); labHit({ kind: 'tarimvav', tr }, x, y + r0 + 11, lbl); }
           hits.push({ kind: 'tarimvav', tr, x0: x - r0 - 5, x1: x + r0 + 5, y0: y - r0 - 5, y1: y + r0 + 5 });
@@ -1570,9 +1878,8 @@ window.Dunya = (() => {
           const r0 = hov ? 13 : 10.5;
           g.save(); if (dim) g.globalAlpha = 0.45;
           g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fef3c7'; g.lineWidth = hov ? 2.5 : 1.7;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13.5 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(yz.ik, x, y + 0.5); g.textBaseline = 'alphabetic'; g.restore();
+          simge(yz.ik, x, y, r0); g.textBaseline = 'alphabetic'; g.restore();
           const lbl = yz.ad.split(' (')[0];
           if (view.z >= 1.25 || hov) { lab(hov ? 97 : 60, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: '#fef3c7', halo: 3, haloCol: 'rgba(20,12,6,0.9)', kay: true }); const hw = lbl.length * 3.4 + 6; hits.push({ kind: 'yazi', yz, x0: x - hw, x1: x + hw, y0: y + r0 - 1, y1: y + r0 + 14 }); }
           hits.push({ kind: 'yazi', yz, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
@@ -1584,7 +1891,7 @@ window.Dunya = (() => {
         for (const dn of TEK.dinler || []) {
           const hov = anyDinHov && hover.dn === dn, dim = anyDinHov && !hov, col = dn.renk || '#eab308';
           for (const pts of dn.yollar || []) {
-            const d = yolHazirla({ pts });
+            const d = pts._d || (pts._d = yolHazirla({ pts }));
             g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
             g.beginPath(); linePath(d.p);
             g.strokeStyle = hexA(col, hov ? 0.36 : dim ? 0.04 : 0.16); g.lineWidth = hov ? 13 : 8; g.stroke();
@@ -1598,9 +1905,8 @@ window.Dunya = (() => {
           const r0 = hov ? 13.5 : 11;
           g.save(); if (dim) g.globalAlpha = 0.48;
           g.fillStyle = hexA(col, 0.95); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.6 : 1.8;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 14 : 12}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(dn.ik, x, y + 0.5); g.textBaseline = 'alphabetic'; g.restore();
+          simge(dn.ik, x, y, r0); g.textBaseline = 'alphabetic'; g.restore();
           if (view.z >= 1.05 || hov) {
             const ly = dn.id === 'yahudilik' ? y + r0 + 12 : dn.id === 'hristiyanlik' ? y - r0 - 7 : y + r0 + 11;
             lab(hov ? 99 : 64, x, ly, dn.ad.split(' (')[0], { size: 10.5, w: 700, col: '#fffbeb', halo: 3.2, haloCol: 'rgba(18,12,8,0.92)', kay: true });
@@ -1652,9 +1958,8 @@ window.Dunya = (() => {
           g.strokeStyle = hexA(col, 0.55); g.lineWidth = 1.6;
           g.beginPath(); g.arc(x, y, (r0 + 5) * pulse, 0, 7); g.stroke();
           g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fecdd3'; g.lineWidth = hov ? 2.5 : 1.7;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13.5 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(sg.ik, x, y + 0.5); g.textBaseline = 'alphabetic'; g.restore();
+          simge(sg.ik, x, y, r0); g.textBaseline = 'alphabetic'; g.restore();
           const lbl = sg.ad.split(' (')[0];
           if (view.z >= 1.25 || hov) { lab(hov ? 97 : 60, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: '#ffe4e6', halo: 3, haloCol: 'rgba(28,6,14,0.9)', kay: true }); const hw = lbl.length * 3.4 + 6; hits.push({ kind: 'salgin', sg, x0: x - hw, x1: x + hw, y0: y + r0, y1: y + r0 + 15 }); }
           hits.push({ kind: 'salgin', sg, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
@@ -1667,9 +1972,8 @@ window.Dunya = (() => {
           const hov = hover && hover.kind === 'bogaz' && hover.bg === bg, r0 = hov ? 12 : 9.5;
           g.fillStyle = bg.tur === 'gecit' ? 'rgba(146,64,14,0.92)' : 'rgba(15,44,89,0.92)';
           g.strokeStyle = hov ? '#fde047' : (bg.tur === 'gecit' ? '#fcd34d' : '#7dd3fc'); g.lineWidth = hov ? 2.4 : 1.7;
-          g.beginPath(); g.moveTo(x, y - r0 - 1); g.lineTo(x + r0 + 1, y); g.lineTo(x, y + r0 + 1); g.lineTo(x - r0 - 1, y); g.closePath(); g.fill(); g.stroke();
           g.font = `${hov ? 12.5 : 10.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(bg.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge(bg.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = bg.ad.split(' (')[0];
           if (view.z >= 1.4 || hov) { lab(hov ? 97 : 58, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(10,18,34,0.9)', kay: true }); const hw = lbl.length * 3.4 + 6; hits.push({ kind: 'bogaz', bg, x0: x - hw, x1: x + hw, y0: y + r0, y1: y + r0 + 15 }); }
           hits.push({ kind: 'bogaz', bg, x0: x - r0 - 4, x1: x + r0 + 4, y0: y - r0 - 4, y1: y + r0 + 4 });
@@ -1689,9 +1993,8 @@ window.Dunya = (() => {
           }
           g.fillStyle = kral ? 'rgba(202,138,4,0.96)' : 'rgba(51,65,85,0.90)';
           g.strokeStyle = kral ? '#fef08a' : (hov ? '#fde047' : '#cbd5e1'); g.lineWidth = kral ? 2.6 : (hov ? 2.2 : 1.5);
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${kral ? 14 : (hov ? 13 : 10.5)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(kral ? '👑' : mk.ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge(kral ? '👑' : mk.ik, x, y, kral ? r0 * 1.15 : r0); g.textBaseline = 'alphabetic';
           if (kral || view.z >= 1.35 || hov) {
             const lbl = (kral ? '👑 ' : '') + mk.ad.split(' (')[0];
             lab(kral ? 99 : (hov ? 97 : 58), x, y + r0 + 11, lbl, { size: kral ? 11.2 : 10, w: 700, col: kral ? '#fef08a' : '#f1f5f9', halo: 3.2, haloCol: 'rgba(15,12,8,0.92)', kay: true });
@@ -1712,9 +2015,8 @@ window.Dunya = (() => {
           shownK.push([x, y]);
           const hov = hover && hover.kind === kind && hover.it === it, r0 = hov ? 13 : 10.5;
           g.fillStyle = bg; g.strokeStyle = hov ? '#ffffff' : bd; g.lineWidth = hov ? 2.5 : 1.7;
-          g.beginPath(); g.arc(x, y, r0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov ? 13.5 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(it.ik || '✨', x, y + 0.5); g.textBaseline = 'alphabetic';
+          simge(it.ik || '✨', x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = it.ad.split(' (')[0];
           if (view.z >= zLbl || hov) {
             lab(hov ? 98 : 61, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: txCol, halo: 3.1, haloCol: 'rgba(14,10,8,0.92)', kay: true });
@@ -1742,13 +2044,7 @@ window.Dunya = (() => {
         const [ik, bg] = CG_STIL[cg.tur] || ['📍', '#5a4a3a'];
         const hov = hover && hover.kind === 'cografya' && hover.cg === cg, s0 = hov ? 12.5 : (uzak ? 8.5 : 10);
         g.fillStyle = bg; g.strokeStyle = hov ? '#ffd666' : (cg.tur === 'harika' ? '#ffe08a' : '#fff6dc'); g.lineWidth = hov ? 2.2 : 1.5;
-        if (cg.tur === 'harika') {
-          const r1 = s0 * 1.15;
-          g.beginPath(); g.moveTo(x, y - r1); g.lineTo(x + r1, y); g.lineTo(x, y + r1); g.lineTo(x - r1, y); g.closePath(); g.fill(); g.stroke();
-        } else {
-          g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
-        }
-        g.font = `${hov ? 13 : (uzak ? 9.5 : 11)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(ik, x, y + 0.5); g.textBaseline = 'alphabetic';
+        g.font = `${hov ? 13 : (uzak ? 9.5 : 11)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge(ik, x, y, s0); g.textBaseline = 'alphabetic';
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         const kisaYuk = cg.yukseklik ? cg.yukseklik.split(' (')[0].split(' ·')[0] : '';
         const lbl = cg.tur === 'dag' && kisaYuk && (view.z >= 2.1 || hov) ? `${cg.ad.split(' (')[0]} · ${kisaYuk}` : cg.ad.split(' (')[0];
@@ -1776,10 +2072,13 @@ window.Dunya = (() => {
         const d = yolHazirla(hg), hov = hover && hover.kind === 'hayvangoc' && hover.hg === hg;
         const col = hov ? '#ffd666' : (hg.renk || '#34d399');
         g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
-        // Organik noktalı göç patikası (iz noktaları)
+        // Göç patikası: hayvanın renginde yumuşak parıltı, ince hat ve hat boyunca akan beyaz noktalar
         g.beginPath(); linePath(d.p);
-        g.strokeStyle = hov ? 'rgba(255,214,102,0.34)' : 'rgba(14,22,34,0.38)'; g.lineWidth = hov ? 7.5 : 5; g.stroke();
-        g.strokeStyle = col; g.lineWidth = hov ? 3.2 : 2.3; g.setLineDash([1.5, 9]); g.stroke(); g.setLineDash([]);
+        g.strokeStyle = hexA(col, hov ? 0.34 : 0.17); g.lineWidth = hov ? 9 : 6; g.stroke();
+        g.strokeStyle = hexA(col, hov ? 0.95 : 0.6); g.lineWidth = hov ? 1.8 : 1.2; g.stroke();
+        g.setLineDash([0.01, 13]); g.lineDashOffset = -T * 14;
+        g.strokeStyle = hov ? 'rgba(255,250,225,0.98)' : 'rgba(255,255,255,0.85)'; g.lineWidth = hov ? 3.3 : 2.5; g.stroke();
+        g.setLineDash([]); g.lineDashOffset = 0;
         // Mevsimsel çıkış ve varış yaşam alanı halkaları (yıllık döngü)
         const nP = d.pts.length, pulse = (T * 0.7) % 1;
         for (const pt of [d.pts[0], d.pts[nP - 1]]) {
@@ -1791,36 +2090,104 @@ window.Dunya = (() => {
             g.beginPath(); g.arc(hx, hy, 4.2, 0, 7); g.fill(); g.stroke();
           }
         }
-        // Hat boyunca V-formasyonu sürü ile süzülen göçmen hayvan
-        const k = ((T / 7.5 + hg.pts[0][0] * 0.013) % 1 + 1) % 1;
-        const [px0, py0, pz] = P(...yolNokta(d, d.L * k));
-        const [px2, py2] = P(...yolNokta(d, Math.min(d.L, d.L * k + 65)));
-        let px = px0, py = py0;
-        if (pz > 0.08) {
-          const ang = Math.atan2(py2 - py0, px2 - px0);
-          const bob = Math.sin(T * 5.2 + hg.pts[0][0]) * 2.1;
-          px = px0 - Math.sin(ang) * bob; py = py0 + Math.cos(ang) * bob;
-          // Arkada V-formasyonunda kanat/yüzgeç çırpan sürü izi
-          g.save(); g.translate(px, py); g.rotate(ang);
-          g.strokeStyle = col; g.lineWidth = hov ? 2 : 1.5;
-          for (const [bx, by, ph] of [[-15, -6, 0], [-15, 6, 0.6], [-23, -11, 1.2], [-23, 11, 1.8]]) {
-            const flap = Math.sin(T * 8.5 + ph) * 2.2;
-            g.beginPath();
-            g.moveTo(bx - 3.5, by - 2.6 + flap);
-            g.lineTo(bx + 2, by);
-            g.lineTo(bx - 3.5, by + 2.6 - flap);
-            g.stroke();
+        // Tek hayvan: rota boyunca gider, uçta soluklanıp geri döner (halka rotada durmadan döner). Uçanlar yerden yüksekte
+        // uçar ve gölgeleri yere düşer; yüzenler arkalarında köpük ve halka bırakır; koşanlar toz kaldırır.
+        const si = GOC_IDX[hg.id], spr = si != null ? gocSprite() : null;
+        const faz = hg.pts[0][0] * 0.013 + hg.pts[0][1] * 0.007, kes = v => ((v % 1) + 1) % 1;
+        let k, gy = 1;
+        if (d.halka) k = kes(T / 11 + faz); else { const u = kes((T / 11 + faz) / 2) * 2; k = u < 1 ? u : 2 - u; gy = u < 1 ? 1 : -1; }
+        const s = d.L * k, kmPx = 6371 / R();   // 1 pikselin kaç km ettiği: izler ekranda hep aynı boyda görünsün
+        const geri = km2 => yolNokta(d, d.halka ? ((s - gy * km2) % d.L + d.L) % d.L : clamp(s - gy * km2, 0, d.L));
+        let px = 0, py = 0, pz = -1;
+        const [lx, ly, lz] = P(...yolNokta(d, s));
+        if (lz > 0.08) {
+          const ileri = Math.max(d.L * 0.012, 5 * kmPx), [ax2, ay2] = P(...geri(-ileri)), [bx2, by2] = P(...geri(ileri));
+          const ang = Math.atan2(ay2 - by2, ax2 - bx2), uc = d.halka ? 1 : Math.min(1, k / 0.04, (1 - k) / 0.04);
+          const r = clamp(5.5 + view.z * 3.1, 8, 22) + (hov ? 3 : 0);   // uzakta küçük, yaklaştıkça büyür
+          const ort = spr ? GOC_TUR[si] : null, ortam = ort ? ort[0] : 'h', bk = ort ? ort[2] : 1, k2 = r * 2.05 * bk;
+          const yuk = ortam === 'h' ? r * (1.0 + 0.24 * Math.sin(T * 1.7 + faz * 9)) : 0;   // uçuş yüksekliği (hafifçe alçalıp yükselir)
+          const izPx = Math.min(r * (ortam === 'h' ? 5.5 : 4.2), d.L * 0.3 / kmPx);
+          g.globalCompositeOperation = 'lighter';
+          if (ortam === 'h') {
+            // arkasında parlayan iz: yerden hayvana doğru yükselir
+            const izk = [new Path2D(), new Path2D(), new Path2D()];
+            let on = null;
+            for (let i = 0; i <= 9; i++) {
+              const [qx, qy, qz] = P(...geri(izPx * kmPx * (1 - i / 9)));
+              if (qz <= 0.08) { on = null; continue; }
+              const yy = qy - yuk * (0.35 + 0.65 * i / 9);
+              if (on) { const b = Math.min(2, Math.floor((i - 1) / 3)); izk[b].moveTo(on[0], on[1]); izk[b].lineTo(qx, yy); }
+              on = [qx, yy];
+            }
+            for (let b = 0; b < 3; b++) { g.strokeStyle = hexA(col, ((b + 1) / 3) ** 1.6 * 0.55 * uc); g.lineWidth = (hov ? 4.2 : 3.2) * (b + 1) / 3; g.stroke(izk[b]); }
+            // kanatlarından geriye savrulan, kıvrılarak sönen rüzgâr çizgileri
+            const dx = Math.cos(ang), dy = Math.sin(ang); g.lineWidth = 1.15;
+            for (let j = 0; j < 4; j++) {
+              const a = kes(T * 1.6 + j / 4 + faz * 3), yan = (j % 2 ? 1 : -1) * r * (0.55 + 0.35 * (j >> 1)), gp = r * (0.7 + 2.6 * a), uz = r * (0.7 + 0.9 * a), kv = yan * 0.35 * (0.4 + a);
+              const bx = lx - dx * gp - dy * yan, by = ly - yuk - dy * gp + dx * yan;
+              g.strokeStyle = `rgba(255,255,255,${Math.sin(Math.PI * a) * 0.62 * uc})`;
+              g.beginPath(); g.moveTo(bx, by); g.quadraticCurveTo(bx - dx * uz * 0.5 - dy * kv * 0.3, by - dy * uz * 0.5 + dx * kv * 0.3, bx - dx * uz - dy * kv, by - dy * uz + dx * kv); g.stroke();
+            }
+          } else if (ortam === 's') {
+            // V biçimli köpük izi + geride büyüyüp sönen su halkaları
+            const nx = -Math.sin(ang), ny = Math.cos(ang), [tx2, ty2] = P(...geri(izPx * kmPx));
+            const gr = g.createLinearGradient(lx, ly, tx2, ty2); gr.addColorStop(0, `rgba(235,250,255,${0.6 * uc})`); gr.addColorStop(1, 'rgba(235,250,255,0)');
+            g.strokeStyle = gr; g.lineWidth = hov ? 1.9 : 1.4;
+            for (const yan of [-1, 1]) {
+              g.beginPath();
+              for (let i = 0; i <= 7; i++) { const [qx, qy] = P(...geri(izPx * kmPx * i / 7)), ac = r * (0.18 + 0.85 * i / 7) * yan; i ? g.lineTo(qx + nx * ac, qy + ny * ac) : g.moveTo(qx + nx * ac, qy + ny * ac); }
+              g.stroke();
+            }
+            for (let j = 0; j < 3; j++) {
+              const a = kes(T * 0.5 + j / 3 + faz), [qx, qy, qz] = P(...geri(izPx * kmPx * a * 1.1)); if (qz <= 0.08) continue;
+              g.strokeStyle = `rgba(215,242,255,${(1 - a) * 0.5 * uc})`; g.lineWidth = 1.2;
+              g.beginPath(); g.ellipse(qx, qy, r * (0.3 + 1.25 * a), r * (0.3 + 1.25 * a) * 0.62, 0, 0, 7); g.stroke();
+            }
           }
-          g.restore();
-          // Lider hayvan rozeti
-          g.fillStyle = 'rgba(18,24,36,0.9)'; g.strokeStyle = col; g.lineWidth = hov ? 2.2 : 1.7;
-          g.beginPath(); g.arc(px, py, hov ? 12 : 10, 0, 7); g.fill(); g.stroke();
-          g.font = `${hov ? 13.5 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(hg.ik, px, py + 0.5);
+          g.globalCompositeOperation = 'source-over';
+          if (ortam === 'k') for (let j = 0; j < 4; j++) {   // ayaklarının kaldırdığı toz
+            const a = kes(T * 1.3 + j / 4 + faz), [qx, qy, qz] = P(...geri(izPx * kmPx * (0.15 + 0.85 * a))); if (qz <= 0.08) continue;
+            g.fillStyle = `rgba(232,212,172,${(1 - a) * 0.5 * uc})`;
+            g.beginPath(); g.arc(qx, qy + r * 0.5 - a * r * 0.7, r * (0.16 + 0.42 * a), 0, 7); g.fill();
+          }
+          px = lx; py = ly - yuk; pz = lz;
+          if (spr) {
+            // ekrandaki gidiş açısına en yakın yön karesi seçilir, kalan küçük fark döndürülerek tamamlanır
+            let al = ang, ayna = 1; if (Math.cos(al) < 0) { al = Math.PI - al; ayna = -1; }
+            al = Math.atan2(Math.sin(al), Math.cos(al));
+            const di = clamp(Math.round((Math.PI / 2 - al) / (Math.PI / 8)), 0, 8), kalan = al - (Math.PI / 2 - di * Math.PI / 8);
+            const kare = Math.floor(kes(T * ort[1] + faz * 5) * 4) % 4, sx = (di * 4 + kare) * GOC_HP, sy = si * GOC_HP;
+            if (ortam === 'h') {
+              g.save(); g.translate(lx + yuk * 0.3, ly + yuk * 0.1); g.scale(ayna, 1); g.rotate(kalan); g.globalAlpha = 0.3 * uc;
+              g.drawImage(gocGolge(spr), sx / 2, sy / 2, GOC_HP / 2, GOC_HP / 2, -k2 * 0.8, -k2 * 0.8, k2 * 1.6, k2 * 1.6); g.restore();
+            } else if (ortam === 's') {
+              g.fillStyle = `rgba(6,38,74,${0.26 * uc})`; g.beginPath(); g.ellipse(lx + r * 0.12, ly + r * 0.3, k2 * 0.62, k2 * 0.3, ang, 0, 7); g.fill();
+            }
+            g.save(); g.translate(px, py); g.globalAlpha = uc; g.scale(ayna, 1); g.rotate(kalan);
+            g.drawImage(spr, sx, sy, GOC_HP, GOC_HP, -k2, -k2, k2 * 2, k2 * 2); g.restore();
+            if (si === 6 || si === 18) {   // balinalar ara ara su püskürtür
+              const sp = kes(T / 4.5 + faz * 3);
+              if (sp < 0.28) {
+                const t = sp / 0.28, hx = px + Math.cos(ang) * k2 * 0.3, hy = py + Math.sin(ang) * k2 * 0.2 - k2 * 0.12;
+                g.fillStyle = `rgba(238,251,255,${(1 - t) * 0.92 * uc})`;
+                for (let j = -3; j <= 3; j++) { g.beginPath(); g.arc(hx + j * k2 * 0.1 * t, hy - k2 * (1.5 * t - 0.85 * t * t) * (1 - Math.abs(j) * 0.11), 0.8 + (1 - t) * 1.2, 0, 7); g.fill(); }
+              }
+            }
+          } else {
+            // resim yüklenene kadar (ya da resmi olmayan rotada) emoji
+            const emo = emojiResim(hg.ik), yon = emojiYon(hg.ik);
+            g.save(); g.translate(px, py); g.globalAlpha = uc;
+            if (yon === 'sol' || yon === 'sag') {
+              const saga = Math.cos(ang) >= 0, ayna = (saga ? 1 : -1) * (yon === 'sag' ? 1 : -1);
+              g.rotate(clamp(saga ? ang : ang - Math.PI * Math.sign(ang || 1), -0.55, 0.55)); g.scale(ayna, 1);
+            } else if (yon === 'ust') g.rotate(ang + Math.PI / 2);
+            g.drawImage(emo, -r, -r, r * 2, r * 2);
+            g.restore();
+          }
         }
         g.restore();
         const [mx, my, mz] = P(...yolNokta(d, d.L * 0.5));
-        const hgAd = `${hg.ik} ${hg.ad.split(' (')[0]}`;
+        const hgAd = GOC_IDX[hg.id] != null ? hg.ad.split(' (')[0] : `${hg.ik} ${hg.ad.split(' (')[0]}`;
         if (mz > 0.12 && (view.z >= 1.35 || hov)) {
           lab(hov ? 97 : 58, mx, my - 12, hgAd, { size: 10.5, w: 700, col: '#fff7dc', halo: 3, haloCol: 'rgba(14,24,34,0.9)', kay: true });
           const hw = hgAd.length * 3.3 + 6; hits.push({ kind: 'hayvangoc', hg, x0: mx - hw, x1: mx + hw, y0: my - 23, y1: my - 1 });
@@ -1841,9 +2208,8 @@ window.Dunya = (() => {
         const s0 = hov ? 12 : 9.5;
         g.save();
         g.fillStyle = hov ? '#1d4ed8' : '#163457'; g.strokeStyle = hov ? '#ffd666' : '#f3d58d'; g.lineWidth = hov ? 2.2 : 1.5;
-        g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
         g.font = `${hov ? 13 : 10.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.fillText('⚓', x, y + 0.5);
+        simge('⚓', x, y, s0);
         g.restore();
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         if (view.z >= 1.75 || hov) lab(hov ? 97 : 60, x, y + s0 + 10, lm.ad.split(' (')[0], { size: 10.2, w: 700, col: '#e8f4ff', halo: 2.8, haloCol: 'rgba(12,24,44,0.9)', kay: true });
@@ -1864,9 +2230,8 @@ window.Dunya = (() => {
         const k = (T / 6) % 1, [px, py, pz] = P(...yolNokta(d, d.L * k));
         if (pz > 0.08) {
           g.fillStyle = 'rgba(42,24,10,0.92)'; g.strokeStyle = '#ffd666'; g.lineWidth = 1.8;
-          g.beginPath(); g.arc(px, py, 11, 0, 7); g.fill(); g.stroke();
           g.font = '13px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(rotaItem.ik, px, py + 0.5);
+          simge(rotaItem.ik, px, py, 12);
         }
         g.restore();
       }
@@ -1881,9 +2246,8 @@ window.Dunya = (() => {
           const s0 = hov || akt ? 12.5 : 10;
           g.save();
           g.fillStyle = akt ? '#ffd666' : '#fff6dc'; g.strokeStyle = hov || akt ? '#b45309' : '#92400e'; g.lineWidth = hov || akt ? 2.4 : 1.6;
-          g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
           g.font = `${hov || akt ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-          g.fillText(yy.ik, x, y + 0.5);
+          simge(yy.ik, x, y, s0);
           g.restore();
           obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
           if (view.z >= 1.5 || hov || akt) lab(hov || akt ? 98 : 56, x, y + s0 + 10, yy.ad.split(' (')[0], { size: 10.2, w: 700, col: '#fef3c7', halo: 2.8, haloCol: 'rgba(42,20,8,0.9)', kay: true });
@@ -2012,8 +2376,7 @@ window.Dunya = (() => {
         g.fillStyle = tuk ? '#fff0cc' : den ? '#e4f5ff' : '#fbf6e8';
         g.strokeStyle = hov ? '#ffd666' : tuk ? '#c87018' : den ? '#2b88c4' : '#3d8a4e';
         g.lineWidth = hov ? 2.4 : 1.7;
-        g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
-        g.font = `${hov ? 15 : 12.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(h.ik, x, y + 1); g.textBaseline = 'alphabetic';
+        g.font = `${hov ? 15 : 12.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge(h.ik, x, y, s0); g.textBaseline = 'alphabetic';
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         if (view.z >= 2.6 || hov) lab(hov ? 96 : 48, x, y + s0 + 10, h.ad.split(' (')[0], { size: 10, w: 700, col: tuk ? '#ffe2a0' : '#fff8e8', halo: 2.8, haloCol: 'rgba(20,16,10,0.85)', kay: true });
         hits.push({ kind: 'hayvan', h, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
@@ -2031,8 +2394,7 @@ window.Dunya = (() => {
         shownB.push([x, y]);
         const hov = hover && hover.kind === 'bitki' && hover.bt === bt, s0 = hov ? 12.5 : 10;
         g.fillStyle = '#e6f6e8'; g.strokeStyle = hov ? '#ffd666' : '#2e7d32'; g.lineWidth = hov ? 2.4 : 1.7;
-        g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
-        g.font = `${hov ? 14.5 : 12}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bt.ik, x, y + 1); g.textBaseline = 'alphabetic';
+        g.font = `${hov ? 14.5 : 12}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge(bt.ik, x, y, s0); g.textBaseline = 'alphabetic';
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         if (view.z >= 2.4 || hov) lab(hov ? 96 : 47, x, y + s0 + 10, bt.ad.split(' (')[0], { size: 10, w: 700, col: '#dcfce7', halo: 2.8, haloCol: 'rgba(14,32,18,0.88)', kay: true });
         hits.push({ kind: 'bitki', bt, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
@@ -2098,9 +2460,8 @@ window.Dunya = (() => {
         g.strokeStyle = `rgba(255,214,102,${0.65 * (1 - ph)})`; g.lineWidth = 2;
         g.beginPath(); g.arc(x, y, s0 + ph * 11, 0, 7); g.stroke();
         g.fillStyle = hov ? '#ffd666' : '#2d193d'; g.strokeStyle = '#ffd666'; g.lineWidth = hov ? 2.6 : 2;
-        g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
         g.font = `${hov ? 15 : 12.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.fillText('⚡', x, y + 0.5);
+        simge('⚡', x, y, s0);
         g.restore();
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         lab(hov ? 99 : 72, x, y + s0 + 10, `${dn.ad}`, { size: 10.5, w: 800, col: '#ffe99c', halo: 3.2, haloCol: 'rgba(26,12,38,0.9)', kay: true });
@@ -2151,9 +2512,8 @@ window.Dunya = (() => {
           g.beginPath(); g.arc(x, y, s0 + 3 + ph * 3, 0, 7); g.stroke();
         }
         g.fillStyle = bul ? 'rgba(42,28,14,0.92)' : 'rgba(56,34,12,0.58)'; g.strokeStyle = hov ? '#ffd666' : 'rgba(255,214,102,0.75)'; g.lineWidth = hov ? 2 : 1.1;
-        g.beginPath(); g.arc(x, y, s0, 0, 7); g.fill(); g.stroke();
         g.font = `${hov ? 13.5 : (bul ? 11.5 : 8.5)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.fillText(bul ? sp.ik : '✨', x, y + 0.5);
+        g.globalAlpha *= bul ? 1 : 0.7; simge(bul ? sp.ik : '✨', x, y, s0);
         g.restore();
         if (bul && (view.z >= sp.minZ + 0.6 || hov)) lab(hov ? 98 : 50, x, y + s0 + 10, sp.ad.split(' (')[0], { size: 10, w: 700, col: '#ffe89c', halo: 2.8, haloCol: 'rgba(28,18,6,0.9)', kay: true });
         hits.push({ kind: 'surpriz', sp, x0: x - s0 - 4, x1: x + s0 + 4, y0: y - s0 - 4, y1: y + s0 + 4 });
@@ -2176,9 +2536,8 @@ window.Dunya = (() => {
             g.strokeStyle = `rgba(255,214,102,${hov ? 0.85 : 0.35 + ph * 0.25})`; g.lineWidth = 1.2;
             g.beginPath(); g.arc(vx, vy, (hov ? 12 : 9) + ph * 2.5, 0, 7); g.stroke();
             g.fillStyle = 'rgba(22,26,48,0.82)'; g.strokeStyle = '#ffd666'; g.lineWidth = hov ? 1.6 : 1;
-            g.beginPath(); g.arc(vx, vy, hov ? 9.5 : 7.5, 0, 7); g.fill(); g.stroke();
             g.font = `${hov ? 11.5 : 9.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
-            g.fillText('🛰️', vx, vy + 0.5);
+            simge('🛰️', vx, vy, hov ? 9.5 : 7.5);
             text(vx, vy + 16, 'Voyager 1', { size: 9.5, w: 700, col: '#ffe89c', halo: 2.5, haloCol: 'rgba(10,14,28,0.9)' });
           } else {
             // Keşfedilmeden önce: uzayda hafifçe parlayan minik altın 4-köşeli yıldız
@@ -2357,8 +2716,8 @@ window.Dunya = (() => {
     const w = Math.max(w1, ...lines.map(l => g.measureText(l).width)) + 18, h = 24 + lines.length * 15;
     x = clamp(x, 4, W - w - 4); y = clamp(y - h, 4, H - h - 4);
     g.fillStyle = 'rgba(255,246,220,0.97)'; g.strokeStyle = OUT; g.lineWidth = 1; g.beginPath(); g.roundRect(x, y, w, h, 9); g.fill(); g.stroke();
-    g.fillStyle = OUT; g.textAlign = 'left'; g.font = '700 13px system-ui'; g.fillText(t1, x + 9, y + 17);
-    g.font = '12px system-ui'; lines.forEach((l, i) => g.fillText(l, x + 9, y + 33 + i * 15));
+    g.fillStyle = OUT; g.textAlign = 'left'; g.font = '700 13px system-ui'; duzYazi(t1, x + 9, y + 17, 13);
+    g.font = '12px system-ui'; lines.forEach((l, i) => duzYazi(l, x + 9, y + 33 + i * 15, 12));
   }
   function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; }
   function softHex(hex) { const n = parseInt(hex.slice(1), 16); const f = v => Math.round(v + (255 - v) * 0.35); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; }

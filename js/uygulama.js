@@ -1339,69 +1339,44 @@
     tg.textBaseline = 'middle'; tg.textAlign = 'center';
     const x0 = yearX(P.from);
     tlKitaKutular = [];
-    if (DUNYA) {
-      // her kıta bir sıra; sol etikette kıtanın adı; tıklayınca küre o kıtaya döner (yıl değişmez)
-      const KT = window.KITALAR || [{ id: 'hepsi', ad: '', ikon: '', b: BSIRA }], RENK = { afrika: ['#9a6a2e', '#b8843e'], asya: ['#8e3b32', '#ad5446'], avrupa: ['#2f5a8a', '#4a76a8'], amerika: ['#2e7a4e', '#46966a'], okyanusya: ['#2a8a9a', '#46a8b8'], hepsi: ['#6a5a4a', '#8a7a6a'] };
-      const rh = Math.min(13, Math.floor(54 / KT.length)), fs = Math.min(9.5, rh - 1);
-      KT.forEach((kt, i) => {
-        const y0 = 4 + i * rh, bl = kt.b.filter(b => BSIRA.includes(b)), lh = (rh - 1) / Math.max(1, bl.length), rk = RENK[kt.id] || RENK.hepsi;
-        tg.fillStyle = 'rgba(255,255,255,0.05)'; tg.fillRect(0, y0, TW, rh - 1);
-        bl.forEach((b, k) => PARTS.filter(p => p.bolge === b).forEach((p, j) => {
-          const a = yearX(Math.min(p.from, P.from)), bb = yearX(Math.max(p.to, P.to)); if (bb <= a) return;
-          tg.fillStyle = rk[(j + k) % 2]; tg.fillRect(a, y0 + k * lh, bb - a, Math.max(1, lh - 0.6));
-        }));
-        const ky = kitaYil[kt.id], isAk = kt.id === ak, isHov = hoverKita && hoverKita.id === kt.id;
-        tg.font = `700 ${fs}px system-ui`;
-        const t = `${kt.ikon} ${kt.ad}`, w = tg.measureText(t).width + 12; void ky;
-        tg.fillStyle = isHov ? 'rgba(62,44,20,0.96)' : isAk ? 'rgba(42,30,14,0.92)' : 'rgba(25,18,12,0.82)';
-        tg.fillRect(2, y0, w, rh - 1);
-        if (isAk || isHov) { tg.fillStyle = '#ffd666'; tg.fillRect(2, y0, 2.5, rh - 1); }
-        tg.fillStyle = isAk || isHov ? '#ffe89c' : '#f5e6c8'; tg.textAlign = 'left'; tg.fillText(t, 8, y0 + rh / 2); tg.textAlign = 'center';
-        tlKitaKutular.push({ kt, x0: 2, x1: 2 + w, y0, y1: y0 + rh - 1 });
-      });
+    const midY = Math.round(TH * 0.36);
+    const xSol = 14, xSag = TW - 52;
+    // Tek, sade tarih akışı çubuğu (kıta satırları olmadan)
+    tg.fillStyle = 'rgba(34, 30, 26, 0.14)';
+    tg.beginPath(); tg.roundRect(xSol, midY - 2, Math.max(10, xSag - xSol), 4, 2); tg.fill();
+    const cx = yearX(Y);
+    if (cx > x0) {
+      tg.fillStyle = '#1F4E5B';
+      tg.beginPath(); tg.roundRect(x0, midY - 2, cx - x0, 4, 2); tg.fill();
     }
-    else for (const d of P.dynasties) {
-      const a = yearX(Math.min(d.from, P.from)), b = yearX(Math.max(d.to, P.to)); if (b <= a) continue;
-      tg.fillStyle = d.renk; tg.globalAlpha = 0.85; tg.fillRect(a, 4, b - a, 14); tg.globalAlpha = 1;
-      tg.fillStyle = '#fff'; tg.font = '700 10px system-ui'; if (tg.measureText(d.ad).width < b - a - 6) tg.fillText(d.ad, (a + b) / 2, 11.5);
-    }
-    if (!DUNYA) P.rulers.forEach((r, i) => {
-      const a = yearX(Math.min(r.from, P.from)), b = yearX(Math.max(r.to, P.to)); if (b <= a) return;
-      tg.fillStyle = i % 2 ? '#3b2e22' : '#4a3a2b'; tg.fillRect(a, 21, b - a, 22);
-      tg.fillStyle = '#f5e6c8'; tg.font = '600 11px system-ui';
-      const name = tg.measureText(r.kisa).width < b - a - 4 ? r.kisa : (b - a > 14 ? r.kisa[0] : '');
-      tg.fillText(name, (a + b) / 2, 32.5);
-    });
-    for (const m of P.monuments) {
-      if (m.minor || m.eski) continue;
-      const a = yearX(Math.min(m.start, P.from)), b = yearX(Math.max(m.stop || m.end, P.to)); if (b <= a) continue;
-      tg.fillStyle = m.id === 'khufu' ? '#f2c94c' : (m.stop ? '#9b8a70' : '#c9a45c'); tg.fillRect(a, 60, Math.max(2, b - a), 4.5);
-    }
+    // Önemli olay noktaları (tek çizgi üzerinde sade noktalar)
     for (const ev of P.events) {
       if (ev.y > P.from || ev.y < P.to) continue;
-      const x = yearX(ev.y), w = ev.k === 'w';
-      tg.fillStyle = hoverEv === ev ? '#fff' : (w ? '#6bb6e0' : '#f2c94c');
-      tg.beginPath(); if (w) tg.arc(x, 71, 3.4, 0, 7); else { tg.moveTo(x, 66); tg.lineTo(x + 4.2, 74); tg.lineTo(x - 4.2, 74); tg.closePath(); } tg.fill();
+      const x = yearX(ev.y), akt = hoverEv === ev;
+      tg.fillStyle = akt ? '#D95D39' : '#1F4E5B';
+      tg.beginPath(); tg.arc(x, midY, akt ? 4.5 : 2.8, 0, 7); tg.fill();
     }
-    tg.fillStyle = '#b9a88c'; tg.strokeStyle = '#7d6b52'; tg.font = '10px system-ui';
+    // Yıl çentikleri ve rakamları
+    tg.fillStyle = '#221E1A'; tg.strokeStyle = 'rgba(34, 30, 26, 0.38)'; tg.lineWidth = 1;
+    tg.font = '600 11px "Instrument Sans", system-ui, sans-serif';
     const pxYr = (TW - 66) / (vA() - vB());
-    const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000].find(v => v * pxYr >= 64) || 5000;
-    const tick = [1, 2, 5, 10, 20, 25, 50, 100, 250, 500, 1000].find(v => v * pxYr >= 7) || 1000;
+    const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000].find(v => v * pxYr >= 72) || 5000;
+    const tick = [1, 2, 5, 10, 20, 25, 50, 100, 250, 500, 1000].find(v => v * pxYr >= 9) || 1000;
     for (let y = Math.ceil(vB() / tick) * tick; y <= vA(); y += tick) {
-      if (y === 0) continue; // 0 yılı yok: MÖ 1'den MS 1'e geçilir
-      const x = yearX(y), big = y % step === 0; tg.beginPath(); tg.moveTo(x, 78); tg.lineTo(x, big ? 86 : 82); tg.stroke();
-      if (big) tg.fillText(`${YIL.fmt(y)}`, x, 95);
+      if (y === 0) continue;
+      const x = yearX(y), big = y % step === 0;
+      tg.beginPath(); tg.moveTo(x, midY + 5); tg.lineTo(x, midY + (big ? 11 : 8)); tg.stroke();
+      if (big) tg.fillText(`${YIL.fmt(y)}`, x, midY + 21);
     }
-    const cx = yearX(Y);
-    tg.fillStyle = 'rgba(242,201,76,0.18)'; tg.fillRect(x0, 4, cx - x0, 2);
-    tg.strokeStyle = '#ffd666'; tg.lineWidth = 2; tg.beginPath(); tg.moveTo(cx, 2); tg.lineTo(cx, 88); tg.stroke();
-    tg.fillStyle = '#ffd666'; tg.beginPath(); tg.arc(cx, 2, 5, 0, 7); tg.fill();
-    tg.beginPath(); tg.arc(cx, 82, 6.5, 0, 7); tg.fill(); tg.strokeStyle = '#3a2414'; tg.lineWidth = 2; tg.stroke();
+    // Seçili yıl tutamacı
+    tg.fillStyle = '#D95D39'; tg.strokeStyle = '#F6F2E9'; tg.lineWidth = 2;
+    tg.beginPath(); tg.arc(cx, midY, 6.5, 0, 7); tg.fill(); tg.stroke();
   }
   let dragTL = false;
   const tlPos = ev => { const r = tcv.getBoundingClientRect(); return [ev.clientX - r.left, ev.clientY - r.top]; };
   const evAt = (x, y) => {
-    if (y < 50 || y > 70) return null;
+    const midY = Math.round(TH * 0.36);
+    if (Math.abs(y - midY) > 14) return null;
     let best = null, bd = 8;
     for (const ev of P.events) { const d = Math.abs(yearX(ev.y) - x); if (d < bd) { bd = d; best = ev; } }
     return best;
@@ -1706,9 +1681,11 @@
   function kartlariKapat(haric) {
     if (haric !== 'kart') $('#citycard').hidden = true;
     if (haric !== 'katman') { $('#katman').hidden = true; $('#katbtn').classList.remove('on'); }
+    if (haric !== 'tarih') { $('#tarihpop').hidden = true; $('#tarihgit').classList.remove('on'); }
     if (haric !== 'panel' && haric !== 'modal') panelAc(false);
   }
   function kartGoster() { kartlariKapat('kart'); $('#citycard').hidden = false; }
+  { const a = $('#ara'); if (a) a.addEventListener('click', () => kartlariKapat()); }   // arama açılınca açık kart/pencere altında kalmasın
   // ---------- 📖 Bu yıl paneli ----------
   function panelAc(ac) {
     document.body.classList.toggle('panelacik', ac); $('#buyil').classList.toggle('on', ac); $('#buyil').setAttribute('aria-expanded', ac);
@@ -2013,6 +1990,21 @@
       body.innerHTML = o.tabs[i].html || ''; body.scrollTop = 0;
       nav.querySelectorAll('button').forEach((b, j) => b.classList.toggle('on', i === j));
       if (o.tabs[i].onShow) o.tabs[i].onShow(body);
+      // Bilgi kartının altına doğrudan Vikipedi bağlantıları ekle
+      if (o.title && !body.querySelector('.m-wiki')) {
+        const kp = body.querySelector('[data-kapak]');
+        const enW = (o.w || (kp && kp.dataset.kapak) || '').trim();
+        const trAd = String(o.title).split('·')[0].split('(')[0].trim();
+        if (trAd) {
+          const wb = document.createElement('div');
+          wb.className = 'm-wiki';
+          const trUrl = `https://tr.wikipedia.org/w/index.php?search=${encodeURIComponent(trAd)}`;
+          const enUrl = enW ? `https://en.wikipedia.org/wiki/${encodeURIComponent(enW.replace(/ /g, '_'))}` : '';
+          wb.innerHTML = `<a class="phbtn" href="${trUrl}" target="_blank" rel="noopener">Vikipedi'de Oku (TR) ↗</a>` +
+            (enUrl ? `<a class="phbtn" href="${enUrl}" target="_blank" rel="noopener">Wikipedia (EN) ↗</a>` : '');
+          body.appendChild(wb);
+        }
+      }
     };
     nav.onclick = e => { const b = e.target.closest('[data-tab]'); if (b) show(+b.dataset.tab); };
     if (modal.hidden) { playingBeforeModal = playing; playing = false; updPlay(); }
@@ -2799,7 +2791,7 @@
 
   // ---------- 📅 tarihe git ----------
   $('#tarihgit').addEventListener('click', () => {
-    const p = $('#tarihpop'), ac = p.hidden; p.hidden = !ac; $('#tarihgit').classList.toggle('on', ac);
+    const p = $('#tarihpop'), ac = p.hidden; if (ac) kartlariKapat('tarih'); p.hidden = !ac; $('#tarihgit').classList.toggle('on', ac);
     if (ac) { const y = Math.round(Y); $('#tp-yil').value = Math.abs(y) || 1; $('#tp-cag').value = y > 0 ? 'mo' : 'ms'; $('#tp-not').textContent = `Bu çizelge ${YIL.fmt(P.from)} – ${P.to <= -2026 ? 'bugün' : YIL.fmt(P.to)} arasını kapsıyor.`; setTimeout(() => { $('#tp-yil').focus(); $('#tp-yil').select(); }, 30); }
   });
   $('#tp-form').addEventListener('submit', ev => {

@@ -10,3 +10,6 @@ desktop.ini
 # yerel notlar ve ayarlar (yayınlanmaz)
 YENI-SOHBET-OZETI.md
 .claude/
+
+# indirilen ham simge PNG'leri (img/simgeler.webp bunlardan uretilir)
+araclar/simge-kaynak/
