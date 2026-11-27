@@ -25,7 +25,7 @@ const gorulen = new Set();
 const gez = o => {
   if (!o || typeof o !== 'object' || gorulen.has(o)) return; gorulen.add(o);
   if (Array.isArray(o)) { o.forEach(gez); return; }
-  for (const [k, v] of Object.entries(o)) { if (k === 'ik' && typeof v === 'string') ekle(v); else if (v && typeof v === 'object') gez(v); }
+  for (const [k, v] of Object.entries(o)) { if ((k === 'ik' || k === 'sem') && typeof v === 'string') ekle(v); else if (v && typeof v === 'object') gez(v); }
 };
 for (const k of Object.keys(global)) if (!once.has(k)) gez(global[k]);
 const veriSayi = bulunan.size;

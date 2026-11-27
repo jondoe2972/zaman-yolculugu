@@ -2226,15 +2226,17 @@ body[data-tema] .tech td { border-bottom-color: var(--t-border); }
    ============================================================================ */
 :root {
   /* 1 Ana Renk + 1 Vurgu Rengi + 3 Gri (Mor-mavi geçiş ve neon yok) */
-  --c-ana:   #1F4E5B; /* Ana renk: Derin okyanus / petrol çiviti */
-  --c-vurgu: #D95D39; /* Vurgu rengi: Sıcak kiremit / mercan (ekran başına tek ana aksiyon) */
-  --c-gri1:  #F6F2E9; /* 1. Gri (Açık): Sıcak taş / kâğıt yüzeyi */
-  --c-gri2:  #DDD4C3; /* 2. Gri (Orta): Kenarlık, ayraç ve ikincil yüzey */
-  --c-gri3:  #221E1A; /* 3. Gri (Koyu): Ana mürekkep metin */
+  --c-ana:   #0F6E8C; /* Ana renk: Derin okyanus / petrol çiviti */
+  --c-vurgu: #F0642F; /* Vurgu rengi: Sıcak kiremit / mercan (ekran başına tek ana aksiyon) */
+  --c-gri1:  #FFFFFF; /* 1. Gri (Açık): Sıcak taş / kâğıt yüzeyi */
+  --c-gri2:  #E1E7EE; /* 2. Gri (Orta): Kenarlık, ayraç ve ikincil yüzey */
+  --c-gri3:  #17212B;
+  --c-ic:    #F3F6F9; /* İç yüzey: kartın içindeki kutular, seçili olmayan sekmeler */
+  --c-soluk: #56616D; /* İkincil (soluk) metin */ /* 3. Gri (Koyu): Ana mürekkep metin */
 
   /* 2 Font (Google Fonts — Inter yok) */
-  --f-baslik: "Young Serif", Georgia, serif;
-  --f-metin:  "Instrument Sans", system-ui, sans-serif;
+  --f-baslik: "Literata", Georgia, serif;
+  --f-metin:  "Atkinson Hyperlegible Next", system-ui, sans-serif;
 
   /* 6 Yazı Boyutu (Oranlı ölçek: 13 / 15 / 17 / 21 / 28 / 40) */
   --fs-1: 13px;
@@ -2254,18 +2256,18 @@ body[data-tasarim="kesin"] {
   font-size: var(--fs-2) !important;
   color: var(--c-gri3) !important;
   /* Tüm tema değişkenlerini tek merkezden koyu mürekkep + sıcak taş zeminle eşitle (sıfır okunmayan açık yazı) */
-  --t-bg1: #EAE2D3 !important;
-  --t-bg2: #DDD4C3 !important;
-  --t-panel: #F6F2E9 !important;
-  --t-card: #F6F2E9 !important;
-  --t-soft: #EAE2D3 !important;
-  --t-accent: #D95D39 !important;
-  --t-accent-ink: #F6F2E9 !important;
-  --t-title: #1F4E5B !important;
-  --t-border: #C9BFA9 !important;
-  --t-text: #221E1A !important;
-  --t-muted: #544B3F !important;
-  --t-did: #EDE6D7 !important;
+  --t-bg1: var(--c-ic) !important;
+  --t-bg2: var(--c-gri2) !important;
+  --t-panel: var(--c-gri1) !important;
+  --t-card: var(--c-gri1) !important;
+  --t-soft: var(--c-ic) !important;
+  --t-accent: var(--c-vurgu) !important;
+  --t-accent-ink: var(--c-gri1) !important;
+  --t-title: var(--c-ana) !important;
+  --t-border: var(--c-gri2) !important;
+  --t-text: var(--c-gri3) !important;
+  --t-muted: var(--c-soluk) !important;
+  --t-did: var(--c-ic) !important;
 }
 
 /* Yasaklar: Buzlu cam (backdrop-filter), renk geçişli butonlar, sol kenarı 4px çizgili kutular ve emojili modal ikonları kapalı */
@@ -2288,7 +2290,7 @@ body[data-tasarim="kesin"] .aa-kart button.ana {
   background: var(--c-vurgu) !important; color: var(--c-gri1) !important;
 }
 body[data-tasarim="kesin"] .yc-aa {
-  background: #EDE6D7 !important; border: 1px solid var(--c-gri2) !important;
+  background: var(--c-ic) !important; border: 1px solid var(--c-gri2) !important;
   border-radius: var(--r-kucuk) !important; color: var(--c-gri3) !important;
 }
 body[data-tasarim="kesin"] .yc-aa i { color: var(--c-ana) !important; font-style: normal !important; font-weight: 700 !important; }
@@ -2319,7 +2321,7 @@ body[data-tasarim="kesin"] .sespop select, body[data-tasarim="kesin"] .katpop se
   border: 1.5px solid var(--c-gri2) !important; border-radius: var(--r-kucuk) !important;
 }
 body[data-tasarim="kesin"] .ses-sustur, body[data-tasarim="kesin"] .temapop button {
-  background: #EDE6D7 !important; color: var(--c-gri3) !important;
+  background: var(--c-ic) !important; color: var(--c-gri3) !important;
   border: 1px solid var(--c-gri2) !important; border-radius: var(--r-kucuk) !important;
 }
 body[data-tasarim="kesin"] .temapop button.on {
@@ -2700,7 +2702,7 @@ body[data-tasarim="kesin"] .tl .ctrl .play {
   }
   body[data-tasarim="kesin"] .um-stil-sec {
     display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 4px;
-    background: #EAE2D3; padding: 4px; border-radius: var(--r-kucuk); border: 1px solid var(--c-gri2);
+    background: var(--c-ic); padding: 4px; border-radius: var(--r-kucuk); border: 1px solid var(--c-gri2);
   }
   body[data-tasarim="kesin"] .um-stil-sec button {
     border: 0; background: transparent; color: var(--c-gri3); font-size: 11px; font-weight: 700;
@@ -2710,11 +2712,11 @@ body[data-tasarim="kesin"] .tl .ctrl .play {
     background: var(--c-vurgu); color: var(--c-gri1);
   }
   body[data-tasarim="kesin"] .ustmenu .place {
-    background: #EAE2D3 !important; border: 1.5px solid var(--c-gri2) !important;
+    background: var(--c-ic) !important; border: 1.5px solid var(--c-gri2) !important;
     border-radius: var(--r-kucuk) !important; padding: 10px !important; box-shadow: none !important;
     width: 100% !important; min-width: 0 !important; overflow: hidden !important;
   }
-  body[data-tasarim="kesin"] .ustmenu .place-not { color: #544B3F !important; font-size: var(--fs-1) !important; }
+  body[data-tasarim="kesin"] .ustmenu .place-not { color: var(--c-soluk) !important; font-size: var(--fs-1) !important; }
   body[data-tasarim="kesin"] .ustmenu .place-not b { color: var(--c-ana) !important; font-family: var(--f-baslik) !important; font-size: var(--fs-2) !important; }
   body[data-tasarim="kesin"] .ustmenu .place select {
     background: var(--c-gri1) !important; color: var(--c-gri3) !important;
@@ -2728,7 +2730,7 @@ body[data-tasarim="kesin"] .tl .ctrl .play {
   body[data-tasarim="kesin"] .ustmenu .um-ayar .rehber-btn,
   body[data-tasarim="kesin"] .ustmenu #um-ses::after,
   body[data-tasarim="kesin"] .ustmenu #rehber-ac::after {
-    background: #EAE2D3 !important; color: var(--c-gri3) !important;
+    background: var(--c-ic) !important; color: var(--c-gri3) !important;
     border-radius: var(--r-kucuk) !important; font-size: var(--fs-1) !important;
   }
 
@@ -2740,7 +2742,7 @@ body[data-tasarim="kesin"] .tl .ctrl .play {
   body[data-tasarim="kesin"][data-menu-stil="bento"] .ustmenu .modlar button {
     display: flex !important; flex-direction: column; align-items: flex-start; justify-content: space-between;
     min-height: 64px; padding: 10px 12px !important;
-    background: #EAE2D3 !important; color: var(--c-gri3) !important;
+    background: var(--c-ic) !important; color: var(--c-gri3) !important;
     border: 1.5px solid var(--c-gri2) !important; border-radius: var(--r-kucuk) !important;
     font-size: var(--fs-2) !important; font-weight: 700 !important;
   }
@@ -2764,7 +2766,7 @@ body[data-tasarim="kesin"] .tl .ctrl .play {
   }
   body[data-tasarim="kesin"][data-menu-stil="fihrist"] .ustmenu .modlar button:last-child { border-bottom: 0 !important; }
   body[data-tasarim="kesin"][data-menu-stil="fihrist"] .ustmenu .modlar button.on {
-    background: #EAE2D3 !important; color: var(--c-vurgu) !important;
+    background: var(--c-ic) !important; color: var(--c-vurgu) !important;
     box-shadow: inset 4px 0 0 var(--c-vurgu) !important;
   }
 
@@ -2783,7 +2785,7 @@ body[data-tasarim="kesin"] .tl .ctrl .play {
   body[data-tasarim="kesin"][data-menu-stil="kompakt"] .um-bas * { color: var(--c-gri1) !important; }
   body[data-tasarim="kesin"][data-menu-stil="kompakt"] .um-x { background: rgba(255,255,255,0.18) !important; }
   body[data-tasarim="kesin"][data-menu-stil="kompakt"] .ustmenu .modlar {
-    background: #EAE2D3 !important; border: 1px solid var(--c-gri2) !important;
+    background: var(--c-ic) !important; border: 1px solid var(--c-gri2) !important;
     border-radius: var(--r-kucuk) !important; padding: 4px !important; box-shadow: none !important;
   }
 }
@@ -2810,3 +2812,21 @@ emo-s.on {
   overflow: hidden; white-space: nowrap; text-indent: -99em; line-height: 1; text-shadow: none;
   background: center / contain no-repeat;
 }
+
+/* 5) GECE MODU (body[data-gece="1"]; düğme: #gecemodbtn, js/gece-modu.js). Karanlıkta ekran "ay gibi parlamasın":
+      kartlar ve menüler "Gece atlası" renklerine geçer, küre ve uzay da biraz koyulaşır. */
+body[data-gece="1"] {
+  --c-ana:   #5CC8E0; /* buz mavisi */
+  --c-vurgu: #FFB454; /* kehribar */
+  --c-gri1:  #111B26; /* kart zemini */
+  --c-gri2:  #26374A; /* kenarlık */
+  --c-gri3:  #EAF1F7; /* metin */
+  --c-ic:    #18242F; /* iç kutular */
+  --c-soluk: #A9B8C6; /* ikincil metin */
+  color-scheme: dark;
+}
+body[data-gece="1"] #globe { filter: brightness(0.78) saturate(0.9); }
+body[data-gece="1"] #timeline { filter: invert(0.92) hue-rotate(180deg) brightness(1.05); }
+/* ana renk gece modunda açık olduğundan, üstündeki yazı koyu olmalı */
+body[data-gece="1"][data-tasarim="kesin"] .tl .ctrl .play,
+body[data-gece="1"][data-tasarim="kesin"] .um-stil-sec button.on { color: #1b1200 !important; }

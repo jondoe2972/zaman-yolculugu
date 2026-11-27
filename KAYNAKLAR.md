@@ -113,6 +113,6 @@ Her bölge dosyasının başında o bölgede kullanılan kitaplar yazılıdır. 
 - **Okyanusya:** Kirch, *On the Road of the Winds* (2017); Thompson, *Sea People* (2019); Clark, *A Short History of Australia* (2006); King, *The Penguin History of New Zealand* (2003); Hunt & Lipo, *The Statues That Walked* (2011).
 
 ## Harita simgeleri (img/simgeler.webp, 2026-11-28)
-- **Noto Emoji** (Google LLC), https://github.com/googlefonts/noto-emoji · `2D/png/128` klasöründen 236 simge; küçültülüp tek resimde birleştirildi (`araclar/simge-sayfa.js`, `araclar/simge-sayfa.py`; dizin `data/simge-dizin.js`).
+- **Noto Emoji** (Google LLC), https://github.com/googlefonts/noto-emoji · `2D/png/128` klasöründen 261 simge; küçültülüp tek resimde birleştirildi (`araclar/simge-sayfa.js`, `araclar/simge-sayfa.py`; dizin `data/simge-dizin.js`).
 - Lisans: resimler Apache 2.0, yazı tipi SIL OFL 1.1 (deponun README dosyasına göre); bayrak resimleri kamu malı. Lisans metni sitede: `img/NOTO-EMOJI-LISANS.txt`. Atıf "Hakkında ve kaynaklar" penceresinde.
-- **Sayfadaki emojiler (img/emo/, 2026-11-28):** aynı Noto Emoji deposunun `2D/png/72` klasöründen 523 PNG (1,4 MB); `js/emo.js` sayfadaki emojileri bu resimlerle gösterir (`araclar/emo-indir.js`, liste `js/emo-liste.js`). Lisans ve atıf yukarıdakiyle aynı.
+- **Sayfadaki emojiler (img/emo/, 2026-11-28):** aynı Noto Emoji deposunun `2D/png/72` klasöründen 534 PNG (1,4 MB); `js/emo.js` sayfadaki emojileri bu resimlerle gösterir (`araclar/emo-indir.js`, liste `js/emo-liste.js`). Lisans ve atıf yukarıdakiyle aynı.

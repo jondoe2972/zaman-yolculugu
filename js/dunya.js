@@ -153,7 +153,7 @@ window.Dunya = (() => {
   const BOGAZ = [
     { ad: 'İstanbul Boğazı', km: 1.4, p: prep([[40.995, 28.985], [41.02, 29.0], [41.045, 29.015], [41.07, 29.045], [41.09, 29.058], [41.12, 29.07], [41.15, 29.078], [41.175, 29.095], [41.2, 29.115], [41.23, 29.135]]) }
   ];
-  const BULUT = Array.from({ length: 18 }, (_, i) => ({ la: (Math.sin(i * 12.9) * 0.5) * 120, lo: i * 47 % 360 - 180, r: 6 + (i % 5) * 2.5, a: 0.18 + (i % 3) * 0.06 }));
+  const BULUT = Array.from({ length: 16 }, (_, i) => ({ la: (Math.sin(i * 12.9) * 0.5) * 120, lo: i * 47 % 360 - 180, r: 5 + (i % 5) * 1.6, tur: i % 3 }));
   // sabit ızgara, yıldızlar ve Nil kolları: her karede yeniden üretilmesin
   const IZGARA = [-60, -30, 0, 30, 60].map(la => prep(Array.from({ length: 91 }, (_, i) => [la, -180 + i * 4])));
   const YILDIZ = Array.from({ length: 180 }, (_, i) => [Math.sin(i * 91.7) * 0.5 + 0.5, Math.sin(i * 47.3 + 1) * 0.5 + 0.5, i % 9 ? 1.2 : 2, 1 + i % 3]);
@@ -349,10 +349,10 @@ window.Dunya = (() => {
   const _emo = {}, EMO_PX = 46, EMO_PAY = 13;
   function emojiResim(ik) {
     if (_emo[ik]) return _emo[ik];
-    const c = document.createElement('canvas'), x = c.getContext('2d'); x.font = EMO_PX + 'px system-ui';
+    const c = document.createElement('canvas'), x = c.getContext('2d'); x.font = EMO_PX + 'px Atkinson Hyperlegible Next, system-ui';
     const w = Math.max(EMO_PX, Math.ceil(x.measureText(ik).width));
     c.width = w + EMO_PAY * 2; c.height = EMO_PX + EMO_PAY * 2;
-    x.font = EMO_PX + 'px system-ui'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#fffdf5';
+    x.font = EMO_PX + 'px Atkinson Hyperlegible Next, system-ui'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#fffdf5';
     x.shadowColor = 'rgba(8,14,22,0.85)'; x.shadowBlur = 7; x.shadowOffsetY = 1.5;
     x.fillText(ik, c.width / 2, c.height / 2 + 3); x.shadowBlur = 3; x.fillText(ik, c.width / 2, c.height / 2 + 3);
     return (_emo[ik] = c);
@@ -377,7 +377,7 @@ window.Dunya = (() => {
         const yx = y.getContext('2d'); yx.imageSmoothingQuality = 'high'; yx.drawImage(c, 0, 0, y.width, y.height);
         _smYari = y; _smTam = c;
       };
-      _smImg.src = 'img/simgeler.webp?v=1';
+      _smImg.src = 'img/simgeler.webp?v=4';
     }
     return null;
   }
@@ -455,6 +455,39 @@ window.Dunya = (() => {
     x.globalCompositeOperation = 'source-over';
     x.strokeStyle = '#6f8dab'; x.lineWidth = m * 0.018; x.beginPath(); x.arc(m, m, m * 0.072, 0, 7); x.stroke();
     return (_kasirga = mipZinciri(c));
+  }
+  // Bulut: üç ayrı biçimde, net kenarlı pofuduk kümeler (üstten ışık almış beyaz gövde, alt yanı hafif gri-mavi gölgeli).
+  // Her biçim için [bulut, yere düşen gölge] resim zincirleri bir kez üretilir.
+  const _bulut = [];
+  function bulutResim(tur) {
+    if (_bulut[tur]) return _bulut[tur];
+    const N = 384, m = N / 2, c = document.createElement('canvas'); c.width = c.height = N; const x = c.getContext('2d');
+    let th = 31 + tur * 17; const rn = () => (th = (th * 16807) % 2147483647) / 2147483647;
+    const toplar = [], yay = [0.80, 0.66, 0.74][tur], say = [9, 7, 11][tur];
+    for (let i = 0; i < say; i++) {      // gövde: yatay bir eksen boyunca dizilmiş, ortada iri uçlarda küçük toplar
+      const t = say === 1 ? 0.5 : i / (say - 1), ort = 1 - Math.abs(t - 0.5) * 2;
+      toplar.push([m + (t - 0.5) * 2 * m * yay + (rn() - 0.5) * m * 0.08, m + m * 0.10 - ort * m * 0.10 + (rn() - 0.5) * m * 0.10, m * (0.13 + 0.17 * ort) * (0.85 + rn() * 0.3)]);
+    }
+    for (let i = 0; i < say - 3; i++) {  // üstteki kabarıklar
+      const t = (i + 1) / (say - 2);
+      toplar.push([m + (t - 0.5) * 2 * m * yay * 0.62 + (rn() - 0.5) * m * 0.1, m - m * (0.10 + rn() * 0.14), m * (0.12 + rn() * 0.09)]);
+    }
+    const bas = (renk, ek, dy) => { x.fillStyle = renk; x.beginPath(); for (const [px, py, r0] of toplar) { x.moveTo(px + r0 + ek, py + dy); x.arc(px, py + dy, r0 + ek, 0, 6.2832); } x.fill(); };
+    bas('rgba(150,176,204,0.9)', m * 0.016, m * 0.012);   // ince çerçeve
+    bas('#ffffff', 0, 0);
+    x.globalCompositeOperation = 'source-atop';           // gövdenin içinde kalan gölge ve parlaklık
+    const gr = x.createLinearGradient(0, m - m * 0.34, 0, m + m * 0.36); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(0.55, 'rgba(214,226,240,0)'); gr.addColorStop(1, 'rgba(160,184,212,0.75)');
+    x.fillStyle = gr; x.fillRect(0, 0, N, N);
+    x.fillStyle = 'rgba(190,208,228,0.45)';
+    for (const [px, py, r0] of toplar) { x.beginPath(); x.arc(px + r0 * 0.25, py + r0 * 0.42, r0 * 0.78, 0, 7); x.fill(); }
+    x.fillStyle = '#ffffff';
+    for (const [px, py, r0] of toplar) { x.beginPath(); x.arc(px - r0 * 0.14, py - r0 * 0.16, r0 * 0.74, 0, 7); x.fill(); }
+    x.globalCompositeOperation = 'source-over';
+    // gölge: aynı biçimin koyu, yumuşatılmış kopyası
+    const g2 = document.createElement('canvas'); g2.width = g2.height = N; const y2 = g2.getContext('2d');
+    y2.filter = 'blur(' + Math.round(N * 0.022) + 'px)'; y2.drawImage(c, 0, 0); y2.filter = 'none';
+    y2.globalCompositeOperation = 'source-in'; y2.fillStyle = 'rgba(6,24,48,1)'; y2.fillRect(0, 0, N, N);
+    return (_bulut[tur] = [mipZinciri(c), mipZinciri(g2)]);
   }
   function girdapResim() {
     if (_girdap) return _girdap;
@@ -629,34 +662,44 @@ window.Dunya = (() => {
   const hexRGB = h => { const n = parseInt((h || '#888888').slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
   const rgbDist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
   function siyasiRenk(hex) { const [r, gr, b] = hexRGB(hex), [mr, mg, mb, mw] = tema.mix; return `rgb(${Math.round(r * (1 - mw) + mr * mw)},${Math.round(gr * (1 - mw) + mg * mw)},${Math.round(b * (1 - mw) + mb * mw)})`; }
-  // komşu ülkelerin aynı/benzer renge düşmesini (ör. Türkiye–İran) otomatik engeller
+  // Devlet renkleri KALICIDIR: bir devlete (adına) bir kez renk verilir ve o devlet haritada kaldıkça rengi değişmez;
+  // yıl ilerledikçe yalnızca sınırları değişir. Yeni kurulan devlet, o an komşusu olan devletlerin renklerinden en uzak
+  // paleti rengini alır (ör. Türkiye–İran aynı renge düşmez). Eskiden renk, devletin o yılki listedeki sırasına bağlıydı;
+  // listeye bir devlet girip çıkınca bütün renkler kayıyor, harita her yıl yeniden boyanmış gibi görünüyordu.
+  const _devletRenk = new Map();   // devlet adı -> palet sırası
+  const adKarma = t => { let h = 7; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return h; };
   function renkAyir(list) {
-    const pal = tema.palet, palRgb = pal.map(hexRGB), atan = [];
-    for (let idx = 0; idx < list.length; idx++) {
-      const o = list[idx], k = o.k; if (!k || !k.bb) continue;
-      const [a0, a1, o0, o1] = k.bb;
-      const komsu = [];
-      for (const p of atan) {
-        const b = p.bb;
-        if (a1 + 1.8 < b[0] || a0 - 1.8 > b[1] || o1 + 1.8 < b[2] || o0 - 1.8 > b[3]) continue;
-        komsu.push(p._rgb);
+    const pal = tema.palet, palRgb = pal.map(hexRGB), ks = [];
+    for (const o of list) { const k = o.k; if (k && k.bb) ks.push(k); }
+    const komsuMu = (x, y) => !(x.bb[1] + 1.8 < y.bb[0] || x.bb[0] - 1.8 > y.bb[1] || x.bb[3] + 1.8 < y.bb[2] || x.bb[2] - 1.8 > y.bb[3]);
+    const ata = (k, i) => { k._r = pal[i]; k._rgb = palRgb[i]; k._ri = i; };
+    // komşuların renklerine en uzak palet rengi; eşitlikte devletin adından türeyen sıraya en yakın olan (hep aynı sonuç)
+    const enIyi = k => {
+      const komsu = []; for (const q of ks) if (q !== k && q._rgb && komsuMu(k, q)) komsu.push(q._rgb);
+      const bas = adKarma(k.n || '') % pal.length;
+      let bestI = bas, bestD = -1;
+      for (let j = 0; j < pal.length; j++) {
+        const i = (bas + j) % pal.length; let md = 999;
+        for (const c of komsu) { const d = rgbDist(palRgb[i], c); if (d < md) md = d; }
+        if (md >= 62) { if (bestD < 62) { bestI = i; bestD = md; } break; }   // adından gelen sıraya en yakın, yeterince farklı ilk renk
+        if (md > bestD) { bestD = md; bestI = i; }
       }
-      let hex = temaId === 'klasik' ? (k.r || pal[0]) : pal[(idx * 5 + (k.n ? k.n.charCodeAt(0) : 0)) % pal.length];
-      let rgb = hexRGB(hex);
-      if (komsu.some(c => rgbDist(rgb, c) < 62)) {
-        let bestI = 0, bestD = -1;
-        for (let i = 0; i < palRgb.length; i++) {
-          let md = 999;
-          for (const c of komsu) { const d = rgbDist(palRgb[i], c); if (d < md) md = d; }
-          if (md > bestD) { bestD = md; bestI = i; }
-        }
-        hex = pal[bestI]; rgb = palRgb[bestI];
-      }
-      k._r = hex; k._rgb = rgb;
-      atan.push(k);
+      return [bestI, bestD];
+    };
+    const yeni = [];
+    for (const k of ks) {
+      const i = k.n ? _devletRenk.get(k.n) : undefined;
+      if (i !== undefined && i < pal.length) ata(k, i); else { k._rgb = null; yeni.push(k); }
     }
+    // Rengi belli bir devletin rengine sonradan dokunulmaz (iki devlet ileride komşu olup benzer renge düşse bile):
+    // kullanıcı için rengin hiç değişmemesi, komşuların her zaman zıt renkte olmasından önemlidir. Sınır çizgisi ve ad zaten ayırır.
+    for (const k of yeni) { const [i] = enIyi(k); ata(k, i); if (k.n) _devletRenk.set(k.n, i); }
   }
   let katmanCv = null, tabanCv = null, tabanKey = '', dilimVer = 0;
+  // Harita yazıları sitenin kendi yazı tipleriyle çizilir (her cihazda aynı): kara ve deniz adları Literata, etiketler
+  // Atkinson Hyperlegible Next. Tuval yazı tipini kendiliğinden indirmediği için burada istenir; inince küre yeniden çizilir.
+  if (document.fonts && document.fonts.load) Promise.all(['600 12px Literata', '700 12px Literata', 'italic 600 12px Literata', 'italic 700 12px Literata', '600 12px Atkinson Hyperlegible Next', '700 12px Atkinson Hyperlegible Next', '800 12px Atkinson Hyperlegible Next']
+    .map(f => document.fonts.load(f).catch(() => null))).then(() => { tabanKey = ''; });
   // hareket hâlinde taban yarı çözünürlükte (TABAN_HAREKET) ayrı tuvale çizilir; kamera durunca tam çözünürlüğe döner
   let tabanKCv = null, sonKam = '';
   const TABAN_HAREKET = 0.5;
@@ -980,41 +1023,14 @@ window.Dunya = (() => {
     }
   }
   // olay simgeleri: çapraz kılıçlar (savaş), dalga, çatlak, alev, yanardağ, güneş (kuraklık), salgın, mühürlü belge (antlaşma)
-  function evIcon(e, x, y, s) {
-    const bg = { savas: '#a8322a', deniz: '#1f5f8f', afet: '#c9701e', antlasma: '#2f6fa8', olay: '#7a4fb0' }[e.tur] || '#555';
-    g.fillStyle = bg; g.strokeStyle = '#fff6dc'; g.lineWidth = 1.6; g.beginPath(); g.arc(x, y, s, 0, 7); g.fill(); g.stroke();
-    g.save(); g.translate(x, y); const k = s / 10; g.scale(k, k); g.lineCap = 'round'; g.lineJoin = 'round';
-    const W_ = '#fff6dc';
-    if (e.tur === 'savas') {
-      for (const sd of [-1, 1]) { g.save(); g.rotate(sd * 0.78); g.strokeStyle = W_; g.lineWidth = 2.2; g.beginPath(); g.moveTo(0, -7); g.lineTo(0, 4); g.stroke(); g.lineWidth = 2.6; g.beginPath(); g.moveTo(-3, 4); g.lineTo(3, 4); g.stroke(); g.lineWidth = 2; g.beginPath(); g.moveTo(0, 4); g.lineTo(0, 7.5); g.stroke(); g.restore(); }
-    } else if (e.tur === 'deniz') { // yelkenli gemi
-      g.fillStyle = W_; g.beginPath(); g.moveTo(-7, 3); g.lineTo(7, 3); g.lineTo(4.5, 6.5); g.lineTo(-4.5, 6.5); g.closePath(); g.fill();
-      g.strokeStyle = W_; g.lineWidth = 1.6; g.beginPath(); g.moveTo(0, 3); g.lineTo(0, -8); g.stroke();
-      g.beginPath(); g.moveTo(1, -7.5); g.lineTo(6.5, 1.5); g.lineTo(1, 1.5); g.closePath(); g.fill(); g.beginPath(); g.moveTo(-1, -5.5); g.lineTo(-5.5, 1.5); g.lineTo(-1, 1.5); g.closePath(); g.fill();
-    } else if (e.tur === 'olay') {
-      g.fillStyle = W_; g.fillRect(-6, 4, 12, 2.4); g.fillRect(-6, -6, 12, 2.2);
-      for (let i = 0; i < 3; i++) g.fillRect(-5 + i * 4, -4, 2, 8);
-      g.beginPath(); g.moveTo(-7, -6); g.lineTo(0, -9.5); g.lineTo(7, -6); g.closePath(); g.fill();
-    } else if (e.tur === 'antlasma') {
-      g.fillStyle = W_; g.fillRect(-5, -6, 10, 12); g.strokeStyle = bg; g.lineWidth = 1.2; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(-3, -3 + i * 3); g.lineTo(3, -3 + i * 3); g.stroke(); }
-      g.fillStyle = '#d9473a'; g.beginPath(); g.arc(3, 5, 2.6, 0, 7); g.fill();
-    } else {
-      g.strokeStyle = W_; g.fillStyle = W_; g.lineWidth = 2;
-      switch (e.alt) {
-        case 'deprem': g.beginPath(); g.moveTo(-1, -7); g.lineTo(2, -2); g.lineTo(-2, 1); g.lineTo(2, 4); g.lineTo(0, 7); g.stroke(); g.beginPath(); g.moveTo(-7, 6); g.lineTo(7, 6); g.stroke(); break;
-        case 'tsunami': case 'sel': g.beginPath(); g.moveTo(-7, 3); g.quadraticCurveTo(-4, -6, 2, -5); g.quadraticCurveTo(6, -4, 4, 0); g.quadraticCurveTo(1, 0, 2, 3); g.stroke(); g.beginPath(); g.moveTo(-7, 6); g.quadraticCurveTo(0, 3, 7, 6); g.stroke(); break;
-        case 'yangin': g.beginPath(); g.moveTo(0, 7); g.quadraticCurveTo(-7, 3, -2, -7); g.quadraticCurveTo(-1, -2, 2, -3); g.quadraticCurveTo(7, 2, 0, 7); g.fill(); break;
-        case 'yanardag': g.beginPath(); g.moveTo(-7, 6); g.lineTo(-2, -2); g.lineTo(2, -2); g.lineTo(7, 6); g.closePath(); g.fill(); g.fillStyle = '#ffd666'; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(-2 + i * 2, -5 - i % 2 * 2, 1.4, 0, 7); g.fill(); } break;
-        case 'kuraklik': g.beginPath(); g.arc(0, -1, 3.2, 0, 7); g.fill(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.beginPath(); g.moveTo(Math.cos(a) * 4.6, -1 + Math.sin(a) * 4.6); g.lineTo(Math.cos(a) * 6.6, -1 + Math.sin(a) * 6.6); g.stroke(); } break;
-        case 'salgin': g.beginPath(); g.arc(0, 0, 3.5, 0, 7); g.fill(); for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; g.beginPath(); g.moveTo(Math.cos(a) * 3.5, Math.sin(a) * 3.5); g.lineTo(Math.cos(a) * 6.5, Math.sin(a) * 6.5); g.stroke(); g.beginPath(); g.arc(Math.cos(a) * 6.8, Math.sin(a) * 6.8, 1.2, 0, 7); g.fill(); } break;
-        default: g.beginPath(); g.arc(0, 0, 4, 0, 7); g.fill();
-      }
-    }
-    g.restore();
-  }
+  // Olay işaretleri: arka plansız, sitenin Noto resimleriyle (savaş, deniz savaşı, antlaşma, olay ve afet türleri)
+  const EV_SIMGE = { savas: '⚔️', deniz: '⛵', antlasma: '📜', olay: '🏛️' };
+  const AFET_SIMGE = { deprem: '🏚️', tsunami: '🌊', sel: '🌊', yangin: '🔥', yanardag: '🌋', kuraklik: '☀️', salgin: '🦠' };
+  function evIcon(e, x, y, s) { simge(EV_SIMGE[e.tur] || AFET_SIMGE[e.alt] || '⚠️', x, y, s * 1.05); }
+
   function star(x, y, r) { g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } g.closePath(); }
   function text(x, y, t, o = {}) {
-    g.font = `${o.it ? 'italic ' : ''}${o.w || 600} ${o.size || 12}px ${o.serif ? 'Georgia, serif' : 'system-ui, sans-serif'}`;
+    g.font = `${o.it ? 'italic ' : ''}${o.w || 600} ${o.size || 12}px ${o.serif ? 'Literata, Georgia, serif' : 'Atkinson Hyperlegible Next, system-ui, sans-serif'}`;
     g.textAlign = o.align || 'center'; g.textBaseline = 'middle';
     if (o.ls) { try { g.letterSpacing = o.ls + 'px'; } catch (e) { /* eski tarayıcı */ } }
     g.lineWidth = o.halo ?? 3; g.strokeStyle = o.haloCol || 'rgba(20,14,8,0.75)'; g.lineJoin = 'round';
@@ -1069,7 +1085,7 @@ window.Dunya = (() => {
     const placed = [], ga = g.globalAlpha;
     for (const L of LQ) {
       const o = L.o, sz = o.size || 12;
-      g.font = `${o.it ? 'italic ' : ''}${o.w || 600} ${sz}px ${o.serif ? 'Georgia, serif' : 'system-ui, sans-serif'}`;
+      g.font = `${o.it ? 'italic ' : ''}${o.w || 600} ${sz}px ${o.serif ? 'Literata, Georgia, serif' : 'Atkinson Hyperlegible Next, system-ui, sans-serif'}`;
       const tw = g.measureText(L.t).width + (o.ls || 0) * L.t.length, pad = 3;
       const al = o.align || 'center', x0 = al === 'left' ? L.x : al === 'right' ? L.x - tw : L.x - tw / 2;
       // bilgi düğmesi (ⓘ) de yazının kutusuna dahil: yanındaki yazıyla çakışmasın
@@ -1087,7 +1103,7 @@ window.Dunya = (() => {
       if (o.bilgi) { // devlet adının yanında bilgi düğmesi
         const bx = x0 + tw + 11, by = L.y, br = Math.max(6, sz * 0.55);
         g.fillStyle = 'rgba(255,250,240,0.92)'; g.strokeStyle = 'rgba(80,40,15,0.75)'; g.lineWidth = 1.4; g.beginPath(); g.arc(bx, by, br, 0, 7); g.fill(); g.stroke();
-        g.fillStyle = '#6a3a14'; g.font = `700 ${Math.round(br * 1.45)}px Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('i', bx, by + 0.5); g.textBaseline = 'alphabetic';
+        g.fillStyle = '#6a3a14'; g.font = `700 ${Math.round(br * 1.45)}px Literata, Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('i', bx, by + 0.5); g.textBaseline = 'alphabetic';
         hits.push({ kind: 'devlet', k: o.bilgi, x0: bx - br - 3, x1: bx + br + 3, y0: by - br - 3, y1: by + br + 3 });
       }
     }
@@ -1206,7 +1222,18 @@ window.Dunya = (() => {
       g.restore();
     }
     // bulutlar (uzaktan)
-    if (view.z < 3.5) { const ca = 1 - clamp((view.z - 2) / 1.5, 0, 1); for (const b of BULUT) { b.lo += dt * 1.5; const [x, y, z] = P(b.la, b.lo); if (z <= 0.1) continue; g.fillStyle = `rgba(255,255,255,${b.a * ca * z})`; g.beginPath(); g.ellipse(x, y, b.r * r / 100 * 3, b.r * r / 100 * 1.2 * z, 0, 0, 7); g.fill(); } }
+    // Bulutlar: yalnızca dünyaya çok uzaktan bakarken görünür (yaklaştıkça sönüp kaybolur); her biri önce yere düşen
+    // gölgesiyle, sonra pofuduk bulut resmiyle çizilir ve yavaşça doğuya sürüklenir.
+    if (view.z < 1.6) {
+      const ca = 1 - clamp((view.z - 1.12) / 0.48, 0, 1);
+      for (const b of BULUT) {
+        b.lo += dt * 1.5; const [x, y, z] = P(b.la, b.lo); if (z <= 0.18) continue;
+        const [bulut, golge] = bulutResim(b.tur), en = b.r * r / 100 * 5.0, boy = en * (0.55 + 0.45 * z), a = ca * Math.min(1, (z - 0.18) * 2.2);
+        g.globalAlpha = 0.5 * a; g.drawImage(mipSec(golge, en), x - en / 2 + en * 0.05, y - boy / 2 + en * 0.07, en, boy);
+        g.globalAlpha = 0.94 * a; g.drawImage(mipSec(bulut, en), x - en / 2, y - boy / 2, en, boy);
+      }
+      g.globalAlpha = 1;
+    }
     // ---- Mısır katmanı ----
     hits.length = 0;
     if (ez > 0) {
@@ -1284,7 +1311,7 @@ window.Dunya = (() => {
             const bx = px + si + 3, by = py - si - 1;
             g.fillStyle = '#c97b16'; g.strokeStyle = '#fff6dc'; g.lineWidth = 1.4;
             g.beginPath(); g.arc(bx, by, 7.2, 0, 7); g.fill(); g.stroke();
-            g.fillStyle = '#fffaf0'; g.font = '800 8.5px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
+            g.fillStyle = '#fffaf0'; g.font = '800 8.5px Atkinson Hyperlegible Next, system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
             g.fillText(`+${kids.length}`, bx, by + 0.4); g.textBaseline = 'alphabetic';
           }
           g.globalAlpha = ez;
@@ -1338,7 +1365,9 @@ window.Dunya = (() => {
         g.fillStyle = t.renk; g.strokeStyle = hov ? '#ffd666' : '#fff6dc'; g.lineWidth = hov ? 2.4 : 1.4;
         g.beginPath(); g.roundRect(x - s, y - s, s * 2, s * 2, 3); g.fill(); g.stroke();
         const sem = t.sem || '?'; g.fillStyle = t.yazi; g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.font = `800 ${Math.round(s * (sem.length > 2 ? 0.62 : 0.95))}px system-ui`; g.fillText(sem, x, y + 0.5);
+        // simge emojiyse (petrol, elmas) sitenin kendi resmiyle, element yazısıysa (Au, Fe…) yazı olarak çizilir
+        if (YZ_EMO.test(sem) && window.SIMGE_DIZIN && simgeSayfa() && simgeHucreleri(sem, window.SIMGE_DIZIN)) simge(sem, x, y, s * 0.6);
+        else { g.font = `800 ${Math.round(s * (sem.length > 2 ? 0.62 : 0.95))}px Atkinson Hyperlegible Next, system-ui`; g.fillText(sem, x, y + 0.5); }
         if (view.z >= 3.2 || hov) lab(hov ? 97 : 52, x, y + s + 10, k.ad.replace(/ \(.*\)$/, ''), { size: 10, w: 600, col: '#ffe7a3', halo: 2.6, haloCol: 'rgba(24,16,8,0.88)', kay: true });
         g.globalAlpha = 1;
         hits.push({ kind: 'kaynak', k, x0: x - s - 3, x1: x + s + 3, y0: y - s - 3, y1: y + s + 3 });
@@ -1368,7 +1397,7 @@ window.Dunya = (() => {
       if (pz > 0.05) { g.fillStyle = '#fff3e0'; g.strokeStyle = '#d4522a'; g.lineWidth = 2; g.beginPath(); g.arc(px, py, 4, 0, 7); g.fill(); g.stroke(); }
       const [mx, my, mz] = P(...yolNokta(d, d.L / 2));
       if (mz > 0.1) {
-        const lb = '⏱ ' + j.sure.split(' (')[0].split(';')[0]; g.font = '700 11px system-ui'; const w = g.measureText(lb).width + 14;
+        const lb = '⏱ ' + j.sure.split(' (')[0].split(';')[0]; g.font = '700 11px Atkinson Hyperlegible Next, system-ui'; const w = g.measureText(lb).width + 14;
         g.fillStyle = hov ? '#ffd666' : 'rgba(58,26,12,0.9)'; g.strokeStyle = '#ff8c5a'; g.lineWidth = 1.2; g.beginPath(); g.roundRect(mx - w / 2, my - 10, w, 20, 10); g.fill(); g.stroke();
         g.fillStyle = hov ? '#2a1d10' : '#ffe7d6'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(lb, mx, my + 0.5);
         hits.push({ kind: 'yolculuk', j, x0: mx - w / 2, x1: mx + w / 2, y0: my - 10, y1: my + 10 });
@@ -1408,7 +1437,7 @@ window.Dunya = (() => {
         const [x, y, z] = P(...m.ll); if (z <= 0.1) continue;
         const hov = hover && hover.kind === 'tarim' && hover.m === m;
         g.globalAlpha = 1; g.fillStyle = 'rgba(250,236,170,0.95)'; g.strokeStyle = '#7a5a14'; g.lineWidth = 1.5;
-        g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge('🌾', x, y, hov ? 11.5 : 9.5); g.textBaseline = 'alphabetic';
+        g.font = `${hov ? 13 : 11}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge('🌾', x, y, hov ? 11.5 : 9.5); g.textBaseline = 'alphabetic';
         if (view.z >= 1.9 || hov) text(x, y + 20, m.ad, { size: 11, w: 700, col: '#5a4010', halo: 3, haloCol: 'rgba(255,248,225,0.9)', serif: true });
         hits.unshift({ kind: 'tarim', m, x0: x - 12, x1: x + 12, y0: y - 12, y1: y + 12 }); g.globalAlpha = 1;
       }
@@ -1578,7 +1607,7 @@ window.Dunya = (() => {
           shownKz.push([x, y]);
           const hov = hover && hover.kind === kind && hover.kz === kz, s0 = hov ? 12.5 : 10;
           g.fillStyle = bg; g.strokeStyle = hov ? '#ffd666' : border; g.lineWidth = hov ? 2.4 : 1.6;
-          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 13 : 11}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(kz.ik || (kind === 'fosilkazi' ? '🦴' : '🏺'), x, y, s0); g.textBaseline = 'alphabetic';
           obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
           if (view.z >= 1.55 || hov) lab(hov ? 97 : 58, x, y + s0 + 10, kz.ad.split(' (')[0], { size: 10.5, w: 700, col: kind === 'fosilkazi' ? '#fef08a' : '#ffe8c2', halo: 3, haloCol: 'rgba(24,14,8,0.88)', kay: true });
@@ -1675,7 +1704,7 @@ window.Dunya = (() => {
           const [x, y, z] = P(...n.ll); if (z <= 0.12 || x < -20 || x > W + 20 || y < -20 || y > H + 20) continue;
           const hov = hover && hover.kind === 'iklim' && hover.n === n, r0 = hov ? 12 : 9.5;
           g.fillStyle = hexA(b.renk, 0.92); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.4 : 1.5;
-          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 13 : 11}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(b.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = n.ad.split(' (')[0];
           if (view.z >= 1.3 || hov) { lab(hov ? 97 : 56, x, y + r0 + 10, lbl, { size: 10, w: 700, col: '#fef9c3', halo: 3, haloCol: 'rgba(12,18,28,0.88)', kay: true }); labHit({ kind: 'iklim', n, b }, x, y + r0 + 10, lbl); }
@@ -1706,7 +1735,7 @@ window.Dunya = (() => {
           const bg = t.tur === 'cukur' ? 'rgba(15,23,66,0.94)' : t.tur === 'resif' ? 'rgba(190,24,93,0.9)' : 'rgba(124,45,18,0.92)';
           const bd = t.tur === 'cukur' ? '#60a5fa' : t.tur === 'resif' ? '#fbcfe8' : '#fdba74';
           g.fillStyle = bg; g.strokeStyle = hov ? '#fde047' : bd; g.lineWidth = hov ? 2.4 : 1.7;
-          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 13 : 11}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(t.ik, x, y, r0); g.textBaseline = 'alphabetic';
           obstacle(x - r0 - 2, y - r0 - 2, x + r0 + 2, y + r0 + 2);
           const lbl = t.ad.split(' (')[0];
@@ -1741,7 +1770,7 @@ window.Dunya = (() => {
           const hov = hover && hover.kind === 'kutup' && hover.k === k, r0 = hov ? 12.5 : 10;
           const bg = k.tur === 'aurora' ? 'rgba(16,185,129,0.88)' : k.tur === 'buzul' ? 'rgba(30,64,175,0.88)' : 'rgba(120,80,35,0.92)';
           g.fillStyle = bg; g.strokeStyle = hov ? '#fde047' : '#e0f2fe'; g.lineWidth = hov ? 2.4 : 1.7;
-          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 13 : 11}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(k.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = k.ad.split(' (')[0];
           if (view.z >= 1.2 || hov) { lab(hov ? 97 : 59, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(8,16,32,0.9)', kay: true }); labHit({ kind: 'kutup', k }, x, y + r0 + 10, lbl); }
@@ -1760,7 +1789,7 @@ window.Dunya = (() => {
           g.setLineDash([3, 3]); g.beginPath(); g.arc(x, y, (r0 + 9) * pulse, 0, 7); g.stroke();
           g.restore();
           g.fillStyle = 'rgba(124,45,18,0.92)'; g.strokeStyle = hov ? '#fde047' : '#fdba74'; g.lineWidth = hov ? 2.4 : 1.6;
-          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 13 : 11}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge('☄️', x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = kr.ad.split(' (')[0];
           if (view.z >= 1.3 || hov) { lab(hov ? 97 : 58, x, y + r0 + 12, lbl, { size: 10.2, w: 700, col: '#fed7aa', halo: 3, haloCol: 'rgba(24,10,6,0.9)', kay: true }); labHit({ kind: 'krater', kr }, x, y + r0 + 12, lbl); }
@@ -1774,7 +1803,7 @@ window.Dunya = (() => {
           const hov = hover && hover.kind === 'gol' && hover.gl === gl, r0 = hov ? 12 : 9.5;
           g.fillStyle = gl.tur === 'selale' ? 'rgba(6,182,212,0.92)' : 'rgba(29,78,216,0.92)';
           g.strokeStyle = hov ? '#fde047' : '#bae6fd'; g.lineWidth = hov ? 2.4 : 1.6;
-          g.font = `${hov ? 13 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 13 : 11}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(gl.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = gl.ad.split(' (')[0];
           if (view.z >= 1.35 || hov) { lab(hov ? 97 : 57, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(8,20,42,0.9)', kay: true }); labHit({ kind: 'gol', gl }, x, y + r0 + 10, lbl); }
@@ -1795,7 +1824,7 @@ window.Dunya = (() => {
           const dtLoc = new Date(nowMs + s.utc * 3600000);
           const hh = String(dtLoc.getUTCHours()).padStart(2, '0'), mm = String(dtLoc.getUTCMinutes()).padStart(2, '0');
           const txt = `${s.ad} ${hh}:${mm}`;
-          g.save(); g.font = '700 10.5px system-ui';
+          g.save(); g.font = '700 10.5px Atkinson Hyperlegible Next, system-ui';
           const tw = g.measureText(txt).width + 12, th = 19;
           g.fillStyle = 'rgba(15,23,42,0.88)'; g.strokeStyle = '#fbbf24'; g.lineWidth = 1.2;
           g.beginPath(); g.roundRect(x - tw / 2, y - th / 2, tw, th, 6); g.fill(); g.stroke();
@@ -1828,7 +1857,7 @@ window.Dunya = (() => {
           }
           const r0 = hov ? 13 : 10.5;
           g.fillStyle = hexA(col, 0.92); g.strokeStyle = hov ? '#fff' : '#e0f2fe'; g.lineWidth = hov ? 2.4 : 1.7;
-          g.font = `${hov ? 13.5 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 13.5 : 11.5}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(mn.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = mn.ad.split(' (')[0];
           if (view.z >= 1.1 || hov) { lab(hov ? 98 : 62, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: '#f0f9ff', halo: 3, haloCol: 'rgba(10,16,32,0.9)', kay: true }); labHit({ kind: 'manyetik', mn }, x, y + r0 + 11, lbl); }
@@ -1847,7 +1876,7 @@ window.Dunya = (() => {
           hits.unshift({ kind: 'tarimvav', tr, x0: x - haloR * 0.85, x1: x + haloR * 0.85, y0: y - haloR * 0.85, y1: y + haloR * 0.85 });
           const r0 = hov ? 13 : 10.5;
           g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.5 : 1.8;
-          g.font = `${hov ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 14 : 11.5}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(tr.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = tr.ad.split(' (')[0];
           if (view.z >= 1.15 || hov) { lab(hov ? 98 : 63, x, y + r0 + 11, lbl, { size: 10.5, w: 700, col: '#fefce8', halo: 3.2, haloCol: 'rgba(18,14,6,0.9)', kay: true }); labHit({ kind: 'tarimvav', tr }, x, y + r0 + 11, lbl); }
@@ -1878,7 +1907,7 @@ window.Dunya = (() => {
           const r0 = hov ? 13 : 10.5;
           g.save(); if (dim) g.globalAlpha = 0.45;
           g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fef3c7'; g.lineWidth = hov ? 2.5 : 1.7;
-          g.font = `${hov ? 13.5 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 13.5 : 11}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(yz.ik, x, y, r0); g.textBaseline = 'alphabetic'; g.restore();
           const lbl = yz.ad.split(' (')[0];
           if (view.z >= 1.25 || hov) { lab(hov ? 97 : 60, x, y + r0 + 10, lbl, { size: 10.2, w: 700, col: '#fef3c7', halo: 3, haloCol: 'rgba(20,12,6,0.9)', kay: true }); const hw = lbl.length * 3.4 + 6; hits.push({ kind: 'yazi', yz, x0: x - hw, x1: x + hw, y0: y + r0 - 1, y1: y + r0 + 14 }); }
@@ -1905,7 +1934,7 @@ window.Dunya = (() => {
           const r0 = hov ? 13.5 : 11;
           g.save(); if (dim) g.globalAlpha = 0.48;
           g.fillStyle = hexA(col, 0.95); g.strokeStyle = hov ? '#fff' : '#fef9c3'; g.lineWidth = hov ? 2.6 : 1.8;
-          g.font = `${hov ? 14 : 12}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 14 : 12}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(dn.ik, x, y, r0); g.textBaseline = 'alphabetic'; g.restore();
           if (view.z >= 1.05 || hov) {
             const ly = dn.id === 'yahudilik' ? y + r0 + 12 : dn.id === 'hristiyanlik' ? y - r0 - 7 : y + r0 + 11;
@@ -1958,7 +1987,7 @@ window.Dunya = (() => {
           g.strokeStyle = hexA(col, 0.55); g.lineWidth = 1.6;
           g.beginPath(); g.arc(x, y, (r0 + 5) * pulse, 0, 7); g.stroke();
           g.fillStyle = hexA(col, 0.94); g.strokeStyle = hov ? '#fff' : '#fecdd3'; g.lineWidth = hov ? 2.5 : 1.7;
-          g.font = `${hov ? 13.5 : 11}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 13.5 : 11}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(sg.ik, x, y, r0); g.textBaseline = 'alphabetic'; g.restore();
           const lbl = sg.ad.split(' (')[0];
           if (view.z >= 1.25 || hov) { lab(hov ? 97 : 60, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: '#ffe4e6', halo: 3, haloCol: 'rgba(28,6,14,0.9)', kay: true }); const hw = lbl.length * 3.4 + 6; hits.push({ kind: 'salgin', sg, x0: x - hw, x1: x + hw, y0: y + r0, y1: y + r0 + 15 }); }
@@ -1972,7 +2001,7 @@ window.Dunya = (() => {
           const hov = hover && hover.kind === 'bogaz' && hover.bg === bg, r0 = hov ? 12 : 9.5;
           g.fillStyle = bg.tur === 'gecit' ? 'rgba(146,64,14,0.92)' : 'rgba(15,44,89,0.92)';
           g.strokeStyle = hov ? '#fde047' : (bg.tur === 'gecit' ? '#fcd34d' : '#7dd3fc'); g.lineWidth = hov ? 2.4 : 1.7;
-          g.font = `${hov ? 12.5 : 10.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 12.5 : 10.5}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(bg.ik, x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = bg.ad.split(' (')[0];
           if (view.z >= 1.4 || hov) { lab(hov ? 97 : 58, x, y + r0 + 11, lbl, { size: 10.2, w: 700, col: '#e0f2fe', halo: 3, haloCol: 'rgba(10,18,34,0.9)', kay: true }); const hw = lbl.length * 3.4 + 6; hits.push({ kind: 'bogaz', bg, x0: x - hw, x1: x + hw, y0: y + r0, y1: y + r0 + 15 }); }
@@ -1993,7 +2022,7 @@ window.Dunya = (() => {
           }
           g.fillStyle = kral ? 'rgba(202,138,4,0.96)' : 'rgba(51,65,85,0.90)';
           g.strokeStyle = kral ? '#fef08a' : (hov ? '#fde047' : '#cbd5e1'); g.lineWidth = kral ? 2.6 : (hov ? 2.2 : 1.5);
-          g.font = `${kral ? 14 : (hov ? 13 : 10.5)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${kral ? 14 : (hov ? 13 : 10.5)}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(kral ? '👑' : mk.ik, x, y, kral ? r0 * 1.15 : r0); g.textBaseline = 'alphabetic';
           if (kral || view.z >= 1.35 || hov) {
             const lbl = (kral ? '👑 ' : '') + mk.ad.split(' (')[0];
@@ -2015,7 +2044,7 @@ window.Dunya = (() => {
           shownK.push([x, y]);
           const hov = hover && hover.kind === kind && hover.it === it, r0 = hov ? 13 : 10.5;
           g.fillStyle = bg; g.strokeStyle = hov ? '#ffffff' : bd; g.lineWidth = hov ? 2.5 : 1.7;
-          g.font = `${hov ? 13.5 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov ? 13.5 : 11.5}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(it.ik || '✨', x, y, r0); g.textBaseline = 'alphabetic';
           const lbl = it.ad.split(' (')[0];
           if (view.z >= zLbl || hov) {
@@ -2044,7 +2073,7 @@ window.Dunya = (() => {
         const [ik, bg] = CG_STIL[cg.tur] || ['📍', '#5a4a3a'];
         const hov = hover && hover.kind === 'cografya' && hover.cg === cg, s0 = hov ? 12.5 : (uzak ? 8.5 : 10);
         g.fillStyle = bg; g.strokeStyle = hov ? '#ffd666' : (cg.tur === 'harika' ? '#ffe08a' : '#fff6dc'); g.lineWidth = hov ? 2.2 : 1.5;
-        g.font = `${hov ? 13 : (uzak ? 9.5 : 11)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge(ik, x, y, s0); g.textBaseline = 'alphabetic';
+        g.font = `${hov ? 13 : (uzak ? 9.5 : 11)}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge(ik, x, y, s0); g.textBaseline = 'alphabetic';
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         const kisaYuk = cg.yukseklik ? cg.yukseklik.split(' (')[0].split(' ·')[0] : '';
         const lbl = cg.tur === 'dag' && kisaYuk && (view.z >= 2.1 || hov) ? `${cg.ad.split(' (')[0]} · ${kisaYuk}` : cg.ad.split(' (')[0];
@@ -2208,7 +2237,7 @@ window.Dunya = (() => {
         const s0 = hov ? 12 : 9.5;
         g.save();
         g.fillStyle = hov ? '#1d4ed8' : '#163457'; g.strokeStyle = hov ? '#ffd666' : '#f3d58d'; g.lineWidth = hov ? 2.2 : 1.5;
-        g.font = `${hov ? 13 : 10.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `${hov ? 13 : 10.5}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
         simge('⚓', x, y, s0);
         g.restore();
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
@@ -2230,7 +2259,7 @@ window.Dunya = (() => {
         const k = (T / 6) % 1, [px, py, pz] = P(...yolNokta(d, d.L * k));
         if (pz > 0.08) {
           g.fillStyle = 'rgba(42,24,10,0.92)'; g.strokeStyle = '#ffd666'; g.lineWidth = 1.8;
-          g.font = '13px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = '13px Atkinson Hyperlegible Next, system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(rotaItem.ik, px, py, 12);
         }
         g.restore();
@@ -2246,7 +2275,7 @@ window.Dunya = (() => {
           const s0 = hov || akt ? 12.5 : 10;
           g.save();
           g.fillStyle = akt ? '#ffd666' : '#fff6dc'; g.strokeStyle = hov || akt ? '#b45309' : '#92400e'; g.lineWidth = hov || akt ? 2.4 : 1.6;
-          g.font = `${hov || akt ? 14 : 11.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.font = `${hov || akt ? 14 : 11.5}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
           simge(yy.ik, x, y, s0);
           g.restore();
           obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
@@ -2273,87 +2302,14 @@ window.Dunya = (() => {
         shownV.push([x, y]);
         const hov = hover && hover.kind === 'volkan' && hover.v === v;
         const s0 = hov ? 13 : 10.5, aktif = !/uyuyan|sönmüş/i.test(v.durum || '');
-        const b = y + s0 * 0.65, tepe = y - s0 * 0.58, kr = s0 * 0.25;
-        g.save();
-        // Zemin gölgesi
-        g.fillStyle = 'rgba(20,12,8,0.32)';
-        g.beginPath(); g.ellipse(x, b + 1.2, s0 * 1.15, s0 * 0.28, 0, 0, 7); g.fill();
-        if (aktif) {
-          // 🔥 Aktif Yanardağ: düz kraterli koyu bazalt koni + lav akıntısı + patlama kıvılcımları ve yükselen kül bulutu
-          g.beginPath();
-          g.moveTo(x - s0 * 1.05, b);
-          g.quadraticCurveTo(x - s0 * 0.42, y + s0 * 0.12, x - kr, tepe);
-          g.lineTo(x + kr, tepe);
-          g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.12, x + s0 * 1.05, b);
-          g.closePath();
-          g.fillStyle = '#624d44'; g.fill();
-          // Gölgede kalan sağ yamaç
-          g.beginPath();
-          g.moveTo(x + s0 * 0.04, tepe); g.lineTo(x + kr, tepe);
-          g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.12, x + s0 * 1.05, b);
-          g.lineTo(x - s0 * 0.08, b); g.quadraticCurveTo(x + s0 * 0.12, y + s0 * 0.1, x + s0 * 0.04, tepe);
-          g.closePath();
-          g.fillStyle = '#382a24'; g.fill();
-          // Yamaçtan sızan ince lav damarı
-          g.strokeStyle = 'rgba(249,115,22,0.85)'; g.lineWidth = 1.4; g.lineCap = 'round';
-          g.beginPath(); g.moveTo(x - kr * 0.2, tepe + 1); g.quadraticCurveTo(x - s0 * 0.18, y - s0 * 0.1, x - s0 * 0.34, y + s0 * 0.18); g.stroke();
-          // Dış kontur
-          g.beginPath();
-          g.moveTo(x - s0 * 1.05, b); g.quadraticCurveTo(x - s0 * 0.42, y + s0 * 0.12, x - kr, tepe);
-          g.lineTo(x + kr, tepe); g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.12, x + s0 * 1.05, b);
-          g.closePath();
-          g.strokeStyle = hov ? '#ffd666' : '#261a14'; g.lineWidth = hov ? 1.8 : 1.1; g.stroke();
-          // Krater lavı + patlama kıvılcımları + yükselen kül bulutçukları
-          const fl = 0.8 + 0.25 * Math.sin(T * 7 + v.ll[1]);
-          g.fillStyle = '#ea580c'; g.beginPath(); g.ellipse(x, tepe, kr * 1.05, kr * 0.45, 0, 0, 7); g.fill();
-          g.fillStyle = '#fde047'; g.beginPath(); g.ellipse(x, tepe, kr * 0.58 * fl, kr * 0.24 * fl, 0, 0, 7); g.fill();
-          for (let k = 0; k < 3; k++) {
-            const ph = (T * 0.65 + k * 0.33 + (v.ll[1] * 0.02)) % 1;
-            const px = x + Math.sin(ph * 5 + k * 2) * 3.2 + (k - 1) * ph * 4;
-            const py = tepe - 2 - ph * (s0 * 1.15);
-            if (ph < 0.45) {
-              g.fillStyle = `rgba(255,140,30,${(1 - ph * 1.8).toFixed(2)})`;
-              g.beginPath(); g.arc(px, py, 1.5, 0, 7); g.fill();
-            }
-            g.fillStyle = `rgba(215,205,198,${(0.55 * (1 - ph)).toFixed(2)})`;
-            g.beginPath(); g.arc(px + ph * 2.5, py - 2, 1.8 + ph * 3.6, 0, 7); g.fill();
-          }
-        } else {
-          // 🏔️ Uyuyan / Sönmüş Dağ: sakin, sivri karlı dağ zirvesi (patlama/lav yok!)
-          const zirve = y - s0 * 0.72;
-          g.beginPath();
-          g.moveTo(x - s0 * 1.05, b);
-          g.quadraticCurveTo(x - s0 * 0.42, y + s0 * 0.08, x, zirve);
-          g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.08, x + s0 * 1.05, b);
-          g.closePath();
-          g.fillStyle = '#75665c'; g.fill();
-          // Gölge yamaç
-          g.beginPath();
-          g.moveTo(x, zirve);
-          g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.08, x + s0 * 1.05, b);
-          g.lineTo(x - s0 * 0.06, b);
-          g.quadraticCurveTo(x + s0 * 0.1, y + s0 * 0.05, x, zirve);
-          g.closePath();
-          g.fillStyle = '#4a3f39'; g.fill();
-          // Karlı zirve örtüsü
-          g.beginPath();
-          g.moveTo(x - s0 * 0.44, y - s0 * 0.05);
-          g.quadraticCurveTo(x - s0 * 0.22, y - s0 * 0.35, x, zirve);
-          g.quadraticCurveTo(x + s0 * 0.22, y - s0 * 0.35, x + s0 * 0.44, y - s0 * 0.05);
-          g.lineTo(x + s0 * 0.16, y - s0 * 0.16);
-          g.lineTo(x, y - s0 * 0.02);
-          g.lineTo(x - s0 * 0.18, y - s0 * 0.16);
-          g.closePath();
-          g.fillStyle = 'rgba(248,250,255,0.92)'; g.fill();
-          // Dış kontur
-          g.beginPath();
-          g.moveTo(x - s0 * 1.05, b);
-          g.quadraticCurveTo(x - s0 * 0.42, y + s0 * 0.08, x, zirve);
-          g.quadraticCurveTo(x + s0 * 0.42, y + s0 * 0.08, x + s0 * 1.05, b);
-          g.closePath();
-          g.strokeStyle = hov ? '#ffd666' : '#2e241e'; g.lineWidth = hov ? 1.8 : 1.1; g.stroke();
+        // Yanardağ artık sitenin Noto resmiyle çizilir: etkin olanlar yanardağ simgesi ve kraterden yükselen kül
+        // bulutçuklarıyla, uyuyan ya da sönmüş olanlar sakin karlı dağ simgesiyle.
+        simge(aktif ? '🌋' : '🗻', x, y, s0 * 1.05);
+        if (aktif) for (let k = 0; k < 3; k++) {
+          const ph = (((T * 0.5 + k * 0.33 + v.ll[1] * 0.02) % 1) + 1) % 1;
+          g.fillStyle = `rgba(228,221,214,${(0.5 * (1 - ph)).toFixed(2)})`;
+          g.beginPath(); g.arc(x + Math.sin(ph * 5 + k * 2) * 2.4 + ph * 3, y - s0 * 0.95 - ph * s0, 1.6 + ph * 3.2, 0, 7); g.fill();
         }
-        g.restore();
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         if (view.z >= 1.55 || hov) lab(hov ? 97 : 61, x, y + s0 + 9, v.ad.split(' (')[0], { size: 10.2, w: 700, col: '#ffedd5', halo: 2.8, haloCol: 'rgba(42,14,10,0.9)', kay: true });
         hits.push({ kind: 'volkan', v, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
@@ -2372,11 +2328,11 @@ window.Dunya = (() => {
         if (shownH.some(q => Math.abs(q[0] - x) < minD && Math.abs(q[1] - y) < minD)) continue;
         shownH.push([x, y]);
         const hov = hover && hover.kind === 'hayvan' && hover.h === h;
-        const s0 = hov ? 13 : 10.5, den = h.kita === 'Okyanus';
+        const buy = clamp(10.5 + (view.z - 1.55) * 1.5, 10.5, 15), s0 = hov ? buy + 2 : buy, den = h.kita === 'Okyanus';   // yaklaştıkça büyür
         g.fillStyle = tuk ? '#fff0cc' : den ? '#e4f5ff' : '#fbf6e8';
         g.strokeStyle = hov ? '#ffd666' : tuk ? '#c87018' : den ? '#2b88c4' : '#3d8a4e';
         g.lineWidth = hov ? 2.4 : 1.7;
-        g.font = `${hov ? 15 : 12.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge(h.ik, x, y, s0); g.textBaseline = 'alphabetic';
+        g.font = `${hov ? 15 : 12.5}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge(h.ik, x, y, s0); g.textBaseline = 'alphabetic';
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         if (view.z >= 2.6 || hov) lab(hov ? 96 : 48, x, y + s0 + 10, h.ad.split(' (')[0], { size: 10, w: 700, col: tuk ? '#ffe2a0' : '#fff8e8', halo: 2.8, haloCol: 'rgba(20,16,10,0.85)', kay: true });
         hits.push({ kind: 'hayvan', h, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
@@ -2394,7 +2350,7 @@ window.Dunya = (() => {
         shownB.push([x, y]);
         const hov = hover && hover.kind === 'bitki' && hover.bt === bt, s0 = hov ? 12.5 : 10;
         g.fillStyle = '#e6f6e8'; g.strokeStyle = hov ? '#ffd666' : '#2e7d32'; g.lineWidth = hov ? 2.4 : 1.7;
-        g.font = `${hov ? 14.5 : 12}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge(bt.ik, x, y, s0); g.textBaseline = 'alphabetic';
+        g.font = `${hov ? 14.5 : 12}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; simge(bt.ik, x, y, s0); g.textBaseline = 'alphabetic';
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
         if (view.z >= 2.4 || hov) lab(hov ? 96 : 47, x, y + s0 + 10, bt.ad.split(' (')[0], { size: 10, w: 700, col: '#dcfce7', halo: 2.8, haloCol: 'rgba(14,32,18,0.88)', kay: true });
         hits.push({ kind: 'bitki', bt, x0: x - s0 - 3, x1: x + s0 + 3, y0: y - s0 - 3, y1: y + s0 + 3 });
@@ -2460,7 +2416,7 @@ window.Dunya = (() => {
         g.strokeStyle = `rgba(255,214,102,${0.65 * (1 - ph)})`; g.lineWidth = 2;
         g.beginPath(); g.arc(x, y, s0 + ph * 11, 0, 7); g.stroke();
         g.fillStyle = hov ? '#ffd666' : '#2d193d'; g.strokeStyle = '#ffd666'; g.lineWidth = hov ? 2.6 : 2;
-        g.font = `${hov ? 15 : 12.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `${hov ? 15 : 12.5}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
         simge('⚡', x, y, s0);
         g.restore();
         obstacle(x - s0 - 2, y - s0 - 2, x + s0 + 2, y + s0 + 2);
@@ -2512,7 +2468,7 @@ window.Dunya = (() => {
           g.beginPath(); g.arc(x, y, s0 + 3 + ph * 3, 0, 7); g.stroke();
         }
         g.fillStyle = bul ? 'rgba(42,28,14,0.92)' : 'rgba(56,34,12,0.58)'; g.strokeStyle = hov ? '#ffd666' : 'rgba(255,214,102,0.75)'; g.lineWidth = hov ? 2 : 1.1;
-        g.font = `${hov ? 13.5 : (bul ? 11.5 : 8.5)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `${hov ? 13.5 : (bul ? 11.5 : 8.5)}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
         g.globalAlpha *= bul ? 1 : 0.7; simge(bul ? sp.ik : '✨', x, y, s0);
         g.restore();
         if (bul && (view.z >= sp.minZ + 0.6 || hov)) lab(hov ? 98 : 50, x, y + s0 + 10, sp.ad.split(' (')[0], { size: 10, w: 700, col: '#ffe89c', halo: 2.8, haloCol: 'rgba(28,18,6,0.9)', kay: true });
@@ -2536,7 +2492,7 @@ window.Dunya = (() => {
             g.strokeStyle = `rgba(255,214,102,${hov ? 0.85 : 0.35 + ph * 0.25})`; g.lineWidth = 1.2;
             g.beginPath(); g.arc(vx, vy, (hov ? 12 : 9) + ph * 2.5, 0, 7); g.stroke();
             g.fillStyle = 'rgba(22,26,48,0.82)'; g.strokeStyle = '#ffd666'; g.lineWidth = hov ? 1.6 : 1;
-            g.font = `${hov ? 11.5 : 9.5}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
+            g.font = `${hov ? 11.5 : 9.5}px Atkinson Hyperlegible Next, system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle';
             simge('🛰️', vx, vy, hov ? 9.5 : 7.5);
             text(vx, vy + 16, 'Voyager 1', { size: 9.5, w: 700, col: '#ffe89c', halo: 2.5, haloCol: 'rgba(10,14,28,0.9)' });
           } else {
@@ -2566,7 +2522,7 @@ window.Dunya = (() => {
       for (const [la, lo, ad] of KITA_AD) {
         const [x, y, z] = P(la, lo); if (z <= 0.15) continue;
         const sz = clamp(13 + view.z * 2.5, 15, 20), ls = 6;
-        g.font = `700 ${sz}px Georgia, serif`; const tw = g.measureText(ad).width + ls * ad.length;
+        g.font = `700 ${sz}px Literata, Georgia, serif`; const tw = g.measureText(ad).width + ls * ad.length;
         g.globalAlpha = ka * clamp((z - 0.15) * 3, 0, 1);
         text(x, y, ad, { size: sz, w: 700, serif: true, ls, col: '#fffaf0', halo: 3.5, haloCol: 'rgba(70,42,18,0.6)' });
         kutular.push([x - tw / 2 - 4, y - sz / 2 - 4, x + tw / 2 + 4, y + sz / 2 + 4]);
@@ -2581,7 +2537,7 @@ window.Dunya = (() => {
       const cakisir = r => kutular.some(k => r[0] < k[2] && r[2] > k[0] && r[1] < k[3] && r[3] > k[1]);
       // Dokunmatik ekranda fare yok, "üstüne gelince ad" çıkmaz: Tüm Dünya'da da adlar küçük yazıyla noktanın yanında
       const dmAd = DM && DOKUNMATIK.matches, adBoy = dmAd ? 12 : 15;
-      g.save(); g.font = `800 ${adBoy}px Georgia, serif`;
+      g.save(); g.font = `800 ${adBoy}px Literata, Georgia, serif`;
       for (const o of pts) {
         const { BGd, x, y } = o, on = BGd.id !== 'misir' || (Y <= 3150 && Y >= 30), ad = (DM ? BGd.ikon + ' ' : '') + (BGd.ad || 'Mısır');
         const tw = g.measureText(ad).width + 4;
@@ -2635,7 +2591,7 @@ window.Dunya = (() => {
         g.lineWidth = aktif ? 2.5 : 2;
         g.beginPath(); g.arc(x, y, rad, 0, 7); g.fill(); g.stroke();
         g.fillStyle = aktif ? '#1a0e04' : '#fff8e1';
-        g.font = `800 ${aktif ? 12 : 10.5}px system-ui, sans-serif`;
+        g.font = `800 ${aktif ? 12 : 10.5}px Atkinson Hyperlegible Next, system-ui, sans-serif`;
         g.textAlign = 'center'; g.textBaseline = 'middle';
         g.fillText(String(i + 1), x, y + 0.5);
         g.restore();
@@ -2711,13 +2667,13 @@ window.Dunya = (() => {
     else if (hover && hover.kind === 'sehir') tip(hover.x1 + 6, hover.y0, hover.c.ad + (hover.c.cap ? ' (başkent)' : ''), hover.c.not || '');
   }
   function tip(x, y, t1, t2) {
-    g.font = '700 13px system-ui'; const w1 = g.measureText(t1).width; g.font = '12px system-ui';
+    g.font = '700 13px Atkinson Hyperlegible Next, system-ui'; const w1 = g.measureText(t1).width; g.font = '12px Atkinson Hyperlegible Next, system-ui';
     const words = (t2 || '').split(' '), lines = []; let cur = ''; for (const w of words) { const n = cur ? cur + ' ' + w : w; if (g.measureText(n).width > 250 && cur) { lines.push(cur); cur = w; } else cur = n; } if (cur) lines.push(cur);
     const w = Math.max(w1, ...lines.map(l => g.measureText(l).width)) + 18, h = 24 + lines.length * 15;
     x = clamp(x, 4, W - w - 4); y = clamp(y - h, 4, H - h - 4);
     g.fillStyle = 'rgba(255,246,220,0.97)'; g.strokeStyle = OUT; g.lineWidth = 1; g.beginPath(); g.roundRect(x, y, w, h, 9); g.fill(); g.stroke();
-    g.fillStyle = OUT; g.textAlign = 'left'; g.font = '700 13px system-ui'; duzYazi(t1, x + 9, y + 17, 13);
-    g.font = '12px system-ui'; lines.forEach((l, i) => duzYazi(l, x + 9, y + 33 + i * 15, 12));
+    g.fillStyle = OUT; g.textAlign = 'left'; g.font = '700 13px Atkinson Hyperlegible Next, system-ui'; duzYazi(t1, x + 9, y + 17, 13);
+    g.font = '12px Atkinson Hyperlegible Next, system-ui'; lines.forEach((l, i) => duzYazi(l, x + 9, y + 33 + i * 15, 12));
   }
   function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; }
   function softHex(hex) { const n = parseInt(hex.slice(1), 16); const f = v => Math.round(v + (255 - v) * 0.35); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; }
@@ -2768,7 +2724,7 @@ window.Dunya = (() => {
   function reset() { idle = 0; vel = [0, 0]; target = { lat: 24, lon: 22, z: 1 }; }
   // seçili yılda var olan devletler (dilim yüklenmemişse yüklenir ve kısa süre beklenir)
   async function devletler(y) {
-    for (let i = 0; i < 40; i++) { const o = aktifSinirlar0(y); if (o.length) return o.map(q => ({ ad: duzAd(q.k, Math.max(y, SINIR_SON)) || q.k.tr || q.k.n, n: q.k.n, a: q.k.a, e: q.k.e, bb: q.k.bb, w: q.k.w })); await new Promise(r => setTimeout(r, 250)); }
+    for (let i = 0; i < 40; i++) { const o = aktifSinirlar0(y); if (o.length) return o.map(q => ({ ad: duzAd(q.k, Math.max(y, SINIR_SON)) || q.k.tr || q.k.n, n: q.k.n, a: q.k.a, e: q.k.e, bb: q.k.bb, w: q.k.w, renk: q.k._r })); await new Promise(r => setTimeout(r, 250)); }
     return [];
   }
   // bir devletin o yılki sınır kaydı (oyunlar için): halkalar [enlem], [boylam] dizileri olarak
