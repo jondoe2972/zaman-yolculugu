@@ -6,7 +6,7 @@
   const DENIZLER = [
     // ---- Türkiye ve Akdeniz Alt Denizleri (Akdeniz ve Karadeniz'den ÖNCE eşleşir!) ----
     {
-      id: 'marmara', ad: 'Marmara Denizi', tur: 'deniz', ik: '🌊',
+      id: 'marmara', baglanti: 'Kuzeydoğuda İstanbul Boğazı ile Karadeniz\'e, güneybatıda Çanakkale Boğazı ile Ege\'ye bağlanır. Boğazlarda iki katlı akıntı vardır: üstte Karadeniz\'in az tuzlu suyu Ege\'ye, altta Akdeniz\'in tuzlu suyu Karadeniz\'e doğru akar.', ad: 'Marmara Denizi', tur: 'deniz', ik: '🌊',
       bb: [40.25, 41.15, 26.6, 29.95], merkez: [40.7, 28.2],
       yuzolcum: '11.350 km²', derinlik: 'Ortalama 494 m · En derin: 1.370 m',
       sicaklik: 'Yazın 23–26 °C · Kışın 7–9 °C',
@@ -17,7 +17,7 @@
       w: 'Sea of Marmara'
     },
     {
-      id: 'ege', ad: 'Ege Denizi', tur: 'deniz', ik: '⛵',
+      id: 'ege', baglanti: 'Akdeniz\'in kuzeydoğu koludur. Güneyde Girit\'in iki yanındaki geçitlerle açık Akdeniz\'e, kuzeydoğuda Çanakkale Boğazı ile Marmara\'ya bağlanır.', ad: 'Ege Denizi', tur: 'deniz', ik: '⛵',
       bb: [35.4, 41.0, 22.8, 27.3], merkez: [38.2, 25.0],
       yuzolcum: '214.000 km²', derinlik: 'Ortalama 350 m · En derin: 3.543 m (Girit kuzeyi)',
       sicaklik: '15–26 °C (berrak ve bol güneşli)',
@@ -28,7 +28,7 @@
       w: 'Aegean Sea'
     },
     {
-      id: 'azak', ad: 'Azak Denizi', tur: 'deniz', ik: '🌊',
+      id: 'azak', baglanti: 'Kerç Boğazı ile Karadeniz\'e bağlanır. Don ve Kuban nehirleri dökülür; bu yüzden suyu çok az tuzludur.', ad: 'Azak Denizi', tur: 'deniz', ik: '🌊',
       bb: [45.2, 47.4, 34.8, 39.4], merkez: [46.1, 36.8],
       yuzolcum: '39.000 km²', derinlik: 'Ortalama yalnızca 7 m · En derin: 14 m (dünyanın en sığ denizi!)',
       sicaklik: 'Yazın 28 °C · Kışın kısmen donar',
@@ -39,7 +39,7 @@
       w: 'Sea of Azov'
     },
     {
-      id: 'adriyatik', ad: 'Adriyatik Denizi', tur: 'deniz', ik: '⛵',
+      id: 'adriyatik', baglanti: 'Güneyde Otranto Boğazı ile İyon Denizi\'ne (Akdeniz) açılır. Başlıca tatlı su kaynağı Po Nehri\'dir.', ad: 'Adriyatik Denizi', tur: 'deniz', ik: '⛵',
       bb: [40.0, 45.8, 12.2, 19.6], merkez: [42.8, 15.8],
       yuzolcum: '138.600 km²', derinlik: 'Kuzeyde sığ (35 m) · Güneyde 1.233 m',
       sicaklik: '12–26 °C',
@@ -50,7 +50,7 @@
       w: 'Adriatic Sea'
     },
     {
-      id: 'tiren', ad: 'Tiren Denizi', tur: 'deniz', ik: '🌋',
+      id: 'tiren', baglanti: 'Akdeniz\'in bir parçasıdır. Güneyde Messina Boğazı ile İyon Denizi\'ne, batıda Bonifacio Boğazı (Korsika ile Sardinya arası) ile Batı Akdeniz\'e bağlanır.', ad: 'Tiren Denizi', tur: 'deniz', ik: '🌋',
       bb: [38.0, 43.0, 9.5, 16.0], merkez: [40.2, 12.8],
       yuzolcum: '275.000 km²', derinlik: 'Ortalama 2.000 m · En derin: 3.785 m',
       sicaklik: '14–26 °C',
@@ -61,7 +61,7 @@
       w: 'Tyrrhenian Sea'
     },
     {
-      id: 'iyon', ad: 'İyon Denizi', tur: 'deniz', ik: '🌊',
+      id: 'iyon', baglanti: 'Kuzeyde Otranto Boğazı ile Adriyatik\'e, batıda Messina Boğazı ile Tiren Denizi\'ne bağlanır; güneyi açık Akdeniz\'dir.', ad: 'İyon Denizi', tur: 'deniz', ik: '🌊',
       bb: [35.5, 40.2, 15.0, 22.2], merkez: [37.8, 18.8],
       yuzolcum: '169.000 km²', derinlik: 'En derin: 5.267 m (Akdeniz\'in en derin çukuru: Calypso!)',
       sicaklik: '15–27 °C',
@@ -72,7 +72,7 @@
       w: 'Ionian Sea'
     },
     {
-      id: 'hazar', ad: 'Hazar Denizi', tur: 'deniz', ik: '🐟',
+      id: 'hazar', baglanti: 'Okyanusla bağlantısı yoktur: kapalı bir havzadır ve dünyanın en büyük gölüdür. Suyunun büyük bölümünü Volga getirir; su yalnızca buharlaşmayla eksilir. Gemiler Volga–Don Kanalı\'yla Azak Denizi\'ne ve Karadeniz\'e geçebilir.', ad: 'Hazar Denizi', tur: 'deniz', ik: '🐟',
       bb: [36.5, 47.2, 46.5, 54.5], merkez: [41.8, 50.6],
       yuzolcum: '371.000 km² (Dünyanın en büyük kapalı su kütlesi!)', derinlik: 'Kuzeyde 5 m · Güneyde 1.025 m',
       sicaklik: 'Kuzeyde kışın donar · Güneyde 10–28 °C',
@@ -85,7 +85,7 @@
 
     // ---- Avrupa ve Kuzey Denizleri ----
     {
-      id: 'kuzeydenizi', ad: 'Kuzey Denizi', tur: 'deniz', ik: '🌊',
+      id: 'kuzeydenizi', baglanti: 'Kuzeyde Norveç Denizi\'ne ve Atlas Okyanusu\'na açılır. Güneyde Dover Boğazı ile Manş Denizi\'ne, doğuda Skagerrak ile Baltık Denizi\'ne bağlanır. Ren, Elbe ve Thames buraya dökülür.', ad: 'Kuzey Denizi', tur: 'deniz', ik: '🌊',
       bb: [51.0, 61.5, -3.0, 9.5], merkez: [56.2, 3.2],
       yuzolcum: '570.000 km²', derinlik: 'Ortalama 95 m · En derin: 700 m (Norveç Çukuru)',
       sicaklik: '6–17 °C (rüzgârlı ve dalgalı)',
@@ -96,7 +96,7 @@
       w: 'North Sea'
     },
     {
-      id: 'baltik', ad: 'Baltık Denizi', tur: 'deniz', ik: '🟠',
+      id: 'baltik', baglanti: 'Danimarka boğazları (Öresund, Büyük Belt, Küçük Belt), ardından Kattegat ve Skagerrak üzerinden Kuzey Denizi\'ne bağlanır. Çıkışı dar, dökülen nehri çok olduğu için suyu az tuzludur.', ad: 'Baltık Denizi', tur: 'deniz', ik: '🟠',
       bb: [53.8, 66.0, 10.0, 30.2], merkez: [58.5, 19.8],
       yuzolcum: '377.000 km²', derinlik: 'Ortalama yalnızca 55 m · En derin: 459 m',
       sicaklik: '0–20 °C (kuzeyi kışın kalın buzla kaplanır)',
@@ -107,7 +107,7 @@
       w: 'Baltic Sea'
     },
     {
-      id: 'mans', ad: 'Manş Denizi (İngiliz Kanalı)', tur: 'deniz', ik: '⛵',
+      id: 'mans', baglanti: 'Batıda Atlas Okyanusu\'na, doğuda Dover Boğazı (en dar yeri yaklaşık 33 km) ile Kuzey Denizi\'ne bağlanır. Seine Nehri buraya dökülür.', ad: 'Manş Denizi (İngiliz Kanalı)', tur: 'deniz', ik: '⛵',
       bb: [48.5, 51.2, -5.5, 2.0], merkez: [50.0, -1.5],
       yuzolcum: '75.000 km²', derinlik: 'Ortalama 63 m · En dar yeri: Dover Boğazı (33 km)',
       sicaklik: '8–18 °C',
@@ -118,7 +118,7 @@
       w: 'English Channel'
     },
     {
-      id: 'irlandadenizi', ad: 'İrlanda Denizi', tur: 'deniz', ik: '🌊',
+      id: 'irlandadenizi', baglanti: 'Kuzeyde Kuzey Kanalı, güneyde St. George Kanalı ile Atlas Okyanusu\'na bağlanır.', ad: 'İrlanda Denizi', tur: 'deniz', ik: '🌊',
       bb: [51.8, 55.2, -6.5, -2.8], merkez: [53.6, -4.6],
       yuzolcum: '46.000 km²', derinlik: 'Ortalama 52 m · En derin: 315 m',
       sicaklik: '7–16 °C',
@@ -129,7 +129,7 @@
       w: 'Irish Sea'
     },
     {
-      id: 'norvecdenizi', ad: 'Norveç Denizi', tur: 'deniz', ik: '❄️',
+      id: 'norvecdenizi', baglanti: 'Atlas Okyanusu ile Arktik Okyanusu arasında bir geçiş denizidir. Güneyde Kuzey Denizi\'ne, kuzeydoğuda Barents Denizi\'ne, batıda Grönland Denizi\'ne açılır. Kuzey Atlantik Akıntısı\'nın ılık suyu buradan kuzeye taşınır.', ad: 'Norveç Denizi', tur: 'deniz', ik: '❄️',
       bb: [61.5, 72.0, -5.0, 18.0], merkez: [66.5, 4.5],
       yuzolcum: '1,38 milyon km²', derinlik: 'Ortalama 2.000 m · En derin: 3.970 m',
       sicaklik: '2–10 °C (sıcak akıntı sayesinde buz tutmaz!)',
@@ -140,7 +140,7 @@
       w: 'Norwegian Sea'
     },
     {
-      id: 'barents', ad: 'Barents Denizi', tur: 'deniz', ik: '🧊',
+      id: 'barents', baglanti: 'Arktik Okyanusu\'nun kenar denizidir. Batıda Norveç Denizi\'ne, doğuda Novaya Zemlya adalarının ötesinde Kara Denizi\'ne, güneyde Beyaz Deniz\'e bağlanır.', ad: 'Barents Denizi', tur: 'deniz', ik: '🧊',
       bb: [68.0, 80.5, 18.0, 60.0], merkez: [74.0, 38.0],
       yuzolcum: '1,4 milyon km²', derinlik: 'Ortalama 230 m · En derin: 600 m',
       sicaklik: '-1 ile +8 °C arası',
@@ -153,7 +153,7 @@
 
     // ---- Asya ve Hint Okyanusu Denizleri ----
     {
-      id: 'arapdenizi', ad: 'Arap Denizi (Umman Denizi)', tur: 'deniz', ik: '⛵',
+      id: 'arapdenizi', baglanti: 'Hint Okyanusu\'nun kuzeybatı bölümüdür. Aden Körfezi ve Babülmendep Boğazı ile Kızıldeniz\'e; Umman Körfezi ve Hürmüz Boğazı ile Basra Körfezi\'ne bağlanır. İndus Nehri buraya dökülür.', ad: 'Arap Denizi (Umman Denizi)', tur: 'deniz', ik: '⛵',
       bb: [8.0, 25.5, 51.0, 76.5], merkez: [16.5, 64.0],
       yuzolcum: '3,86 milyon km²', derinlik: 'Ortalama 2.734 m · En derin: 4.652 m',
       sicaklik: '24–30 °C',
@@ -164,7 +164,7 @@
       w: 'Arabian Sea'
     },
     {
-      id: 'bengal', ad: 'Bengal Körfezi', tur: 'deniz', ik: '🌊',
+      id: 'bengal', baglanti: 'Hint Okyanusu\'nun kuzeydoğu körfezidir; doğuda Andaman Denizi\'ne açılır. Ganj–Brahmaputra, Godavari ve Krişna nehirleri dökülür; bu yüzden yüzey suyu az tuzludur.', ad: 'Bengal Körfezi', tur: 'deniz', ik: '🌊',
       bb: [5.0, 22.5, 79.5, 95.5], merkez: [14.5, 87.5],
       yuzolcum: '2,17 milyon km² (Dünyanın en büyük körfezi!)', derinlik: 'Ortalama 2.600 m · En derin: 4.694 m',
       sicaklik: '26–30 °C',
@@ -175,7 +175,7 @@
       w: 'Bay of Bengal'
     },
     {
-      id: 'andaman', ad: 'Andaman Denizi', tur: 'deniz', ik: '🪸',
+      id: 'andaman', baglanti: 'Batıda Andaman ve Nikobar adaları arasındaki geçitlerle Bengal Körfezi\'ne, güneydoğuda Malakka Boğazı ile Güney Çin Denizi\'ne bağlanır. İrravadi Nehri buraya dökülür.', ad: 'Andaman Denizi', tur: 'deniz', ik: '🪸',
       bb: [5.5, 17.0, 92.5, 99.5], merkez: [11.0, 96.0],
       yuzolcum: '797.700 km²', derinlik: 'Ortalama 870 m · En derin: 4.400 m',
       sicaklik: '27–30 °C',
@@ -186,7 +186,7 @@
       w: 'Andaman Sea'
     },
     {
-      id: 'guneycin', ad: 'Güney Çin Denizi', tur: 'deniz', ik: '⛵',
+      id: 'guneycin', baglanti: 'Kuzeydoğuda Tayvan Boğazı ile Doğu Çin Denizi\'ne ve Luzon Boğazı ile Filipin Denizi\'ne (Büyük Okyanus), güneybatıda Malakka Boğazı ile Hint Okyanusu\'na bağlanır. Mekong ve İnci nehirleri buraya dökülür.', ad: 'Güney Çin Denizi', tur: 'deniz', ik: '⛵',
       bb: [0.0, 23.5, 102.0, 121.0], merkez: [12.5, 113.5],
       yuzolcum: '3,5 milyon km²', derinlik: 'Ortalama 1.212 m · En derin: 5.560 m',
       sicaklik: '25–30 °C',
@@ -197,7 +197,7 @@
       w: 'South China Sea'
     },
     {
-      id: 'dogucin', ad: 'Doğu Çin Denizi', tur: 'deniz', ik: '🌊',
+      id: 'dogucin', baglanti: 'Kuzeyde Sarı Deniz\'e, kuzeydoğuda Kore Boğazı ile Japon Denizi\'ne, güneyde Tayvan Boğazı ile Güney Çin Denizi\'ne bağlanır; doğuda Ryukyu Adaları\'nın arasından Büyük Okyanus\'a açılır. Yangtze Nehri buraya dökülür.', ad: 'Doğu Çin Denizi', tur: 'deniz', ik: '🌊',
       bb: [23.5, 33.5, 118.5, 130.0], merkez: [28.5, 124.5],
       yuzolcum: '1,25 milyon km²', derinlik: 'Geniş sığ kıta sahanlığı (~200 m) · Okinawa Çukuru: 2.717 m',
       sicaklik: '15–28 °C',
@@ -208,7 +208,7 @@
       w: 'East China Sea'
     },
     {
-      id: 'sarideniz', ad: 'Sarı Deniz', tur: 'deniz', ik: '🌊',
+      id: 'sarideniz', baglanti: 'Güneyde Doğu Çin Denizi\'ne açılır; kuzeybatıdaki iç körfezi Bohai Denizi\'dir. Rengini, Sarı Irmak\'ın taşıdığı sarı toprak (lös) verir.', ad: 'Sarı Deniz', tur: 'deniz', ik: '🌊',
       bb: [33.5, 41.0, 117.5, 126.5], merkez: [36.5, 122.5],
       yuzolcum: '380.000 km²', derinlik: 'Ortalama yalnızca 44 m · En derin: 152 m',
       sicaklik: '4–26 °C',
@@ -219,7 +219,7 @@
       w: 'Yellow Sea'
     },
     {
-      id: 'ohotsk', ad: 'Ohotsk Denizi', tur: 'deniz', ik: '🧊',
+      id: 'ohotsk', baglanti: 'Kuril Adaları arasındaki geçitlerle Büyük Okyanus\'a; La Pérouse ve Tatar boğazlarıyla Japon Denizi\'ne bağlanır. Amur Nehri dökülür.', ad: 'Ohotsk Denizi', tur: 'deniz', ik: '🧊',
       bb: [44.0, 62.5, 135.0, 162.0], merkez: [54.0, 148.0],
       yuzolcum: '1,58 milyon km²', derinlik: 'Ortalama 859 m · En derin: 3.372 m',
       sicaklik: '-1 ile +12 °C arası (kışın büyük kısmı donar)',
@@ -230,7 +230,7 @@
       w: 'Sea of Okhotsk'
     },
     {
-      id: 'bering', ad: 'Bering Denizi', tur: 'deniz', ik: '🧊',
+      id: 'bering', baglanti: 'Kuzeyde Bering Boğazı (yaklaşık 85 km) ile Arktik Okyanusu\'na bağlanır; güneyde Aleut Adaları\'nın arasından Büyük Okyanus\'a açılır.', ad: 'Bering Denizi', tur: 'deniz', ik: '🧊',
       bb: [52.0, 66.0, 162.0, 180.0], bb2: [52.0, 66.0, -180.0, -158.0], merkez: [58.5, -175.0],
       yuzolcum: '2 milyon km²', derinlik: 'Kuzeyde sığ (50 m) · Güneyde 4.097 m',
       sicaklik: '0–10 °C (dünyanın en fırtınalı denizlerinden)',
@@ -241,7 +241,7 @@
       w: 'Bering Sea'
     },
     {
-      id: 'filipin', ad: 'Filipin Denizi', tur: 'deniz', ik: '🌋',
+      id: 'filipin', baglanti: 'Büyük Okyanus\'un batı kenar denizidir. Batıda Luzon Boğazı ile Güney Çin Denizi\'ne bağlanır; doğusu Mariana Adaları\'na kadar açık okyanustur.', ad: 'Filipin Denizi', tur: 'deniz', ik: '🌋',
       bb: [6.0, 32.0, 121.0, 145.0], merkez: [19.0, 133.0],
       yuzolcum: '5 milyon km² (Dünyanın en büyük kenar denizlerinden!)', derinlik: 'Ortalama 4.100 m · En derin: 10.994 m (Mariana Çukuru!)',
       sicaklik: '22–29 °C',
@@ -252,7 +252,7 @@
       w: 'Philippine Sea'
     },
     {
-      id: 'cava', ad: 'Cava Denizi', tur: 'deniz', ik: '⛵',
+      id: 'cava', baglanti: 'Batıda Karimata Boğazı ile Güney Çin Denizi\'ne ve Sunda Boğazı ile Hint Okyanusu\'na; doğuda Flores Denizi\'ne; kuzeydoğuda Makassar Boğazı ile Selebes Denizi\'ne bağlanır.', ad: 'Cava Denizi', tur: 'deniz', ik: '⛵',
       bb: [-8.5, -2.5, 105.5, 119.0], merkez: [-5.3, 112.0],
       yuzolcum: '320.000 km²', derinlik: 'Ortalama yalnızca 46 m',
       sicaklik: '27–30 °C',
@@ -265,7 +265,7 @@
 
     // ---- Okyanusya ve Amerika Denizleri ----
     {
-      id: 'mercan', ad: 'Mercan Denizi', tur: 'deniz', ik: '🪸',
+      id: 'mercan', baglanti: 'Büyük Okyanus\'un kenar denizidir. Kuzeybatıda Torres Boğazı ile Arafura Denizi\'ne bağlanır, güneyde Tasman Denizi\'ne açılır.', ad: 'Mercan Denizi', tur: 'deniz', ik: '🪸',
       bb: [-25.0, -9.0, 142.0, 166.0], merkez: [-17.5, 154.0],
       yuzolcum: '4,79 milyon km²', derinlik: 'Ortalama 2.394 m · En derin: 9.140 m',
       sicaklik: '22–29 °C',
@@ -276,7 +276,7 @@
       w: 'Coral Sea'
     },
     {
-      id: 'tasman', ad: 'Tasman Denizi', tur: 'deniz', ik: '🌊',
+      id: 'tasman', baglanti: 'Avustralya ile Yeni Zelanda arasındadır. Kuzeyde Mercan Denizi\'ne, güneyde Güney Okyanusu\'na açılır; batıda Bass Boğazı ile Avustralya\'nın güney sularına bağlanır.', ad: 'Tasman Denizi', tur: 'deniz', ik: '🌊',
       bb: [-46.0, -25.0, 148.0, 174.0], merkez: [-36.5, 161.0],
       yuzolcum: '2,3 milyon km²', derinlik: 'Ortalama 3.500 m · En derin: 5.943 m',
       sicaklik: '12–23 °C',
@@ -287,7 +287,7 @@
       w: 'Tasman Sea'
     },
     {
-      id: 'meksikakorfezi', ad: 'Meksika Körfezi', tur: 'deniz', ik: '☄️',
+      id: 'meksikakorfezi', baglanti: 'Karayip suyu Yucatán Kanalı\'ndan girer, Florida Boğazı\'ndan Atlas Okyanusu\'na çıkar: Gulf Stream böyle başlar. Mississippi Nehri buraya dökülür.', ad: 'Meksika Körfezi', tur: 'deniz', ik: '☄️',
       bb: [18.0, 30.5, -98.0, -80.5], merkez: [24.8, -90.0],
       yuzolcum: '1,6 milyon km²', derinlik: 'Ortalama 1.615 m · En derin: 4.384 m',
       sicaklik: '22–30 °C (sıcak tropikal havuz)',
@@ -298,7 +298,7 @@
       w: 'Gulf of Mexico'
     },
     {
-      id: 'hudson', ad: 'Hudson Körfezi', tur: 'deniz', ik: '🐻‍❄️',
+      id: 'hudson', baglanti: 'Hudson Boğazı ile Labrador Denizi\'ne (Atlas Okyanusu) bağlanır; kuzeyde Foxe Havzası üzerinden Arktik sularına açılır.', ad: 'Hudson Körfezi', tur: 'deniz', ik: '🐻‍❄️',
       bb: [51.0, 64.0, -95.0, -77.0], merkez: [58.5, -85.5],
       yuzolcum: '1,23 milyon km²', derinlik: 'Ortalama yalnızca 100 m',
       sicaklik: 'Kışın tamamen donar · Yazın 4–8 °C',
@@ -309,7 +309,7 @@
       w: 'Hudson Bay'
     },
     {
-      id: 'labradordenizi', ad: 'Labrador Denizi', tur: 'deniz', ik: '🧊',
+      id: 'labradordenizi', baglanti: 'Atlas Okyanusu\'nun kuzeybatı koludur. Kuzeyde Davis Boğazı ile Baffin Körfezi\'ne, batıda Hudson Boğazı ile Hudson Körfezi\'ne bağlanır.', ad: 'Labrador Denizi', tur: 'deniz', ik: '🧊',
       bb: [52.0, 65.0, -64.0, -43.0], merkez: [58.0, -53.5],
       yuzolcum: '841.000 km²', derinlik: 'Ortalama 1.900 m · En derin: 4.316 m',
       sicaklik: '-1 ile +6 °C arası',

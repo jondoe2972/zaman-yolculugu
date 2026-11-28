@@ -281,7 +281,8 @@
 
   window.OyunYukle = Object.assign(ad => paketYukle(ad), {
     hepsi: () => Promise.all(Object.keys(PAKET).map(paketYukle)),
-    menuAc: () => goster(true)
+    menuAc: () => goster(true),
+    menuKapat: () => goster(false)
   });
 
   if (btn) {

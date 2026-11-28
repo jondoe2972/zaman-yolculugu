@@ -13,3 +13,9 @@ YENI-SOHBET-OZETI.md
 
 # indirilen ham simge PNG'leri (img/simgeler.webp bunlardan uretilir)
 araclar/simge-kaynak/
+
+# ceviri modeli denemesi (olcum dosyalari; yayinlanmaz)
+araclar/ceviri-deneme/
+
+# kabartma ve okyanus gorsellerinin ham kaynaklari (img/zemin-*.webp bunlardan uretilir)
+araclar/zemin-kaynak/

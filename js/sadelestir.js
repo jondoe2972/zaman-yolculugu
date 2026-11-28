@@ -11,8 +11,8 @@
     tema.classList.add('tema-gomulu');
     ses.appendChild(tema);
     tema.hidden = false;
-    const sb = $('#sesbtn'); if (sb) { sb.title = 'Ses, müzik ve renk teması'; sb.setAttribute('aria-label', 'Ses, müzik ve renk teması'); }
-    ses.setAttribute('aria-label', 'Ses, müzik ve renk teması');
+    const sb = $('#sesbtn'); if (sb) { sb.title = 'Ayarlar: ses, müzik, renk teması ve küre görünümü'; sb.setAttribute('aria-label', 'Ayarlar'); }
+    ses.setAttribute('aria-label', 'Ayarlar: ses, müzik, renk teması ve küre görünümü');
   }
   // 2) bölge modu şeridi
   const B = window.BOLGE;

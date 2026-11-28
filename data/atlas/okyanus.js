@@ -4,7 +4,7 @@ window.ATLAS_OKYANUS = {
   // Denizler önce kontrol edilir (küçük kutu öncelikli), eşleşmezse büyük okyanuslar seçilir.
   okyanuslar: [
     {
-      id: 'karadeniz', ad: 'Karadeniz', tur: 'deniz', ik: '🌊',
+      id: 'karadeniz', baglanti: 'İstanbul Boğazı, Marmara ve Çanakkale Boğazı yoluyla Ege\'ye ve Akdeniz\'e; Kerç Boğazı ile Azak Denizi\'ne bağlanır. Tuna, Dinyeper, Dinyester, Kızılırmak ve Sakarya buraya dökülür; bu yüzden suyu Akdeniz\'den belirgin biçimde az tuzludur.', ad: 'Karadeniz', tur: 'deniz', ik: '🌊',
       bb: [40.8, 47.0, 27.3, 41.8], merkez: [43.3, 34.5],
       yuzolcum: '436.400 km²', derinlik: 'Ortalama 1.253 m · En derin: 2.212 m',
       sicaklik: 'Yazın 22–26 °C · Kışın 6–9 °C',
@@ -15,7 +15,7 @@ window.ATLAS_OKYANUS = {
       w: 'Black Sea'
     },
     {
-      id: 'akdeniz', ad: 'Akdeniz', tur: 'deniz', ik: '🌊',
+      id: 'akdeniz', baglanti: 'Batıda Cebelitarık Boğazı (en dar yeri yaklaşık 14 km) ile Atlas Okyanusu\'na; kuzeydoğuda Çanakkale Boğazı üzerinden Marmara ve Karadeniz\'e; güneydoğuda Süveyş Kanalı (1869) ile Kızıldeniz\'e bağlanır. Buharlaşmayla yitirdiği su, nehirlerin getirdiğinden fazladır; açığı Atlas Okyanusu\'ndan giren yüzey suyu kapatır.', ad: 'Akdeniz', tur: 'deniz', ik: '🌊',
       bb: [30.0, 45.8, -5.6, 36.3], merkez: [35.5, 18.0],
       yuzolcum: '2,5 milyon km²', derinlik: 'Ortalama 1.500 m · En derin: 5.267 m (Calypso Çukuru)',
       sicaklik: '14–28 °C (yüksek buharlaşma nedeniyle okyanuslardan daha tuzlu)',
@@ -26,7 +26,7 @@ window.ATLAS_OKYANUS = {
       w: 'Mediterranean Sea'
     },
     {
-      id: 'kizildeniz', ad: 'Kızıldeniz', tur: 'deniz', ik: '🪸',
+      id: 'kizildeniz', baglanti: 'Güneyde Babülmendep Boğazı ile Aden Körfezi\'ne (Hint Okyanusu), kuzeyde Süveyş Kanalı ile Akdeniz\'e bağlanır. Sürekli akan hiçbir nehir dökülmez; buharlaşma da çok olduğu için dünyanın en tuzlu denizlerindendir.', ad: 'Kızıldeniz', tur: 'deniz', ik: '🪸',
       bb: [12.5, 30.0, 32.3, 43.6], merkez: [21.0, 38.0],
       yuzolcum: '438.000 km²', derinlik: 'Ortalama 490 m · En derin: 3.040 m',
       sicaklik: '21–32 °C (dünyanın en sıcak ve en tuzlu denizlerinden)',
@@ -37,7 +37,7 @@ window.ATLAS_OKYANUS = {
       w: 'Red Sea'
     },
     {
-      id: 'basra', ad: 'Basra Körfezi', tur: 'deniz', ik: '⛵',
+      id: 'basra', baglanti: 'Hürmüz Boğazı ile Umman Körfezi\'ne ve Arap Denizi\'ne bağlanır. Fırat ile Dicle birleşip Şattülarap adıyla buraya dökülür.', ad: 'Basra Körfezi', tur: 'deniz', ik: '⛵',
       bb: [23.8, 30.5, 47.5, 56.5], merkez: [26.8, 51.8],
       yuzolcum: '251.000 km²', derinlik: 'Ortalama yalnızca 50 m · En derin: 90 m',
       sicaklik: 'Yazın 34 °C\'ye kadar çıkar',
@@ -48,7 +48,7 @@ window.ATLAS_OKYANUS = {
       w: 'Persian Gulf'
     },
     {
-      id: 'karayip', ad: 'Karayip Denizi', tur: 'deniz', ik: '🏝️',
+      id: 'karayip', baglanti: 'Kuzeybatıda Yucatán Kanalı ile Meksika Körfezi\'ne; doğuda Küçük Antiller arasındaki geçitlerle Atlas Okyanusu\'na bağlanır. Panama Kanalı gemileri Büyük Okyanus\'a geçirir.', ad: 'Karayip Denizi', tur: 'deniz', ik: '🏝️',
       bb: [9.0, 23.0, -89.0, -60.0], merkez: [15.5, -75.0],
       yuzolcum: '2,75 milyon km²', derinlik: 'Ortalama 2.200 m · En derin: 7.686 m (Cayman Çukuru)',
       sicaklik: 'Yıl boyu 26–29 °C',
@@ -59,7 +59,7 @@ window.ATLAS_OKYANUS = {
       w: 'Caribbean Sea'
     },
     {
-      id: 'japondenizi', ad: 'Japon Denizi (Doğu Denizi)', tur: 'deniz', ik: '🌊',
+      id: 'japondenizi', baglanti: 'Dar boğazlarla çevrili, neredeyse kapalı bir denizdir: güneyde Kore (Tsuşima) Boğazı Doğu Çin Denizi\'ne; doğuda Tsugaru Boğazı Büyük Okyanus\'a; kuzeyde La Pérouse ve Tatar boğazları Ohotsk Denizi\'ne açılır.', ad: 'Japon Denizi (Doğu Denizi)', tur: 'deniz', ik: '🌊',
       bb: [34.5, 51.5, 127.5, 142.0], merkez: [40.0, 134.5],
       yuzolcum: '978.000 km²', derinlik: 'Ortalama 1.752 m · En derin: 3.742 m',
       sicaklik: 'Güneyde ılıman, kuzeyde kışın buzlanacak kadar soğuk',
@@ -70,7 +70,7 @@ window.ATLAS_OKYANUS = {
       w: 'Sea of Japan'
     },
     {
-      id: 'arktik', ad: 'Arktik (Kuzey Buz) Okyanusu', tur: 'okyanus', ik: '🧊',
+      id: 'arktik', baglanti: 'Bering Boğazı ile Büyük Okyanus\'a; Grönland ile Norveç arasındaki geniş açıklıktan (Fram Boğazı, Norveç ve Barents denizleri) Atlas Okyanusu\'na bağlanır. Ob, Yenisey, Lena ve Mackenzie gibi dev nehirler buraya dökülür.', ad: 'Arktik (Kuzey Buz) Okyanusu', tur: 'okyanus', ik: '🧊',
       bb: [66.5, 90.0, -180.0, 180.0], merkez: [82.0, 0.0],
       yuzolcum: '14,1 milyon km² (en küçük ve en sığ okyanus)', derinlik: 'Ortalama 1.038 m · En derin: 5.550 m (Molloy Çukuru)',
       sicaklik: '-1,8 °C ile +2 °C arası; yılın büyük bölümünde deniz buzuyla kaplı',
@@ -81,7 +81,7 @@ window.ATLAS_OKYANUS = {
       w: 'Arctic Ocean'
     },
     {
-      id: 'guney', ad: 'Güney (Antarktika) Okyanusu', tur: 'okyanus', ik: '🐧',
+      id: 'guney', baglanti: 'Öteki okyanuslarla arasında kara yoktur: 60° güney enleminin güneyinde Atlas, Hint ve Büyük Okyanus\'un sularıyla birleşir. Antarktika\'yı çepeçevre dolaşan Antarktika Çevresel Akıntısı üç okyanusun suyunu birbirine karıştırır.', ad: 'Güney (Antarktika) Okyanusu', tur: 'okyanus', ik: '🐧',
       bb: [-90.0, -58.0, -180.0, 180.0], merkez: [-64.0, 20.0],
       yuzolcum: '21,9 milyon km²', derinlik: 'Ortalama 3.270 m · En derin: 7.434 m',
       sicaklik: '-2 °C ile +4 °C arası',
@@ -92,7 +92,7 @@ window.ATLAS_OKYANUS = {
       w: 'Southern Ocean'
     },
     {
-      id: 'hint', ad: 'Hint Okyanusu', tur: 'okyanus', ik: '🌊',
+      id: 'hint', baglanti: 'Güneybatıda, Afrika\'nın güney ucundaki Agulhas Burnu\'nun güneyinde Atlas Okyanusu\'yla; doğuda Endonezya adalarının arasındaki geçitlerde ve Avustralya\'nın güneyinde Büyük Okyanus\'la; güneyde Güney Okyanusu\'yla birleşir. Kızıldeniz ve Basra Körfezi kuzeydeki kollarıdır.', ad: 'Hint Okyanusu', tur: 'okyanus', ik: '🌊',
       bb: [-58.0, 31.0, 20.0, 146.0], merkez: [-15.0, 78.0],
       yuzolcum: '70,6 milyon km² (dünyanın 3. büyük okyanusu)', derinlik: 'Ortalama 3.741 m · En derin: 7.290 m (Java Çukuru)',
       sicaklik: '22–30 °C (dünyanın en sıcak okyanusu)',
@@ -103,7 +103,7 @@ window.ATLAS_OKYANUS = {
       w: 'Indian Ocean'
     },
     {
-      id: 'atlas', ad: 'Atlas (Atlantik) Okyanusu', tur: 'okyanus', ik: '🌊',
+      id: 'atlas', baglanti: 'Kuzeyde Arktik Okyanusu\'na açılır. Güneybatıda, Horn Burnu\'nun güneyindeki Drake Geçidi\'nde Büyük Okyanus\'la; güneydoğuda, Afrika\'nın güney ucundaki Agulhas Burnu\'nun güneyinde Hint Okyanusu\'yla birleşir. Akdeniz (Cebelitarık Boğazı), Karayip ve Baltık başlıca kollarıdır; Panama Kanalı gemileri Büyük Okyanus\'a geçirir.', ad: 'Atlas (Atlantik) Okyanusu', tur: 'okyanus', ik: '🌊',
       bb: [-58.0, 66.5, -98.0, 20.0], merkez: [15.0, -35.0],
       yuzolcum: '85,1 milyon km² (dünyanın 2. büyük okyanusu)', derinlik: 'Ortalama 3.646 m · En derin: 8.376 m (Porto Riko Çukuru)',
       sicaklik: 'Kutuplarda -2 °C, Ekvator\'da 28 °C',
@@ -114,7 +114,7 @@ window.ATLAS_OKYANUS = {
       w: 'Atlantic Ocean'
     },
     {
-      id: 'pasifik', ad: 'Büyük (Pasifik) Okyanus', tur: 'okyanus', ik: '🌊',
+      id: 'pasifik', baglanti: 'Kuzeyde Bering Boğazı ile Arktik Okyanusu\'na; güneydoğuda Drake Geçidi ile Atlas Okyanusu\'na; batıda Endonezya adalarının arasındaki geçitlerle (Malakka, Lombok, Torres boğazları) Hint Okyanusu\'na bağlanır. Güneyde Güney Okyanusu\'yla birleşir.', ad: 'Büyük (Pasifik) Okyanus', tur: 'okyanus', ik: '🌊',
       bb: [-58.0, 66.5, -180.0, 180.0], merkez: [5.0, -155.0],
       yuzolcum: '165,2 milyon km² (Dünya yüzeyinin yaklaşık üçte biri!)', derinlik: 'Ortalama 4.000 m · En derin: 10.984 m (Mariana Çukuru)',
       sicaklik: 'Kutuplarda -1,4 °C, batı Ekvator\'da 30 °C',

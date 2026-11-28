@@ -27,6 +27,29 @@
     { id: 'okyanus', ad: '🌊 Sakin Okyanus Dalgaları', url: GA + 'water/waves_crashing_on_rock_beach.ogg', baz: 0.28, basla: 0 }
   ];
   if (cfg.parca === 'kozmik') { cfg.parca = 'oto'; kaydet(); }
+  // "Otomatik" seçimde Doğa Atlası'nın müziği: sakin arp ezgisi + hafif orman ve kuş sesleri (listede ayrıca görünmez).
+  // Eskiden yalnızca kuş sesi çalıyordu; kısık olduğu için "Doğa Atlası'nda müzik açılmıyor" izlenimi veriyordu.
+  const DOGA_OTO = { id: 'doga-oto', ad: 'Doğa Atlası: arp ezgisi ve orman sesleri', url: WC + '2/20/Greensleeves.ogg', url2: GA + 'ambiences/spring_day_forest.ogg', baz: 0.36, baz2: 0.2, basla: 0.5 };
+  // ---------- 🎼 Çağa göre müzik ("Otomatik" seçimde, Tarih Atlası) ----------
+  // Zaman çizelgesindeki yıl hangi çağdaysa o çağın bir kaydı çalar. `bas`: çağın başladığı yıl (sitenin kuralı: MÖ artı, MS eksi);
+  // liste eskiden yeniye sıralıdır, yıla uyan son kayıt seçilir. Kayıtların hepsi Wikimedia Commons'tandır; lisansları KAYNAKLAR.md'de.
+  const CAGLAR = [
+    { id: 'cag-tunc', bas: Infinity, ad: 'Tunç Çağı: Hurri ilahisi (Ugarit, MÖ 1400 dolayı; varsayımsal yorum)', url: WC + '4/48/Hurrian_Song_H6.ogg', baz: 0.34 },
+    { id: 'cag-antik', bas: 800, ad: 'Antik Çağ: Seikilos Ağıtı (bilinen en eski eksiksiz ezgi)', url: WC + 'b/b6/%CE%9F_%CE%95%CF%80%CE%B9%CF%84%CE%AC%CF%86%CE%B9%CE%BF%CF%82_%CF%84%CE%BF%CF%85_%CE%A3%CE%B5%E1%BF%96%CE%BA%CE%B9%CE%BB%CE%BF%CF%85_-_Epitaph_of_Seikilos.ogg', baz: 0.36 },
+    { id: 'cag-orta', bas: -500, ad: 'Orta Çağ: Cantigas de Santa Maria, 100. ezgi (13. yüzyıl)', url: WC + '1/13/Santa_Maria.ogg', baz: 0.34 },
+    { id: 'cag-ronesans', bas: -1400, ad: 'Rönesans: lavta (Ludwig Senfl)', url: WC + '7/7f/Ludwig_Senfl_--_Ach_Elslein.opus', baz: 0.38, basla: 0.5 },
+    { id: 'cag-barok', bas: -1600, ad: 'Barok: keman sonatı (Telemann)', url: WC + 'a/a8/Telemann_-_2violin_Sonata_1-1.ogg', baz: 0.34, basla: 0.5 },
+    { id: 'cag-klasik', bas: -1750, ad: 'Klasik dönem: Mozart, 16. Piyano Sonatı', url: WC + '3/38/Wolfgang_Amadeus_Mozart_-_sonata_no._16_in_c_major%2C_k.545_%27sonata_facile%27_-_i._allegro.ogg', baz: 0.3 },
+    { id: 'cag-romantik', bas: -1820, ad: 'Romantik dönem: Chopin, Noktürn Op. 9 No. 2', url: WC + '0/04/Chopin_Nocturne_No._2_in_E_Flat_Major%2C_Op._9.ogg', baz: 0.34 },
+    { id: 'cag-modern', bas: -1900, ad: '20. yüzyıl: Debussy, Clair de Lune', url: WC + '6/67/Clair_de_Lune_by_Claude_Debussy_%281905%2C_piano_solo%29.opus', baz: 0.36 }
+  ];
+  const yilOku = () => { const y = window.ZY && window.ZY.Y; return typeof y === 'number' && isFinite(y) ? y : null; };
+  function cagBul(y) {
+    if (y == null) return CAGLAR[3];   // yıl henüz bilinmiyorsa eski varsayılan (lavta)
+    let c = CAGLAR[0]; for (const k of CAGLAR) if (y <= k.bas) c = k;
+    return c;
+  }
+  const parcaBul = id => id === DOGA_OTO.id ? DOGA_OTO : (CAGLAR.find(m => m.id === id) || MUZIKLER.find(m => m.id === id));
 
   // ---------- 🌊🏞️⚔️⛏️🌋💨 Gerçek Doğa & Olay Ses Efektleri ----------
   const SFX = {
@@ -36,7 +59,9 @@
     savas2:  { url: GA + 'impacts/metal_crash.ogg', sure: 2400, baz: 0.68 },
     maden:   { url: GA + 'tools/digging_with_trowel.ogg', sure: 3800, baz: 0.70 },
     volkan:  { url: WC + '2/2b/385098_morganpurkis_volcano.ogg', sure: 5200, baz: 0.75 },
-    ruzgar:  { url: GA + 'weather/wind.ogg', sure: 4800, baz: 0.55 }
+    ruzgar:  { url: GA + 'weather/wind.ogg', sure: 4800, baz: 0.55 },
+    tufek:   { url: WC + 'e/ee/Gunshots_8.ogg', sure: 5200, baz: 0.5 },                       // ateşli silahlar çağının kara savaşları
+    top:     { url: GA + 'weapons/big_explosion_distant.ogg', sure: 5200, baz: 0.7 }          // toplu gemiler çağının deniz savaşları
   };
 
   // ---------- 🐾 Gerçek Hayvan Sesi Kayıtları (yalnızca gerçek kayıt bulunan türler!) ----------
@@ -82,7 +107,9 @@
     [/cırcır|circir|çekirge|cekirge|ağustos böceği|agustos bocegi|peygamber devesi/i, WC + '8/80/Field_cricket_Gryllus_pennsylvanicus.ogg', 4500, 0.68]
   ];
 
-  let atlasMod = 'tarih';
+  // Bu dosya uygulama.js'ten sonra yüklenir: sayfa Doğa Atlası'nda açıldıysa (body.atlas-doga) ilk değer oradan okunur.
+  // (Eskiden hep 'tarih' başlıyordu; site Doğa Atlası'nda açılınca "Otomatik" seçimi Tarih müziğini çalıyordu.)
+  let atlasMod = document.body && document.body.classList.contains('atlas-doga') ? 'doga' : 'tarih';
   let muzikEl = null, muzikEl2 = null, muzikParcaId = null;
   let aktifSfx = null, sfxTimer = null, fadeRaf = null;
   let kilicSira = 0;
@@ -90,22 +117,23 @@
   const etkinVol = (baz = 1) => cfg.sessiz ? 0 : Math.max(0, Math.min(1, (+cfg.vol || 0) * baz));
 
   function aktifParcaBul() {
-    const hedefId = cfg.parca === 'oto' ? (atlasMod === 'doga' ? 'doga' : 'tarih') : cfg.parca;
-    return MUZIKLER.find(m => m.id === hedefId) || MUZIKLER[0];
+    if (cfg.parca === 'oto') return atlasMod === 'doga' ? DOGA_OTO : cagBul(yilOku());
+    return parcaBul(cfg.parca) || MUZIKLER[0];
   }
 
   function sesGuncelle() {
-    const p = MUZIKLER.find(m => m.id === muzikParcaId) || MUZIKLER[0];
+    const p = parcaBul(muzikParcaId) || MUZIKLER[0];
     if (muzikEl) {
       const v = cfg.muzik ? etkinVol(p.baz) : 0;
       muzikEl.volume = v;
       if (v <= 0 && !muzikEl.paused) muzikEl.pause();
     }
     if (muzikEl2) {
-      const v2 = cfg.muzik ? etkinVol(p.baz2 || p.baz) : 0;
+      const v2 = cfg.muzik && !(ortamId && p.id === DOGA_OTO.id) ? etkinVol(p.baz2 || p.baz) : 0;
       muzikEl2.volume = v2;
       if (v2 <= 0 && !muzikEl2.paused) muzikEl2.pause();
     }
+    if (ortamEl) { if (ortamEl.__kis) { clearInterval(ortamEl.__kis); ortamEl.__kis = null; } ortamEl.volume = ortamId ? etkinVol(ORTAM[ortamId].baz) : 0; }
     if (aktifSfx && cfg.sessiz) {
       sfxDurdur();
     }
@@ -136,17 +164,86 @@
       muzikEl.volume = etkinVol(p.baz);
       if (muzikEl.paused) muzikEl.play().catch(() => {});
       if (muzikEl2) {
-        muzikEl2.volume = etkinVol(p.baz2 || p.baz);
+        muzikEl2.volume = ortamId && p.id === DOGA_OTO.id ? 0 : etkinVol(p.baz2 || p.baz);
         if (muzikEl2.paused) muzikEl2.play().catch(() => {});
       }
       return;
     }
-    if (muzikEl) { try { muzikEl.pause(); muzikEl.src = ''; } catch (e) {} muzikEl = null; }
-    if (muzikEl2) { try { muzikEl2.pause(); muzikEl2.src = ''; } catch (e) {} muzikEl2 = null; }
+    // eski parça kısılarak susar, yenisi açılarak girer (çağ değişirken müzik birden kesilmesin)
+    for (const eski of [muzikEl, muzikEl2]) if (eski) kis(eski, 0, 700, () => { try { eski.pause(); eski.src = ''; } catch (e) {} });
+    muzikEl = muzikEl2 = null;
     muzikParcaId = p.id;
-    muzikEl = audioKur(p.url, etkinVol(p.baz), p.basla || 0);
-    if (p.url2) muzikEl2 = audioKur(p.url2, etkinVol(p.baz2 || p.baz), 0);
+    muzikEl = audioKur(p.url, 0, p.basla || 0); kis(muzikEl, etkinVol(p.baz), 900);
+    if (p.url2) { muzikEl2 = audioKur(p.url2, 0, 0); kis(muzikEl2, ortamId && p.id === DOGA_OTO.id ? 0 : etkinVol(p.baz2 || p.baz), 900); }
+    uiGuncelle();
   }
+  // bir ses öğesinin düzeyini `ms` sürede `hedef`e getirir (aynı öğede yeni çağrı eskisini iptal eder)
+  function kis(el, hedef, ms, sonra) {
+    if (!el) return;
+    if (el.__kis) clearInterval(el.__kis);
+    const v0 = el.volume, t0 = performance.now();
+    el.__kis = setInterval(() => {
+      const p = Math.min(1, (performance.now() - t0) / ms);
+      try { el.volume = Math.max(0, Math.min(1, v0 + (hedef - v0) * p)); } catch (e) {}
+      if (p >= 1) { clearInterval(el.__kis); el.__kis = null; if (sonra) sonra(); }
+    }, 60);
+  }
+
+  // ---------- 🌴 Bölgeye göre ortam sesi ----------
+  // Küreye yaklaşınca (yakınlık en az ORTAM_Z) ekranın ortasındaki yerin sesi kısık ve sürekli çalar: açık denizde dalga,
+  // yağmur ormanında orman, çölde ve kutuplarda rüzgâr. "Doğa ve olay sesleri" kutusuna bağlıdır. Öteki yerlerde susar.
+  const ORTAM = {
+    okyanus: { ad: 'okyanus dalgaları', url: GA + 'water/waves_crashing_on_rock_beach.ogg', baz: 0.3 },
+    orman: { ad: 'yağmur ormanı', url: GA + 'ambiences/jungle_atmosphere_afternoon.ogg', baz: 0.36 },
+    col: { ad: 'çöl rüzgârı', url: GA + 'weather/wind.ogg', baz: 0.26 },
+    kutup: { ad: 'kutup rüzgârı', url: GA + 'weather/wind.ogg', baz: 0.32 }
+  };
+  const ORTAM_Z = 2.4;
+  // tropikal yağmur ormanı kuşakları: [güney, kuzey, batı, doğu]
+  const YAGMUR_ORMANI = [[-11, 5, -76, -50], [-5, 4, 9, 28], [4, 7.5, -9, 9], [-9, 7, 95, 150]];
+  let ortamId = null, ortamEl = null, ortamAday = null, dokunuldu = false;
+  function halkada(h, la, lo) {
+    let ic = false;
+    for (let i = 0, j = h.length - 1; i < h.length; j = i++) {
+      const a = h[i], b = h[j];
+      if ((a[0] > la) !== (b[0] > la) && lo < (b[1] - a[1]) * (la - a[0]) / (b[0] - a[0]) + a[1]) ic = !ic;
+    }
+    return ic;
+  }
+  function bolgeBul() {
+    const DN = window.Dunya, cv = document.getElementById('globe');
+    if (!DN || !DN.view || !DN.karaMi || !cv || !cv.getClientRects().length || document.hidden) return null;
+    const v = DN.view; if (!(v.z >= ORTAM_Z)) return null;
+    const la = v.lat, lo = ((v.lon % 360) + 540) % 360 - 180, S = window.DOGAL_SEKIL || {};
+    if (Math.abs(la) >= 66) return 'kutup';
+    if (!DN.karaMi(la, lo)) return 'okyanus';
+    if ((S.buz || []).some(h => halkada(h, la, lo))) return 'kutup';
+    if ((S.col || []).some(h => halkada(h, la, lo))) return 'col';
+    if (YAGMUR_ORMANI.some(k => la >= k[0] && la <= k[1] && lo >= k[2] && lo <= k[3])) return 'orman';
+    return null;
+  }
+  function ortamAyarla(id) {
+    if (id === ortamId) return;
+    if (ortamEl) { const eski = ortamEl; kis(eski, 0, 900, () => { try { eski.pause(); eski.src = ''; } catch (e) {} }); ortamEl = null; }
+    ortamId = id;
+    if (id) { ortamEl = audioKur(ORTAM[id].url, 0, 0); kis(ortamEl, etkinVol(ORTAM[id].baz), 1200); }
+    // Doğa müziğinin orman katmanı, bölgenin kendi sesi çalarken susar
+    if (muzikEl2 && muzikParcaId === DOGA_OTO.id) kis(muzikEl2, id || !cfg.muzik ? 0 : etkinVol(DOGA_OTO.baz2), 900);
+    uiGuncelle();
+  }
+  // saniyede bir yoklama: çağ değiştiyse müzik, bölge değiştiyse ortam sesi değişir (iki yoklama üst üste aynıysa: küre dönerken zıplamasın)
+  let cagAday = null;
+  setInterval(() => {
+    if (!dokunuldu) return;
+    if (cfg.parca === 'oto' && atlasMod === 'tarih' && cfg.muzik && !cfg.sessiz) {
+      const c = cagBul(yilOku());
+      if (c.id !== muzikParcaId) { if (cagAday === c.id) { cagAday = null; muzikBaslat(); } else cagAday = c.id; } else cagAday = null;
+    }
+    // savaş yerine yaklaşınca o savaşın sesi bir kez çalar (uzaklaşıp yeniden yaklaşınca yine çalar)
+    if (!cfg.sessiz && cfg.doga) { const sv = yakinSavas(); if (sv && sv !== sonSavas) playSavas(sv); sonSavas = sv; }
+    const b = cfg.sessiz || !cfg.doga ? null : bolgeBul();
+    if (b !== ortamId) { if (ortamAday === b) ortamAyarla(b); else ortamAday = b; } else ortamAday = b;
+  }, 1000);
 
   function muzikDurdur() {
     if (muzikEl) { try { muzikEl.pause(); } catch (e) {} }
@@ -194,11 +291,29 @@
   function playVolkan()  { if (cfg.doga) playUrl(SFX.volkan.url, SFX.volkan.sure, SFX.volkan.baz); }
   function playRuzgar()  { if (cfg.doga) playUrl(SFX.ruzgar.url, SFX.ruzgar.sure, SFX.ruzgar.baz); }
   function playMaden()   { if (cfg.doga) playUrl(SFX.maden.url, SFX.maden.sure, SFX.maden.baz); }
-  function playSavas() {
+  // Savaşın sesi çağa göre seçilir (e: olay kaydı; yıl sitenin kuralıyla: MÖ artı, MS eksi). Kara savaşlarında MS 1500'den
+  // sonra tüfek, deniz savaşlarında MS 1450'den sonra top; daha eski çağlarda kılıç ve metal sesleri.
+  function playSavas(e) {
     if (!cfg.doga) return;
-    const s = (kilicSira++ % 2 === 0) ? SFX.savas : SFX.savas2;
+    const y = e && typeof e.y === 'number' ? e.y : null, deniz = !!e && e.tur === 'deniz';
+    const s = deniz && y != null && y <= -1450 ? SFX.top : !deniz && y != null && y <= -1500 ? SFX.tufek : (kilicSira++ % 2 === 0) ? SFX.savas : SFX.savas2;
     playUrl(s.url, s.sure, s.baz);
   }
+  // Savaş ya da deniz savaşı katmanı açıkken küreye yaklaşınca ekranın ortasına en yakın savaşı bulur (yoksa null)
+  function yakinSavas() {
+    const DN = window.Dunya, cv = document.getElementById('globe'), O = window.OLAYLAR, y = yilOku();
+    if (!DN || !DN.view || !DN.layers || !O || y == null || !cv || !cv.getClientRects().length || document.hidden) return null;
+    const v = DN.view; if (!(v.z >= 3.2) || (!DN.layers.savas && !DN.layers.deniz)) return null;
+    const la = v.lat, lo = ((v.lon % 360) + 540) % 360 - 180, esik = 14 / v.z, ar = DN.aralik || 100, ck = Math.cos(la * Math.PI / 180);
+    let en = null, enU = esik;
+    for (const e of O) {
+      if (!e.ll || (e.tur !== 'savas' && e.tur !== 'deniz') || !DN.layers[e.tur] || Math.abs(y - e.y) > ar) continue;
+      const u = Math.hypot(e.ll[0] - la, ((e.ll[1] - lo + 540) % 360 - 180) * ck);
+      if (u < enU) { enU = u; en = e; }
+    }
+    return en;
+  }
+  let sonSavas = null;
 
   // ---------- 🐾 Gerçek Hayvan Sesi Eşleyici ----------
   function hayvanKaydiBul(o) {
@@ -236,9 +351,9 @@
     const btn = document.getElementById('sesbtn');
     if (btn) {
       const kapali = cfg.sessiz || cfg.vol <= 0 || (!cfg.muzik && !cfg.doga && !cfg.hayvan);
-      btn.textContent = kapali ? '🔇' : (cfg.vol < 0.35 ? '🔉' : '🔊');
+      // düğmenin simgesi ayarlar çarkıdır (index.html); ses kapalıyken yalnızca soluklaşır (.sessiz)
       btn.classList.toggle('sessiz', kapali);
-      btn.title = kapali ? 'Ses kapalı — açmak için tıkla' : `Ses ve müzik ayarları (%${Math.round(cfg.vol * 100)})`;
+      btn.title = kapali ? 'Ayarlar (ses kapalı)' : 'Ayarlar: ses, müzik, renk teması ve küre görünümü';
     }
     const pop = document.getElementById('sespop');
     if (!pop) return;
@@ -254,6 +369,13 @@
     const dg = pop.querySelector('#ses-doga'); if (dg) dg.checked = !!cfg.doga;
     const hy = pop.querySelector('#ses-hayvan'); if (hy) hy.checked = !!cfg.hayvan;
     const pr = pop.querySelector('#ses-parca'); if (pr) pr.value = cfg.parca || 'oto';
+    const cl = pop.querySelector('#ses-calan');
+    if (cl) {
+      const p = parcaBul(muzikParcaId), calan = [];
+      if (p && cfg.muzik && !cfg.sessiz && muzikEl) calan.push('🎵 ' + (p.ad || '').replace(/^[^\p{L}\d]+/u, ''));
+      if (ortamId) calan.push('🌍 Bölge sesi: ' + ORTAM[ortamId].ad);
+      cl.textContent = calan.join(' · '); cl.hidden = !calan.length;
+    }
   }
 
   function bagla() {
@@ -279,7 +401,7 @@
     pop.querySelector('#ses-sessiz')?.addEventListener('click', () => {
       cfg.sessiz = !cfg.sessiz;
       kaydet();
-      if (cfg.sessiz) { muzikDurdur(); sfxDurdur(); }
+      if (cfg.sessiz) { muzikDurdur(); sfxDurdur(); ortamAyarla(null); }
       else { sesGuncelle(); if (cfg.muzik) muzikBaslat(); }
       uiGuncelle();
     });
@@ -308,7 +430,7 @@
     });
     pop.querySelector('#ses-doga')?.addEventListener('change', e => {
       cfg.doga = e.target.checked;
-      if (!cfg.doga) sfxDurdur();
+      if (!cfg.doga) { sfxDurdur(); ortamAyarla(null); }
       kaydet(); uiGuncelle();
     });
     pop.querySelector('#ses-hayvan')?.addEventListener('change', e => {
@@ -320,6 +442,7 @@
 
   // Tarayıcı kuralı: ilk kullanıcı dokunuşunda müzik açıksa otomatik başlasın
   const ilkDokunus = () => {
+    dokunuldu = true;
     if (!cfg.sessiz && cfg.muzik) muzikBaslat();
     window.removeEventListener('pointerdown', ilkDokunus);
     window.removeEventListener('keydown', ilkDokunus);

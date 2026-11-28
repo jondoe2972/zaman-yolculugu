@@ -23,26 +23,38 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..800;1,7..72,400..800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/stil.css?v=121">
+<link rel="stylesheet" href="css/stil.css?v=125">
 <style>
-/* Açılış ekranı: sayfa kodları inerken boş sayfa yerine görünür (stil.css'e bağlı değil) */
-.acilis { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, #0e314d, #04101c 70%); color: #e6f2ff; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; transition: opacity .4s ease; }
+/* Açılış ekranı ve jenerik (stil.css'e bağlı değil): sayfa kodları inerken uzay ve uzaktaki dünya (parlak nokta) görünür.
+   Uygulama hazır olunca .jenerik: zemin çözülür, aynı noktadan gerçek küre yaklaşmaya başlar (js/dunya.js acilisSahnesi),
+   başlık bir süre kalıp söner. .bitti: ekran tümüyle kalkar. */
+.acilis { position: fixed; inset: 0; z-index: 200; color: #e6f2ff; font-family: "Literata", Georgia, serif; transition: opacity .6s ease; overflow: hidden; }
+.acilis::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, #0d2740, #050d18 62%, #02060d); transition: opacity .9s ease; }
+.acilis.jenerik { pointer-events: none; }
+.acilis.jenerik::before { opacity: 0; }
 .acilis.bitti { opacity: 0; pointer-events: none; }
-.ac-ic { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 24px; }
-.ac-kure { width: 84px; height: 84px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #7fd3ff, #2484cc 45%, #0f4a82 75%); box-shadow: 0 0 40px rgba(103,232,249,.45); position: relative; overflow: hidden; }
-.ac-kure::before { content: ''; position: absolute; inset: 18% -40% 22% 0; background: radial-gradient(ellipse at 30% 50%, #8fc474 0 22%, transparent 23%), radial-gradient(ellipse at 62% 35%, #c8e6a8 0 16%, transparent 17%), radial-gradient(ellipse at 48% 72%, #8fc474 0 14%, transparent 15%); animation: acDon 3.2s linear infinite; }
-@keyframes acDon { from { transform: translateX(-30%); } to { transform: translateX(30%); } }
-.ac-ic b { font-family: Georgia, serif; font-size: 26px; color: #ffd666; margin-top: 6px; }
-.ac-yazi { font-size: 15px; color: #b8d6ec; min-height: 1.4em; }
-.ac-cubuk { width: 180px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; }
-.ac-cubuk i { display: block; width: 40%; height: 100%; border-radius: 4px; background: #4ade80; animation: acCubuk 1.3s ease-in-out infinite; }
+.ac-yildiz { position: absolute; left: 0; top: 0; width: 2px; height: 2px; border-radius: 50%; background: transparent; transition: opacity .9s ease;
+  box-shadow: 8vw 14vh 0 0 rgba(255,250,236,.8), 21vw 71vh 0 0 rgba(190,214,255,.7), 33vw 28vh 0 0 rgba(255,250,236,.55), 47vw 9vh 0 0 rgba(255,250,236,.75), 58vw 83vh 0 0 rgba(190,214,255,.6), 69vw 22vh 0 0 rgba(255,250,236,.8), 81vw 64vh 0 0 rgba(255,250,236,.6), 92vw 35vh 0 0 rgba(190,214,255,.75), 14vw 46vh 0 0 rgba(255,250,236,.45), 39vw 88vh 0 0 rgba(255,250,236,.6), 74vw 91vh 0 0 rgba(255,250,236,.5), 88vw 8vh 0 0 rgba(255,250,236,.65), 4vw 84vh 0 0 rgba(190,214,255,.55), 63vw 47vh 0 0 rgba(255,250,236,.4), 27vw 6vh 0 0 rgba(255,250,236,.5); animation: acKirp 3.4s ease-in-out infinite alternate; }
+@keyframes acKirp { from { opacity: .55; } to { opacity: 1; } }
+.ac-kure { position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: radial-gradient(circle at 36% 32%, #cfeeff, #5cb6f2 42%, #1b62a8 78%); box-shadow: 0 0 18px 6px rgba(120,190,255,.55), 0 0 70px 26px rgba(80,150,240,.28); animation: acNabiz 2.6s ease-in-out infinite; transition: opacity .7s ease; }
+@keyframes acNabiz { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+.ac-baslik { position: absolute; left: 0; right: 0; top: calc(50% + 62px); text-align: center; padding: 0 20px; }
+.ac-baslik b { display: block; font-size: clamp(24px, 4.6vw, 40px); font-weight: 600; letter-spacing: .14em; color: #fff4d6; text-shadow: 0 2px 22px rgba(4,12,24,.9); }
+.ac-baslik span { display: block; margin-top: 10px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: clamp(10.5px, 1.5vw, 13px); letter-spacing: .34em; text-transform: uppercase; color: #9fc4e2; }
+.ac-alt { position: absolute; left: 0; right: 0; bottom: 9vh; display: flex; flex-direction: column; align-items: center; gap: 10px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; transition: opacity .5s ease; }
+.ac-yazi { font-size: 13.5px; color: #8fb3cc; min-height: 1.4em; }
+.ac-cubuk { width: 150px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
+.ac-cubuk i { display: block; width: 40%; height: 100%; border-radius: 3px; background: #7cc4f5; animation: acCubuk 1.3s ease-in-out infinite; }
 @keyframes acCubuk { from { transform: translateX(-110%); } to { transform: translateX(260%); } }
-.ac-yavas { font-size: 12.5px; color: #8fb3cc; max-width: 260px; }
-@media (prefers-reduced-motion: reduce) { .ac-kure::before, .ac-cubuk i { animation: none; } }
+.ac-yavas { font-size: 12.5px; color: #8fb3cc; max-width: 260px; text-align: center; }
+.acilis.jenerik .ac-kure, .acilis.jenerik .ac-alt, .acilis.jenerik .ac-yildiz { opacity: 0; animation: none; }
+.acilis.jenerik .ac-baslik { animation: acBaslik 3.4s ease forwards; }
+@keyframes acBaslik { 0% { opacity: 1; letter-spacing: 0; } 62% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-10px) scale(1.04); } }
+@media (prefers-reduced-motion: reduce) { .ac-kure, .ac-cubuk i, .ac-yildiz { animation: none; } }
 </style>
 </head>
 <body data-tasarim="kesin" data-menu-stil="kompakt">
-<div id="acilis" class="acilis" role="status" aria-live="polite"><div class="ac-ic"><div class="ac-kure"></div><b>Zaman Yolculuğu</b><span class="ac-yazi" id="ac-yazi">Dünya yükleniyor…</span><div class="ac-cubuk"><i></i></div><span class="ac-yavas" id="ac-yavas" hidden>Bağlantı yavaş görünüyor; ilk açılış biraz sürebilir, sonraki açılışlar hızlı olur.</span></div></div>
+<div id="acilis" class="acilis" role="status" aria-live="polite"><i class="ac-yildiz"></i><div class="ac-kure"></div><div class="ac-baslik"><b>Zaman Yolculuğu</b><span>Dünya tarihi ve doğa atlası</span></div><div class="ac-alt"><span class="ac-yazi" id="ac-yazi">Dünya yükleniyor…</span><div class="ac-cubuk"><i></i></div><span class="ac-yavas" id="ac-yavas" hidden>Bağlantı yavaş görünüyor; ilk açılış biraz sürebilir, sonraki açılışlar hızlı olur.</span></div></div>
 <script>
 // Açılış ekranı: yükleme sırasında değişen kısa yazılar; uygulama hazır olunca uygulama.js kapatır.
 // Bir hata yüzünden kapanmazsa sayfa yüklendikten 4 sn sonra yine de kalkar (ekran kilitli kalmasın).
@@ -50,8 +62,13 @@
   var y = ['Dünya yükleniyor…', 'Kıyılar ve nehirler çiziliyor…', 'Beş bin yılın sınırları hazırlanıyor…', 'Uygarlıklar yerleşiyor…'], i = 0;
   var t = setInterval(function () { var e = document.getElementById('ac-yazi'); if (!e) return clearInterval(t); e.textContent = y[++i % y.length]; }, 1600);
   setTimeout(function () { var e = document.getElementById('ac-yavas'); if (e) e.hidden = false; }, 7000);
-  window.acilisKapat = function () { clearInterval(t); var a = document.getElementById('acilis'); if (!a) return; a.classList.add('bitti'); setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 450); };
-  window.addEventListener('load', function () { setTimeout(window.acilisKapat, 4000); });
+  // acilisKapat(true): jenerik başlar (zemin çözülür, başlık bir süre kalır, sonra ekran kendiliğinden kalkar); acilisKapat(): hemen kalkar
+  window.acilisKapat = function (jenerik) {
+    clearInterval(t); var a = document.getElementById('acilis'); if (!a) return;
+    if (jenerik && !a.classList.contains('jenerik')) { a.classList.add('jenerik'); setTimeout(function () { window.acilisKapat(); }, 3500); return; }
+    a.classList.add('bitti'); setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 650);
+  };
+  window.addEventListener('load', function () { setTimeout(function () { var a = document.getElementById('acilis'); if (a && !a.classList.contains('jenerik')) window.acilisKapat(); }, 4000); });
 })();
 </script>
 <header class="top">
@@ -96,12 +113,16 @@
   <button type="button" data-tema-sec="zumrut">🌿 Zümrüt Orman &amp; Yeşim</button>
   <button type="button" data-tema-sec="mor">🔮 Bizans Moru &amp; Altın</button>
   <button type="button" data-tema-sec="kutup">❄️ Kutup Işığı (Aurora)</button>
+  <b>🌐 Küre Görünümü</b>
+  <button type="button" data-kure-sec="oyun" class="on" title="Düz renkli, hızlı çizim">🎮 Oyun (hızlı)</button>
+  <button type="button" data-kure-sec="resimli" title="Basamaklı renkler ve dağ kabartması; daha yavaş çalışır">🖌️ Resimli kabartma</button>
+  <button type="button" data-kure-sec="gercekci" title="Uydu görünümüne yakın kabartma ve okyanus tabanı; daha yavaş çalışır">🛰️ Gerçekçi</button>
 </div>
 <div id="turpop" class="turpop" hidden role="menu" aria-label="Belgesel Turları"></div>
 <main class="app">
   <section class="stage">
     <canvas id="globe" aria-label="Dünya küresi"></canvas>
-    <div class="globectl"><button id="gzin" title="Yakınlaştır">＋</button><button id="gzout" title="Uzaklaştır">－</button><button id="tamekran" class="tamekran" title="Tam ekran: yıl kartını ve zaman çizelgesini gizle">⛶</button><button id="gecemodbtn" class="tamekran" title="Gece modu: karanlıkta gözü yormayan koyu renkler" aria-pressed="false">🌙</button></div>
+    <div class="globectl"><button id="gzin" title="Yakınlaştır">＋</button><button id="gzout" title="Uzaklaştır">－</button><button id="tamekran" class="tamekran" title="Tam ekran: yıl kartını ve zaman çizelgesini gizle">⛶</button><button id="gecemodbtn" class="tamekran" title="Gece modu: karanlıkta gözü yormayan koyu renkler" aria-pressed="false">🌙</button><button id="tur-ac" class="tamekran" title="Tanıtım turu: siteyi adım adım gezdirir" aria-label="Tanıtım turunu izle">?</button></div>
     <div class="yearcard">
       <b id="yc-city" class="yc-city" hidden></b>
       <b id="yc-year">MÖ 2560</b>
@@ -145,7 +166,7 @@
       <div class="ses-parca-sat">
         <span>🎼 Müzik</span>
         <select id="ses-parca" aria-label="Arka plan müziği seç">
-          <option value="oto">✨ Otomatik (Tarih / Doğa'ya göre)</option>
+          <option value="oto">✨ Otomatik (çağa ve atlasa göre)</option>
           <option value="tarih">🏛️ 1. Tarihî Lavta (Rönesans)</option>
           <option value="arp">🪕 2. Sakin Arp &amp; Kelt Ezgisi</option>
           <option value="keman">🎻 3. Barok Keman Sonatı</option>
@@ -155,7 +176,8 @@
           <option value="okyanus">🌊 7. Sakin Okyanus Dalgaları</option>
         </select>
       </div>
-      <label><input type="checkbox" id="ses-doga" checked><span>🌊 Doğa &amp; olay sesleri (dalga, nehir, kılıç, maden, volkan)</span></label>
+      <small id="ses-calan" class="ses-calan" hidden></small>
+      <label><input type="checkbox" id="ses-doga" checked><span>🌊 Doğa ve olay sesleri (yaklaşınca bölgenin sesi: dalga, orman, rüzgâr)</span></label>
       <label><input type="checkbox" id="ses-hayvan" checked><span>🐾 Gerçek hayvan sesleri (aslan, balina, yunus, kurt…)</span></label>
       <small>Ayarların otomatik kaydedilir; tekrar açana kadar aynı kalır.</small>
     </div>
@@ -176,18 +198,19 @@
           <label><input type="checkbox" data-kat="sinir" checked><span>🗺️ Dönemin sınırları</span></label>
           <label><input type="checkbox" data-kat="yapi"><span>🏛️ Dünyaca ünlü yapıtlar ve anıtlar</span><i></i></label>
           <label><input type="checkbox" data-kat="donum,olay"><span>⚡ Büyük olaylar ve dönüm noktaları</span><i></i></label>
-          <label><input type="checkbox" data-kat="icat"><span>💡 Dünyayı değiştiren büyük icatlar</span><i></i></label>
-          <label><input type="checkbox" data-kat="insanlar"><span>👑 Dünyada yaşamış büyük insanlar</span><i></i></label>
-          <label><input type="checkbox" data-kat="felsefe"><span>🦉 Felsefi akımlar ve düşünce okulları</span><i></i></label>
           <label><input type="checkbox" data-kat="ticaret,yolculuk,yayilis"><span>🐪 Ticaret, keşif ve icat yolları</span><i></i></label>
           <label><input type="checkbox" data-kat="goc,tarihgoc"><span>🧭 İnsanlığın yayılışı ve büyük göçler</span><i></i></label>
+          <label><input type="checkbox" data-kat="insanlar"><span>👑 Dünyada yaşamış büyük insanlar</span><i></i></label>
+          <label><input type="checkbox" data-kat="mit"><span>🐉 Mitler ve efsaneler</span><i></i></label>
+          <label><input type="checkbox" data-kat="icat"><span>💡 Dünyayı değiştiren büyük icatlar</span><i></i></label>
           <label><input type="checkbox" data-kat="megakent"><span>🏙️ Tarih boyunca dünyanın en büyük şehirleri</span><i></i></label>
           <label><input type="checkbox" data-kat="din"><span>🕊️ Dinlerin ve inançların doğuşu ve yayılışı</span><i></i></label>
+          <label><input type="checkbox" data-kat="felsefe"><span>🦉 Felsefi akımlar ve düşünce okulları</span><i></i></label>
           <label><input type="checkbox" data-kat="yazi"><span>📜 Yazının doğuşu, alfabeler ve dil aileleri</span><i></i></label>
-          <label><input type="checkbox" data-kat="liman,bogaz"><span>⚓ Önemli limanlar ve stratejik boğazlar</span><i></i></label>
           <label><input type="checkbox" data-kat="salgin"><span>🦠 Dünyayı değiştiren büyük salgınlar</span><i></i></label>
           <label><input type="checkbox" data-kat="tarihkazi"><span>🏺 Tarihî kazılar ve arkeolojik buluntular</span><i></i></label>
           <label><input type="checkbox" data-kat="magara"><span>🪨 Tarihöncesi mağaralar</span><i></i></label>
+          <label><input type="checkbox" data-kat="liman,bogaz"><span>⚓ Önemli limanlar ve stratejik boğazlar</span><i></i></label>
           <label><input type="checkbox" data-kat="gece"><span>🌓 Canlı gece / gündüz ve şehir ışıkları</span></label>
           <div class="kp-ayir">⚔️ Tarihî Olaylar</div>
           <label><input type="checkbox" data-kat="savas"><span>⚔️ Savaşlar</span><i></i></label>
@@ -197,24 +220,24 @@
           <div class="kp-aralik">Seçili yılın ±<select id="aralik"><option value="1">1</option><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100" selected>100</option><option value="250">250</option><option value="500">500</option></select> yıl çevresi</div>
         </div>
         <div class="kp-grup" data-kpgrup="doga" hidden>
-          <label><input type="checkbox" data-kat="cografya"><span>🏔️ Dağlar (rakım), doğa harikaları ve çöller</span><i></i></label>
-          <label><input type="checkbox" data-kat="nehir"><span>🏞️ Dünya nehirleri (büyüklüğe göre)</span><i></i></label>
-          <label><input type="checkbox" data-kat="iklim"><span>🌡️ İklim kuşakları, biyomlar ve Ekvator</span><i></i></label>
+          <label><input type="checkbox" data-kat="hayvangoc"><span>🐋 Hayvanların yıllık göç döngüsü</span><i></i></label>
+          <label><input type="checkbox" data-kat="hayvan"><span>🦁 Bölge hayvanları</span><i></i></label>
           <label><input type="checkbox" data-kat="akinti"><span>🌊 Akıntılar, girdaplar ve fırtınalar</span><i></i></label>
           <label><input type="checkbox" data-kat="ruzgar"><span>💨 Dünyayı değiştiren yıllık rüzgâr dalgaları</span><i></i></label>
           <label><input type="checkbox" data-kat="volkan"><span>🌋 Yanardağlar ve Ateş Çemberi</span><i></i></label>
-          <label><input type="checkbox" data-kat="taban"><span>🪸 Okyanus tabanı: çukurlar, sırtlar ve resifler</span><i></i></label>
-          <label><input type="checkbox" data-kat="gol"><span>💧 Büyük göller ve dev şelaleler</span><i></i></label>
-          <label><input type="checkbox" data-kat="hayvan"><span>🦁 Bölge hayvanları</span><i></i></label>
           <label><input type="checkbox" data-kat="tukenen"><span>🦣 Nesli tükenen canlılar</span><i></i></label>
+          <label><input type="checkbox" data-kat="cografya"><span>🏔️ Dağlar (rakım), doğa harikaları ve çöller</span><i></i></label>
+          <label><input type="checkbox" data-kat="nehir"><span>🏞️ Dünya nehirleri (büyüklüğe göre)</span><i></i></label>
+          <label><input type="checkbox" data-kat="gol"><span>💧 Büyük göller ve dev şelaleler</span><i></i></label>
+          <label><input type="checkbox" data-kat="taban"><span>🪸 Okyanus tabanı: çukurlar, sırtlar ve resifler</span><i></i></label>
+          <label><input type="checkbox" data-kat="kutup"><span>🌌 Kutup ışıkları (Aurora) ve Buzul Çağı</span><i></i></label>
           <label><input type="checkbox" data-kat="bitki"><span>🌳 Yöreye özgü bitkiler ve ağaçlar</span><i></i></label>
-          <label><input type="checkbox" data-kat="hayvangoc"><span>🐋 Hayvanların yıllık göç döngüsü</span><i></i></label>
+          <label><input type="checkbox" data-kat="iklim"><span>🌡️ İklim kuşakları, biyomlar ve Ekvator</span><i></i></label>
+          <label><input type="checkbox" data-kat="krater"><span>☄️ Göktaşı kraterleri ve jeolojik izler</span><i></i></label>
+          <label><input type="checkbox" data-kat="fosilkazi"><span>🦴 Fosil kazıları ve doğa buluntuları</span><i></i></label>
           <label><input type="checkbox" data-kat="tarim"><span>🌾 Tarım ve besin anavatanları (Vavilov merkezleri)</span><i></i></label>
           <label><input type="checkbox" data-kat="kaynak"><span>⛏️ Dünya madenleri ve yeraltı kaynakları</span><i></i></label>
-          <label><input type="checkbox" data-kat="kutup"><span>🌌 Kutup ışıkları (Aurora) ve Buzul Çağı</span><i></i></label>
-          <label><input type="checkbox" data-kat="krater"><span>☄️ Göktaşı kraterleri ve jeolojik izler</span><i></i></label>
           <label><input type="checkbox" data-kat="manyetik"><span>🧲 Manyetik kutuplar ve Güney Atlantik Anomalisi</span><i></i></label>
-          <label><input type="checkbox" data-kat="fosilkazi"><span>🦴 Fosil kazıları ve doğa buluntuları</span><i></i></label>
           <label><input type="checkbox" data-kat="saat"><span>🕐 Saat dilimleri ve Tarih Değiştirme Çizgisi</span><i></i></label>
           <button type="button" id="derin-ac" class="kp-kesif" style="margin-top:6px">🦖 Derin Zaman: Dinozorlar ve Pangea</button>
         </div>
@@ -287,17 +310,17 @@
   </div>
 </div>
 <script src="js/yil.js?v=3"></script>
-<script src="js/gec-yukle.js?v=1"></script>
+<script src="js/gec-yukle.js?v=2"></script>
 <script src="js/bolge.js?v=9"></script>
 <script src="js/sahne.js?v=36"></script>
-<script src="js/cizim.js?v=29"></script>
+<script src="js/cizim.js?v=31"></script>
 <script src="data/kaynaklar.js?v=2"></script>
 <script src="data/yollar.js?v=1"></script>
 <script src="data/cografya.js?v=1"></script>
 <script src="data/roller.js?v=2"></script>
 <script src="data/sinir/sinir-dizin.js?v=1"></script>
-<script src="data/atlas/okyanus.js?v=2"></script>
-<script src="data/atlas/denizler-ek.js?v=1"></script>
+<script src="data/atlas/okyanus.js?v=3"></script>
+<script src="data/atlas/denizler-ek.js?v=2"></script>
 <script src="data/atlas/ruzgarlar.js?v=1"></script>
 <script src="data/atlas/hayvanlar.js?v=7"></script>
 <script src="data/atlas/bitkiler.js?v=1"></script>
@@ -307,13 +330,14 @@
 <script src="data/atlas/kultur.js?v=1"></script>
 <script src="data/atlas/ekonomi.js?v=1"></script>
 <script src="data/atlas/magaralar.js?v=1"></script>
+<script src="data/atlas/mitler.js?v=3"></script>
 <script src="data/atlas/kazilar.js?v=1"></script>
 <script src="data/atlas/doga-ek.js?v=4"></script>
 <script src="data/atlas/tarih-ek.js?v=3"></script>
 <script src="data/atlas/kultur-ek.js?v=1"></script>
 <script src="data/atlas/surprizler.js?v=5"></script>
 <script src="data/atlas/limanlar.js?v=1"></script>
-<script src="data/atlas/nehirler.js?v=1"></script>
+<script src="data/atlas/nehirler.js?v=2"></script>
 <script src="data/atlas/hayvan-goc.js?v=4"></script>
 <script src="data/atlas/volkanlar.js?v=2"></script>
 <script src="data/atlas/tarihte-bugun.js?v=1"></script>
@@ -321,8 +345,12 @@
 <script src="data/atlas/yolculuk-hikaye-ek.js?v=1"></script>
 <script src="data/atlas/donum-noktalari.js?v=2"></script>
 <script src="data/simge-dizin.js?v=4"></script>
-<script src="js/dunya.js?v=154"></script>
-<script src="data/belgeseller.js?v=2"></script>
+<script src="data/nehir-kalinlik.js?v=1"></script>
+<script src="data/dogal-sekil.js?v=1"></script>
+<script src="data/gol-sekil.js?v=1"></script>
+<script src="js/kure-zemin.js?v=2"></script>
+<script src="js/dunya.js?v=166"></script>
+<script src="data/belgeseller.js?v=3"></script>
 <script src="data/goc.js?v=1"></script>
 <script src="data/yapilar/afrika.js?v=1"></script>
 <script src="data/yapilar/asya.js?v=1"></script>
@@ -330,16 +358,16 @@
 <script src="data/yapilar/amerika.js?v=1"></script>
 <script src="data/yapilar/simgeler.js?v=1"></script>
 <script src="js/kart-paylas.js?v=1"></script>
-<script src="js/uygulama.js?v=139"></script>
-<script src="js/ses.js?v=4"></script>
-<script src="js/hakkinda.js?v=6"></script>
+<script src="js/uygulama.js?v=150"></script>
+<script src="js/ses.js?v=7"></script>
+<script src="js/hakkinda.js?v=8"></script>
 <script src="js/katman-sade.js?v=2"></script>
 <script src="data/ayni-anda.js?v=3"></script>
 <script src="data/ayni-anda-2.js?v=2"></script>
 <script src="js/ayni-anda.js?v=8"></script>
-<script src="js/oyun/oyunlar.js?v=32"></script>
-<script src="js/ara.js?v=28"></script>
-<script src="js/sadelestir.js?v=2"></script>
+<script src="js/oyun/oyunlar.js?v=33"></script>
+<script src="js/ara.js?v=29"></script>
+<script src="js/sadelestir.js?v=3"></script>
 <script src="js/emo-liste.js?v=4"></script>
 <script src="js/emo.js?v=1"></script>
 <script src="js/tek-pencere.js?v=1"></script>

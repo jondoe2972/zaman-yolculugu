@@ -6,12 +6,12 @@
   const a = (href, t) => `<a href="${href}" target="_blank" rel="noopener">${t}</a>`;
   const KAYNAK = [
     ['🗺️', 'Tarihî sınırlar', `${a('https://github.com/Seshat-Global-History-Databank/cliopatria', 'Cliopatria')}, Seshat Global History Databank (MÖ 3400 – MS 2024). Lisans: ${a('https://creativecommons.org/licenses/by/4.0/deed.tr', 'CC BY 4.0')}. Makale: ${a('https://doi.org/10.1038/s41597-025-04516-9', 'Scientific Data, 2025')}. Türkçe devlet adlarının bir kısmı Vikiveri'den eşleştirildi ve elle düzeltildi.`],
-    ['🌍', 'Kıyılar, göller ve nehirler', `${a('https://www.naturalearthdata.com/', 'Natural Earth')} 1:50m (kamu malı).`],
+    ['🌍', 'Kıyılar, nehirler, kabartmalı zemin ve okyanus tabanı', `${a('https://www.naturalearthdata.com/', 'Natural Earth')} 1:50m (kamu malı).`],
     ['🧩', 'Simgeler ve emojiler',`${a('https://github.com/googlefonts/noto-emoji', 'Noto Emoji')} · © Google LLC · resimler ${a('https://www.apache.org/licenses/LICENSE-2.0', 'Apache 2.0')}, yazı tipi ${a('https://openfontlicense.org/', 'SIL OFL 1.1')}. Her cihazda aynı görünsün diye haritadaki simgeler ve sayfadaki emojiler sitenin kendi resim dosyalarından çizilir.`],
     ['🐋', 'Göç hayvanı 3B modelleri', `${a('https://poly.pizza/', 'Poly Pizza')} üzerinden: Poly by Google, Google Data Arts Team ve Paul Spooner (${a('https://creativecommons.org/licenses/by/3.0/deed.tr', 'CC BY')}); Quaternius (CC0). İkonlar Blender ile render edildi.`],
     ['📖', 'Ülke, kişi ve yapı bilgileri', `${a('https://www.wikidata.org/', 'Vikiveri')} (CC0) ve ${a('https://tr.wikipedia.org/', 'Vikipedi')} özetleri (${a('https://creativecommons.org/licenses/by-sa/4.0/deed.tr', 'CC BY-SA 4.0')}). Her kartta özetin alındığı maddeye bağlantı var.`],
     ['📷', 'Fotoğraflar', `${a('https://commons.wikimedia.org/', 'Wikimedia Commons')}. Her fotoğrafın altında çekeni ve lisansı yazıyor; yalnızca özgür lisanslı görseller gösterilir.`],
-    ['🎵', 'Müzik ve doğa sesleri', `Wikimedia Commons kayıtları (her biri kendi lisansıyla) ve ${a('https://developers.google.com/assistant/tools/sound-library', 'Google Sound Library')}.`],
+    ['🎵', 'Müzik ve doğa sesleri', `Wikimedia Commons kayıtları (her biri kendi lisansıyla) ve ${a('https://developers.google.com/assistant/tools/sound-library', 'Google Sound Library')}. Antik Çağ müziği: Seikilos Ağıtı, seslendiren Marcus Harvey (${a('https://commons.wikimedia.org/wiki/File:%CE%9F_%CE%95%CF%80%CE%B9%CF%84%CE%AC%CF%86%CE%B9%CE%BF%CF%82_%CF%84%CE%BF%CF%85_%CE%A3%CE%B5%E1%BF%96%CE%BA%CE%B9%CE%BB%CE%BF%CF%85_-_Epitaph_of_Seikilos.ogg', 'Commons')}, ${a('https://creativecommons.org/licenses/by-sa/2.5/deed.tr', 'CC BY-SA 2.5')}). Öteki çağ müzikleri kamu malı ya da CC0; tam liste KAYNAKLAR.md'de.`],
     ['📚', 'Kitaplar ve makaleler', `Tarihler, olaylar ve sayılar için kullanılan kitapların ve makalelerin tam listesi: ${a(GH + '/blob/main/KAYNAKLAR.md', 'KAYNAKLAR.md')}.`]
   ];
   const html = `<div class="hk">

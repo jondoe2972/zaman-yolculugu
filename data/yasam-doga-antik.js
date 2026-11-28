@@ -48,3 +48,13 @@
     ['yd-archaeopteris', 'Archaeopteris (Dünyanın İlk Gerçek Ağacı · 385 My)', '🌳', [42.2, -74.4], 'Onlarca yıl yaşayan ilk gerçek orman ağacı', 'Devoniyen nehir vadileri — Dünya\'nın ilk ormanları (385 – 350 My önce)', 'Fotosentez — derin kökleriyle toprağı kayalardan ilk kez parçaladı!', 'Dünyanın ilk gerçek odunsu ağacı; ilk gölgeli ormanları yarattı!', 'Çiçeği ve tohumu yoktu; yapraklarının altından spor saçarak tüm kıtalara yayıldı.', '385 milyon yıl önce çıplak kayalık gezegeni ilk kez yemyeşil dev ormanlarla kapladı!', '30 metreye ulaşan odunsu gövdesi ve derin kökleri atmosferdeki CO₂\'yi hızla düşürüp gezegeni serinletti!', 'Adı Archaeopteryx kuşuyla karıştırılır — ama Archaeopteris ondan 230 milyon yıl ÖNCE yaşamış, Dünya\'nın ilk gerçek ağacıdır!', 'Archaeopteris']
   ]));
 })();
+
+// Göç eden hayvanlar neden göç eder (kart satırı: "Neden göç eder?"). araclar/kart-bilgi-ekle.js ile eklendi.
+(() => {
+  const GOC_NEDEN = {
+    'yd-diplodocus': 'Büyük olasılıkla kurak mevsimde su ve taze bitki bulmak için; bu boyda bir sürü bir bölgenin bitkisini kısa sürede tüketirdi.',
+    'yd-parasaurolophus': 'Büyük olasılıkla mevsime göre yeşeren bitkileri ve güvenli yuvalama alanlarını izlemek için.',
+    'yd-triceratops': 'Büyük olasılıkla kurak mevsimde tükenen bitkilerin yerine taze otlak bulmak için.'
+  };
+  for (const h of (window.YASAM_DOGA && window.YASAM_DOGA.hayvanlar) || []) if (GOC_NEDEN[h.id]) h.gocNeden = GOC_NEDEN[h.id];
+})();

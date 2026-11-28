@@ -18,7 +18,7 @@ window.YASAM_DOGA = {
       w: 'Blue whale'
     },
     {
-      id: 'yd-kartal', ad: 'Kaya Kartalı', ik: '🦅', tur: 'hayvan', ll: [39.5, 38.0],
+      id: 'yd-kartal', gocNeden: 'Kuzeyde kışın kalın kar tavşan ve dağ sıçanı gibi avları gizler; av bulmak zorlaşınca kartallar güneye iner. Ilıman dağlarda av yıl boyu bulunduğu için oradakiler göç etmez.', ad: 'Kaya Kartalı', ik: '🦅', tur: 'hayvan', ll: [39.5, 38.0],
       omur: '25 – 30 yıl (doğada)',
       beslenme: 'Yırtıcı etçil — tavşan, dağ sıçanı, tilki ve leşle beslenir.',
       alan: 'Kuzey yarımkürenin yüksek dağları, kanyonları ve bozkırları (Anadolu dahil)',
@@ -60,7 +60,7 @@ window.YASAM_DOGA = {
       w: 'Giant Pacific octopus'
     },
     {
-      id: 'yd-penguen', ad: 'İmparator Penguen', ik: '🐧', tur: 'hayvan', ll: [-77.5, 166.0],
+      id: 'yd-penguen', gocNeden: 'Yumurta ve yavru için aylarca erimeyecek sağlam deniz buzu gerekir. Koloni kıyıdan uzakta, buzun en kalın olduğu yerde kurulur; yavru büyüdüğünde buz erir ve okyanus yakınlaşır.', ad: 'İmparator Penguen', ik: '🐧', tur: 'hayvan', ll: [-77.5, 166.0],
       omur: '15 – 20 yıl',
       beslenme: 'Etçil — balık, kalamar ve Antarktika krili (500 m derine dalabilir!).',
       alan: 'Antarktika deniz buzları ve Güney Okyanusu',
@@ -88,7 +88,7 @@ window.YASAM_DOGA = {
       w: 'African bush elephant'
     },
     {
-      id: 'yd-kaplumbaga', ad: 'Galápagos Dev Kaplumbağası', ik: '🐢', tur: 'hayvan', ll: [-0.65, -90.5],
+      id: 'yd-kaplumbaga', gocNeden: 'Kurak ve serin mevsimde ovadaki otlar kurur; sisin nemli tuttuğu yaylalar ise yeşil kalır. Yağmurlar başlayınca taze ot ve yumurtlama alanı için ovaya geri iner.', ad: 'Galápagos Dev Kaplumbağası', ik: '🐢', tur: 'hayvan', ll: [-0.65, -90.5],
       omur: '100 – 175+ yıl (en uzun yaşayan kara omurgalılarından!)',
       beslenme: 'Otçul — dikenli incir kaktüsü, çimen, yaprak ve düşen meyveler.',
       alan: 'Galápagos Adaları (Ekvador, Büyük Okyanus)',
@@ -172,7 +172,7 @@ window.YASAM_DOGA = {
       w: 'Komodo dragon'
     },
     {
-      id: 'yd-albatros', ad: 'Gezgin Albatros', ik: '🕊️', tur: 'hayvan', ll: [-54.0, -37.0],
+      id: 'yd-albatros', gocNeden: 'Besini olan kalamar ve balık açık okyanusta çok seyrek dağılmıştır; yeterince yiyecek bulmak için rüzgârı kullanarak çok geniş bir alanı taramak zorundadır.', ad: 'Gezgin Albatros', ik: '🕊️', tur: 'hayvan', ll: [-54.0, -37.0],
       omur: '50 – 70 yıl',
       beslenme: 'Etçil — okyanus yüzeyindeki kalamar, balık ve kril.',
       alan: 'Güney Okyanusu\'nun fırtınalı açık denizleri',
@@ -200,7 +200,7 @@ window.YASAM_DOGA = {
       w: 'Common bottlenose dolphin'
     },
     {
-      id: 'yd-denizkaplumbaga', ad: 'Caretta Caretta (İribaş Deniz Kaplumbağası)', ik: '🐢', tur: 'hayvan', ll: [36.8, 28.6],
+      id: 'yd-denizkaplumbaga', gocNeden: 'Beslendiği açık deniz ile yumurtlayabileceği kumsal ayrı yerlerdedir. Kendi çıktığı kumsala döner, çünkü orası yavru çıkarmaya elverişli olduğunu bir kez kanıtlamıştır.', ad: 'Caretta Caretta (İribaş Deniz Kaplumbağası)', ik: '🐢', tur: 'hayvan', ll: [36.8, 28.6],
       omur: '60 – 80 yıl',
       beslenme: 'Etçil/Hepçil — denizanası, yengeç, deniz kestanesi ve süngerler.',
       alan: 'Akdeniz (Dalyan, Patara, Belek kıyıları) ve Atlas-Hint-Pasifik okyanusları',
@@ -215,7 +215,7 @@ window.YASAM_DOGA = {
     },
     // ---- ⏳ Nesli Tükenmiş Hayvan Olarak Yaşa ----
     {
-      id: 'yd-mamut', ad: 'Yünlü Mamut (Nesli Tükendi)', ik: '🦣', tur: 'hayvan', ll: [68.0, 140.0],
+      id: 'yd-mamut', gocNeden: 'Buzul Çağı bozkırında ot mevsime göre yer değiştirirdi; günde yüzlerce kilo bitki yiyen sürüler taze otlağı ve suyu izlemek zorundaydı.', ad: 'Yünlü Mamut (Nesli Tükendi)', ik: '🦣', tur: 'hayvan', ll: [68.0, 140.0],
       omur: '60 – 70 yıl (MÖ ~1700\'de tükendi)',
       beslenme: 'Otçul — günde ~180 kg soğuk bozkır otu, saz ve bodur söğüt dalı.',
       alan: 'Buzul Çağı Sibirya, Avrupa ve Kuzey Amerika mamut bozkırları',
@@ -286,7 +286,7 @@ window.YASAM_DOGA = {
     },
     // ---- +16 Yeni Hayvan Çeşitliliği ----
     {
-      id: 'yd-kralkelebek', ad: 'Kral Kelebeği', ik: '🦋', tur: 'hayvan', ll: [19.6, -100.2],
+      id: 'yd-kralkelebek', gocNeden: 'Kuzeyin kışında donarak ölür. Tırtılının tek besini olan ipekotu ise yazın kuzeyde boldur; bu yüzden yazı kuzeyde, kışı Meksika\'nın serin ama donmayan dağ ormanlarında geçirir.', ad: 'Kral Kelebeği', ik: '🦋', tur: 'hayvan', ll: [19.6, -100.2],
       omur: '2 – 6 hafta (göçmen nesil 8 – 9 ay yaşar!)',
       beslenme: 'Tırtılken yalnızca zehirli ipekotu yaprağı; kelebekken çiçek nektarı.',
       zincir: 'Birincil tüketici & tozlayıcı — yediği ipekotu zehrini vücudunda biriktirdiği için kuşlar tarafından yenmez.',
@@ -303,7 +303,7 @@ window.YASAM_DOGA = {
       w: 'Monarch butterfly'
     },
     {
-      id: 'yd-sumru', ad: 'Arktik Sumru (Göç Rekortmeni)', ik: '🕊️', tur: 'hayvan', ll: [65.0, -18.0],
+      id: 'yd-sumru', gocNeden: 'İki kutbun da yazını yaşar: uzun gündüzlerde küçük balık ve kril avlamak kolaydır. Böylece yılın büyük bölümünü gün ışığında geçirir.', ad: 'Arktik Sumru (Göç Rekortmeni)', ik: '🕊️', tur: 'hayvan', ll: [65.0, -18.0],
       omur: '25 – 34 yıl',
       beslenme: 'Etçil — küçük deniz balıkları, kril ve kabuklular.',
       zincir: 'İkincil deniz avcısı — okyanus yüzeyindeki küçük balıkları avlar, kutup tilkisi ve yırtıcı martılardan kaçınır.',
@@ -473,7 +473,7 @@ window.YASAM_DOGA = {
       w: 'Leafcutter ant'
     },
     {
-      id: 'yd-yusufcuk', ad: 'Yusufçuk (Hava Avcısı)', ik: '🪰', tur: 'hayvan', ll: [40.0, 29.0],
+      id: 'yd-yusufcuk', gocNeden: 'Larvaları, yağmurların oluşturduğu geçici su birikintilerinde büyür. Yusufçuklar muson yağmurlarını izleyerek her kuşakta yeni yağmur alan bölgeye geçer.', ad: 'Yusufçuk (Hava Avcısı)', ik: '🪰', tur: 'hayvan', ll: [40.0, 29.0],
       omur: '1 – 5 yıl su altı larvası, 2 – 6 ay uçan yetişkin',
       beslenme: 'Etçil — günde 100\'den fazla sivrisinek, tatarcık ve küçük böcek avlar!',
       zincir: 'Hava süper avcısı — sivrisinekleri kontrol ederek insanları sıtma gibi hastalıklardan korur; kurbağa ve kuşlara av olur.',
@@ -507,7 +507,7 @@ window.YASAM_DOGA = {
       w: 'Platypus'
     },
     {
-      id: 'yd-akbaba', ad: 'Kızıl Akbaba (Doğanın Temizlik Ekibi)', ik: '🦅', tur: 'hayvan', ll: [39.0, 32.0],
+      id: 'yd-akbaba', gocNeden: 'Kışın soğuk havada onu taşıyan sıcak hava akımları zayıflar ve leş bulmak zorlaşır. Deneyimsiz gençler bu yüzden kışı sıcak Afrika\'da geçirir.', ad: 'Kızıl Akbaba (Doğanın Temizlik Ekibi)', ik: '🦅', tur: 'hayvan', ll: [39.0, 32.0],
       omur: '25 – 40 yıl',
       beslenme: 'Leşçil — yalnızca ölü hayvanları yer, canlı av peşinde koşmaz.',
       zincir: 'Kritik ayrıştırıcı/temizlikçi — leşleri hızla tüketerek salgın hastalıkların yayılmasını önler.',
@@ -1266,7 +1266,7 @@ window.YASAM_DOGA = {
     },
     'yd-kaplumbaga': {
       zincir: 'Ada otçulu & tohum dağıtıcısı — kaktüs ve otları yiyip tohumlarını adaya yayar; yetişkininin doğal düşmanı yoktur.',
-      goc: 'Yağmur mevsiminde kıyıdan volkan yamaçlarındaki yeşil yaylalara doğru birkaç kilometrelik yavaş göç yapar.',
+      goc: 'Kurak mevsimde ovadan volkan yamaçlarındaki yeşil yaylalara çıkar, yağmur mevsiminde yeniden ovaya iner; birkaç kilometrelik yavaş bir göçtür.',
       sasirtici: 'Metabolizması o kadar yavaştır ki tek damla su içmeden ve yemek yemeden 1 YIL boyunca hayatta kalabilir; 170 yılı aşan ömrüyle birkaç insan kuşağına tanıklık eder!'
     },
     'yd-ari': {

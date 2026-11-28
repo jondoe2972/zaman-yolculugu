@@ -5,7 +5,7 @@
   if (!YD) return;
   YD.hayvanlar.push(
     {
-      id: 'yd-sinekkusu', ad: 'Arı Sinekkuşu', ik: '🐦', tur: 'hayvan', ll: [21.5, -79.0],
+      id: 'yd-sinekkusu', gocNeden: 'Yakut boğazlı sinekkuşu gibi göçmen türler için: Kuzey Amerika\'da kışın çiçek nektarı ve böcek kalmaz. Çok hızlı çalışan metabolizmaları aç kalmaya dayanamadığından kışı Orta Amerika\'da geçirirler.', ad: 'Arı Sinekkuşu', ik: '🐦', tur: 'hayvan', ll: [21.5, -79.0],
       omur: '3 – 7 yıl',
       beslenme: 'Çiçek nektarı ve minik sinekler — her 10 dakikada bir beslenmek zorundadır!',
       zincir: 'Hızlı tozlayıcı — yüzlerce tropikal çiçeği tozlaştırır; örümcekler ve peygamber develerinden kaçınır.',
@@ -73,7 +73,7 @@
       w: 'Axolotl'
     },
     {
-      id: 'yd-narval', ad: 'Narval (Denizin Tek Boynuzlusu)', ik: '🐋', tur: 'hayvan', ll: [73.0, -80.0],
+      id: 'yd-narval', gocNeden: 'Yazın buzsuz, sığ fiyortlarda yavrular. Kışın açık denizin derin sularında, yoğun buzun altında balık avlar; buz onu katil balinalardan da korur.', ad: 'Narval (Denizin Tek Boynuzlusu)', ik: '🐋', tur: 'hayvan', ll: [73.0, -80.0],
       omur: '40 – 50 yıl',
       beslenme: 'Etçil — Grönland pisi balığı, Arktik morina ve kalamar.',
       zincir: 'Arktik derin dalış avcısı — kutup ayıları ve orkalar baş düşmanıdır.',
@@ -124,7 +124,7 @@
       w: 'Three-toed sloth'
     },
     {
-      id: 'yd-flamingo', ad: 'Flamingo', ik: '🦩', tur: 'hayvan', ll: [38.7, 33.4],
+      id: 'yd-flamingo', gocNeden: 'Beslendiği sığ tuzlu göllerin su düzeyi mevsime göre değişir. Göl kuruduğunda ya da donduğunda, tuzla karidesi ve alg bulabileceği başka bir göle geçer.', ad: 'Flamingo', ik: '🦩', tur: 'hayvan', ll: [38.7, 33.4],
       omur: '30 – 40 yıl (hayvanat bahçelerinde 60+ yıl!)',
       beslenme: 'Tuzlu göllerdeki mavi-yeşil algler ve tuz karideslerini ters gagasından süzerek yer.',
       zincir: 'Tuz gölü süzücüsü — başka kuşların yaşayamadığı aşırı tuzlu ve sodalı göllerde beslenir.',
@@ -158,7 +158,7 @@
       w: 'Barn owl'
     },
     {
-      id: 'yd-zurafa', ad: 'Zürafa', ik: '🦒', tur: 'hayvan', ll: [-2.0, 36.0],
+      id: 'yd-zurafa', gocNeden: 'Kurak mevsimde yaprağını döken ağaçlardan, yeşil kalan nehir kıyısı ormanlarına geçer; yağmurla birlikte taze yaprak veren savana geri döner.', ad: 'Zürafa', ik: '🦒', tur: 'hayvan', ll: [-2.0, 36.0],
       omur: '20 – 25 yıl',
       beslenme: 'Otçul — başka hiçbir hayvanın ulaşamadığı yüksek akasya yaprakları.',
       zincir: 'Yüksek ağaç tüketicisi — savanın gözetleme kulesi gibidir; diğer otçullar tehlikeyi zürafaya bakıp anlar.',
@@ -226,7 +226,7 @@
       w: 'Meerkat'
     },
     {
-      id: 'yd-kutuptilkisi', ad: 'Kutup Tilkisi', ik: '🦊', tur: 'hayvan', ll: [78.2, 15.6],
+      id: 'yd-kutuptilkisi', gocNeden: 'Başlıca avı olan lemmingler azaldığında ya da genç tilki kendine boş bir bölge aradığında, deniz buzunu köprü gibi kullanarak çok uzaklara yürür.', ad: 'Kutup Tilkisi', ik: '🦊', tur: 'hayvan', ll: [78.2, 15.6],
       omur: '3 – 6 yıl (doğada)',
       beslenme: 'Hepçil — lemming kemirgenleri, deniz kuşları, balık ve kutup ayısı artıkları.',
       zincir: 'Arktik tundra avcısı — lemming popülasyonuna bağlı yaşar; kar baykuşu ve kutup ayısına dikkat eder.',
@@ -379,7 +379,7 @@
       w: 'Okapi'
     },
     {
-      id: 'yd-leylek', ad: 'Beyaz Leylek', ik: '🦢', tur: 'hayvan', ll: [40.2, 28.6],
+      id: 'yd-leylek', gocNeden: 'Avrupa\'da kışın kurbağa, çekirge ve öteki böcekler ortadan kalkar. Yiyeceğin bol olduğu Afrika\'da kışlar, baharda yavrulamak için kuzeye döner.', ad: 'Beyaz Leylek', ik: '🦢', tur: 'hayvan', ll: [40.2, 28.6],
       omur: '20 – 35 yıl',
       beslenme: 'Etçil — kurbağa, böcek, çekirge, yılan ve tarla faresi.',
       zincir: 'Sulak alan ve tarla avcısı — çiftçilerin en sevdiği doğal zararlı kontrolcüsüdür.',

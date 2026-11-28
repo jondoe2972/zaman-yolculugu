@@ -44,6 +44,21 @@ Uygulamadaki bilgiler aşağıdaki standart kaynaklara dayanıyor. Tarihler yakl
 
 ## Dünya küresi
 - Kıyı ve nehirler: Natural Earth 1:50m (kamu malı), küçültülerek data/dunya-veri.js'e çevrildi.
+- Kürenin kabartmalı zemini: Natural Earth 1:50m "Natural Earth II with Shaded Relief and Water" (kara) ve "Ocean Bottom" (okyanus tabanı) görselleri (kamu malı; naturalearthdata.com). araclar/zemin-uret.py ile küçültülüp img/zemin-kara-4k.webp, img/zemin-kara-8k.webp ve img/zemin-deniz.webp üretildi.
+- Nehir kalınlıkları: Natural Earth 1:50m "Rivers + lake centerlines, scale rank" (kamu malı); araclar/nehir-kalinlik.js ile data/nehir-kalinlik.js üretildi.
+- Çağa göre müzik (js/ses.js, CAGLAR; hepsi Wikimedia Commons, 28.11.2026'da lisansları Commons API'siyle denetlendi):
+  - Tunç Çağı: "Hurrian Song H6.ogg", Ugarit'te bulunan h.6 tabletinin (Nikkal'a ilahi) ilk iki satırının varsayımsal yorumu; yükleyen Kapoios2026; CC0.
+  - Antik Çağ: "Ο Επιτάφιος του Σεῖκιλου - Epitaph of Seikilos.ogg"; Marcus Harvey, User:Byz; CC BY-SA 2.5 (atıf gerekli: Hakkında penceresinde yazıyor).
+  - Orta Çağ: "Santa Maria.ogg", Cantigas de Santa Maria 100. ezgi ("Santa Maria, Strela do Dia"); user:Makemi; kamu malı.
+  - Rönesans: "Ludwig Senfl -- Ach Elslein.opus"; Barok: "Telemann - 2violin Sonata 1-1.ogg" (önceden de kullanılıyordu).
+  - Klasik dönem: "Wolfgang Amadeus Mozart - sonata no. 16 in c major, k.545 'sonata facile' - i. allegro.ogg"; kamu malı.
+  - Romantik dönem: "Chopin Nocturne No. 2 in E Flat Major, Op. 9.ogg"; Peter Johnston; CC0.
+  - 20. yüzyıl: "Clair de Lune by Claude Debussy (1905, piano solo).opus"; kamu malı.
+- Savaş sesleri: tüfek "Gunshots 8.ogg" (Wikimedia Commons, yükleyen aradlaw, kamu malı); top sesi Google Sound Library "big_explosion_distant".
+- Mitler ve efsaneler (data/atlas/mitler.js): 28.11.2026'da 30 kart İngilizce Vikipedi maddeleriyle, Şahmaran kartı TDV İslâm Ansiklopedisi "Câmasbnâme" maddesiyle karşılaştırıldı.
+- Mitler ve efsaneler, kaynak listesi (data/atlas/mitler.js): anlatılar için antik kaynaklar her kartta yazıyor (30 kayıt: Homeros, Platon, Tevrat ve Kur'an, Gılgamış Destanı, Plutarkhos, Ovidius, Livius, Apollonios, Strabon, Herodotos, Firdevsî, Valmiki, Sima Qian, Kojiki, Reşîdüddin, Garcilaso de la Vega ve ötekiler). "Gerçekte ne biliyoruz?" bölümleri genel başvuru bilgisinden yazıldı; tek tek kaynakla karşılaştırılmadı.
+- Göl biçimleri: Natural Earth 1:50m "Lakes" (kamu malı; github.com/nvkelso/natural-earth-vector); araclar/gol-sekil.js ile data/gol-sekil.js üretildi. Aral Gölü elle çizilmiştir (1960 öncesindeki hâli).
+- Çöl, buz örtüsü ve Hazar Denizi biçimleri: aynı "Natural Earth II" görselinin arazi renklerinden araclar/dogal-sekil.py ile çıkarıldı (data/dogal-sekil.js). Çöl sınırları görseldeki kum renklerine dayanır; kesin bir iklim sınırı değildir.
 - Dönemlere göre Mısır sınırları yaklaşıktır (Baines ve Málek, *Atlas of Ancient Egypt*; Shaw 2000). Antik devletlerin kesin sınır çizgileri yoktu.
 
 ## 3D görünüm için indirilen dosyalar (2026-11-20)

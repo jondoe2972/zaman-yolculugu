@@ -132,3 +132,22 @@
     ['yd-bakteriDemir', 'Manyetik Bakteri (Canlı Pusula)', '🧭', [41.5, -70.6], 'Saatler içinde bölünür', 'Deniz ve göl tabanı çamurları', 'Oksijenin az olduğu sınır tabakasında kimyasal enerji.', 'Çamur tabakasının mikroskobik kâşifi.', 'Bölünürken içindeki mıknatıs zincirini de iki yavruya eşit paylaştırır!', 'Dünya\'nın manyetik alan çizgilerini takip ederek doğru oksijen derinliğine yüzer.', 'Hücresinin içinde tıpkı bir pusula iğnesi gibi dizilmiş gerçek DEMİR-MANYETİT kristalleri üretir!', 'İnsanlar pusulayı icat etmeden milyarlarca yıl önce bu minik bakteriler kendi vücutlarının içinde gerçek manyetik pusula inşa etmişti!', 'Magnetotactic bacteria']
   ]));
 })();
+
+// Göç eden hayvanlar neden göç eder (kart satırı: "Neden göç eder?"). araclar/kart-bilgi-ekle.js ile eklendi.
+(() => {
+  const GOC_NEDEN = {
+    'yd-kelaynak': 'Kışın Fırat kıyılarında böcek ve küçük sürüngen kalmazdı; kuşlar kışı Etiyopya yaylalarında geçirirdi. Bugün Birecik\'tekiler kışın koruma altında tutulur.',
+    'yd-kanguru': 'Avustralya\'nın iç kesimlerinde yağmur düzensiz yağar; taze ot yalnızca yağmur alan yerde biter. Kangurular uzaktaki fırtınaların ardından yeşeren alana gider.',
+    'yd-pelikan': 'Kışın kuzeydeki göller donar ve balıklar derine çekilir; pelikanlar balık tutabilecekleri sıcak ve sığ sulara, Afrika\'ya iner.',
+    'yd-rengeyigi': 'Yazın kuzeydeki tundrada taze ot ve yavrulamak için güvenli alan bulur, serin rüzgâr sinek sürülerini de uzak tutar. Kışın, karın altından liken kazıyabildiği ormanlık güneye iner.',
+    'yd-atnalikrab': 'Yumurtalarını bırakmak için. Yumurtalar, en yüksek gelgitin ulaştığı kumda dalgalardan ve denizdeki avcılardan uzakta gelişir.',
+    'yd-tardigrad2': 'Sayıları çok artınca bulundukları yerin bitkisi tükenir. Sürü, yağmurdan sonra yeşeren yeni alanlara doğru rüzgârla birlikte uçar.',
+    'yd-orumcek': 'Yumurtadan çıkan yüzlerce yavru aynı yerde kalırsa yiyecek için birbiriyle yarışır, hatta birbirini yer. Rüzgârla dağılarak boş bir avlanma alanı bulurlar.',
+    'yd-yunusnehir': 'Sular yükselince balıklar su basmış ormanın içine dağılır; yunus da avının peşinden ağaçların arasına girer.',
+    'yd-puffin': 'Yumurtasını denizde bırakamaz; karada, yırtıcıların ulaşamadığı uçurum yuvalarında ürer. Yavru büyüyünce balığın bol olduğu açık denize döner.',
+    'yd-sinekkanat': 'Avladığı küçük kuşlar kışın kuzeyi terk eder; gökdoğan da avının peşinden güneye iner.',
+    'yd-bizon': 'Mevsime göre yeşeren otlakları izlerdi: yazın kuzeyin taze çayırlarına çıkar, kışın karın daha ince olduğu güneye inerdi.',
+    'yd-alpkeçisi': 'Yüksekte kış boyu kalın kar otu örter. Güneşi gören alçak güney yamaçlarında kar incedir ve ot karın altından çıkarılabilir.'
+  };
+  for (const h of (window.YASAM_DOGA && window.YASAM_DOGA.hayvanlar) || []) if (GOC_NEDEN[h.id]) h.gocNeden = GOC_NEDEN[h.id];
+})();

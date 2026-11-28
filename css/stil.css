@@ -2825,8 +2825,48 @@ body[data-gece="1"] {
   --c-soluk: #A9B8C6; /* ikincil metin */
   color-scheme: dark;
 }
-body[data-gece="1"] #globe { filter: brightness(0.78) saturate(0.9); }
+/* Oyun görünümünde küre gece modunda süzgeçle karartılır; kabartmalı görünümler kendi gece renkleriyle çizilir (js/dunya.js) */
+body[data-gece="1"]:not([data-kure="resimli"]):not([data-kure="gercekci"]) #globe { filter: brightness(0.78) saturate(0.9); }
 body[data-gece="1"] #timeline { filter: invert(0.92) hue-rotate(180deg) brightness(1.05); }
 /* ana renk gece modunda açık olduğundan, üstündeki yazı koyu olmalı */
 body[data-gece="1"][data-tasarim="kesin"] .tl .ctrl .play,
 body[data-gece="1"][data-tasarim="kesin"] .um-stil-sec button.on { color: #1b1200 !important; }
+
+/* ---------- Açılış sahnesi (28.11.2026) ----------
+   Dünya uzaydan dönerek yaklaşırken (js/dunya.js acilisSahnesi) arayüz gizli durur; sahne bitince yumuşakça belirir. */
+body.acilis-an .top, body.acilis-an .tl, body.acilis-an .stage > :not(#globe) { opacity: 0 !important; pointer-events: none; }
+/* Arayüzün gelişi: önce genel olarak belirir, ardından parçalar hafif büyük başlayıp yaylanarak yerine oturur (sırayla).
+   "scale" özelliği kullanılır: öğelerin kendi transform'larına (ortalama vb.) dokunmaz. */
+body.acilis-gel .top, body.acilis-gel .tl, body.acilis-gel .stage > :not(#globe) { animation: acSol .7s ease both; }
+body.acilis-gel .modlar, body.acilis-gel .place, body.acilis-gel #menubtn { animation: acYerles .8s cubic-bezier(.2, .85, .25, 1.14) both; }
+body.acilis-gel .stage > .yearcard { animation: acYerles .8s cubic-bezier(.2, .85, .25, 1.14) .08s both; }
+body.acilis-gel #katbtn, body.acilis-gel #sesbtn { animation: acYerles .8s cubic-bezier(.2, .85, .25, 1.14) .16s both; }
+body.acilis-gel .stage > .globectl { animation: acYerles .8s cubic-bezier(.2, .85, .25, 1.14) .24s both; }
+@keyframes acSol { from { opacity: 0; } to { opacity: 1; } }
+@keyframes acYerles { from { opacity: 0; scale: 1.22; } to { opacity: 1; scale: 1; } }
+@media (prefers-reduced-motion: reduce) { body.acilis-gel * { animation: none !important; } }
+
+/* ---------- Tanıtım turu (28.11.2026): js/uygulama.js TUR ----------
+   .gt-perde tıklamaları tutar; .gt-halka gösterilen yeri çerçeveler ve gerisini karartır; .gt-kutu anlatım kutusu. */
+.gt-perde { position: fixed; inset: 0; z-index: 940; background: transparent; }
+.gt-halka { position: fixed; z-index: 941; pointer-events: none; border: 2px solid var(--c-vurgu, #F0642F); box-shadow: 0 0 0 200vmax rgba(8, 14, 26, 0.6), 0 0 0 6px rgba(240, 100, 47, 0.22); transition: left .4s ease, top .4s ease, width .4s ease, height .4s ease, border-radius .4s ease; }
+.gt-halka.bos { border-color: transparent; box-shadow: 0 0 0 200vmax rgba(8, 14, 26, 0.6); }
+.gt-kutu { position: fixed; z-index: 942; left: 50%; bottom: 22px; transform: translateX(-50%); width: min(430px, calc(100vw - 24px)); padding: 16px 18px 14px; border-radius: 16px; background: var(--c-gri1, #fff); color: var(--c-gri3, #17212B); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38); font-family: var(--f-metin, system-ui, sans-serif); }
+.gt-kutu.ustte { bottom: auto; top: 22px; }
+.gt-kutu.ortada { bottom: auto; top: 50%; transform: translate(-50%, -50%); }
+.gt-perde[hidden], .gt-halka[hidden], .gt-kutu[hidden] { display: none; }
+.gt-ust { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.gt-say { font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--c-soluk, #56616D); }
+.gt-kutu h3 { margin: 0 0 6px; font-family: var(--f-baslik, Georgia, serif); font-size: 20px; line-height: 1.2; }
+.gt-kutu p { margin: 0 0 12px; font-size: 14.5px; line-height: 1.5; }
+.gt-cubuk { height: 3px; border-radius: 3px; background: var(--c-gri2, #E1E7EE); overflow: hidden; margin-bottom: 12px; }
+.gt-cubuk i { display: block; height: 100%; width: 0; background: var(--c-ana, #0F6E8C); transition: width .1s linear; }
+.gt-cubuk[hidden] { display: none; }
+.gt-alt { display: flex; align-items: center; gap: 8px; }
+.gt-kutu button { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--c-gri2, #E1E7EE); background: var(--c-ic, #F3F6F9); color: inherit; padding: 8px 12px; min-height: 38px; }
+.gt-kutu button[hidden] { display: none; }
+.gt-kutu .gt-ileri { margin-left: auto; background: var(--c-vurgu, #F0642F); border-color: transparent; color: #fff; font-weight: 700; padding: 8px 16px; }
+.gt-kutu .gt-gec { font-size: 13px; font-weight: 700; padding: 6px 10px; min-height: 32px; }
+.gt-kutu .gt-dur { min-width: 38px; padding: 8px; }
+@media (max-width: 600px) { .gt-kutu { bottom: 12px; padding: 14px 14px 12px; } .gt-kutu.ustte { top: 12px; } .gt-kutu h3 { font-size: 18px; } .gt-kutu p { font-size: 14px; } }
+@media (prefers-reduced-motion: reduce) { .gt-halka { transition: none; } }

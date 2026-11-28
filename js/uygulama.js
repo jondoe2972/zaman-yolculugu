@@ -337,6 +337,7 @@
     ['volkan', '🌋 Yanardağlar ve Ateş Çemberi', () => (window.ATLAS_VOLKANLAR?.volkanlar || []).length],
     ['yasamdoga', '🐾🌿🦠 Hayvan, Bitki ve Mikro Yaşamlar', () => ((window.YASAM_DOGA?.hayvanlar || []).length + (window.YASAM_DOGA?.bitkiler || []).length + (window.YASAM_DOGA?.mikroplar || []).length)],
     ['magara', '🪨 Tarihöncesi Mağaralar ve Kazılar', () => (window.ATLAS_MAGARALAR || []).length],
+    ['mit', '🐉 Mitler ve Efsaneler', () => (window.ATLAS_MITLER || []).length],
     ['tarihkazi', '🏺 Tarihî Kazılar ve Arkeolojik Buluntular', () => (window.ATLAS_KAZILAR?.tarih || []).length],
     ['fosilkazi', '🦴 Fosil Kazıları ve Doğa Buluntuları', () => (window.ATLAS_KAZILAR?.doga || []).length],
     ['donum', '⚡ Dünyayı Değiştiren Büyük Olaylar', () => (window.DONUM_NOKTALARI || []).length],
@@ -478,6 +479,7 @@
     if (window.Ses) window.Ses.playOkyanus();
     const genel = `<div class="kapak" data-kapak="${esc(o.w)}"></div>
       ${rowsHTML([['Tür', o.tur === 'deniz' ? 'Deniz' : 'Okyanus'], ['Yüzölçümü', o.yuzolcum], ['Derinlik', o.derinlik], ['Su sıcaklığı', o.sicaklik]])}
+      ${o.baglanti ? `<h4>🔗 Bağlandığı ve Karıştığı Sular</h4><p>${esc(o.baglanti)}</p>` : ''}
       <h4>🐋 Canlı Yaşamı</h4><p>${esc(o.canlilar)}</p>
       <h4>🌀 Akıntılar ve Su Hareketi</h4><p>${esc(o.akintiOzet)}</p>
       <h4>📜 Tarihteki Rolü</h4><p>${esc(o.tarih)}</p>
@@ -637,6 +639,21 @@
       ...(m.w ? [photoTab(m.w, 8, true)] : [])
     ] });
   }
+  // 🐉 Mit ve efsane kartı: anlatı, gerçekte bilinenler ve en eski kaynaklar ayrı başlıklarda durur
+  function openMit(m) {
+    if (!m) return;
+    kesifKaydet('mit', m.id);
+    const genel = `<div class="kapak" data-kapak="${esc(m.w)}"></div>
+      <span class="pill">🐉 Mit ve Efsane</span>
+      ${rowsHTML([['Konum', m.yer], ['Kültür', m.kultur]])}
+      <h4>📖 Anlatı</h4><p>${esc(m.anlati)}</p>
+      <h4>🔎 Gerçekte Ne Biliyoruz?</h4><p>${esc(m.gercek)}</p>
+      <h4>📚 En Eski Kaynaklar</h4><p>${esc(m.kaynak)}</p>`;
+    showModal({ ikon: m.ik || '🐉', title: m.ad, sub: m.yer, tabs: [
+      { ad: '🐉 Anlatı ve Gerçek', html: genel, onShow: b => kapakYukle(b.querySelector('.kapak')) },
+      ...(m.w ? [photoTab(m.w, 8, true)] : [])
+    ] });
+  }
   function openSurpriz(sp) {
     if (!sp) return;
     const ilk = kesifKaydet('surpriz', sp.id);
@@ -674,6 +691,8 @@
     const genel = `<div class="kapak" data-kapak="${esc(nr.w)}"></div>
       <span class="pill">🏞️ ${nr.boy === 3 ? 'Dev Dünya Nehri' : nr.boy === 2 ? 'Büyük Bölgesel Nehir' : 'Önemli Tarihî & Doğal Nehir'}</span>
       ${rowsHTML([['Uzunluk', nr.uzunluk], ['Havza', nr.havza]])}
+      ${nr.kaynak ? `<h4>🏔️ Nerede ve Nasıl Doğar?</h4><p>${esc(nr.kaynak)}</p>` : ''}
+      ${nr.dokulur ? `<h4>🌊 Nereye Dökülür?</h4><p>${esc(nr.dokulur)}</p>` : ''}
       <h4>🌿 Doğa ve Canlı Yaşamı</h4><p>${esc(nr.doga)}</p>
       <h4>📜 Tarihteki Yeri</h4><p>${esc(nr.tarih)}</p>
       <div class="gos"><button class="phbtn icbtn" data-atlaskure="nehir|${nr.ll[0]}|${nr.ll[1]}|${esc('🏞️ ' + nr.ad)}">🌍 Kürede göster</button><button class="phbtn" data-nrses="1">🔊 Nehir Sesi</button></div>`;
@@ -1003,8 +1022,9 @@
     showModal({ ikon: '📅', title: 'Tarihte Bugün & Bu Yıl', sub: `📅 ${baslikTarih} · 🗓️ ${YIL.fmt(Math.round(Y))} ve çevresi`, open: acSekme || 0,
       tabs: [{ ad: '📅 Tarihte Bugün', html }, tbySekme(), ayniAndaSekme()] });
   }
-  const KAT_STORE_KEY = 'zy-katman-v1';
-  const KAT_VARSAYILAN = { tarih: { sinir: true }, doga: {} };
+  const KAT_STORE_KEY = 'zy-katman-v2';   // v2: açılış katmanları değişti (eski kayıt yeni açılışı örtmesin diye anahtar yenilendi)
+  // Doğa Atlası site açılışında göründüğü için ilk ziyarette boş kalmaz: hayvanlar, hayvan göçleri ve okyanus akıntıları açık gelir
+  const KAT_VARSAYILAN = { tarih: { sinir: true }, doga: { hayvan: true, hayvangoc: true, akinti: true } };
   let aktifAtlasMod = 'tarih';
   function katKayitOku() {
     try {
@@ -1496,7 +1516,7 @@
         const h = DN.hitTest(...cvPos(gcv, ev), ev.pointerType === 'mouse' ? 0 : 12);
         if (h && h.kind === 'turdurak') { turOtoDurdur(); turDurakGoster(h.idx); }
       } else if (typeof window.__kureSec === 'function') { const cb = window.__kureSec; window.__kureSec = null; cb(DN.llAt(...cvPos(gcv, ev))); }
-      else { const h = DN.hitTest(...cvPos(gcv, ev), ev.pointerType === 'mouse' ? 0 : 12); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'donum') openDonum(h.d); else if (h && h.kind === 'hatyapi') openHatYapi(h.hy); else if (h && h.kind === 'magara') openMagara(h.m); else if (h && h.kind === 'tarihkazi') openKazi(h.kz, 'tarih'); else if (h && h.kind === 'fosilkazi') openKazi(h.kz, 'doga'); else if (h && h.kind === 'iklim') openAtlasEk('iklim', h.b, h.n); else if (h && h.kind === 'cizgi') openAtlasEk('cizgi', h.cz); else if (h && h.kind === 'taban') openAtlasEk('taban', h.t); else if (h && h.kind === 'tabansirt') openAtlasEk('taban', h.sr); else if (h && h.kind === 'kutup') openAtlasEk('kutup', h.k); else if (h && h.kind === 'krater') openAtlasEk('krater', h.kr); else if (h && h.kind === 'gol') openAtlasEk('gol', h.gl); else if (h && h.kind === 'saat') openAtlasEk('saat', h.s); else if (h && h.kind === 'yazi') openAtlasEk('yazi', h.yz); else if (h && h.kind === 'din') openAtlasEk('din', h.dn); else if (h && h.kind === 'tarihgoc') openAtlasEk('tarihgoc', h.mg); else if (h && h.kind === 'salgin') openAtlasEk('salgin', h.sg); else if (h && h.kind === 'bogaz') openAtlasEk('bogaz', h.bg); else if (h && h.kind === 'manyetik') openAtlasEk('manyetik', h.mn); else if (h && h.kind === 'tarimvav') openAtlasEk('tarim', h.tr); else if (h && h.kind === 'megakent') openAtlasEk('megakent', h.mk); else if (h && h.kind === 'icat') openAtlasEk('icat', h.it); else if (h && h.kind === 'felsefe') openAtlasEk('felsefe', h.it); else if (h && h.kind === 'insanlar') openAtlasEk('insanlar', h.it); else if (h && h.kind === 'surpriz') openSurpriz(h.sp); else if (h && h.kind === 'liman') openLiman(h.lm); else if (h && h.kind === 'nehir') openNehir(h.nr); else if (h && h.kind === 'hayvangoc') openHayvanGoc(h.hg); else if (h && h.kind === 'volkan') openVolkan(h.v); else if (h && h.kind === 'fay') openFay(h.f); else if (h && h.kind === 'akinti') openAkinti(h.a); else if (h && h.kind === 'ruzgar') openRuzgar(h.rz); else if (h && h.kind === 'denizolay') openDenizOlay(h.o); else if (h && h.kind === 'hayvan') openHayvan(h.h); else if (h && h.kind === 'bitki') openBitki(h.bt); else if (h && h.kind === 'yayilis') { DN.setYayilis(h.yy.id); openYayilis(h.yy); } else if (h && h.kind === 'cografya') openCografya(h.cg); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); else if (!h) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) { if (DN.karaMi && !DN.karaMi(ll[0], ll[1])) { const ok = okyanusBul(ll[0], ll[1]); if (ok) openOkyanus(ok); } else { let yakinCg = null; if ((DN.layers.cografya || !DN.sinirAcik) && window.ATLAS_COGRAFYA) { const tol = Math.max(0.65, 2.4 / Math.max(1, (DN.view && DN.view.z) || 1)); let enYakin = tol * tol; for (const cg of window.ATLAS_COGRAFYA) { if (cg.tur !== 'harika' && cg.tur !== 'dag') continue; const d2 = (cg.ll[0] - ll[0]) ** 2 + (cg.ll[1] - ll[1]) ** 2; if (d2 < enYakin) { enYakin = d2; yakinCg = cg; } } } if (yakinCg) openCografya(yakinCg); else if (DN.sinirAcik) { DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else { const db = window.dogaBolgeBul && window.dogaBolgeBul(ll[0], ll[1]); if (db) openDogaBolge(db); } } } } }
+      else { const h = DN.hitTest(...cvPos(gcv, ev), ev.pointerType === 'mouse' ? 0 : 12); if (h && (h.kind === 'goc' || h.kind === 'besik' || h.kind === 'tarim')) openGoc(h.kind === 'goc' ? h.r.id : h.kind === 'tarim' ? 'tarim' : null); else if (h && h.kind === 'donum') openDonum(h.d); else if (h && h.kind === 'hatyapi') openHatYapi(h.hy); else if (h && h.kind === 'magara') openMagara(h.m); else if (h && h.kind === 'mit') openMit(h.m); else if (h && h.kind === 'tarihkazi') openKazi(h.kz, 'tarih'); else if (h && h.kind === 'fosilkazi') openKazi(h.kz, 'doga'); else if (h && h.kind === 'iklim') openAtlasEk('iklim', h.b, h.n); else if (h && h.kind === 'cizgi') openAtlasEk('cizgi', h.cz); else if (h && h.kind === 'taban') openAtlasEk('taban', h.t); else if (h && h.kind === 'tabansirt') openAtlasEk('taban', h.sr); else if (h && h.kind === 'kutup') openAtlasEk('kutup', h.k); else if (h && h.kind === 'krater') openAtlasEk('krater', h.kr); else if (h && h.kind === 'gol') openAtlasEk('gol', h.gl); else if (h && h.kind === 'saat') openAtlasEk('saat', h.s); else if (h && h.kind === 'yazi') openAtlasEk('yazi', h.yz); else if (h && h.kind === 'din') openAtlasEk('din', h.dn); else if (h && h.kind === 'tarihgoc') openAtlasEk('tarihgoc', h.mg); else if (h && h.kind === 'salgin') openAtlasEk('salgin', h.sg); else if (h && h.kind === 'bogaz') openAtlasEk('bogaz', h.bg); else if (h && h.kind === 'manyetik') openAtlasEk('manyetik', h.mn); else if (h && h.kind === 'tarimvav') openAtlasEk('tarim', h.tr); else if (h && h.kind === 'megakent') openAtlasEk('megakent', h.mk); else if (h && h.kind === 'icat') openAtlasEk('icat', h.it); else if (h && h.kind === 'felsefe') openAtlasEk('felsefe', h.it); else if (h && h.kind === 'insanlar') openAtlasEk('insanlar', h.it); else if (h && h.kind === 'surpriz') openSurpriz(h.sp); else if (h && h.kind === 'liman') openLiman(h.lm); else if (h && h.kind === 'nehir') openNehir(h.nr); else if (h && h.kind === 'hayvangoc') openHayvanGoc(h.hg); else if (h && h.kind === 'volkan') openVolkan(h.v); else if (h && h.kind === 'fay') openFay(h.f); else if (h && h.kind === 'akinti') openAkinti(h.a); else if (h && h.kind === 'ruzgar') openRuzgar(h.rz); else if (h && h.kind === 'denizolay') openDenizOlay(h.o); else if (h && h.kind === 'hayvan') openHayvan(h.h); else if (h && h.kind === 'bitki') openBitki(h.bt); else if (h && h.kind === 'yayilis') { DN.setYayilis(h.yy.id); openYayilis(h.yy); } else if (h && h.kind === 'cografya') openCografya(h.cg); else if (h && h.kind === 'med') DN.goEgypt(h.b ? h.b.merkez : BG.merkez, h.b ? h.b.merkezZ : BG.merkezZ); else if (h && h.kind === 'yapi') { if (h.it.lm) openYapi(h.it.id, h.kids); else showMonument(h.it.id, h.kids, h); } else if (h && h.kind === 'kume') DN.zoomTo(h.cx, h.cy, 2.6); else if (h && h.kind === 'sehir') openCity(h.c); else if (h && h.kind === 'olay') openEvent(h.e); else if (h && h.kind === 'kaynak') openKaynak(h.k); else if (h && h.kind === 'yol') openYol(h.t); else if (h && h.kind === 'devlet') openDevlet(h.k); else if (h && h.kind === 'yolculuk') openYolculuk(h.j); else if (!h) { const ll = DN.llAt(...cvPos(gcv, ev)); if (ll) { if (DN.karaMi && !DN.karaMi(ll[0], ll[1])) { const ok = okyanusBul(ll[0], ll[1]); if (ok) openOkyanus(ok); } else { let yakinCg = null; if ((DN.layers.cografya || !DN.sinirAcik) && window.ATLAS_COGRAFYA) { const tol = Math.max(0.65, 2.4 / Math.max(1, (DN.view && DN.view.z) || 1)); let enYakin = tol * tol; for (const cg of window.ATLAS_COGRAFYA) { if (cg.tur !== 'harika' && cg.tur !== 'dag') continue; const d2 = (cg.ll[0] - ll[0]) ** 2 + (cg.ll[1] - ll[1]) ** 2; if (d2 < enYakin) { enYakin = d2; yakinCg = cg; } } } if (yakinCg) openCografya(yakinCg); else if (DN.sinirAcik) { DN.nerede(ll[0], ll[1], Math.round(Y)).then(k => { if (k) openDevlet(k); }); } else { const db = window.dogaBolgeBul && window.dogaBolgeBul(ll[0], ll[1]); if (db) openDogaBolge(db); } } } } }
     }
     gpts.delete(ev.pointerId);
     if (!gpts.size) dragG = null;
@@ -1536,7 +1556,7 @@
   const AFET_TUR = { deprem: 'Deprem', tsunami: 'Deprem ve dev dalga', sel: 'Sel', yangin: 'Yangın', yanardag: 'Yanardağ patlaması', kuraklik: 'Kuraklık', salgin: 'Salgın hastalık' };
   function openEvent(e) {
     if (window.Ses) {
-      if (e.tur === 'savas') window.Ses.playSavas();
+      if (e.tur === 'savas' || e.tur === 'deniz') window.Ses.playSavas(e);
       else if (e.alt === 'yanardag') window.Ses.playVolkan();
     }
     const rows = [['Tarih', `${YIL.fmt(e.y)}${e.y < 100 ? '' : ' (yaklaşık)'}`], ['Tür', e.tur === 'afet' ? AFET_TUR[e.alt] || 'Doğal afet' : OLAY_TUR[e.tur]], ['Tarihî önemi', '★'.repeat(e.onem) + '☆'.repeat(Math.max(0, 5 - e.onem))]];
@@ -1571,7 +1591,7 @@
     DN.goTo(e.ll[0], e.ll[1], 7); openEvent(e);
   });
   // ---------- katman menüsü (sağ üstte 🗂️) ----------
-  const KATLAR = ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'ticaret', 'yolculuk', 'akinti', 'ruzgar', 'hayvan', 'bitki', 'cografya', 'nehir', 'hayvangoc', 'liman', 'volkan', 'donum', 'magara', 'tarihkazi', 'fosilkazi', 'yayilis', 'gece', 'iklim', 'taban', 'kutup', 'krater', 'gol', 'saat', 'manyetik', 'tarim', 'yazi', 'din', 'tarihgoc', 'salgin', 'bogaz', 'megakent', 'icat', 'felsefe', 'insanlar'];
+  const KATLAR = ['savas', 'deniz', 'antlasma', 'afet', 'olay', 'kaynak', 'ticaret', 'yolculuk', 'akinti', 'ruzgar', 'hayvan', 'bitki', 'cografya', 'nehir', 'hayvangoc', 'liman', 'volkan', 'donum', 'magara', 'mit', 'tarihkazi', 'fosilkazi', 'yayilis', 'gece', 'iklim', 'taban', 'kutup', 'krater', 'gol', 'saat', 'manyetik', 'tarim', 'yazi', 'din', 'tarihgoc', 'salgin', 'bogaz', 'megakent', 'icat', 'felsefe', 'insanlar'];
   const katSay = k => k === 'yapi' ? (window.YAPILAR || []).filter(y => Y <= y.y).length : k === 'kaynak' ? kaynakAktif().length : k === 'ticaret' ? (window.TICARET_YOLLARI || []).length
     : k === 'yolculuk' ? (window.YOLCULUKLAR || []).filter(j => Math.abs(Y - j.y) <= DN.aralik).length
     : k === 'akinti' ? ((window.ATLAS_OKYANUS?.akintilar || []).length + (window.ATLAS_OKYANUS?.olaylar || []).length)
@@ -1605,6 +1625,7 @@
     : k === 'volkan' ? (window.ATLAS_VOLKANLAR?.volkanlar || []).length
     : k === 'donum' ? (window.DONUM_NOKTALARI || []).length
     : k === 'magara' ? (window.ATLAS_MAGARALAR || []).length
+    : k === 'mit' ? (window.ATLAS_MITLER || []).length
     : k === 'yayilis' ? (window.ATLAS_YAYILIS || []).length
     : k === 'gece' ? ''
     : (window.OLAYLAR || []).filter(e => e.tur === k && Math.abs(Y - e.y) <= DN.aralik).length;
@@ -1660,10 +1681,21 @@
     document.querySelectorAll('[data-tema-sec]').forEach(b => b.classList.toggle('on', b.dataset.temaSec === id));
     if (!sessiz) toast(`🎨 Tema değiştirildi: <b>${TEMA_AD[id]}</b>`);
   }
+  // Küre görünümü: Oyun (varsayılan; düz renkli, hızlı) · Resimli ve Gerçekçi (kabartmalı zemin; deneme, daha yavaş)
+  const KURE_AD = { oyun: '🎮 Oyun', resimli: '🖌️ Resimli kabartma', gercekci: '🛰️ Gerçekçi' };
+  function kureGorunumUygula(id, sessiz) {
+    if (!KURE_AD[id]) id = 'oyun';
+    document.body.dataset.kure = id;
+    if (DN.setGorunum) DN.setGorunum(id);
+    try { localStorage['zy-kure'] = id; } catch (e) { /* */ }
+    document.querySelectorAll('[data-kure-sec]').forEach(b => b.classList.toggle('on', b.dataset.kureSec === id));
+    if (!sessiz) toast(`🌐 Küre görünümü: <b>${KURE_AD[id]}</b>${id === 'oyun' ? '' : ' (kabartma görselleri iniyor…)'}`);
+  }
   const temaBtn = $('#temabtn'), temaPop = $('#temapop');
   if (temaBtn && temaPop) {
     temaBtn.addEventListener('click', ev => { ev.stopPropagation(); temaPop.hidden = !temaPop.hidden; temaBtn.classList.toggle('on', !temaPop.hidden); });
     temaPop.addEventListener('click', ev => {
+      const kb = ev.target.closest('[data-kure-sec]'); if (kb) { kureGorunumUygula(kb.dataset.kureSec); return; }
       const b = ev.target.closest('[data-tema-sec]'); if (!b) return;
       temaUygula(b.dataset.temaSec);
       temaPop.hidden = true; temaBtn.classList.remove('on');
@@ -1671,9 +1703,12 @@
     document.addEventListener('click', ev => { if (!temaPop.hidden && !temaPop.contains(ev.target) && ev.target !== temaBtn) { temaPop.hidden = true; temaBtn.classList.remove('on'); } });
   }
   temaUygula((() => { try { const s = localStorage['zy-tema']; return TEMA_AD[s] ? s : 'doga'; } catch (e) { return 'doga'; } })(), true);
+  kureGorunumUygula((() => { try { return localStorage['zy-kure'] || 'oyun'; } catch (e) { return 'oyun'; } })(), true);
 
   // İlk açılışta tertemiz (Tarih: yalnızca siyasi sınırlar; Doğa: tertemiz küre) — son seçilen katmanlar localStorage'dan hatırlanır
-  atlasModUygula(katKayitOku().mod || 'tarih', true);
+  // Site, ana girişte (Tüm Dünya, adreste yönlendirme yok) her zaman Doğa Atlası'yla açılır; bölge sayfalarında ve
+  // adresle gelinen görünümlerde son seçilen atlas (yoksa Tarih) kullanılır.
+  atlasModUygula(DUNYA && !location.search ? 'doga' : (katKayitOku().mod || 'tarih'), true);
   kesifRozetGuncelle();
   $('#aralik').addEventListener('change', e => { DN.setAralik(+e.target.value); renderOlayPanel(); shown = null; });
 
@@ -1770,7 +1805,7 @@
   // ---------- Yaşa (yeni): kıta → dönem → hayat (data/yasam*.js) ----------
   const SINIF = { lider: '👑 Lider', ciftci: '🌾 Çiftçi', isci: '⚒️ İşçi', tuccar: '⚖️ Tüccar', asker: '⚔️ Asker', alim: '📜 Bilgin', zanaat: '🛠️ Meslek' };
   const yasamBul = id => { for (const k of window.YASAM || []) for (const d of k.donemler) { const r = d.roller.find(x => x.id === id); if (r) return { k, d, r }; } return null; };
-  const yasamOpt = (d, r) => ({ tapinak: true, tema: d.tema || 'avrupa', giyim: d.giyim || 'antik', tac: r.sinif === 'lider' ? (d.giyim === 'modern' ? 'yok' : 'tac') : r.sinif === 'asker' && d.giyim !== 'modern' ? 'migfer' : 'yok' });
+  const yasamOpt = (d, r) => ({ tapinak: true, tema: d.tema || 'avrupa', giyim: d.giyim || 'antik', tac: r.sinif === 'lider' ? (d.giyim === 'modern' ? 'yok' : 'tac') : r.sinif === 'asker' && d.giyim !== 'modern' ? 'migfer' : 'yok', ikon: r.ikon });
   // Yaşa yılı: Yaşa penceresinde seçilen yıl (genel zamanı değiştirmeden başka yıllar denenebilsin); ±YASA_PAY yıl içindeki hayatlar gösterilir
   const YASA_PAY = 100, YASA_EN_ESKI = 3000;
   let yasaYil = null;
@@ -1916,6 +1951,7 @@
     if (o.zincir) satirlar.push(['🕸️ Ekosistem / Besin Zinciri', o.zincir]);
     if (o.ureme) satirlar.push([mikrop ? '🧬 Çoğalma Süreci' : bitki ? '🌱 Üreme / Tohumlama' : '🤰 Gebelik / Üreme Süreci', o.ureme]);
     if (o.goc) satirlar.push([bitki || mikrop ? '🌬️ Yayılış / Göç' : '🧭 Göç Bilgisi', o.goc]);
+    if (o.gocNeden) satirlar.push(['❓ Neden Göç Eder?', o.gocNeden]);
     satirlar.push(['⚡ Süper Güç', o.superguc], ['⚠️ Başlıca Tehditler', o.tehdit]);
     const html = `<div class="kapak" data-kapak="${esc(o.w)}"></div>
       <span class="pill">${turAd} · ⏳ ${esc(o.omur)}</span>
@@ -2623,7 +2659,7 @@
     v.tarih = YIL.fmt(y); return v;
   }
   const fill = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? '');
-  const rolCizimOpt = r => ({ tapinak: DUNYA || !['misir-erken', 'misir-eski-krallik', 'misir-orta-krallik'].includes(SP.id), tema: r.tema || 'misir', giyim: r.giyim || 'antik', tac: r.tac });
+  const rolCizimOpt = r => ({ tapinak: DUNYA || !['misir-erken', 'misir-eski-krallik', 'misir-orta-krallik'].includes(SP.id), tema: r.tema || 'misir', giyim: r.giyim || 'antik', tac: r.tac, ikon: r.ikon });
   function openLife() {
     const { guc, halk } = rolListesi(), y = Math.round(Y);
     const kart = r => `<button class="rolecard${r.guc ? ' guc' : ''}" data-role="${r.id}"><canvas data-rolecv="${r.id}"></canvas><b>${r.ikon} ${r.ad}</b><small>${fill(r.kim, rolDegisken(r))}</small></button>`;
@@ -2653,7 +2689,7 @@
   function gizliUygula() {
     document.body.classList.toggle('ust-gizli', !!GIZ.ust); document.body.classList.toggle('alt-gizli', !!GIZ.alt);
     $('#tl-ac').hidden = !GIZ.alt; $('#yc-gizle').textContent = GIZ.ust ? '▾' : '▴';
-    $('#yc-gizle').title = GIZ.ust ? 'Yıl kartını aç' : 'Yıl kartını küçült'; $('#tamekran').classList.toggle('on', !!(GIZ.ust && GIZ.alt));
+    $('#yc-gizle').title = GIZ.ust ? 'Yıl kartını aç' : 'Yıl kartını küçült'; if (!document.documentElement.requestFullscreen && !document.documentElement.webkitRequestFullscreen) $('#tamekran').classList.toggle('on', !!(GIZ.ust && GIZ.alt));
     if (GIZ.alt) $('#tarihpop').hidden = true;
     try { localStorage.setItem('zy-gizli', JSON.stringify(GIZ)); } catch (e) { /* */ }
     requestAnimationFrame(resize);
@@ -2665,7 +2701,22 @@
   const ycAyni = $('#yc-ayni'); if (ycAyni) ycAyni.addEventListener('click', ev => { ev.stopPropagation(); openTarihteBugun(null, 2); });
   $('#tl-gizle').addEventListener('click', () => { GIZ.alt = true; gizliUygula(); });
   $('#tl-ac').addEventListener('click', ev => { if (ev.target.closest('#tl-ac-oyna')) { $('#play').click(); return; } GIZ.alt = false; gizliUygula(); });
-  $('#tamekran').addEventListener('click', () => { const hepsi = !!(GIZ.ust && GIZ.alt); GIZ.ust = GIZ.alt = !hepsi; gizliUygula(); });
+  // ⛶ Tam ekran: tarayıcının gerçek tam ekranı (adres çubuğu ve sekmeler gizlenir; Esc ya da aynı düğmeyle çıkılır).
+  // Tam ekranı desteklemeyen tarayıcıda (ör. iPhone) eski davranış: yıl kartı ve zaman çizelgesi gizlenir.
+  {
+    const kok = document.documentElement, iste = kok.requestFullscreen || kok.webkitRequestFullscreen, cik = document.exitFullscreen || document.webkitExitFullscreen;
+    const tamMi = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+    const kartGizle = () => { const hepsi = !!(GIZ.ust && GIZ.alt); GIZ.ust = GIZ.alt = !hepsi; gizliUygula(); };
+    const btn = $('#tamekran');
+    const durum = () => { if (!iste) return; btn.classList.toggle('on', tamMi()); btn.title = tamMi() ? 'Tam ekrandan çık (Esc)' : 'Tam ekran'; requestAnimationFrame(resize); };
+    btn.addEventListener('click', () => {
+      if (!iste || !cik) { kartGizle(); return; }
+      if (tamMi()) { cik.call(document); return; }
+      try { const p = iste.call(kok); if (p && p.catch) p.catch(() => { toast('Tarayıcı tam ekrana izin vermedi; kartlar gizlendi.'); kartGizle(); }); } catch (e) { kartGizle(); }
+    });
+    document.addEventListener('fullscreenchange', durum); document.addEventListener('webkitfullscreenchange', durum);
+    if (iste) btn.title = 'Tam ekran';
+  }
   const geceBtn = $('#gecebtn');
   if (geceBtn) geceBtn.addEventListener('click', () => {
     const ac = !DN.layers.gece;
@@ -2868,6 +2919,7 @@
     openCografya: id => { const cg = (window.ATLAS_COGRAFYA || []).find(x => x.id === id); if (cg) openCografya(cg); },
     openDonum: id => { const d = (window.DONUM_NOKTALARI || []).find(x => x.id === id); if (d) openDonum(d); },
     openMagara: id => { const m = (window.ATLAS_MAGARALAR || []).find(x => x.id === id); if (m) openMagara(m); },
+    openMit: id => { const m = (window.ATLAS_MITLER || []).find(x => x.id === id); if (!m) return; DN.setLayer('mit', true); const kb = document.querySelector('#katman [data-kat="mit"]'); if (kb) kb.checked = true; if (view !== 'dunya') setView('dunya'); DN.goTo(m.ll[0], m.ll[1], 4); openMit(m); },
     openKazi: (id, tip) => { const KZ = window.ATLAS_KAZILAR || {}; const kz = (tip === 'doga' ? KZ.doga : tip === 'tarih' ? KZ.tarih : [...(KZ.tarih || []), ...(KZ.doga || [])]).find(x => x.id === id); if (kz) openKazi(kz, tip || ((KZ.doga || []).includes(kz) ? 'doga' : 'tarih')); },
     openAtlasEk: (kat, o) => openAtlasEk(kat, o),
     openBuyukInsanlarGaleri: f => openBuyukInsanlarGaleri(f),
@@ -2888,7 +2940,7 @@
     openSurpriz: id => { const s = (window.ATLAS_SURPRIZLER || []).find(x => x.id === id); if (s) openSurpriz(s); },
     xpEkle, surprizBulunduMu, openKesif,
     openKesif: () => openKesif(), kesifSayi: () => kesifSayi(),
-    rehberAc: () => hgAc(0)
+    rehberAc: () => TUR.ac()
   };
   window.__zy = { get Y() { return Y; }, get camX() { return camX; }, get follow() { return follow; }, setYear: y => setYear(y, true), snap: wx => { follow = false; camHedef = null; camX = wx ?? S.focus(Y).wx; }, setView, switchPlace, openInfo, openCity: ad => openCity((MIS.sehirler || []).find(c => c.ad === ad)), showMonument: id => showMonument(id) };
   updPlay();
@@ -2899,8 +2951,179 @@
   modGuncelle();
   if (QS.get('yasa')) { syncScenePart(); setTimeout(yasaAc, 80); }
   // açılış ekranını, kürenin ilk karesi çizildikten sonra kaldır
-  requestAnimationFrame(() => requestAnimationFrame(() => { if (window.acilisKapat) window.acilisKapat(); }));
-  // ---------- ilk ziyaret: 6 sahnelik yenilenmiş interaktif rehber ----------
+  let ilkZiyaretTuru = false;   // ilk ziyaret mi (aşağıda, eski rehberin yanında belirlenir); açılış sahnesinden sonra tanıtım turu başlar
+  // Kabartmalı bir küre görünümü seçiliyse ve zemin iniyorsa en çok 2,5 sn beklenir ki dünya ilk göründüğünde tam hâliyle görünsün.
+  // Tüm Dünya ana açılışında (adreste yönlendirme yokken) kısa bir açılış sahnesi oynar: dünya uzaydan dönerek yaklaşır,
+  // arayüz ardından belirir (stil.css: body.acilis-an / body.acilis-gel). Hareketi azalt tercihi varsa sahne atlanır.
+  // Sekme başına bir kez oynar (sayfa yenilenince yinelenmez).
+  {
+    const t0 = performance.now();
+    const kapat = () => {
+      const azalt = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const sure = DUNYA && !location.search && !azalt && document.body.classList.contains('globeonly') && DN.acilisSahnesi ? DN.acilisSahnesi() : 0;
+      if (!sure) { if (window.acilisKapat) window.acilisKapat(); if (ilkZiyaretTuru) setTimeout(() => TUR.ac(), 900); return; }
+      // Jenerik: açılış ekranının zemini çözülür (başlık bir süre kalır), dünya yıldızların arasından yaklaşır;
+      // yerine oturmasına yakın arayüz belirir. Tıklama, dokunma ya da bir tuş jeneriği hemen bitirir.
+      if (window.acilisKapat) window.acilisKapat(true);
+      document.body.classList.add('acilis-an');
+      let geldi = false;
+      const gel = () => {
+        if (geldi) return; geldi = true;
+        window.removeEventListener('pointerdown', gec, true); window.removeEventListener('keydown', gec, true);
+        document.body.classList.add('acilis-gel'); document.body.classList.remove('acilis-an');
+        setTimeout(() => document.body.classList.remove('acilis-gel'), 1500);
+        if (ilkZiyaretTuru) setTimeout(() => TUR.ac(), 1900);
+      };
+      const gec = ev => {
+        if (ev.type === 'pointerdown') window.addEventListener('click', e => { e.stopPropagation(); e.preventDefault(); }, { capture: true, once: true });   // bu tıklama küredeki bir şeyi açmasın
+        DN.acilisGec(); if (window.acilisKapat) window.acilisKapat(); gel();
+      };
+      window.addEventListener('pointerdown', gec, true); window.addEventListener('keydown', gec, true);
+      setTimeout(gel, sure * 1000 * 0.86);
+    };
+    const bekle = () => { const z = window.KureZemin; if (!z || !z.istendi || z.hazir || z.yok || performance.now() - t0 > 2500) kapat(); else requestAnimationFrame(bekle); };
+    requestAnimationFrame(() => requestAnimationFrame(bekle));
+  }
+  // ---------- 🧭 Tanıtım turu: siteyi gezdirir (katmanları, zaman çizelgesini, oyunları, Yaşa'yı, aramayı sırayla açıp gösterir) ----------
+  // İlk ziyarette açılış sahnesinin ardından kendiliğinden başlar; "?" düğmesiyle yeniden izlenir. Her adım birkaç saniye
+  // sonra kendiliğinden ilerler (kutunun üstüne gelince durur); "Turu geç" her an çıkarır. Stil: css/stil.css (.gt-*).
+  const TUR = (() => {
+    const SURE = 7500, dar = () => window.matchMedia('(max-width: 1279px)').matches;
+    let perde = null, halka = null, kutu = null, idx = -1, sayac = null, kalan = 0, durdu = false, onceMod = 'doga', elleDur = false;
+    const gorunur = el => el && !el.hidden && el.getClientRects().length ? el : null;
+    const kureKutu = () => { const c = $('#globe'); if (!gorunur(c)) return null; const b = c.getBoundingClientRect(), r = Math.min(b.width, b.height) * 0.42 * clamp(DN.view.z, 0.6, 1); return { x: b.left + b.width / 2 - r, y: b.top + b.height / 2 - r, w: r * 2, h: r * 2, yuvarlak: true }; };
+    const ADIM = [
+      { baslik: 'Zaman Yolculuğu\'na hoş geldin', metin: 'Burası, dünyanın doğasını ve beş bin yıllık tarihini aynı kürede gösteren bir atlas. Bu kısa turda en önemli yerleri sırayla açıp göstereceğim. İstersen <b>Turu geç</b>\'e basıp hemen kendin keşfet.' },
+      { baslik: 'Küre', metin: 'Küreyi <b>sürükleyerek döndür</b>; fare tekerleğiyle ya da iki parmakla <b>yaklaş</b>. Gördüğün her şeye tıklanır: denizler, nehirler, hayvanlar ve ülkeler bir bilgi kartı açar.', hedef: kureKutu,
+        gir: () => { const v = DN.view; DN.goTo(v.lat, v.lon + 50, Math.max(1, Math.min(v.z, 1.6))); } },
+      { baslik: 'Katmanlar ve iki atlas', metin: 'Kürede ne görmek istediğini buradan seçersin. En üstteki iki düğme atlası değiştirir: <b>Doğa Atlası</b> (hayvanlar, akıntılar, rüzgârlar, dağlar) ve <b>Tarih Atlası</b> (devletler, şehirler, savaşlar, yapılar).', hedef: () => gorunur($('#katman')),
+        gir: () => { if ($('#katman').hidden) $('#katbtn').click(); }, cik: () => kartlariKapat() },
+      { baslik: 'Tarih Atlası ve zaman çizelgesi', metin: 'Tarih Atlası\'nda alttaki çizelge seni <b>MÖ 3000\'den bugüne</b> götürür. <b>▶</b> zamanı oynatır: devletlerin sınırları gözünün önünde değişir.', hedef: () => gorunur($('footer.tl')) || gorunur($('#tl-ac')),
+        gir: () => { atlasModUygula('tarih', true); playing = true; updPlay(); }, cik: () => { playing = false; updPlay(); } },
+      { baslik: 'Yıl kartı', metin: 'Hangi yılda olduğunu gösterir. <b>Bu yıl neler oldu?</b> o yılın olaylarını listeler; <b>Biliyor muydun?</b> her seferinde başka bir ilginç bilgi açar.', hedef: () => gorunur($('.yearcard')) },
+      { baslik: 'Bölümler', metin: dar() ? 'Telefonda bütün bölümler bu menüdedir: <b>Keşfet</b> (küre), <b>Belgesel</b> (anlatımlı hazır turlar), <b>Oyunlar</b>, <b>Yaşa</b> ve <b>Ara</b>. Sırayla bakalım.' : 'Üstteki sekmeler: <b>Keşfet</b> (bu küre), <b>Belgesel</b> (anlatımlı hazır turlar), <b>Oyunlar</b>, <b>Yaşa</b> ve <b>Ara</b>. Sırayla bakalım.',
+        hedef: () => dar() ? gorunur($('#ustmenu')) || gorunur($('#menubtn')) : gorunur($('nav.modlar')),
+        gir: () => { if (dar() && $('#menubtn').getAttribute('aria-expanded') !== 'true') $('#menubtn').click(); },
+        cik: () => { if (dar() && $('#menubtn').getAttribute('aria-expanded') === 'true') { const x = $('#ustmenu .um-x'); if (x) x.click(); } } },
+      { baslik: 'Oyunlar', metin: '<b>Ben Kimim?</b>, <b>Sınırdan Bil</b>, <b>Tarihte Hayatta Kal</b> ve daha fazlası. İkinci sekmede dinozorların dünyası <b>Derin Zaman</b> ve <b>Keşif Defterin</b> durur.', hedef: () => gorunur(document.querySelector('.oyunpop')),
+        gir: () => { if (window.OyunYukle) window.OyunYukle.menuAc(); }, cik: () => { if (window.OyunYukle && window.OyunYukle.menuKapat) window.OyunYukle.menuKapat(); } },
+      { baslik: 'Yaşa', metin: 'Bir çağ ve bir kişi seç, onun <b>bir gününü yaşa</b>: ne yer, nerede uyur, neden korkar. İnsanların yanında hayvan, dinozor ve bitki hayatları da var.', hedef: () => { const m = $('#modal'); return gorunur(m) ? (gorunur(m.firstElementChild) || m) : null; },
+        gir: () => yasaAc(), cik: () => { playingBeforeModal = false; closeModal(); } },
+      { baslik: 'Ara', metin: 'Bir ülke, hayvan, nehir, yapı ya da kişi yaz; küre seni oraya götürür ve bilgi kartını açar.', hedef: () => { const a = $('#arama'); return gorunur(a) ? (gorunur(a.firstElementChild) || a) : null; },
+        gir: () => { const a = $('#ara'); if (a) a.click(); setTimeout(() => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }, 80); },
+        cik: () => { const x = $('#ara-x'); if (x) x.click(); $('#arama').hidden = true; } },
+      { baslik: 'Müzik ve sesler', metin: 'Sağ üstteki <b>Ayarlar</b> düğmesi bu pencereyi açar. Arka plan müziğini buradan seçersin: lavta, arp, keman, flüt ya da orman, yağmur ve okyanus sesleri. <b>Otomatik</b> seçiliyken Tarih Atlası\'nda müzik çağa göre değişir; küreye yaklaşınca bulunduğun yerin sesi de duyulur: dalga, orman ya da rüzgâr.',
+        hedef: () => birlesik('#sespop > *:not(.temapop)'), gir: () => sesAc('#ses-sessiz'), cik: sesKapat },
+      { baslik: 'Renk temaları', metin: 'Aynı pencerede beş renk teması var: <b>Canlı Doğa</b>, <b>Safir Gece</b>, <b>Zümrüt Orman</b>, <b>Bizans Moru</b> ve <b>Kutup Işığı</b>. Seçtiğin tema denizlerin, karaların ve pencerelerin renklerini değiştirir.',
+        hedef: () => birlesik('#sespop [data-tema-sec]'), gir: () => sesAc('#sespop [data-tema-sec]'), cik: sesKapat },
+      { baslik: 'Küre görünümü', metin: 'Kürenin nasıl çizileceğini de buradan seçersin. <b>Oyun</b> düz renkli ve en hızlısıdır. <b>Resimli kabartma</b> ile <b>Gerçekçi</b> dağları ve okyanus tabanını gösterir, ama daha yavaş çalışır.',
+        hedef: () => birlesik('#sespop [data-kure-sec]'), gir: () => sesAc('#sespop [data-kure-sec]', true), cik: sesKapat },
+      { baslik: 'Hazırsın!', metin: 'Tur bitti; küre artık senin. Bu turu istediğin zaman şu <b>?</b> düğmesinden yeniden izleyebilirsin.', son: true, hedef: () => gorunur($('#tur-ac')),
+        gir: () => { kartlariKapat(); atlasModUygula(onceMod, true); } }
+    ];
+    // birden çok öğeyi tek çerçeveye alır (ör. ses penceresindeki tema düğmeleri)
+    function birlesik(secici) {
+      let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      document.querySelectorAll(secici).forEach(el => { if (!el.getClientRects().length) return; const b = el.getBoundingClientRect(); if (b.width < 2 || b.height < 2) return; x0 = Math.min(x0, b.left); y0 = Math.min(y0, b.top); x1 = Math.max(x1, b.right); y1 = Math.max(y1, b.bottom); });
+      return x1 > x0 ? { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } : null;
+    }
+    // ses ve görünüm penceresini açar; anlatılan bölüm görünmüyorsa pencereyi oraya kaydırır
+    function sesAc(secici, sonu) {
+      const pop = $('#sespop'), btn = $('#sesbtn'); if (!pop) return;
+      if (pop.hidden && btn) btn.click();
+      // önce son, sonra ilk öğe görünür kılınır: bölüm pencereye sığıyorsa tamamı görünür
+      const l = [...document.querySelectorAll(secici)], sira = sonu ? [l[0], l[l.length - 1]] : [l[l.length - 1], l[0]];
+      for (const el of sira) if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+    }
+    function sesKapat() { const pop = $('#sespop'), btn = $('#sesbtn'); if (pop && !pop.hidden) { pop.hidden = true; if (btn) btn.setAttribute('aria-expanded', 'false'); } }
+    function kur() {
+      if (kutu) return;
+      perde = document.createElement('div'); perde.className = 'gt-perde';
+      halka = document.createElement('div'); halka.className = 'gt-halka';
+      kutu = document.createElement('div'); kutu.className = 'gt-kutu'; kutu.setAttribute('role', 'dialog'); kutu.setAttribute('aria-label', 'Tanıtım turu');
+      kutu.innerHTML = '<div class="gt-ust"><span class="gt-say"></span><button type="button" class="gt-gec" data-gt="gec">Turu geç ✕</button></div><h3></h3><p></p><div class="gt-cubuk"><i></i></div>' +
+        '<div class="gt-alt"><button type="button" class="gt-geri" data-gt="geri">‹ Geri</button><button type="button" class="gt-dur" data-gt="dur" title="Durdur / sürdür" aria-label="Durdur ya da sürdür">⏸</button><button type="button" class="gt-ileri" data-gt="ileri">İleri ›</button></div>';
+      for (const el of [perde, halka, kutu]) { el.hidden = true; document.body.appendChild(el); }
+      // perdeye ve kutuya yapılan tıklamalar sayfaya geçmez (açık menüler "dışarı tıklandı" sanıp kapanmasın)
+      perde.addEventListener('click', ev => ev.stopPropagation());
+      kutu.addEventListener('click', ev => {
+        ev.stopPropagation();
+        const b = ev.target.closest('[data-gt]'); if (!b) return;
+        if (b.dataset.gt === 'gec') kapat();
+        else if (b.dataset.gt === 'geri') git(idx - 1);
+        else if (b.dataset.gt === 'ileri') { if (idx >= ADIM.length - 1) kapat(); else git(idx + 1); }
+        else if (b.dataset.gt === 'dur') { elleDur = !elleDur; b.textContent = elleDur ? '▶' : '⏸'; }
+      });
+      kutu.addEventListener('mouseenter', () => { durdu = true; }); kutu.addEventListener('mouseleave', () => { durdu = false; });
+      window.addEventListener('resize', () => { if (idx >= 0) yerlestir(); });
+      window.addEventListener('keydown', ev => {
+        if (idx < 0) return;
+        if (ev.key === 'Escape') { ev.stopPropagation(); kapat(); }
+        else if (ev.key === 'ArrowRight') { if (idx < ADIM.length - 1) git(idx + 1); else kapat(); }
+        else if (ev.key === 'ArrowLeft') git(idx - 1);
+      }, true);
+    }
+    function yerlestir() {
+      const a = ADIM[idx]; if (!a) return;
+      let h = a.hedef ? a.hedef() : null;
+      if (h && h.getBoundingClientRect) { const b = h.getBoundingClientRect(); h = { x: b.left, y: b.top, w: b.width, h: b.height }; }
+      const W2 = window.innerWidth, H2 = window.innerHeight;
+      if (h && h.w > 4 && h.h > 4) {
+        const p = h.yuvarlak ? 0 : 6, x = Math.max(4, h.x - p), y = Math.max(4, h.y - p), w = Math.min(W2 - 8 - (x - 4), h.w + p * 2), yk = Math.min(H2 - 8 - (y - 4), h.h + p * 2);
+        halka.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${yk}px;border-radius:${h.yuvarlak ? '50%' : '14px'}`;
+        halka.classList.remove('bos');
+        // kutu, hedef ekranın alt yarısındaysa üste, değilse alta yerleşir (hedefin üstünü örtmesin)
+        kutu.classList.toggle('ustte', y + yk / 2 > H2 * 0.55);
+        kutu.classList.remove('ortada');
+      } else {
+        halka.style.cssText = `left:${W2 / 2}px;top:${H2 / 2}px;width:0;height:0;border-radius:50%`;
+        halka.classList.add('bos'); kutu.classList.remove('ustte'); kutu.classList.add('ortada');
+      }
+    }
+    function git(i) {
+      if (i < 0 || i >= ADIM.length) return;
+      const eski = ADIM[idx]; if (eski && eski.cik) { try { eski.cik(); } catch (e) { /* adım kapanamadıysa tur sürer */ } }
+      idx = i; const a = ADIM[i];
+      if (a.gir) { try { a.gir(); } catch (e) { /* adım açılamadıysa yalnızca anlatılır */ } }
+      kutu.querySelector('.gt-say').textContent = `${i + 1} / ${ADIM.length}`;
+      kutu.querySelector('h3').textContent = a.baslik; kutu.querySelector('p').innerHTML = a.metin;
+      kutu.querySelector('.gt-geri').hidden = i === 0;
+      kutu.querySelector('.gt-ileri').textContent = a.son ? 'Keşfetmeye başla ✓' : 'İleri ›';
+      kutu.querySelector('.gt-gec').hidden = !!a.son; kutu.querySelector('.gt-dur').hidden = !!a.son; kutu.querySelector('.gt-cubuk').hidden = !!a.son;
+      kalan = SURE; yerlestir();
+      // açılan pencere yerine oturunca çerçeve yeniden ölçülür
+      for (const ms of [120, 450, 1000]) setTimeout(() => { if (idx === i) yerlestir(); }, ms);
+    }
+    function ac() {
+      if (idx >= 0) return;
+      kur();
+      onceMod = aktifAtlasMod; kartlariKapat(); if (!modal.hidden) closeModal(); if (hg) hg.hidden = true;
+      if (view !== 'dunya') setView('dunya');
+      durdu = false; elleDur = false; kutu.querySelector('.gt-dur').textContent = '⏸';
+      for (const el of [perde, halka, kutu]) el.hidden = false;
+      document.body.classList.add('gt-acik');
+      git(0);
+      sayac = setInterval(() => {
+        if (idx < 0) return;
+        const a = ADIM[idx];
+        if (!a.son && !durdu && !elleDur && !document.hidden) kalan -= 100;
+        kutu.querySelector('.gt-cubuk i').style.width = (100 - clamp(kalan / SURE, 0, 1) * 100) + '%';
+        if (kalan <= 0 && !a.son) git(idx + 1);
+      }, 100);
+    }
+    function kapat() {
+      if (idx < 0) return;
+      clearInterval(sayac); sayac = null;
+      const a = ADIM[idx]; if (a && a.cik) { try { a.cik(); } catch (e) { /* */ } }
+      idx = -1;
+      for (const el of [perde, halka, kutu]) el.hidden = true;
+      document.body.classList.remove('gt-acik');
+      playing = false; updPlay(); kartlariKapat(); if (aktifAtlasMod !== onceMod) atlasModUygula(onceMod, true);
+      try { localStorage.setItem('zy-hosgeldin', '4'); } catch (e) { /* gizli mod */ }
+    }
+    return { ac, kapat, get acik() { return idx >= 0; } };
+  })();
+  // ---------- eski 6 sahnelik rehber (artık kendiliğinden açılmaz; yerini yukarıdaki tanıtım turu aldı) ----------
   const hg = $('#hosgeldin'), hgIc = $('#hg-icerik'), hgNk = $('#hg-noktalar');
   const HG_SAHNELER = [
     {
@@ -2983,7 +3206,8 @@
     try { localStorage.setItem('zy-hosgeldin', '3'); } catch (e) { /* gizli mod */ }
   }
   const rehberBtn = $('#rehber-ac');
-  if (rehberBtn) rehberBtn.addEventListener('click', () => { kartlariKapat(); hgAc(0); });
+  if (rehberBtn) rehberBtn.addEventListener('click', ev => { ev.stopPropagation(); const x = $('#ustmenu .um-x'); if (x && $('#menubtn').getAttribute('aria-expanded') === 'true') x.click(); TUR.ac(); });
+  { const b = $('#tur-ac'); if (b) b.addEventListener('click', ev => { ev.stopPropagation(); TUR.ac(); }); }   // küre düğmelerinin yanındaki "?" (masaüstünde de görünür)
   if (hg) {
     hg.addEventListener('click', ev => {
       if (ev.target === hg || ev.target.closest('.hg-x')) return hgKapat();
@@ -3006,10 +3230,9 @@
       else if (ev.key === 'ArrowRight') { if (hgIdx < HG_SAHNELER.length - 1) { hgIdx++; hgCiz(); } }
       else if (ev.key === 'ArrowLeft') { if (hgIdx > 0) { hgIdx--; hgCiz(); } }
     });
-    let ilk = false; try { ilk = localStorage.getItem('zy-hosgeldin') !== '3'; } catch (e) { /* gizli mod */ }
-    if (ilk && !QS.get('yasa') && !QS.get('dog') && !QS.get('oyun') && !QS.get('yapi')) {
-      hgAc(0);
-    }
+    let ilk = false; try { ilk = localStorage.getItem('zy-hosgeldin') !== '4'; } catch (e) { /* gizli mod */ }   // 4: tanıtım turu (eski rehberi görmüş olanlara da bir kez gösterilir)
+    // ilk ziyaret: açılış sahnesi bitince tanıtım turu başlar (adresle belirli bir yere gelindiyse başlamaz)
+    if (ilk && DUNYA && !location.search) ilkZiyaretTuru = true;
   }
   requestAnimationFrame(frame);
 })();

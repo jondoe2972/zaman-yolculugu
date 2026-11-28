@@ -5,7 +5,7 @@
 window.GecYukle = (() => {
   const PAKET = {
     yasa: ['data/yasam.js?v=1', 'data/yasam-asya.js?v=1', 'data/yasam-amerika.js?v=1',
-      'data/yasam-doga.js?v=4', 'data/yasam-doga-ek.js?v=2', 'data/yasam-doga-ek2.js?v=1', 'data/yasam-doga-antik.js?v=1']
+      'data/yasam-doga.js?v=5', 'data/yasam-doga-ek.js?v=3', 'data/yasam-doga-ek2.js?v=2', 'data/yasam-doga-antik.js?v=2']
   };
   const vaat = {}, hazir = {};
   const betik = src => new Promise((ok, hata) => {

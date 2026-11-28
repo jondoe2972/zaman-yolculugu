@@ -538,133 +538,116 @@ window.Cizim = (() => {
   }
 
   // ---------- "o dönemde yaşasaydım" sahneleri ----------
-  const SKY = { 'Şafak': ['#f0a868', '#f7d9a8'], 'Şafak öncesi': ['#3a3a6a', '#c98a7a'], 'Sabah': ['#8ec3e6', '#f3e4c2'], 'Öğle': ['#6fb0e0', '#fff1c8'], 'İkindi': ['#e9b26a', '#f6deb0'], 'Akşam': ['#5a4a8a', '#e09a6a'], 'Gece': ['#0f1530', '#2a2a50'] };
+  // ---------- "O dönemde yaşasaydım" sahnesi (yeni tasarım) ----------
+  // Eskiden bütün roller aynı çöp adam çizimleriyle anlatılıyordu. Yeni sahne katmanlı küçük bir manzaradır: günün saatine
+  // göre gökyüzü (güneş, ay, yıldız, bulut), bölgeye göre tepeler ve zemin, sahnenin türüne göre birkaç nesne ve önde rolün
+  // kendi simgesi. Nesneler sitenin kendi emoji resimleridir (img/emo/, Noto): sitenin geri kalanıyla aynı çizgi dili.
+  // step: { saat, sahne }; opt: { tema: misir|anadolu|avrupa, giyim: antik|cubbe|modern, ikon: rolün simgesi }.
+  // Resimler sonradan yüklenir; eksik resim varsa sahne o olmadan çizilir ve resim gelince bir kez yeniden çizilir.
+  const GOK = { 'Şafak': ['#f29a6b', '#fbd9a6', '#fff1cf'], 'Şafak öncesi': ['#2b2f66', '#8d6b9c', '#f0a98a'], 'Sabah': ['#5fb1ea', '#b9e0f7', '#eef8fd'], 'Öğle': ['#3d9be6', '#9bd2f5', '#e3f4fd'],
+    'İkindi': ['#e9a25c', '#f8cf95', '#fdebc9'], 'Akşam': ['#1f2560', '#7a4f8f', '#f08f62'], 'Gece': ['#0b1030', '#1c2456', '#3a3f7a'] };
+  const YER = {   // [uzak tepe, yakın tepe, zemin, zemin gölgesi]
+    misir: ['#e9cf9c', '#dcb877', '#e8c98b', '#cfa663'], anadolu: ['#c7cf9d', '#a9b97a', '#c9c98a', '#a7a866'], avrupa: ['#b4d79b', '#8fc377', '#a8cf86', '#83b265'] };
+  // sahne türü -> nesneler: [emoji, yatay yer (0..1), boy (zemin yüksekliğine göre), hareket]
+  const NESNE = {
+    saray: [['🏛️', 0.62, 1.5]], divan: [['🏛️', 0.66, 1.35], ['📜', 0.22, 0.5, 'sal']], karargah: [['⛺', 0.64, 1.15], ['🚩', 0.2, 0.8, 'dal']],
+    toren: [['🚩', 0.16, 0.9, 'dal'], ['🚩', 0.84, 0.9, 'dal'], ['🥁', 0.68, 0.55, 'sal']], ofis: [['💼', 0.7, 0.6], ['📜', 0.24, 0.5, 'sal']],
+    ev: [['🏠', 0.66, 1.2], ['🌳', 0.16, 1.0, 'dal']], aksam: [['🏠', 0.66, 1.2], ['🔥', 0.26, 0.5, 'alev']], tarla: [['🌾', 0.14, 0.6, 'dal'], ['🌾', 0.86, 0.6, 'dal'], ['🐂', 0.7, 0.75]],
+    golge: [['🌳', 0.7, 1.35, 'dal'], ['📜', 0.24, 0.45, 'sal']], katip: [['📜', 0.24, 0.6, 'sal'], ['🖋️', 0.74, 0.55, 'sal']], yazi: [['📜', 0.24, 0.6, 'sal'], ['🖋️', 0.74, 0.55, 'sal']],
+    ders: [['📚', 0.72, 0.65], ['📜', 0.22, 0.5, 'sal']], santiye: [['🧱', 0.7, 0.75], ['⚒️', 0.22, 0.55, 'sal']], nehir: [['⛵', 0.7, 0.9, 'yuz'], ['🐟', 0.2, 0.3, 'yuz']],
+    pazar: [['🏺', 0.2, 0.6], ['🧺', 0.76, 0.55], ['🪙', 0.9, 0.3, 'sal']], tapinak: [['🏛️', 0.64, 1.45], ['🕯️', 0.2, 0.5, 'alev']], kamp: [['⛺', 0.7, 1.05], ['🔥', 0.24, 0.5, 'alev']],
+    talim: [['🛡️', 0.24, 0.6, 'sal'], ['🏹', 0.76, 0.65, 'sal']], yuruyus: [['🚩', 0.2, 0.85, 'dal'], ['🐎', 0.74, 0.8, 'sal']], savas: [['⚔️', 0.72, 0.75, 'sal'], ['🛡️', 0.22, 0.6, 'sal']],
+    oyun: [['⚽', 0.72, 0.4, 'sal'], ['🌳', 0.16, 1.0, 'dal']]
+  };
+  // çağa ve bölgeye göre değişen nesneler: [sahne, koşul, yerine geçecek liste]
+  const NESNE_OZEL = [
+    ['ev', o => o.tema === 'misir', [['🛖', 0.66, 1.05], ['🌴', 0.16, 1.15, 'dal']]], ['aksam', o => o.tema === 'misir' || o.giyim === 'antik', [['🛖', 0.66, 1.05], ['🔥', 0.26, 0.5, 'alev']]],
+    ['ev', o => o.giyim === 'antik', [['🛖', 0.66, 1.05], ['🌳', 0.16, 1.0, 'dal']]],   // eski çağlarda kiremit çatılı ev yerine kulübe
+    ['golge', o => o.tema === 'misir', [['🌴', 0.7, 1.4, 'dal'], ['📜', 0.24, 0.45, 'sal']]], ['oyun', o => o.tema === 'misir', [['⚽', 0.72, 0.4, 'sal'], ['🌴', 0.16, 1.15, 'dal']]],
+    ['saray', o => o.giyim === 'cubbe', [['🕌', 0.62, 1.5]]], ['tapinak', o => o.giyim === 'cubbe', [['🕌', 0.64, 1.45], ['🕯️', 0.2, 0.5, 'alev']]],
+    ['saray', o => o.giyim === 'modern', [['🏛️', 0.62, 1.4], ['🚩', 0.2, 0.8, 'dal']]], ['santiye', o => o.giyim === 'modern', [['🏭', 0.68, 1.2], ['⚒️', 0.22, 0.55, 'sal']]],
+    ['ofis', o => o.giyim === 'modern', [['💻', 0.7, 0.6], ['📚', 0.24, 0.55]]], ['nehir', o => o.giyim === 'modern', [['🚢', 0.7, 0.95, 'yuz'], ['🐟', 0.2, 0.3, 'yuz']]],
+    ['yuruyus', o => o.giyim === 'modern', [['🚩', 0.2, 0.85, 'dal'], ['🚂', 0.72, 0.8]]]
+  ];
+  const emoResim = new Map(), emoBekleyen = new WeakMap();
+  const emoKod = g => Array.from(g, ch => ch.codePointAt(0)).filter(n => n !== 0xFE0F).map(n => n.toString(16)).join('_');
+  function emoAl(g) {
+    let im = emoResim.get(g);
+    if (!im) { im = new Image(); im.src = 'img/emo/' + emoKod(g) + '.png?v=1'; emoResim.set(g, im); }
+    return im;
+  }
   function drawLife(ctx, W, H, step, t, A, opt = {}) {
-    c = ctx; const sky = SKY[step.saat] || SKY['Sabah'];
-    const gr = c.createLinearGradient(0, 0, 0, H * 0.7); gr.addColorStop(0, sky[0]); gr.addColorStop(1, sky[1]);
+    c = ctx; c.save(); c.lineJoin = 'round';
+    const saat = GOK[step.saat] ? step.saat : 'Sabah', gk = GOK[saat], gece = saat === 'Akşam' || saat === 'Şafak öncesi' || saat === 'Gece';
+    const tema = YER[opt.tema] ? opt.tema : 'avrupa', yer = YER[tema], ic = ['saray', 'divan', 'ofis'].includes(step.sahne) && false;
+    const gy = H * 0.74, zemin = H - gy, eksik = [];
+    const koy = f => gece ? f.replace(/^#(..)(..)(..)$/, (_, r, g, b) => '#' + [r, g, b].map((x, i) => Math.round(parseInt(x, 16) * [0.5, 0.52, 0.72][i]).toString(16).padStart(2, '0')).join('')) : f;
+    // gökyüzü
+    const gr = c.createLinearGradient(0, 0, 0, gy); gr.addColorStop(0, gk[0]); gr.addColorStop(0.6, gk[1]); gr.addColorStop(1, gk[2]);
     c.fillStyle = gr; c.fillRect(0, 0, W, H);
-    const night = step.saat === 'Akşam' || step.saat === 'Şafak öncesi';
-    if (night) { c.fillStyle = 'rgba(255,255,255,0.8)'; for (let i = 0; i < 30; i++) circ(hash(i) * W, hash(i + 5) * H * 0.4, 1 + hash(i + 2), 'rgba(255,255,255,0.8)', 0); }
-    const sunY = { 'Şafak': 0.55, 'Sabah': 0.3, 'Öğle': 0.12, 'İkindi': 0.3, 'Akşam': 0.62 }[step.saat];
-    if (sunY != null) circ(W * (step.saat === 'İkindi' || step.saat === 'Akşam' ? 0.8 : 0.2), H * sunY, H * 0.07, '#fff1b0', 0);
-    const gy = H * 0.78, tema = opt.tema || 'misir', giyim = opt.giyim;
-    const ic = ['saray', 'divan', 'ofis'].includes(step.sahne);
-    const DUVAR = { misir: ['#d9b98a', '#c49a64'], anadolu: giyim === 'modern' ? ['#e9e4da', '#cfc6b6'] : giyim === 'cubbe' ? ['#e8dcc4', '#2f6f8f'] : ['#cdb28c', '#a07a52'], avrupa: giyim === 'modern' ? ['#e4ddd0', '#b9ab94'] : ['#e8d8b0', '#b58a3a'] }[tema];
-    if (ic) { c.fillStyle = DUVAR[0]; c.fillRect(0, 0, W, gy); }
-    c.fillStyle = ic ? '#a98a64' : tema === 'misir' ? '#e2bf84' : '#b7c08a'; c.fillRect(0, gy, W, H - gy);
-    const k = H / 160;
-    const P = (x, o) => A.person(x, gy + 6, k, { giyim, ...o });
-    const agac = (x, h, s) => { if (tema === 'misir') return A.palm(x, gy, h, s); limb(x, gy, x, gy - h * 0.45, 5 * k, '#7a5532'); circ(x, gy - h * 0.62, h * 0.2, '#6f9a4a', 1.4); circ(x - h * 0.1, gy - h * 0.52, h * 0.13, '#7fa957', 1.2); };
-    // başlık: lider rolünün kişisinin başına
-    const tac = (x, tur) => {
-      const hy = gy + 6 - 57 * k, s = k;
-      if (tur === 'pskent') { poly([x - 5 * s, hy + 3 * s, x + 5 * s, hy + 3 * s, x + 4 * s, hy - 9 * s, x - 4 * s, hy - 9 * s], '#f4efe2', 1.2); poly([x - 7 * s, hy + 4 * s, x + 7 * s, hy + 4 * s, x + 7 * s, hy - 3 * s, x + 2 * s, hy - 3 * s, x + 2 * s, hy - 10 * s, x - 7 * s, hy - 10 * s], '#c0392b', 1.2); }
-      else if (tur === 'kavuk') { c.beginPath(); c.ellipse(x, hy - 3 * s, 9 * s, 8 * s, 0, 0, 7); c.fillStyle = '#fbf8f0'; c.fill(); c.strokeStyle = OUT; c.lineWidth = 1.2; c.stroke(); circ(x + 4 * s, hy - 9 * s, 2 * s, '#e8b923', 1); limb(x + 4 * s, hy - 10 * s, x + 7 * s, hy - 16 * s, 1.5 * s, '#f4efe2'); }
-      else if (tur === 'tac') { poly([x - 7 * s, hy + 2 * s, x + 7 * s, hy + 2 * s, x + 8 * s, hy - 7 * s, x + 4 * s, hy - 3 * s, x, hy - 9 * s, x - 4 * s, hy - 3 * s, x - 8 * s, hy - 7 * s], GOLD, 1.2); circ(x, hy - 1 * s, 1.5 * s, '#c0392b', 0); }
-      else if (tur === 'migfer') { c.beginPath(); c.arc(x, hy + 2 * s, 7.5 * s, Math.PI, 0); c.closePath(); c.fillStyle = '#9aa3ab'; c.fill(); c.strokeStyle = OUT; c.lineWidth = 1.2; c.stroke(); poly([x - 6 * s, hy - 4 * s, x + 6 * s, hy - 4 * s, x + 4 * s, hy - 10 * s, x - 4 * s, hy - 10 * s], '#b5383a', 1); }
+    // yıldızlar (akşam ve şafak öncesi): yavaşça kırpışır
+    if (gece) for (let i = 0; i < 26; i++) { const yy = hash(i + 5) * gy * 0.62, a = (0.35 + 0.65 * Math.abs(Math.sin(t * 1.3 + i * 1.7))) * (1 - yy / (gy * 0.75)); c.fillStyle = 'rgba(255,250,230,' + a.toFixed(2) + ')'; c.beginPath(); c.arc(hash(i) * W, yy, 0.6 + hash(i + 2) * 0.9, 0, 7); c.fill(); }
+    // güneş ya da ay: çevresinde yumuşak ışık
+    const gx = W * (saat === 'İkindi' || saat === 'Akşam' ? 0.8 : 0.2), gyy = gy * ({ 'Şafak': 0.86, 'Sabah': 0.42, 'Öğle': 0.2, 'İkindi': 0.46, 'Akşam': 0.3, 'Şafak öncesi': 0.3, 'Gece': 0.28 }[saat]);
+    const gR = H * (gece ? 0.075 : 0.085), isik = c.createRadialGradient(gx, gyy, gR * 0.4, gx, gyy, gR * 4.2);
+    isik.addColorStop(0, gece ? 'rgba(220,228,255,0.5)' : 'rgba(255,246,200,0.75)'); isik.addColorStop(1, gece ? 'rgba(220,228,255,0)' : 'rgba(255,240,180,0)');
+    c.fillStyle = isik; c.beginPath(); c.arc(gx, gyy, gR * 4.2, 0, 7); c.fill();
+    c.fillStyle = gece ? '#f2f0df' : saat === 'Şafak' || saat === 'İkindi' ? '#ffd27a' : '#fff3b8';
+    if (gece) {   // hilal: ay dairesinin içinden ikinci bir daire oyulur (gökyüzünün rengi bozulmaz)
+      c.save(); c.beginPath(); c.arc(gx, gyy, gR, 0, 7); c.clip();
+      c.beginPath(); c.rect(gx - gR * 2, gyy - gR * 2, gR * 4, gR * 4); c.arc(gx + gR * 0.42, gyy - gR * 0.18, gR * 0.86, 0, 7); c.fill('evenodd'); c.restore();
+    } else { c.beginPath(); c.arc(gx, gyy, gR, 0, 7); c.fill(); }
+    // bulutlar (gündüz): ağır ağır kayar
+    if (!gece) for (let i = 0; i < 2; i++) { const bx = ((0.2 + i * 0.5 + t * 0.012 * (i ? 0.7 : 1)) % 1.3 - 0.15) * W, by = gy * (0.2 + i * 0.16), br = H * (0.055 + i * 0.012);
+      c.fillStyle = 'rgba(255,255,255,0.82)'; c.beginPath(); c.ellipse(bx, by, br * 2.1, br * 0.85, 0, 0, 7); c.ellipse(bx - br * 1.1, by + br * 0.2, br * 1.2, br * 0.65, 0, 0, 7); c.ellipse(bx + br * 1.2, by + br * 0.22, br * 1.3, br * 0.6, 0, 0, 7); c.fill(); }
+    // uzak ve yakın tepeler
+    const tepe = (taban, yuk, renk, kay) => { c.fillStyle = koy(renk); c.beginPath(); c.moveTo(0, H); c.lineTo(0, taban); for (let i = 0; i <= 12; i++) { const x = W * i / 12; c.lineTo(x, taban - yuk * (0.45 + 0.55 * Math.abs(Math.sin(i * 0.9 + kay)))); } c.lineTo(W, H); c.closePath(); c.fill(); };
+    tepe(gy + 2, zemin * 0.95, yer[0], 0.6); tepe(gy + 4, zemin * 0.5, yer[1], 2.4);
+    // zemin (nehir sahnesinde su)
+    if (step.sahne === 'nehir') {
+      const su = c.createLinearGradient(0, gy, 0, H); su.addColorStop(0, koy('#5fb4dd')); su.addColorStop(1, koy('#2f7fb4')); c.fillStyle = su; c.fillRect(0, gy, W, zemin);
+      c.strokeStyle = 'rgba(255,255,255,0.45)'; c.lineWidth = 1.2; c.lineCap = 'round';
+      for (let i = 0; i < 5; i++) { const yy = gy + zemin * (0.2 + i * 0.17), kx = ((t * 0.05 * (1 + i * 0.3) + hash(i)) % 1) * W; c.beginPath(); c.moveTo(kx - W * 0.07, yy); c.quadraticCurveTo(kx, yy - 2.5, kx + W * 0.07, yy); c.stroke(); }
+    } else {
+      const zg = c.createLinearGradient(0, gy, 0, H); zg.addColorStop(0, koy(yer[2])); zg.addColorStop(1, koy(yer[3])); c.fillStyle = zg; c.fillRect(0, gy, W, zemin);
+      if (step.sahne === 'tarla') { c.strokeStyle = 'rgba(90,70,30,0.22)'; c.lineWidth = 1; for (let i = 0; i < 7; i++) { c.beginPath(); c.moveTo(W * (i / 6) - W * 0.1, H); c.lineTo(W * 0.5 + (W * (i / 6) - W * 0.5) * 0.35, gy + 1); c.stroke(); } }
+    }
+    // emoji resmi: tabanı (x, yt) noktasına oturur; altında yumuşak yer gölgesi
+    const koyResim = (g, x, yt, boy, o = {}) => {
+      const im = emoAl(g); if (!im.complete || !im.naturalWidth) { if (!im.complete) eksik.push(im); return; }
+      if (!o.golgesiz) { c.fillStyle = 'rgba(30,24,12,' + (gece ? 0.3 : 0.2) + ')'; c.beginPath(); c.ellipse(x, yt - boy * 0.02, boy * 0.36, boy * 0.07, 0, 0, 7); c.fill(); }
+      c.save(); c.translate(x, yt); if (o.egim) c.rotate(o.egim); if (o.alfa != null) c.globalAlpha = o.alfa; c.drawImage(im, -boy / 2, -boy, boy, boy); c.restore();
     };
-    const lider = (x, o = {}) => { P(x, { kind: 'man', act: 'staff', collar: true, longKilt: true, dir: -1, ...o }); if (opt.tac && opt.tac !== 'yok') tac(x, opt.tac); };
-    const kemerler = (n, col) => { for (let i = 0; i < n; i++) { const x = W * (0.08 + i * (0.84 / (n - 1))); poly([x - W * 0.025, gy, x + W * 0.025, gy, x + W * 0.025, gy - H * 0.55, x - W * 0.025, gy - H * 0.55], col, 1.4); } };
-    switch (step.sahne) {
-      case 'saray': {
-        if (tema === 'misir') kemerler(5, '#e6c995');
-        else if (tema === 'anadolu' && giyim !== 'antik') { for (let i = 0; i < 4; i++) { const x = W * (0.12 + i * 0.25); c.beginPath(); c.moveTo(x - W * 0.09, gy - H * 0.05); c.lineTo(x - W * 0.09, gy - H * 0.38); c.quadraticCurveTo(x, gy - H * 0.62, x + W * 0.09, gy - H * 0.38); c.lineTo(x + W * 0.09, gy - H * 0.05); c.fillStyle = '#f3ecdc'; c.fill(); c.strokeStyle = OUT; c.lineWidth = 1.4; c.stroke(); } c.fillStyle = DUVAR[1]; c.fillRect(0, gy - H * 0.05, W, H * 0.05); }
-        else { kemerler(4, DUVAR[1]); c.fillStyle = 'rgba(255,240,200,0.25)'; c.fillRect(W * 0.3, gy - H * 0.5, W * 0.4, H * 0.42); }
-        poly([W * 0.62, gy, W * 0.78, gy, W * 0.78, gy - H * 0.3, W * 0.74, gy - H * 0.36, W * 0.66, gy - H * 0.36, W * 0.62, gy - H * 0.3], tema === 'misir' ? GOLD : '#a8322e', 1.6);
-        lider(W * 0.55);
-        P(W * 0.28, { kind: 'man', act: 'walk', dir: 1, lean: 0.35 }); P(W * 0.38, { kind: 'woman', act: 'walk', dir: 1, lean: 0.25 }); P(W * 0.88, { kind: 'man', act: 'staff', dir: -1 });
-        if (step.saat === 'Akşam') for (let i = 0; i < 3; i++) circ(W * (0.2 + i * 0.3), gy - H * 0.5, 5 + Math.sin(t * 8 + i) * 1.5, '#ffb347', 0);
-        break;
+    // sahnenin nesneleri (arkadan öne): hareket türüne göre hafifçe sallanır, yüzer ya da titreşir
+    let liste = NESNE[step.sahne] || [['🏠', 0.66, 1.2]];
+    for (const [sahne, kosul, l] of NESNE_OZEL) if (sahne === step.sahne && kosul(opt)) { liste = l; break; }
+    const birim = Math.min(zemin * 2.1, H * 0.5);
+    for (let i = 0; i < liste.length; i++) {
+      const [g, fx, fb, har] = liste[i], boy = birim * fb, x = W * fx, o = {};
+      let yt = gy + zemin * (fb > 1 ? 0.22 : 0.5);
+      if (har === 'dal') o.egim = Math.sin(t * 1.4 + i * 2) * 0.04;
+      else if (har === 'sal') yt -= Math.abs(Math.sin(t * 1.6 + i * 1.3)) * boy * 0.07;
+      else if (har === 'yuz') { yt = gy + zemin * 0.34 + Math.sin(t * 1.5 + i) * 2; o.egim = Math.sin(t * 1.1 + i) * 0.05; o.golgesiz = true; }
+      else if (har === 'alev') {
+        const pr = boy * (1.5 + Math.sin(t * 9 + i) * 0.12), al = c.createRadialGradient(x, yt - boy * 0.5, 0, x, yt - boy * 0.5, pr);
+        al.addColorStop(0, 'rgba(255,190,90,' + (gece ? 0.55 : 0.3) + ')'); al.addColorStop(1, 'rgba(255,170,60,0)'); c.fillStyle = al; c.beginPath(); c.arc(x, yt - boy * 0.5, pr, 0, 7); c.fill();
       }
-      case 'divan': {
-        if (giyim === 'cubbe' && tema === 'anadolu') { c.fillStyle = '#2f6f8f'; c.fillRect(0, gy - H * 0.55, W, H * 0.06); for (let i = 0; i < 12; i++) { c.strokeStyle = '#7a5a2a'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(W * 0.42 + i * 4, gy - H * 0.5); c.lineTo(W * 0.42 + i * 4, gy - H * 0.32); c.stroke(); } poly([W * 0.4, gy - H * 0.5, W * 0.6, gy - H * 0.5, W * 0.6, gy - H * 0.32, W * 0.4, gy - H * 0.32], null, 1.6); }
-        poly([W * 0.08, gy, W * 0.92, gy, W * 0.92, gy - H * 0.08, W * 0.08, gy - H * 0.08], giyim === 'modern' ? '#7a5a3a' : '#b5383a', 1.4);
-        for (let i = 0; i < 5; i++) P(W * (0.18 + i * 0.16), { kind: i === 4 && giyim === 'modern' ? 'woman' : 'man', act: i === 2 ? 'staff' : 'walk', dir: i < 2 ? 1 : -1, collar: i === 2 });
-        if (opt.tac && opt.tac !== 'yok' && tema !== 'anadolu') tac(W * 0.5, opt.tac);
-        break;
-      }
-      case 'karargah': {
-        poly([W * 0.1, gy, W * 0.9, gy, W * 0.75, gy - H * 0.5, W * 0.25, gy - H * 0.5], giyim === 'modern' ? '#d9d2bf' : '#efe2c4', 1.6);
-        limb(W * 0.5, gy - H * 0.5, W * 0.5, gy - H * 0.68, 2, '#6b4a2a'); poly([W * 0.5, gy - H * 0.68, W * 0.6, gy - H * 0.64, W * 0.5, gy - H * 0.6], tema === 'anadolu' && giyim !== 'antik' ? '#c0392b' : '#2f5fa8', 1);
-        poly([W * 0.36, gy - H * 0.1, W * 0.64, gy - H * 0.1, W * 0.64, gy - H * 0.13, W * 0.36, gy - H * 0.13], '#e9dcb8', 1.2);
-        c.strokeStyle = '#8a6a3a'; c.lineWidth = 1; for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(W * (0.38 + i * 0.06), gy - H * 0.115); c.lineTo(W * (0.41 + i * 0.06), gy - H * 0.125); c.stroke(); }
-        lider(W * 0.3, { dir: 1 }); P(W * 0.7, { kind: 'man', act: 'staff', dir: -1 }); P(W * 0.8, { kind: 'man', act: 'walk', dir: -1 });
-        break;
-      }
-      case 'toren': {
-        for (let i = 0; i < 4; i++) { const x = W * (0.1 + i * 0.27); limb(x, gy, x, gy - H * 0.55, 2, '#6b4a2a'); const dal = Math.sin(t * 3 + i) * 4; poly([x, gy - H * 0.55, x + W * 0.09, gy - H * 0.52 + dal, x, gy - H * 0.45], tema === 'anadolu' && giyim !== 'antik' ? '#c0392b' : tema === 'misir' ? '#e8b923' : '#2f5fa8', 1); }
-        for (let i = 0; i < 6; i++) P(W * (0.42 + i * 0.09), { kind: 'man', act: 'staff', dir: -1, ph: t * 4 + i });
-        lider(W * 0.25, { dir: 1, act: 'walk', move: true, ph: t * 3 });
-        break;
-      }
-      case 'ofis': {
-        c.fillStyle = '#9fc6e0'; c.fillRect(W * 0.62, gy - H * 0.55, W * 0.26, H * 0.32); poly([W * 0.62, gy - H * 0.55, W * 0.88, gy - H * 0.55, W * 0.88, gy - H * 0.23, W * 0.62, gy - H * 0.23], null, 2);
-        limb(W * 0.15, gy, W * 0.15, gy - H * 0.55, 2, '#c9b16a'); poly([W * 0.15, gy - H * 0.55, W * 0.27, gy - H * 0.52 + Math.sin(t * 2) * 2, W * 0.15, gy - H * 0.42], '#d1322e', 1); circ(W * 0.195, gy - H * 0.485, H * 0.022, '#fff', 0);
-        poly([W * 0.35, gy, W * 0.37, gy, W * 0.37, gy - H * 0.14, W * 0.35, gy - H * 0.14], '#5a3a22', 1); poly([W * 0.66, gy, W * 0.68, gy, W * 0.68, gy - H * 0.14, W * 0.66, gy - H * 0.14], '#5a3a22', 1);
-        poly([W * 0.32, gy - H * 0.14, W * 0.72, gy - H * 0.14, W * 0.72, gy - H * 0.18, W * 0.32, gy - H * 0.18], '#6b4428', 1.4);
-        poly([W * 0.42, gy - H * 0.18, W * 0.5, gy - H * 0.18, W * 0.5, gy - H * 0.19, W * 0.42, gy - H * 0.19], '#f4f1ea', 0.8);
-        lider(W * 0.55, { act: 'staff', dir: -1 }); P(W * 0.25, { kind: 'woman', act: 'walk', dir: 1 });
-        break;
-      }
-      case 'ev': case 'aksam':
-        A.house(W * 0.3, gy, k * 2.2, 0.7); agac(W * 0.85, H * 0.55, 3);
-        if (step.sahne === 'aksam') { circ(W * 0.42, gy - 8, 6 + Math.sin(t * 9) * 1.5, '#ffb347', 0); }
-        P(W * 0.55, { kind: 'woman', act: 'jar', dir: -1, ph: t * 3, move: false }); P(W * 0.65, { kind: 'man', act: 'walk', dir: -1 }); P(W * 0.72, { kind: 'child', act: 'walk', dir: -1, ph: t * 6, move: true });
-        break;
-      case 'tarla':
-        c.fillStyle = '#86b04c'; c.fillRect(0, gy - H * 0.04, W, H * 0.06);
-        A.plough(W * 0.55, gy + 4, k * 1.1, t);
-        P(W * 0.2, { kind: 'man', act: 'sow', dir: 1, ph: t * 4, move: true }); agac(W * 0.9, H * 0.5, 7);
-        break;
-      case 'golge':
-        agac(W * 0.45, H * 0.65, 11); agac(W * 0.6, H * 0.55, 4);
-        A.scribe(W * 0.45, gy + 6, k); P(W * 0.58, { kind: 'man', act: 'walk', dir: -1 });
-        break;
-      case 'katip': case 'yazi': case 'ders':
-        poly([W * 0.62, gy, W * 0.9, gy, W * 0.9, gy - H * 0.3, W * 0.62, gy - H * 0.3], '#caa06a', 1.6);
-        for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(W * (0.67 + i * 0.09), gy - H * 0.3, H * 0.06, Math.PI, 0); c.fillStyle = '#c4985c'; c.fill(); c.strokeStyle = OUT; c.stroke(); }
-        A.scribe(W * 0.35, gy + 6, k * 1.2);
-        if (step.sahne === 'ders') { A.scribe(W * 0.22, gy + 6, k * 0.9); A.scribe(W * 0.48, gy + 6, k * 0.9); }
-        else { P(W * 0.5, { kind: 'man', act: 'hoe', dir: -1 }); A.donkey(W * 0.15, gy + 4, k, 1, t * 5, 0); }
-        break;
-      case 'santiye':
-        if (opt.tapinak) { poly([W * 0.55, gy, W * 0.72, gy, W * 0.7, gy - H * 0.42, W * 0.57, gy - H * 0.42], '#e6c995', 1.6); poly([W * 0.76, gy, W * 0.93, gy, W * 0.91, gy - H * 0.42 * 0.6, W * 0.78, gy - H * 0.42 * 0.6], '#c9a46a', 1.6); poly([W * 0.62, gy - H * 0.42, W * 0.66, gy - H * 0.42, W * 0.78, gy - H * 0.25, W * 0.6, gy], '#ad8a58', 1.2); }
-        else poly([W * 0.55, gy - 2, W * 0.95, gy - 2, W * 0.75, gy - H * 0.45], '#e4c48a', 1.6);
-        A.sledge(W * 0.15, gy + 6, k * 0.9, t);
-        break;
-      case 'nehir':
-        c.fillStyle = '#3f88a8'; c.fillRect(0, gy - H * 0.02, W, H * 0.12);
-        A.boat(W * 0.7, gy + H * 0.04, k * 0.9, { dir: -1, type: 'sail' });
-        P(W * 0.3, { kind: 'woman', act: 'jar', dir: 1, ph: t * 6, move: true });
-        break;
-      case 'pazar':
-        for (let i = 0; i < 3; i++) { const x = W * (0.2 + i * 0.28); poly([x - 40, gy - 30, x + 40, gy - 30, x + 30, gy - 44, x - 30, gy - 44], ['#c0392b', '#2f8fa3', '#e8b923'][i], 1.4); limb(x - 34, gy, x - 34, gy - 30, 2, '#6b4a2a'); limb(x + 34, gy, x + 34, gy - 30, 2, '#6b4a2a'); ell(x - 12, gy - 6, 12, 6, 0, '#e3c36a', 1); ell(x + 14, gy - 6, 10, 6, 0, '#9a5a3a', 1); }
-        P(W * 0.35, { kind: 'woman', act: 'walk', dir: 1, ph: t * 6, move: true }); P(W * 0.62, { kind: 'man', act: 'walk', dir: -1 });
-        break;
-      case 'tapinak':
-        poly([W * 0.25, gy, W * 0.45, gy, W * 0.43, gy - H * 0.5, W * 0.27, gy - H * 0.5], '#e6c995', 1.6); poly([W * 0.55, gy, W * 0.75, gy, W * 0.73, gy - H * 0.5, W * 0.57, gy - H * 0.5], '#c9a46a', 1.6);
-        poly([W * 0.45, gy, W * 0.55, gy, W * 0.55, gy - H * 0.36, W * 0.45, gy - H * 0.36], '#e9d3a3', 1.6);
-        P(W * 0.5, { kind: 'man', act: 'staff', longKilt: true, collar: true, dir: -1 }); P(W * 0.2, { kind: 'man', act: 'walk', longKilt: true, dir: 1, ph: t * 4, move: true });
-        break;
-      case 'kamp': case 'talim': case 'yuruyus':
-        for (let i = 0; i < 3; i++) { const x = W * (0.2 + i * 0.3); poly([x - 30, gy, x + 30, gy, x, gy - 40], '#e9dcc0', 1.4); }
-        if (step.sahne === 'kamp') { circ(W * 0.5, gy - 6, 8 + Math.sin(t * 10) * 2, '#ff9a3a', 0); }
-        for (let i = 0; i < 3; i++) P(W * (0.35 + i * 0.12), { kind: 'man', act: 'staff', dir: 1, ph: t * 5 + i, move: step.sahne !== 'kamp' });
-        if (opt.tac && opt.tac !== 'yok') lider(W * 0.2, { dir: 1, act: 'staff' });
-        break;
-      case 'savas':
-        if (tema === 'misir' || (tema === 'anadolu' && giyim === 'antik')) { A.chariot(W * 0.5, gy + 4, k * 1.2, -1, t * 6); if (opt.tac && opt.tac !== 'yok') tac(W * 0.5 + 6 * k, opt.tac); break; }
-        for (let i = 0; i < 4; i++) P(W * (0.12 + i * 0.08), { kind: 'man', act: 'staff', dir: 1, ph: t * 5 + i, move: true });
-        for (let i = 0; i < 4; i++) P(W * (0.62 + i * 0.08), { kind: 'man', act: 'staff', dir: -1, ph: t * 5 + i + 2, move: true, giyim: giyim === 'modern' ? 'modern' : 'antik' });
-        if (giyim === 'modern') for (let i = 0; i < 4; i++) { const r = 10 + ((t * 20 + i * 13) % 30); c.fillStyle = `rgba(235,235,230,${0.6 - r / 70})`; c.beginPath(); c.arc(W * (0.42 + i * 0.05), gy - H * 0.3 - r * 0.6, r, 0, 7); c.fill(); }
-        if (opt.tac && opt.tac !== 'yok') lider(W * 0.06, { dir: 1, act: 'staff' });
-        break;
-      case 'oyun':
-        for (let i = 0; i < 3; i++) P(W * (0.3 + i * 0.18), { kind: 'child', act: 'walk', dir: i % 2 ? -1 : 1, ph: t * 7 + i, move: true });
-        circ(W * 0.48 + Math.sin(t * 3) * W * 0.12, gy - H * 0.15 - Math.abs(Math.sin(t * 6)) * H * 0.12, H * 0.025, '#c0392b', 1.2);
-        break;
-      default:
-        A.house(W * 0.4, gy, k * 2, 0.4);
+      koyResim(g, x, yt, boy, o);
+    }
+    // savaşta yükselen duman
+    if (step.sahne === 'savas') for (let i = 0; i < 5; i++) { const ph = (t * 0.22 + i / 5) % 1; c.fillStyle = 'rgba(90,86,84,' + (0.35 * (1 - ph)).toFixed(2) + ')'; c.beginPath(); c.arc(W * (0.42 + i * 0.05) + ph * W * 0.05, gy - ph * gy * 0.5, H * (0.04 + ph * 0.07), 0, 7); c.fill(); }
+    // önde rolün simgesi: hafifçe yaylanır
+    if (opt.ikon) { const boy = Math.min(H * 0.5, W * 0.34); koyResim(opt.ikon, W * 0.44, gy + zemin * 0.72 - Math.abs(Math.sin(t * 1.25)) * boy * 0.05, boy); }
+    // kenarlarda hafif kararma: sahne derinlik kazanır
+    const kr = c.createRadialGradient(W / 2, H * 0.48, Math.min(W, H) * 0.42, W / 2, H * 0.5, Math.max(W, H) * 0.8); kr.addColorStop(0, 'rgba(10,14,30,0)'); kr.addColorStop(1, 'rgba(10,14,30,' + (gece ? 0.3 : 0.16) + ')');
+    c.fillStyle = kr; c.fillRect(0, 0, W, H);
+    c.restore();
+    // yüklenmemiş resim varsa: gelince bu tuval bir kez yeniden çizilir
+    if (eksik.length && !emoBekleyen.get(ctx.canvas)) {
+      emoBekleyen.set(ctx.canvas, true); const tr = ctx.getTransform();
+      Promise.all(eksik.map(im => new Promise(r => { im.addEventListener('load', r, { once: true }); im.addEventListener('error', r, { once: true }); }))).then(() => {
+        emoBekleyen.delete(ctx.canvas); if (!ctx.canvas.isConnected) return; ctx.setTransform(tr); drawLife(ctx, W, H, step, t, A, opt);
+      });
     }
   }
 
